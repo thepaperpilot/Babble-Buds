@@ -20,7 +20,6 @@ const template = [
         accelerator: 'CommandOrControl+W',
         enabled: project.project != null,
         click () {
-          // TODO prompt user to save if there are unsaved changes
           project.closeProject()
         }
       },
@@ -29,7 +28,7 @@ const template = [
         accelerator: 'CommandOrControl+S',
         enabled: project.project != null,
         click () {
-          // TODO save project
+          project.saveProject()
         }
       },
       {
