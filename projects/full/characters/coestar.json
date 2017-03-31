@@ -1,0 +1,259 @@
+{
+  "deadbonesStyle": false,
+  "body": [
+    {
+      "tab": "bodies",
+      "name": "Coe",
+      "x": 0,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1
+    }
+  ],
+  "mouths": [
+    "default",
+    "angry",
+    "confused",
+    "gasp"
+  ],
+  "eyes": [
+    "default",
+    "angry",
+    "confused",
+    "gasp",
+    "ooo"
+  ],
+  "emotes": {
+    "default": {
+      "mouth": [
+        {
+          "tab": "mouths",
+          "name": "Coe Closed",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ],
+      "eyes": [
+        {
+          "tab": "eyes",
+          "name": "Coe Normal",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ]
+    },
+    "angry": {
+      "mouth": [
+        {
+          "tab": "mouths",
+          "name": "Coe Teeth",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ],
+      "eyes": [
+        {
+          "tab": "eyes",
+          "name": "Coe Angry",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ]
+    },
+    "confused": {
+      "mouth": [
+        {
+          "tab": "mouths",
+          "name": "Coe Open",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ],
+      "eyes": [
+        {
+          "tab": "eyes",
+          "name": "Coe Confused",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ]
+    },
+    "gasp": {
+      "mouth": [
+        {
+          "tab": "mouths",
+          "name": "Coe Wide Open",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ],
+      "eyes": [
+        {
+          "tab": "eyes",
+          "name": "Coe Sad",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ]
+    },
+    "ooo": {
+      "mouth": [
+        {
+          "tab": "mouths",
+          "name": "Coe Ooo",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ],
+      "eyes": [
+        {
+          "tab": "eyes",
+          "name": "Coe Excited",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ]
+    },
+    "happy": {
+      "mouth": [
+        {
+          "tab": "mouths",
+          "name": "Coe Happy",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ],
+      "eyes": [
+        {
+          "tab": "eyes",
+          "name": "Coe Excited",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ]
+    },
+    "sad": {
+      "mouth": [
+        {
+          "tab": "mouths",
+          "name": "Coe Closed",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ],
+      "eyes": [
+        {
+          "tab": "eyes",
+          "name": "Coe Sad",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ]
+    },
+    "veryangry": {
+      "mouth": [
+        {
+          "tab": "mouths",
+          "name": "Coe Teeth",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ],
+      "eyes": [
+        {
+          "tab": "eyes",
+          "name": "Coe Very Angry",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ]
+    },
+    "verysad": {
+      "mouth": [
+        {
+          "tab": "mouths",
+          "name": "Coe Closed",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ],
+      "eyes": [
+        {
+          "tab": "eyes",
+          "name": "Coe Very Sad",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ]
+    },
+    "wink": {
+      "mouth": [
+        {
+          "tab": "mouths",
+          "name": "Coe Closed",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ],
+      "eyes": [
+        {
+          "tab": "eyes",
+          "name": "Coe Wink",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ]
+    }
+  },
+  "hat": [
+    {
+      "tab": "hats",
+      "name": "Dragonwan",
+      "x": 0,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1
+    }
+  ],
+  "props": []
+}

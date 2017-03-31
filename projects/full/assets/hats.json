@@ -1,0 +1,50 @@
+{
+  "Deadbones Hat": {
+    "location": "hats/deadbones_hat.png"
+  },
+  "Paladin Helm": {
+    "location": "hats/paladin_helm.png"
+  },
+  "Amish": {
+    "location": "hats/amish.png"
+  },
+  "Beard": {
+    "location": "hats/beard.png"
+  },
+  "Cap": {
+    "location": "hats/cap.png"
+  },
+  "CaRell": {
+    "location": "hats/carell.png"
+  },
+  "Elf Ear": {
+    "location": "hats/elfear.png"
+  },
+  "Goggles": {
+    "location": "hats/goggles.png"
+  },
+  "Lolita": {
+    "location": "hats/lolita.png"
+  },
+  "Mane": {
+    "location": "hats/mane.png"
+  },
+  "Ponytail": {
+    "location": "hats/ponytail.png"
+  },
+  "Porc Nose": {
+    "location": "hats/porcnose.png"
+  },
+  "Short Hair": {
+    "location": "hats/short.png"
+  },
+  "Wizard Hat": {
+    "location": "hats/wizard_hat.png"
+  },
+  "Justin Goggles": {
+    "location": "hats/justin_goggles.png"
+  },
+  "Dragonwan": {
+    "location": "hats/dragonwan.png"
+  }
+}

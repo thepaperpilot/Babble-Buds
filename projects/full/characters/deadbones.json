@@ -1,0 +1,229 @@
+{
+  "deadbonesStyle": true,
+  "body": [
+    {
+      "tab": "bodies",
+      "name": "Deadbones",
+      "x": 0,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1
+    }
+  ],
+  "mouths": [
+    "default",
+    "angry",
+    "confused",
+    "sad",
+    "happy"
+  ],
+  "eyes": [
+    "default",
+    "confused",
+    "sad",
+    "happy",
+    "gasp"
+  ],
+  "emotes": {
+    "default": {
+      "mouth": [
+        {
+          "tab": "mouths",
+          "name": "Deadbones Straight",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ],
+      "eyes": []
+    },
+    "angry": {
+      "mouth": [
+        {
+          "tab": "mouths",
+          "name": "Deadbones Center Up",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ],
+      "eyes": [
+        {
+          "tab": "eyes",
+          "name": "Deadbones Angry",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ]
+    },
+    "confused": {
+      "mouth": [
+        {
+          "tab": "mouths",
+          "name": "Deadbones Center Down",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ],
+      "eyes": [
+        {
+          "tab": "eyes",
+          "name": "Deadbones Confused",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ]
+    },
+    "sad": {
+      "mouth": [
+        {
+          "tab": "mouths",
+          "name": "Deadbones Down",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ],
+      "eyes": [
+        {
+          "tab": "eyes",
+          "name": "Deadbones Sad",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ]
+    },
+    "happy": {
+      "mouth": [
+        {
+          "tab": "mouths",
+          "name": "Deadbones Up",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ],
+      "eyes": [
+        {
+          "tab": "eyes",
+          "name": "Deadbones Happy",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ]
+    },
+    "veryangry": {
+      "mouth": [
+        {
+          "tab": "mouths",
+          "name": "Deadbones Center Down",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ],
+      "eyes": [
+        {
+          "tab": "eyes",
+          "name": "Deadbones Very Angry",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ]
+    },
+    "verysad": {
+      "mouth": [
+        {
+          "tab": "mouths",
+          "name": "Deadbones Down",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ],
+      "eyes": [
+        {
+          "tab": "eyes",
+          "name": "Deadbones Very Sad",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ]
+    },
+    "gasp": {
+      "mouth": [
+        {
+          "tab": "mouths",
+          "name": "Deadbones Straight",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ],
+      "eyes": [
+        {
+          "tab": "eyes",
+          "name": "Deadbones Shocked",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ]
+    },
+    "wink": {
+      "mouth": [
+        {
+          "tab": "mouths",
+          "name": "Deadbones Straight",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ],
+      "eyes": [
+        {
+          "tab": "eyes",
+          "name": "Deadbones Blink",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ]
+    }
+  },
+  "hat": [
+    {
+      "tab": "hats",
+      "name": "Deadbones Hat",
+      "x": 0,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1
+    }
+  ],
+  "props": []
+}
