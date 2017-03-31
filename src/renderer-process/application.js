@@ -414,6 +414,7 @@ document.getElementById('host').addEventListener('click', () => {
 		})
 		socket.on('set slots', (slots) => {
 			project.project.numCharacters = slots
+			document.getElementById('numslots').value = slots
 			babble.resize()
 			socket.broadcast.emit('set slots', slots)
 			if (popout)
@@ -546,6 +547,7 @@ document.getElementById('connect').addEventListener('click', () => {
 	})
 	socket.on('set slots', (slots) => {
 		project.project.numCharacters = slots
+		document.getElementById('numslots').value = slots
 		babble.resize()
 		if (popout)
 			popout.webContents.send('resize')
@@ -608,3 +610,11 @@ electron.ipcRenderer.on('keyUp', (event, key) => {
 electron.ipcRenderer.on('init', () => {
 	popout.webContents.send('init', puppets)
 })
+
+// Load settings values
+document.getElementById('colorpicker').value = project.project.greenScreen
+document.getElementById('transparent').checked = project.project.transparent
+document.getElementById('minslotwidth').value = project.project.minSlotWidth
+document.getElementById('numslots').value = project.project.numCharacters
+document.getElementById('ip').value = project.project.ip
+document.getElementById('port').value = project.project.port

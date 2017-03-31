@@ -2,10 +2,15 @@ const fs = require('fs-extra')
 const main = require('../main')
 const menu = require('./menus/application-menu')
 const settings = require('./settings')
+const {dialog} = require('electron')
 
 const path = require('path')
 
+var oldProject
+
 exports.readProject = function(filepath) {
+	if (!checkChanges()) return
+
 	fs.readJson(filepath, (err, project) => {
 		if (err) {
 			main.redirect('welcome.html')
@@ -13,6 +18,7 @@ exports.readProject = function(filepath) {
 		}
 
 		exports.project = project
+		oldProject = JSON.stringify(exports.project)
 		exports.characters = {}
 		exports.assets = {}
 		exports.hotbar = project.hotbar
@@ -38,11 +44,48 @@ exports.readProject = function(filepath) {
 	})
 }
 
+exports.saveProject = function() {
+	fs.writeJson(settings.settings.openProject, exports.project)
+	oldProject = Object.create(exports.project)
+	// TODO save characters and assets
+	// (not doing it right now since the editor isn't made yet)
+}
+
 exports.closeProject = function() {
+	if (!checkChanges()) return
+
 	exports.project = null
+	oldProject = 'null'
 	menu.updateMenu()
 	settings.settings.openProject = ""
 	settings.save()
 
 	main.redirect('welcome.html')
+}
+
+// Returns true if its okay to close the project
+function checkChanges() {
+	if (oldProject !== JSON.stringify(exports.project)) {
+		var response = dialog.showMessageBox({
+			"type": "question",
+			"buttons": ["Don't Save", "Cancel", "Save"],
+			"defaultId": 2,
+			"title": "Save Project?",
+			"message": "Do you want to save the changes to your project?",
+			"detail": "If you don't save, your changes will be lost.",
+			"cancelId": 1
+		})
+
+		switch (response) {
+			default:
+				break
+			case 1:
+				return false
+			case 2:
+				exports.saveProject()
+				break
+		}
+	}
+
+	return true
 }

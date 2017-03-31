@@ -18,22 +18,6 @@ Well, until I port over all the puppets in Marionette Mates, that might be the b
 
 ... and many more will come between now and the 1.0 release. 
 
-## todo
-
-setting character hotbar
-
-saving projects
-
-0.1.0 release
-
-try connecting over LAN
-
-make distributable
-
--- goal: do above before open lab @ 3 tomorrow --
-
-- hotbar select (right clicking a button opens its options- apply this to the character hotbar as well as the assets in the editor, once you start working on that)
-
 ## Roadmap to 1.0
 
 - Integrated editor
