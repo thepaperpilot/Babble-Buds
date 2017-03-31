@@ -415,7 +415,7 @@ document.getElementById('host').addEventListener('click', () => {
 		socket.on('set slots', (slots) => {
 			project.project.numCharacters = slots
 			babble.resize()
-			socket.broadcast('set slots', slots)
+			socket.broadcast.emit('set slots', slots)
 			if (popout)
 				popout.webContents.send('resize')
 		})
