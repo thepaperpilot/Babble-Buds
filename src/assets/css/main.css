@@ -177,7 +177,7 @@ button:focus {
 .char {
 	height: calc( 33% - 14px );
 	position: relative;
-	width: calc( 33% - 19px );
+	width: calc( 33% - 20px );
 }
 
 .emote {
