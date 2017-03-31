@@ -1,0 +1,32 @@
+{
+  "Deadbones": {
+    "location": "bodies/deadbones.png"
+  },
+  "Fembones": {
+    "location": "bodies/fembones.png"
+  },
+  "Roamin": {
+    "location": "bodies/roamin.png"
+  },
+  "Rob": {
+    "location": "bodies/rob.png"
+  },
+  "Danger": {
+    "location": "bodies/danger.png"
+  },
+  "Cromulon": {
+    "location": "bodies/cromulon.png"
+  },
+  "Nisovin": {
+    "location": "bodies/nisovin.png"
+  },
+  "Pause": {
+    "location": "bodies/pause.png"
+  },
+  "Justin": {
+    "location": "bodies/justin.png"
+  },
+  "Coe": {
+    "location": "bodies/coe.png"
+  }
+}

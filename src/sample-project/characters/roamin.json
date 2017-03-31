@@ -1,0 +1,216 @@
+{
+  "deadbonesStyle": false,
+  "body": [
+    {
+      "tab": "bodies",
+      "name": "Roamin",
+      "x": 0,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1
+    }
+  ],
+  "mouths": [
+    "default",
+    "angry",
+    "confused",
+    "gasp",
+    "happy"
+  ],
+  "eyes": [
+    "default",
+    "angry",
+    "confused",
+    "sad",
+    "happy"
+  ],
+  "emotes": {
+    "default": {
+      "mouth": [
+        {
+          "tab": "mouths",
+          "name": "Roamin Closed",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ],
+      "eyes": [
+        {
+          "tab": "eyes",
+          "name": "Roamin Normal",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ]
+    },
+    "angry": {
+      "mouth": [
+        {
+          "tab": "mouths",
+          "name": "Roamin Teeth",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ],
+      "eyes": [
+        {
+          "tab": "eyes",
+          "name": "Roamin Angry",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ]
+    },
+    "confused": {
+      "mouth": [
+        {
+          "tab": "mouths",
+          "name": "Roamin Open",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ],
+      "eyes": [
+        {
+          "tab": "eyes",
+          "name": "Roamin Confused",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ]
+    },
+    "gasp": {
+      "mouth": [
+        {
+          "tab": "mouths",
+          "name": "Roamin Wide Open",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ],
+      "eyes": [
+        {
+          "tab": "eyes",
+          "name": "Roamin Sad",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ]
+    },
+    "ooo": {
+      "mouth": [
+        {
+          "tab": "mouths",
+          "name": "Roamin Ooo",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ],
+      "eyes": [
+        {
+          "tab": "eyes",
+          "name": "Roamin Happy",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ]
+    },
+    "happy": {
+      "mouth": [
+        {
+          "tab": "mouths",
+          "name": "Roamin Happy",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ],
+      "eyes": [
+        {
+          "tab": "eyes",
+          "name": "Roamin Happy",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ]
+    },
+    "sad": {
+      "mouth": [
+        {
+          "tab": "mouths",
+          "name": "Roamin Closed",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ],
+      "eyes": [
+        {
+          "tab": "eyes",
+          "name": "Roamin Sad",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ]
+    },
+    "veryangry": {
+      "mouth": [
+        {
+          "tab": "mouths",
+          "name": "Roamin Teeth",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ],
+      "eyes": [
+        {
+          "tab": "eyes",
+          "name": "Roamin Very Angry",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1
+        }
+      ]
+    }
+  },
+  "hat": [
+    {
+      "tab": "hats",
+      "name": "Paladin Helm",
+      "x": 0,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1
+    }
+  ],
+  "props": []
+}

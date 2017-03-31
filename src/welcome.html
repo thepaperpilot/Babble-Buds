@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" type="text/css" href="assets/css/main.css">
+        <title>Babble Buds</title>
+    </head>
+    <body>
+        <div class="greeting">
+            <span class="greeting-header">Hello!</span><br>
+            To begin, either <a id="open">open a project</a> or create a new one:<br><br>
+            <form>
+                Project Title:<br>
+                <input type="text" id="name" value="MyProject1">
+                Location:<br>
+                <input type="text" id="location" style="width: calc( 100% - 115px )"><button type='button' id="browse">Browse</button><br>
+                <button type='button' id="create">Create</button>
+            </form>
+        </div>
+    </body>
+
+    <script>
+        // You can also require other files to run in this process
+        require('./renderer-process/welcome.js')
+    </script>
+</html>

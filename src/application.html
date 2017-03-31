@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" type="text/css" href="assets/css/main.css">
+        <title>Babble Buds</title>
+    </head>
+    <body>
+        <div id="screen" class="container main"></div>
+        <div class="container bottom">
+            <div class="buttons s2 scroll">
+                <input type="checkbox" id="greenscreen" class="checkbox"><label for="greenscreen" class="checkbox-label" style="width: 100%;text-align: center;">Green Screen</label>
+                <button id="settings" class="fillbutton">Project Settings</button>
+                <button id="popout" class="fillbutton">Pop Out Show Panel</button>
+                <button id="host" class="fillbutton">Host Server</button>
+                <button id="connect" class="fillbutton">Connect to Server</button>
+            </div>
+            <div id="chars" class="s4">
+                <div id="char 0" class="char">1<div class="desc"></div></div>
+                <div id="char 1" class="char">2<div class="desc"></div></div>
+                <div id="char 2" class="char">3<div class="desc"></div></div><br>
+                <div id="char 3" class="char">4<div class="desc"></div></div>
+                <div id="char 4" class="char">5<div class="desc"></div></div>
+                <div id="char 5" class="char">6<div class="desc"></div></div><br>
+                <div id="char 6" class="char">7<div class="desc"></div></div>
+                <div id="char 7" class="char">8<div class="desc"></div></div>
+                <div id="char 8" class="char">9<div class="desc"></div></div>
+            </div>
+            <div id="emotes" class="s4">
+                <div id="default" class="emote selected">u<div class="desc">Default</div></div>
+                <div id="happy" class="emote">i<div class="desc">Happy</div></div>
+                <div id="wink" class="emote">o<div class="desc">Wink</div></div>
+                <div id="kiss" class="emote">p<div class="desc">Kiss</div></div><br>
+                <div id="angry" class="emote">j<div class="desc">Angry</div></div>
+                <div id="sad" class="emote">k<div class="desc">Sad</div></div>
+                <div id="ponder" class="emote">l<div class="desc">Ponder</div></div>
+                <div id="gasp" class="emote">;<div class="desc">Gasp</div></div><br>
+                <div id="veryangry" class="emote">m<div class="desc" style="font-size: 12px">Very Angry</div></div>
+                <div id="verysad" class="emote">,<div class="desc">Very Sad</div></div>
+                <div id="confused" class="emote">.<div class="desc">Confused</div></div>
+                <div id="ooo" class="emote">/<div class="desc" style="font-size: 14px">Oooooooo</div></div><br>
+                <div id="babble" class="babble">space<div class="desc">Babble</div></div>
+            </div>
+            <div id="settings-panel" class="s8 scroll" style="display: none;">
+                <div class="s5">
+                    Green Screen Color:
+                    <input type="color" id="colorpicker" value="#00FF00" style="width: calc(100% - 16px)">
+                    <input type="checkbox" id="transparent" class="checkbox"><label for="transparent" class="checkbox-label" style="margin-bottom: 47px;">Transparent Pop Out (beta)</label><br>
+                    Server IP: (for connecting only)
+                    <input type="text" id="ip" value="localhost" style="width: calc(100% - 16px)">
+                </div>
+                <div class="s5">
+                    Minimum Slot Width:
+                    <input type="number" id="minslotwidth" value="300" style="width: calc(100% - 16px)">
+                    Number of Slots:
+                    <input type="number" id="numslots" value="5" style="width: calc(100% - 16px)">
+                    Server Port:
+                    <input type="number" id="port" value="8080" style="width: calc(100% - 16px)">
+                </div>
+            </div>
+        </div>
+        <div class="container side">
+        Fascinating stuff will go here soon
+        </div>
+    </body>
+
+    <script>
+        // You can also require other files to run in this process
+        require('./renderer-process/application.js')
+    </script>
+</html>

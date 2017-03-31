@@ -1,0 +1,22 @@
+{
+  "name": "babble-buds",
+  "version": "0.1.0",
+  "description": "An open source version of puppet pals",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": "https://github.com/thepaperpilot/babble-buds",
+  "keywords": [
+    "puppet pals",
+    "urealms"
+  ],
+  "author": "thepaperpilot",
+  "license": "CC0-1.0",
+  "devDependencies": {
+    "electron": "~1.6.2",
+    "fs-extra": "~2.1.2",
+    "pixi.js": "~4.4.3",
+    "socket.io": "~1.7.3"
+  }
+}

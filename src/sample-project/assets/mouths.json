@@ -1,0 +1,83 @@
+{
+  "Deadbones Straight": {
+    "location": "mouths/deadbones_straight.png"
+  },
+  "Deadbones Up": {
+    "location": "mouths/deadbones_up.png"
+  },
+  "Deadbones Down": {
+    "location": "mouths/deadbones_down.png"
+  },
+  "Deadbones Center Up": {
+    "location": "mouths/deadbones_centerup.png"
+  },
+  "Deadbones Center Down": {
+    "location": "mouths/deadbones_centerdown.png"
+  },
+  "Roamin Closed": {
+    "location": "mouths/roamin_closed.png"
+  },
+  "Roamin Happy": {
+    "location": "mouths/roamin_happy.png"
+  },
+  "Roamin Ooo": {
+    "location": "mouths/roamin_ooo.png"
+  },
+  "Roamin Open": {
+    "location": "mouths/roamin_open.png"
+  },
+  "Roamin Teeth": {
+    "location": "mouths/roamin_teeth.png"
+  },
+  "Roamin Wide Open": {
+    "location": "mouths/roamin_wideopen.png"
+  },
+  "Rob Closed": {
+    "location": "mouths/rob_closed.png"
+  },
+  "Rob Ooo": {
+    "location": "mouths/rob_ooo.png"
+  },
+  "Rob Open": {
+    "location": "mouths/rob_open.png"
+  },
+  "Rob Teeth": {
+    "location": "mouths/rob_teeth.png"
+  },
+  "Rob Wide Open": {
+    "location": "mouths/rob_wideopen.png"
+  },
+  "Justin Closed": {
+    "location": "mouths/justin_closed.png"
+  },
+  "Justin Ooo": {
+    "location": "mouths/justin_ooo.png"
+  },
+  "Justin Open": {
+    "location": "mouths/justin_open.png"
+  },
+  "Justin Teeth": {
+    "location": "mouths/justin_teeth.png"
+  },
+  "Justin Wide Open": {
+    "location": "mouths/justin_wideopen.png"
+  },
+  "Coe Closed": {
+    "location": "mouths/coe_closed.png"
+  },
+  "Coe Happy": {
+    "location": "mouths/coe_happy.png"
+  },
+  "Coe Ooo": {
+    "location": "mouths/coe_ooo.png"
+  },
+  "Coe Open": {
+    "location": "mouths/coe_open.png"
+  },
+  "Coe Teeth": {
+    "location": "mouths/coe_teeth.png"
+  },
+  "Coe Wide Open": {
+    "location": "mouths/coe_wideopen.png"
+  }
+}

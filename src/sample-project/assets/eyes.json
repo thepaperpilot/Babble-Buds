@@ -1,0 +1,101 @@
+{
+  "Deadbones Angry": {
+    "location": "eyes/deadbones_angry.png"
+  },
+  "Deadbones Confused": {
+    "location": "eyes/deadbones_confused.png"
+  },
+  "Deadbones Sad": {
+    "location": "eyes/deadbones_sad.png"
+  },
+  "Deadbones Happy": {
+    "location": "eyes/deadbones_happy.png"
+  },
+  "Deadbones Very Angry": {
+    "location": "eyes/deadbones_veryangry.png"
+  },
+  "Deadbones Very Sad": {
+    "location": "eyes/deadbones_verysad.png"
+  },
+  "Deadbones Shocked": {
+    "location": "eyes/deadbones_shocked.png"
+  },
+  "Deadbones Blink": {
+    "location": "eyes/deadbones_blink.png"
+  },
+  "Roamin Normal": {
+    "location": "eyes/roamin_normal.png"
+  },
+  "Roamin Angry": {
+    "location": "eyes/roamin_angry.png"
+  },
+  "Roamin Confused": {
+    "location": "eyes/roamin_confused.png"
+  },
+  "Roamin Happy": {
+    "location": "eyes/roamin_happy.png"
+  },
+  "Roamin Sad": {
+    "location": "eyes/roamin_sad.png"
+  },
+  "Roamin Very Angry": {
+    "location": "eyes/roamin_veryangry.png"
+  },
+  "Rob Normal": {
+    "location": "eyes/rob_normal.png"
+  },
+  "Rob Angry": {
+    "location": "eyes/rob_angry.png"
+  },
+  "Rob Confused": {
+    "location": "eyes/rob_confused.png"
+  },
+  "Rob Excited": {
+    "location": "eyes/rob_excited.png"
+  },
+  "Rob Sad": {
+    "location": "eyes/rob_sad.png"
+  },
+  "Justin Angry": {
+    "location": "eyes/justin_angry.png"
+  },
+  "Justin Confused": {
+    "location": "eyes/justin_confused.png"
+  },
+  "Justin Excited": {
+    "location": "eyes/justin_excited.png"
+  },
+  "Justin Normal": {
+    "location": "eyes/justin_normal.png"
+  },
+  "Justin Sad": {
+    "location": "eyes/justin_sad.png"
+  },
+  "Justin Very Angry": {
+    "location": "eyes/justin_veryangry.png"
+  },
+  "Coe Angry": {
+    "location": "eyes/coe_angry.png"
+  },
+  "Coe Confused": {
+    "location": "eyes/coe_confused.png"
+  },
+  "Coe Excited": {
+    "location": "eyes/coe_excited.png"
+  },
+  "Coe Normal": {
+    "location": "eyes/coe_normal.png"
+  },
+  "Coe Sad": {
+    "location": "eyes/coe_sad.png"
+  },
+  "Coe Very Angry": {
+    "location": "eyes/coe_veryangry.png"
+  },
+  "Coe Very Sad": {
+    "location": "eyes/coe_verysad.png"
+  },
+  "Coe Wink": {
+    "location": "eyes/coe_wink.png"
+  }
+}

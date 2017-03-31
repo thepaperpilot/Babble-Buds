@@ -1,0 +1,17 @@
+{
+  "Rob": {
+    "location": "bodies/rob.png"
+  },
+  "Deadbones": {
+    "location": "bodies/deadbones.png"
+  },
+  "Roamin": {
+    "location": "bodies/roamin.png"
+  },
+  "Justin": {
+    "location": "bodies/justin.png"
+  },
+  "Coe": {
+    "location": "bodies/coe.png"
+  }
+}

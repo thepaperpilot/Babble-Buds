@@ -1,0 +1,14 @@
+{
+  "Deadbones Hat": {
+    "location": "hats/deadbones_hat.png"
+  },
+  "Paladin Helm": {
+    "location": "hats/paladin_helm.png"
+  },
+  "Justin Goggles": {
+    "location": "hats/justin_goggles.png"
+  },
+  "Dragonwan": {
+    "location": "hats/dragonwan.png"
+  }
+}
