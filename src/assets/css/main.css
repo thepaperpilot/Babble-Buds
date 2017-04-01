@@ -28,32 +28,18 @@ input {
 	margin-top: 8px;
 }
 
-input[type="text"] {
+input[type="text"], input[type="number"], input[type="search"] {
 	background: none;
 	border: none;
 	border-bottom: solid 2px #969696;
 	color: #FFF;
 	font-size: 20px;
+	margin: 4px;
 	transition: border 0.3s;
-	width: 100%;
+	width: calc( 100% - 8px );
 }
 
-input[type="text"]:focus {
-	border-bottom: solid 2px #c9c9c9;
-	outline: none;
-}
-
-input[type="number"] {
-	background: none;
-	border: none;
-	border-bottom: solid 2px #969696;
-	color: #FFF;
-	font-size: 20px;
-	transition: border 0.3s;
-	width: 100%;
-}
-
-input[type="number"]:focus {
+input[type="text"]:focus, input[type="number"]:focus, input[type="search"]:focus {
 	border-bottom: solid 2px #c9c9c9;
 	outline: none;
 }
@@ -194,8 +180,22 @@ button:focus {
 	width: calc( 100% - 16px );
 }
 
+.charlist {
+	height: calc( 100% - 100px);
+}
+
+.charselector .char {
+	height: 50px;
+	max-width: 150px;
+	min-width: 75px;
+}
+
 .available {
 	box-shadow: none;
+}
+
+.disabled {
+	box-shadow: 0 313px rgba(256, 0, 0, 0.2) inset;
 }
 
 .selected {

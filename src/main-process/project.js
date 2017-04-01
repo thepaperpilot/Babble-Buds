@@ -9,7 +9,7 @@ const path = require('path')
 var oldProject
 
 exports.readProject = function(filepath) {
-	if (!checkChanges()) return
+	if (!exports.checkChanges()) return
 
 	fs.readJson(filepath, (err, project) => {
 		if (err) {
@@ -21,7 +21,6 @@ exports.readProject = function(filepath) {
 		oldProject = JSON.stringify(exports.project)
 		exports.characters = {}
 		exports.assets = {}
-		exports.hotbar = project.hotbar
 		exports.charactersPath = path.join(filepath, '..', 'characters')
 		exports.assetsPath = path.join(filepath, '..', 'assets')
 		for (var i = 0; i < project.characters.length; i++) {
@@ -46,13 +45,13 @@ exports.readProject = function(filepath) {
 
 exports.saveProject = function() {
 	fs.writeJson(settings.settings.openProject, exports.project)
-	oldProject = Object.create(exports.project)
+	oldProject = JSON.stringify(exports.project)
 	// TODO save characters and assets
 	// (not doing it right now since the editor isn't made yet)
 }
 
 exports.closeProject = function() {
-	if (!checkChanges()) return
+	if (!exports.checkChanges()) return
 
 	exports.project = null
 	oldProject = 'null'
@@ -64,7 +63,7 @@ exports.closeProject = function() {
 }
 
 // Returns true if its okay to close the project
-function checkChanges() {
+exports.checkChanges = function() {
 	if (oldProject !== JSON.stringify(exports.project)) {
 		var response = dialog.showMessageBox({
 			"type": "question",
@@ -88,4 +87,9 @@ function checkChanges() {
 	}
 
 	return true
+}
+
+// Changing exports arrays doesn't seem to work outside of the file?
+exports.updateHotbar = function(i, puppet) {
+	exports.project.hotbar[i] = puppet
 }

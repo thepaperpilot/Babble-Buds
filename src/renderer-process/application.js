@@ -25,8 +25,9 @@ function loadPuppets() {
 	puppet = babble.addPuppet(createPuppet(project.puppet), 1)
 
 	// Create Hotbar Puppets
-	for (var i = 0; i < project.hotbar.length; i++) {
-		hotbar[i] = babble.createPuppet(project.characters[project.hotbar[i]])
+	for (var i = 0; i < project.project.hotbar.length; i++) {
+		if (project.project.hotbar[i] !== '')
+			hotbar[i] = babble.createPuppet(project.characters[project.project.hotbar[i]])
 	}
 
 	// Update Editor
@@ -42,7 +43,7 @@ function loadPuppets() {
 	for (var i = 0; i < emotes.length; i++)
 		document.getElementById(emotes[i]).className += " available"
 
-	document.getElementById('char ' + project.hotbar.indexOf(puppet.name)).className += " selected"
+	document.getElementById('char ' + project.project.hotbar.indexOf(puppet.name)).className += " selected"
 	document.getElementById(puppet.emote).className += " selected"
 }
 
@@ -57,6 +58,8 @@ function createPuppet(actor) {
 }
 
 function setPuppet(index) {
+	if (!hotbar[index]) return
+
 	// Set Puppet
 	babble.setPuppet(puppet.id, hotbar[index])
 	puppet = hotbar[index]
@@ -74,7 +77,7 @@ function setPuppet(index) {
 	for (var i = 0; i < emotes.length; i++)
 		document.getElementById(emotes[i]).className += " available"
 
-	document.getElementById('char ' + project.hotbar.indexOf(hotbar[index].name)).className += " selected"
+	document.getElementById('char ' + project.project.hotbar.indexOf(hotbar[index].name)).className += " selected"
 
 	// Update Project
 	project.puppet.name = hotbar[index].name
@@ -160,17 +163,88 @@ function stopBabbling() {
 	}
 }
 
-for (var i = 0; i < project.hotbar.length; i++) {
-	(function() {
-		var innerI = i
-		document.getElementById('char ' + i).addEventListener('click', function() {
-			setPuppet(innerI)
-			if (popout)
-				popout.webContents.send('keyUp', innerI + 49)
-		})
-		document.getElementById('char ' + i).getElementsByClassName('desc')[0].innerHTML = project.hotbar[innerI]
-	}())
+function setHotbar(e) {
+	var i = e.target.i
+	var puppet = e.target.puppet
+	if (('' + document.getElementById('char ' + i).className).indexOf('selected') > -1 && puppet === '') {
+		document.getElementById('chars').style.display = 'block'
+		document.getElementById('charselect').style.display = 'none'
+		return
+	}
+	project.updateHotbar(i, puppet)
+	if (puppet === '') {
+		hotbar[i] = null
+	} else {
+		hotbar[i] = babble.createPuppet(project.characters[puppet])
+	}
+	if (('' + document.getElementById('char ' + i).className).indexOf('selected') > -1) {
+		setPuppet(i)
+		if (popout)
+			popout.webContents.send('keyUp', i + 49)
+	}
+	document.getElementById('char ' + i).getElementsByClassName('desc')[0].innerHTML = puppet	
+	document.getElementById('chars').style.display = 'block'
+	document.getElementById('charselect').style.display = 'none'
 }
+
+for (var i = 0; i < 9; i++) {
+	var element = document.getElementById('char ' + i)
+	element.i = i
+	element.addEventListener('click', function(e) {
+		var i = e.target.i
+		setPuppet(i)
+		if (popout)
+			popout.webContents.send('keyUp', i + 49)
+	})
+	element.addEventListener('contextmenu', function(e) {
+		var i = e.target.i
+		document.getElementById('chars').style.display = 'none'
+		document.getElementById('charselect').style.display = 'block'
+		document.getElementById('char selected').getElementsByClassName('desc')[0].innerHTML = project.project.hotbar[i]
+		var charList = document.getElementById('char list')
+		charList.innerHTML = ''
+		var characters = Object.keys(project.characters)
+		for (var j = 0; j < characters.length; j++) {
+			var selector = document.createElement('div')
+			selector.id = characters[j].toLowerCase()
+			selector.className = "char"
+			charList.appendChild(selector)
+			selector.innerHTML = '<div class="desc">' + characters[j] + '</div>'
+			document.getElementById('char null').i = i
+			selector.i = i
+			selector.puppet = characters[j]
+			if (project.project.hotbar.indexOf(characters[j]) > -1) {
+				selector.className += " disabled"
+			} else {
+				selector.addEventListener('click', setHotbar)
+			}
+		}
+	})
+	element.getElementsByClassName('desc')[0].innerHTML = project.project.hotbar[i]
+}
+
+document.getElementById('char null').addEventListener('click', setHotbar)
+document.getElementById('char null').puppet = ''
+
+document.getElementById('char search').addEventListener('keyup', (e) => {
+	var list = document.getElementById('char list')
+	if (e.target.value === '') {
+		for (var i = 0; i < list.children.length; i++)
+			list.children[i].style.display = 'inline-block'
+	} else {
+		for (var i = 0; i < list.children.length; i++)
+			list.children[i].style.display = 'none'
+		var chars = list.querySelectorAll("[id*='" + e.target.value.toLowerCase() + "']")
+		for (var i = 0; i < chars.length; i++) {
+			chars[i].style.display = 'inline-block'
+		}
+	}
+})
+
+document.getElementById('char selected').addEventListener('click', () => {
+	document.getElementById('chars').style.display = 'block'
+	document.getElementById('charselect').style.display = 'none'
+})
 
 for (var i = 0; i < emotes.length; i++) {
 	(function() {
@@ -243,6 +317,7 @@ document.getElementById('settings').addEventListener('click', () => {
 	if (document.getElementById('settings-panel').style.display == 'none') {
 		document.getElementById('settings-panel').style.display = 'block'
 		document.getElementById('chars').style.display = 'none'
+		document.getElementById('charselect').style.display = 'none'
 		document.getElementById('emotes').style.display = 'none'
 	} else {
 		document.getElementById('settings-panel').style.display = 'none'
@@ -557,7 +632,7 @@ document.getElementById('connect').addEventListener('click', () => {
 window.onkeydown = function(e) {
 	var key = e.keyCode ? e.keyCode : e.which
 
-	if (e.target && (e.target.type === 'number' || e.target.type === 'text'))
+	if (e.target && (e.target.type === 'number' || e.target.type === 'text') || (e.target.type === 'search'))
 		return
 
 	if (key == 32) {
@@ -576,7 +651,7 @@ window.onkeyup = function(e) {
 		return
 
 	if (key > 48 && key < 58) {
-		if (project.hotbar.length > key - 49) {
+		if (project.project.hotbar.length > key - 49) {
 			setPuppet(key - 49)
 		}
 	} else if (key == 85) setEmote('default')

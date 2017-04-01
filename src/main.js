@@ -60,6 +60,11 @@ app.on('activate', function () {
   }
 })
 
+app.on('before-quit', function (e) {
+  if (!project.checkChanges())
+    e.preventDefault()
+})
+
 exports.redirect = function (file) {
   mainWindow.loadURL(url.format({
         pathname: path.join(__dirname, file),
