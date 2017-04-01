@@ -13,8 +13,8 @@ function loadPuppets() {
     puppet = babble.addPuppet(createPuppet(project.puppet))
 
     // Create Hotbar Puppets
-    for (var i = 0; i < project.hotbar.length; i++) {
-        hotbar[i] = babble.createPuppet(project.characters[project.hotbar[i]])
+    for (var i = 0; i < project.project.hotbar.length; i++) {
+        hotbar[i] = babble.createPuppet(project.characters[project.project.hotbar[i]])
     }
 
     // Request initial puppets
@@ -60,7 +60,7 @@ electron.ipcRenderer.on('keyDown', (event, key) => {
 
 electron.ipcRenderer.on('keyUp', (event, key) => {
     if (key > 48 && key < 58) {
-        if (project.hotbar.length > key - 49) {
+        if (project.project.hotbar.length > key - 49) {
             setPuppet(key - 49)
         }
     } else if (key == 85) puppet.changeEmote('default')
