@@ -56,6 +56,13 @@ exports.init = function(element, proj, imgs, assetspath, callback) {
     loader.load(function() { if (callback) callback(); setup(); })
 }
 
+exports.addAsset = function(tab, asset) {
+    if (!assets[tab])
+        assets[tab] = {}
+    assets[tab][asset] = {"location": path.join(tab, asset + '.png')}
+    TextureCache[path.join(assetsPath, assets[tab][asset].location)] = PIXI.Texture.fromImage(path.join(assetsPath, assets[tab][asset].location))
+}
+
 exports.reattach = function(element) {
     screen = document.getElementById(element)
     screen.appendChild(renderer.view)

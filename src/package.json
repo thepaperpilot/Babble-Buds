@@ -16,9 +16,9 @@
   "license": "CC0-1.0",
   "devDependencies": {
     "electron": "~1.6.2",
-    "electron-packager": "~8.5.2",
     "fs-extra": "~2.1.2",
     "pixi.js": "~4.4.3",
-    "socket.io": "~1.7.3"
+    "socket.io": "~1.7.3",
+    "socket.io-stream": "~0.9.1"
   }
 }

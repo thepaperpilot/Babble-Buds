@@ -22,7 +22,7 @@ Well, until I port over all the puppets in Marionette Mates, that might be the b
 
 - Integrated editor
 - Configurable local AND global hotkeys
-- Syncing characters and assets to clients
+- Status indicators when connecting, downloading assets, etc.
 - Convert rest of puppets available in Marionette Mates (and efficiently convert things like the mouths and eyes)
 
 ## Thanks

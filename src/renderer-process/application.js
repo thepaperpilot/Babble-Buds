@@ -9,6 +9,9 @@ const babble = require('./babble.js')
 const project = remote.require('./main-process/project')
 const path = require('path')
 const url = require('url')
+const http = require('http')
+const ss = require('socket.io-stream')
+const fs = require('fs-extra')
 
 var emotes = ['default', 'happy', 'wink', 'kiss', 'angry', 'sad', 'ponder', 'gasp', 'veryangry', 'verysad', 'confused', 'ooo']
 var hotbar = []
@@ -48,7 +51,7 @@ function loadPuppets() {
 }
 
 function createPuppet(actor) {
-	var puppet = Object.create(project.characters[actor.name])
+	var puppet = JSON.parse(JSON.stringify(project.characters[actor.name]))
 	puppet.position = actor.position
 	puppet.emote = actor.emote
 	puppet.facingLeft = actor.facingLeft
@@ -84,7 +87,7 @@ function setPuppet(index) {
 
 	// Update Server
 	if (server)	{
-		server.emit('set puppet', puppet.id, project.puppet)
+		server.emit('set puppet', puppet.id, createPuppet(project.puppet))
 	}
 }
 
@@ -302,7 +305,7 @@ function popOut() {
 		protocol: 'file:',
 		slashes: true
 	  }))
-	// popout.webContents.openDevTools()
+	popout.webContents.openDevTools()
 	document.getElementById('popout').innerHTML ='Close Pop Out'
 	document.getElementById('popout').removeEventListener('click', popOut)
 	document.getElementById('popout').addEventListener('click', popIn)
@@ -387,8 +390,7 @@ document.getElementById('host').addEventListener('click', () => {
 	puppets = []
 
 	// Load requirements
-	var http = require('http')
-	var io = require('socket.io')
+	const io = require('socket.io')
 
 	// Create server & socket
 	var serv = http.createServer(function(req, res) {
@@ -403,6 +405,15 @@ document.getElementById('host').addEventListener('click', () => {
 
 	// Add a connect listener
 	server.sockets.on('connection', function(socket) {
+		// Send list of assets
+		var tabs = Object.keys(project.assets)
+		for (var i = 0; i < tabs.length; i++) {
+			var assetKeys = Object.keys(project.assets[tabs[i]])
+			for (var j = 0; j < assetKeys.length; j++) {
+				socket.emit('add asset', tabs[i], assetKeys[j])
+			}
+		}
+
 		// Add Application Listeners
 		socket.on('add puppet', (puppet) => {
 			socket.emit('set slots', project.project.numCharacters)
@@ -422,7 +433,7 @@ document.getElementById('host').addEventListener('click', () => {
 				popout.webContents.send('add puppet', puppet)
 		})
 		socket.on('set puppet', (id, puppet) => {
-			babble.setPuppet(id, babble.createPuppet(createPuppet(puppet)))
+			babble.setPuppet(id, babble.createPuppet(puppet))
 			socket.broadcast.emit('set puppet', id, puppet)
 			if (popout)
 				popout.webContents.send('set puppet', id, puppet)
@@ -508,6 +519,28 @@ document.getElementById('host').addEventListener('click', () => {
 				}
 			}
 		})
+
+		socket.on('add asset', (tab, asset) => {
+			if (!(project.assets[tab] && project.assets[tab][asset])) {
+				var stream = ss.createStream()
+				fs.ensureDirSync(path.join(project.assetsPath, tab))
+				ss(socket).emit('request asset', stream, tab, asset)
+				stream.on('end', () => {
+					if (!project.assets[tab])
+						project.assets[tab] = {}
+					project.assets[tab][asset] = {"location": path.join(tab, asset + '.png')}
+					project.addAsset(tab, asset)
+					babble.addAsset(tab, asset)
+					if (popout)
+						popout.webContents.send('add asset', tab, asset)
+					socket.broadcast.emit('add asset', tab, asset)
+				})
+				stream.pipe(fs.createWriteStream(path.join(project.assetsPath, tab, asset + '.png')))
+			}
+		})
+		ss(socket).on('request asset', function(stream, tab, asset) {
+			fs.createReadStream(path.join(project.assetsPath, project.assets[tab][asset].location)).pipe(stream)
+		})
 	})
 })
 
@@ -532,6 +565,14 @@ document.getElementById('connect').addEventListener('click', () => {
 	socket.on('connect', function() {
 		puppets = []
 	    socket.emit('add puppet', project.puppet)
+		// Send list of assets
+		var tabs = Object.keys(project.assets)
+		for (var i = 0; i < tabs.length; i++) {
+			var assetKeys = Object.keys(project.assets[tabs[i]])
+			for (var j = 0; j < assetKeys.length; j++) {
+				socket.emit('add asset', tabs[i], assetKeys[j])
+			}
+		}
 	    babble.clearPuppets()
 		if (popout)
 			popout.webContents.send('connect')
@@ -552,7 +593,8 @@ document.getElementById('connect').addEventListener('click', () => {
 		puppets.push(puppet)
 	})
 	socket.on('set puppet', (id, puppet) => {
-		babble.setPuppet(id, babble.createPuppet(createPuppet(puppet)))
+		console.log(puppet, project.assets)
+		babble.setPuppet(id, babble.createPuppet(puppet))
 		if (popout)
 			popout.webContents.send('set puppet', id, puppet)
 		for (var i = 0; i < puppets.length; i++) {
@@ -627,12 +669,35 @@ document.getElementById('connect').addEventListener('click', () => {
 		if (popout)
 			popout.webContents.send('resize')
 	})
+	socket.on('add asset', (tab, asset) => {
+		console.log(tab, asset)
+		if (!(project.assets[tab] && project.assets[tab][asset])) {
+			var stream = ss.createStream()
+			fs.ensureDirSync(path.join(project.assetsPath, tab))
+			ss(socket).emit('request asset', stream, tab, asset)
+			stream.on('end', () => {
+				console.log('finished', tab, asset)
+				if (!project.assets[tab])
+					project.assets[tab] = {}
+				project.assets[tab][asset] = {"location": path.join(tab, asset + '.png')}
+				project.addAsset(tab, asset)
+				babble.addAsset(tab, asset)
+				if (popout)
+					popout.webContents.send('add asset', tab, asset)
+			})
+			stream.pipe(fs.createWriteStream(path.join(project.assetsPath, tab, asset + '.png')))
+		}
+	})
+	ss(socket).on('request asset', function(stream, tab, asset) {
+		console.log('request asset', tab, asset)
+		fs.createReadStream(path.join(project.assetsPath, project.assets[tab][asset].location)).pipe(stream)
+	})
 })
 
 window.onkeydown = function(e) {
 	var key = e.keyCode ? e.keyCode : e.which
 
-	if (e.target && (e.target.type === 'number' || e.target.type === 'text') || (e.target.type === 'search'))
+	if (e.target && (e.target.type === 'number' || e.target.type === 'text' || e.target.type === 'search'))
 		return
 
 	if (key == 32) {

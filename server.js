@@ -1,15 +1,21 @@
-// Constants
+// Load requirements
+const http = require('http')
+const path = require('path')
+// You'll need to install these using npm:
+const fs = require('fs-extra')
+const io = require('socket.io')
+const ss = require('socket.io-stream')
+
+// Settings
 var port = 8080
 var numCharacters = 5
+var assetsPath = path.join(__dirname, 'assets')
 
 // Variables
 var server
 var puppets = []
+var assets = {}
 var numPuppets = 1
-
-// Load requirements
-var http = require('http')
-var io = require('socket.io')
 
 // Create server & socket
 var serv = http.createServer(function(req, res) {
@@ -22,6 +28,15 @@ server = io.listen(serv)
 
 // Add a connect listener
 server.sockets.on('connection', function(socket) {
+	// Send list of assets
+	var tabs = Object.keys(assets)
+	for (var i = 0; i < tabs.length; i++) {
+		var assetKeys = Object.keys(assets[tabs[i]])
+		for (var j = 0; j < assetKeys.length; j++) {
+			socket.emit('add asset', tabs[i], assetKeys[j])
+		}
+	}
+
 	// Add Application Listeners
 	socket.on('add puppet', (puppet) => {
 		socket.emit('set slots', numCharacters)
@@ -98,5 +113,23 @@ server.sockets.on('connection', function(socket) {
 				break
 			}
 		}
+	})
+
+	socket.on('add asset', (tab, asset) => {
+		if (!(assets[tab] && assets[tab][asset])) {
+			var stream = ss.createStream()
+			fs.ensureDirSync(path.join(assetsPath, tab))
+			ss(socket).emit('request asset', stream, tab, asset)
+			stream.on('end', () => {
+				if (!assets[tab])
+					assets[tab] = {}
+				assets[tab][asset] = {"location": path.join(tab, asset + '.png')}
+				socket.broadcast.emit('add asset', tab, asset)
+			})
+			stream.pipe(fs.createWriteStream(path.join(assetsPath, tab, asset + '.png')))
+		}
+	})
+	ss(socket).on('request asset', function(stream, tab, asset) {
+		fs.createReadStream(path.join(assetsPath, assets[tab][asset].location)).pipe(stream)
 	})
 })
