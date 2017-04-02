@@ -6,15 +6,17 @@ const project = remote.require('./main-process/project')
 var puppet
 var hotbar = []
 
+console.log(project.assets)
 babble.init('screen', project.project, project.assets, project.assetsPath, loadPuppets)
 
 function loadPuppets() {
     // Add Puppet
-    puppet = babble.addPuppet(createPuppet(project.puppet))
+    puppet = babble.addPuppet(createPuppet(project.puppet), 1)
 
     // Create Hotbar Puppets
     for (var i = 0; i < project.project.hotbar.length; i++) {
-        hotbar[i] = babble.createPuppet(project.characters[project.project.hotbar[i]])
+        if (project.project.hotbar[i] !== '')
+            hotbar[i] = babble.createPuppet(project.characters[project.project.hotbar[i]])
     }
 
     // Request initial puppets
@@ -105,7 +107,7 @@ electron.ipcRenderer.on('add puppet', (event, puppet) => {
     babble.addPuppet(createPuppet(puppet), puppet.id)
 })
 electron.ipcRenderer.on('set puppet', (event, id, puppet) => {
-    babble.setPuppet(id, babble.createPuppet(createPuppet(puppet)))
+    babble.setPuppet(id, babble.createPuppet(puppet))
 })
 electron.ipcRenderer.on('set emote', (event, id, emote) => {
     babble.getPuppet(id).changeEmote(emote)
@@ -124,4 +126,7 @@ electron.ipcRenderer.on('stop babbling', (event, id) => {
 })
 electron.ipcRenderer.on('remove puppet', (event, id) => {
     babble.removePuppet(id)
+})
+electron.ipcRenderer.on('add asset', (event, tab, asset) => {
+    babble.addAsset(tab, asset)
 })

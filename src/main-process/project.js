@@ -7,6 +7,7 @@ const {dialog} = require('electron')
 const path = require('path')
 
 var oldProject
+var oldAssets
 
 exports.readProject = function(filepath) {
 	if (!exports.checkChanges()) return
@@ -34,6 +35,7 @@ exports.readProject = function(filepath) {
 		for (var i = 0; i < project.assets.length; i++) {
 			exports.assets[project.assets[i].name] = fs.readJsonSync(path.join(exports.assetsPath, project.assets[i].location))
 		}
+		oldAssets = JSON.stringify(exports.assets)
 
 		menu.updateMenu()
 		settings.settings.openProject = filepath
@@ -45,8 +47,12 @@ exports.readProject = function(filepath) {
 
 exports.saveProject = function() {
 	fs.writeJson(settings.settings.openProject, exports.project)
+	var tabs = Object.keys(exports.assets)
+	for (var i = 0; i < tabs.length; i++)
+		fs.writeJson(path.join(settings.settings.openProject, '..', 'assets', tabs[i] + '.json'), exports.assets[tabs[i]])
 	oldProject = JSON.stringify(exports.project)
-	// TODO save characters and assets
+	oldAssets = JSON.stringify(exports.assets)
+	// TODO save characters
 	// (not doing it right now since the editor isn't made yet)
 }
 
@@ -54,7 +60,9 @@ exports.closeProject = function() {
 	if (!exports.checkChanges()) return
 
 	exports.project = null
+	exports.assets = null
 	oldProject = 'null'
+	oldAssets = 'null'
 	menu.updateMenu()
 	settings.settings.openProject = ""
 	settings.save()
@@ -64,7 +72,9 @@ exports.closeProject = function() {
 
 // Returns true if its okay to close the project
 exports.checkChanges = function() {
-	if (oldProject !== JSON.stringify(exports.project)) {
+	var changes = oldProject !== JSON.stringify(exports.project)
+	changes = changes || oldAssets !== JSON.stringify(exports.assets)
+	if (changes) {
 		var response = dialog.showMessageBox({
 			"type": "question",
 			"buttons": ["Don't Save", "Cancel", "Save"],
@@ -92,4 +102,10 @@ exports.checkChanges = function() {
 // Changing exports arrays doesn't seem to work outside of the file?
 exports.updateHotbar = function(i, puppet) {
 	exports.project.hotbar[i] = puppet
+}
+
+exports.addAsset = function(tab, asset) {
+	if (!exports.assets[tab])
+		exports.assets[tab] = {}
+	exports.assets[tab][asset] = {"location": path.join(tab, asset + '.png')}
 }
