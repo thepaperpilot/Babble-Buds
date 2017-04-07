@@ -51,7 +51,7 @@
                 <div class="s5">
                     Green Screen Color:
                     <input type="color" id="colorpicker" value="#00FF00" style="width: calc(100% - 16px)">
-                    <input type="checkbox" id="transparent" class="checkbox"><label for="transparent" class="checkbox-label" style="margin-bottom: 47px;">Transparent Pop Out (beta)</label><br>
+                    <input type="checkbox" id="transparent" class="checkbox"><label for="transparent" class="checkbox-label">Transparent Pop Out (beta)</label><br>
                     Server IP: (for connecting only)
                     <input type="text" id="ip" value="localhost" style="width: calc(100% - 16px)">
                 </div>
@@ -66,7 +66,113 @@
             </div>
         </div>
         <div class="container side">
-        Fascinating stuff will go here soon
+            <div id="editor" class="v5 vbar">
+                <div class="sidebuttons b5">
+                    <button id="editor-open">Open</button>
+                    <button id="editor-save">Save</button>
+                    <button id="editor-new">New</button>
+                    <button id="editor-duplicate">Duplicate</button>
+                    <button id="editor-import">Import</button>
+                </div>
+                <div id="editor-screen" class="editormain">
+                    <button id="zoom in" style="top: 1px">+</button><button id="zoom out" style="left: 30px">-</button>
+                </div>
+                <div id="editor-open-panel" class="editorpanel charselector" style="display: none">
+                    <div id="char open list" class="scroll charlist"></div>
+                    <input type="search" id="char open search" placeholder="Search">
+                </div>
+                <div id="editor-layers-panel" class="editorpanel scroll" style="display: none">
+                    <button id="props" class="babble">Props</button>
+                    <button id="hat" class="babble">Hat</button>
+                    <div class="emotes">
+                        <button id="default-emote" class="emote available">default</button>
+                        <button id="happy-emote" class="emote">happy</button>
+                        <button id="wink-emote" class="emote">wink</button>
+                        <button id="kiss-emote" class="emote">kiss</button>
+                        <button id="angry-emote" class="emote">angry</button>
+                        <button id="sad-emote" class="emote">sad</button>
+                        <button id="ponder-emote" class="emote">ponder</button>
+                        <button id="gasp-emote" class="emote">gasp</button>
+                        <button id="veryangry-emote" class="emote small">veryangry</button>
+                        <button id="verysad-emote" class="emote">verysad</button>
+                        <button id="confused-emote" class="emote small">confused</button>
+                        <button id="ooo-emote" class="emote">ooo</button>
+                        <div class="flipswitch">
+                            <input type="checkbox" name="flipswitch" class="flipswitch-cb" id="eyemouth">
+                            <label class="flipswitch-label" for="eyemouth">
+                                <div class="flipswitch-inner"></div>
+                                <div class="flipswitch-switch"></div>
+                            </label>
+                        </div>
+                    </div>
+                    <button id="head" class="babble">Head</button>
+                    <button id="body" class="babble">Body</button>
+                    <button id="bundles" class="babble">Asset Bundles</button>
+                </div>
+                <div id="editor-babble-panel" class="editorpanel scroll" style="display: none; text-align: center">
+                    <p style="margin: 0 0 8px; padding-top: 16px;">Select mouths to rotate through</p>
+                    <div id="babble-mouths" class="emotes">
+                        <button id="default-mouth" class="emote available">default</button>
+                        <button id="happy-mouth" class="emote">happy</button>
+                        <button id="wink-mouth" class="emote">wink</button>
+                        <button id="kiss-mouth" class="emote">kiss</button>
+                        <button id="angry-mouth" class="emote">angry</button>
+                        <button id="sad-mouth" class="emote">sad</button>
+                        <button id="ponder-mouth" class="emote">ponder</button>
+                        <button id="gasp-mouth" class="emote">gasp</button>
+                        <button id="veryangry-mouth" class="emote small">veryangry</button>
+                        <button id="verysad-mouth" class="emote">verysad</button>
+                        <button id="confused-mouth" class="emote small">confused</button>
+                        <button id="ooo-mouth" class="emote">ooo</button>
+                    </div>
+                    <p style="margin: 48px 0 8px;">Select eyes to rotate through</p>
+                    <div id="babble-eyes" class="emotes">
+                        <button id="default-eyes" class="emote available">default</button>
+                        <button id="happy-eyes" class="emote">happy</button>
+                        <button id="wink-eyes" class="emote">wink</button>
+                        <button id="kiss-eyes" class="emote">kiss</button>
+                        <button id="angry-eyes" class="emote">angry</button>
+                        <button id="sad-eyes" class="emote">sad</button>
+                        <button id="ponder-eyes" class="emote">ponder</button>
+                        <button id="gasp-eyes" class="emote">gasp</button>
+                        <button id="veryangry-eyes" class="emote small">veryangry</button>
+                        <button id="verysad-eyes" class="emote">verysad</button>
+                        <button id="confused-eyes" class="emote small">confused</button>
+                        <button id="ooo-eyes" class="emote">ooo</button>
+                    </div>
+                </div>
+                <div id="editor-settings-panel" class="editorpanel scroll" style="display: none">
+                    <p style="margin: 0 0 8px; padding-top: 16px;">Puppet Name:</p>
+                    <input type="text" id="editor-name" value="New Puppet" style="width: calc(100% - 16px)"><br>
+                    <input type="checkbox" id="deadbonesstyle" class="checkbox"><label for="deadbonesstyle" class="checkbox-label">Bobble head while talking</label>
+                    <button id="delete-character">Delete Character</button>
+                </div>
+                <div class="sidebuttons b3">
+                    <button id="editor-layers">Layers</button>
+                    <button id="editor-babble">Babble</button>
+                    <button id="editor-settings">Settings</button>
+                </div>
+            </div>
+            <div id="assets" class="v5">
+                <div class="sidebuttons" style="padding-left: 10px">
+                    <button id="add-asset" style="background: url(assets/icons/add_asset.png) center no-repeat/contain" title="Add Asset"></button>
+                    <button id="new-asset-bundle" style="background: url(assets/icons/new_bundle.png) center no-repeat/contain" title="New Asset Bundle"></button>
+                    <button id="edit-asset-list" style="background: url(assets/icons/settings.png) center no-repeat/contain; margin-right: 140px" title="Edit Asset List"></button>
+                    <button id="new-asset-list" style="background: url(assets/icons/new_folder.png) center no-repeat/contain" title="New Asset List"></button>
+                    <button id="import-asset-list" style="background: url(assets/icons/import_folder.png) center no-repeat/contain" title="Import Asset List"></button>
+                </div>
+                <select id="asset tabs"></select>
+                <div id="asset list" class="assetlist"></div>
+                <input type="search" id="asset search" placeholder="Search">
+            </div>
+            <div id="asset editor" class="v5" style="display: none">
+                <div id="asset selected" class="asset"><div class="desc"></div><img class="contain" style="width: 120px; height: 120px"></div>
+                <p style="margin: 0 0 8px; padding-top: 16px;">Asset List:</p>
+                <select id="asset-tab"></select>
+                <p style="margin: 0 0 8px; padding-top: 16px;">Asset Name:</p>
+                <input type="text" id="asset-name" value="New Asset" style="width: calc(100% - 16px)"><br>
+                <button id="delete-asset">Delete Asset</button>
+            </div>
         </div>
     </body>
 

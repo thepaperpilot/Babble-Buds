@@ -28,7 +28,7 @@ input {
 	margin-top: 8px;
 }
 
-input[type="text"], input[type="number"], input[type="search"] {
+input[type="text"], input[type="number"], input[type="search"], select {
 	background: none;
 	border: none;
 	border-bottom: solid 2px #969696;
@@ -39,7 +39,7 @@ input[type="text"], input[type="number"], input[type="search"] {
 	width: calc( 100% - 8px );
 }
 
-input[type="text"]:focus, input[type="number"]:focus, input[type="search"]:focus {
+input[type="text"]:focus, input[type="number"]:focus, input[type="search"]:focus, select:focus {
 	border-bottom: solid 2px #c9c9c9;
 	outline: none;
 }
@@ -57,6 +57,10 @@ button {
 button:focus {
 	color: #a3c9ef;
 	outline: none;
+}
+
+select option {
+	color: #000;
 }
 
 .greeting {
@@ -97,8 +101,15 @@ button:focus {
 	width: calc( 100% - 450px );
 }
 
-.button {
-	cursor: pointer;
+.editormain {
+	background-color: #2a323d;
+	height: calc( 100% - 90px );
+	position: relative;
+}
+
+.editormain button {
+	position: absolute;
+	z-index: 1;
 }
 
 .bottom {
@@ -140,10 +151,34 @@ button:focus {
 	width: 80%;
 }
 
+.v5 {
+	height: 50%;
+}
+
 .buttons {
 	border-right: solid 4px #2a323d;
 	margin-right: 8px;
 	width: calc( 20% - 8px);
+}
+
+.sidebuttons button {
+	height: 25px;
+	width: 25px;
+}
+
+.b5 button {
+    padding: 0;
+	width: unset;
+}
+
+.b3 button {
+	width: calc( 33% - 23px );
+}
+
+.vbar {
+	border-bottom: solid 4px #2a323d;
+	height: calc( 50% - 8px);
+	margin-bottom: 8px;
 }
 
 .scroll {
@@ -160,7 +195,14 @@ button:focus {
 	padding: 4px;
 }
 
+.emote:focus, .babble:focus {
+	color: #fff;
+}
+
 .char {
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: contain;
 	height: calc( 33% - 14px );
 	position: relative;
 	width: calc( 33% - 20px );
@@ -180,14 +222,70 @@ button:focus {
 	width: calc( 100% - 16px );
 }
 
+.asset {
+	background-color: #2a323d;
+	color: #fff;
+	cursor: pointer;
+	display: inline-block;
+	height: 120px;
+	margin: 4px 4px 0 4px;
+	position: relative;
+	width: 120px;
+}
+
+.contain {
+	object-fit: contain;
+}
+
 .charlist {
-	height: calc( 100% - 100px);
+	height: calc( 100% - 100px );
+}
+
+.assetlist {
+	height: calc( 100% - 114px );
 }
 
 .charselector .char {
 	height: 50px;
 	max-width: 150px;
 	min-width: 75px;
+}
+
+.editorpanel {
+	height: calc( 100% - 90px );
+}
+
+.editorpanel .char {
+	height: 120px;
+	padding: 0;
+	width: 120px;
+}
+
+.editorpanel .charlist {
+	height: calc( 100% - 31px );
+}
+
+.editorpanel .emote, .editorpanel .babble {
+    height: 9%;
+    min-height: 28px;
+}
+
+.editorpanel .emote {
+	width: calc( 25% - 13px );
+}
+
+.editorpanel .babble {
+	width: calc( 100% - 8px );
+}
+
+.editorpanel .emotes {
+    margin: 4px;
+    outline: #2a323d solid 4px;    
+    padding-left: 3px;
+}
+
+.small {
+	font-size: 16px;
 }
 
 .available {
@@ -214,6 +312,7 @@ button:focus {
     left: 0;
     opacity: 0.5;
     overflow: hidden;
+    pointer-events: none;
     position: absolute;
     text-align: center;
     width: 100%;
@@ -222,6 +321,10 @@ button:focus {
 .checkbox {
     opacity: 0;
     position: absolute;
+}
+
+.checkbox + label {
+	user-select:none;
 }
 
 .checkbox, .checkbox-label {
@@ -239,8 +342,8 @@ button:focus {
 }
 
 .checkbox + .checkbox-label:before {
-    background: #fff;
-    border: 2px solid #ddd;
+    background: #242a33;
+    border: 4px solid #333c4a;
     content: '';
     display: inline-block;
     height: 20px;
@@ -253,11 +356,72 @@ button:focus {
 
 .checkbox:checked + .checkbox-label:before {
     background: #333c4a;
-    box-shadow: inset 0 0 0 4px #fff;
+    box-shadow: inset 0 0 0 4px #242a33;
 }
 
 
 .checkbox:focus + .checkbox-label, .checkbox:active + .checkbox-label {
 	color: #a3c9ef;
 	outline: none;
+}
+
+.flipswitch {
+  bottom: 8px;
+  margin: 12px auto 0;
+  position: relative;
+  width: 120px;
+}
+.flipswitch input[type=checkbox] {
+  display: none;
+}
+.flipswitch-label {
+  border: 4px solid #333c4a;
+  cursor: pointer;
+  display: block;
+  overflow: hidden;
+}
+.flipswitch-inner {
+  margin-left: -100%;
+  transition: margin 0.3s ease-in 0s;
+  width: 200%;
+}
+.flipswitch-inner:before, .flipswitch-inner:after {
+  box-sizing: border-box;
+  color: white;
+  float: left;
+  font-family: Trebuchet, Arial, sans-serif;
+  font-size: 18px;
+  font-weight: bold;
+  height: 24px;
+  line-height: 24px;
+  padding: 0;
+  width: 50%;
+}
+.flipswitch-inner:before {
+  color: #5464d4;
+  content: "eyes";
+  padding-left: 12px;
+}
+.flipswitch-inner:after {
+  color: #5464d4;
+  content: "mouth";
+  padding-right: 12px;
+  text-align: right;
+}
+.flipswitch-switch {
+  background: #242a33;
+  border: 4px solid #333c4a;
+  bottom: 0;
+  margin: -3.5px;
+  position: absolute;
+  right: 93px;
+  top: 0;
+  transition: all 0.3s ease-in 0s;
+  width: 31px;
+}
+.flipswitch-cb:checked + .flipswitch-label .flipswitch-inner {
+  margin-left: 0;
+}
+.flipswitch-cb:checked + .flipswitch-label .flipswitch-switch {
+  right: 0;
 }

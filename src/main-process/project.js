@@ -8,6 +8,7 @@ const path = require('path')
 
 var oldProject
 var oldAssets
+var oldCharacters
 
 exports.readProject = function(filepath) {
 	if (!exports.checkChanges()) return
@@ -24,14 +25,19 @@ exports.readProject = function(filepath) {
 		exports.assets = {}
 		exports.charactersPath = path.join(filepath, '..', 'characters')
 		exports.assetsPath = path.join(filepath, '..', 'assets')
+		exports.numCharacters = 0
 		for (var i = 0; i < project.characters.length; i++) {
-			exports.characters[project.characters[i].name] = fs.readJsonSync(path.join(exports.charactersPath, project.characters[i].location))
-			exports.characters[project.characters[i].name].name = project.characters[i].name
+			exports.characters[project.characters[i].id] = fs.readJsonSync(path.join(exports.charactersPath, project.characters[i].location))
+			exports.characters[project.characters[i].id].name = project.characters[i].name
+			exports.characters[project.characters[i].id].id = project.characters[i].id
+			if (project.characters[i].id > exports.numCharacters)
+				exports.numCharacters = project.characters[i].id
 		}
-		exports.puppet = project.puppet
-		exports.puppet.position = project.puppet.position
-		exports.puppet.facingLeft = project.puppet.facingLeft
-		exports.puppet.emote = project.puppet.emote
+		oldCharacters = JSON.stringify(exports.characters)
+		exports.actor = project.actor
+		exports.actor.position = project.actor.position
+		exports.actor.facingLeft = project.actor.facingLeft
+		exports.actor.emote = project.actor.emote
 		for (var i = 0; i < project.assets.length; i++) {
 			exports.assets[project.assets[i].name] = fs.readJsonSync(path.join(exports.assetsPath, project.assets[i].location))
 		}
@@ -47,13 +53,13 @@ exports.readProject = function(filepath) {
 
 exports.saveProject = function() {
 	fs.writeJson(settings.settings.openProject, exports.project)
-	var tabs = Object.keys(exports.assets)
-	for (var i = 0; i < tabs.length; i++)
-		fs.writeJson(path.join(settings.settings.openProject, '..', 'assets', tabs[i] + '.json'), exports.assets[tabs[i]])
+	for (var i = 0; i < exports.project.assets.length; i++)
+		fs.writeJson(path.join(settings.settings.openProject, '..', 'assets', exports.project.assets[i].location), exports.assets[exports.project.assets[i].name])
+	for (var i = 0; i < exports.project.characters.length; i++)
+		fs.writeJson(path.join(settings.settings.openProject, '..', 'characters', exports.project.characters[i].location), exports.characters[exports.project.characters[i].id])
 	oldProject = JSON.stringify(exports.project)
 	oldAssets = JSON.stringify(exports.assets)
-	// TODO save characters
-	// (not doing it right now since the editor isn't made yet)
+	oldCharacters = JSON.stringify(exports.characters)
 }
 
 exports.closeProject = function() {
@@ -61,8 +67,10 @@ exports.closeProject = function() {
 
 	exports.project = null
 	exports.assets = null
+	exports.characters = null
 	oldProject = 'null'
 	oldAssets = 'null'
+	oldCharacters = 'null'
 	menu.updateMenu()
 	settings.settings.openProject = ""
 	settings.save()
@@ -74,6 +82,7 @@ exports.closeProject = function() {
 exports.checkChanges = function() {
 	var changes = oldProject !== JSON.stringify(exports.project)
 	changes = changes || oldAssets !== JSON.stringify(exports.assets)
+	changes = changes || oldCharacters !== JSON.stringify(exports.characters)
 	if (changes) {
 		var response = dialog.showMessageBox({
 			"type": "question",
@@ -99,13 +108,66 @@ exports.checkChanges = function() {
 	return true
 }
 
-// Changing exports arrays doesn't seem to work outside of the file?
-exports.updateHotbar = function(i, puppet) {
-	exports.project.hotbar[i] = puppet
+exports.updateHotbar = function(i, id) {
+	exports.project.hotbar[i] = id
 }
 
 exports.addAsset = function(tab, asset) {
-	if (!exports.assets[tab])
+	if (!exports.assets[tab]) {
 		exports.assets[tab] = {}
+		exports.project.assets.push({"name": tab, "location": tab.toLowerCase() + '.json'})
+	}
 	exports.assets[tab][asset] = {"location": path.join(tab, asset + '.png')}
+}
+
+exports.saveCharacter = function(character) {
+	var exists = false
+	for (var i = 0; i < exports.project.characters.length; i++) {
+		if (exports.project.characters[i].id == character.id) {
+			exists = true
+			break
+		}
+	}
+	if (!exists)
+		exports.project.characters.push({"name": character.name, "id": character.id, "location": character.name.toLowerCase() + '_' + character.id + '.json'})
+	exports.characters[character.id] = character
+}
+
+exports.getEmptyCharacter = function() {
+	exports.numCharacters++
+	return JSON.stringify({
+	    "deadbonesStyle": false,
+	    "body": [],
+	    "head": [],
+	    "hat": [],
+	    "mouths": [],
+	    "eyes": [],
+	    "emotes": {
+	    	"default": {
+	    		"enabled": true,
+		        "mouth": [],
+		        "eyes": []
+		    }
+	    },
+	    "props": [],
+	    "name": "New Puppet",
+	    "id": exports.numCharacters
+	})
+}
+
+exports.duplicateCharacter = function(character) {
+	exports.numCharacters++
+	character.id = exports.numCharacters
+	return JSON.stringify(character)
+}
+
+exports.deleteCharacter = function(character) {
+	for (var i = 0; i < exports.project.characters.length; i++) {
+		if (exports.project.characters[i].id == character.id) {
+			exports.project.characters.splice(i, 1)
+			delete exports.characters[character.id]
+			if (character.id == exports.numCharacters) exports.numCharacters--
+			break
+		}
+	}
 }

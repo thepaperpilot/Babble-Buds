@@ -4,12 +4,14 @@
     {
       "tab": "bodies",
       "name": "Justin",
-      "x": 0,
-      "y": 0,
+      "x": 5,
+      "y": -125,
       "rotation": 0,
-      "scale": 1
+      "scaleX": 1,
+      "scaleY": 1
     }
   ],
+  "head": [],
   "mouths": [
     "default",
     "angry",
@@ -25,156 +27,177 @@
   ],
   "emotes": {
     "default": {
+      "enabled": true,
       "mouth": [
         {
           "tab": "mouths",
           "name": "Justin Closed",
-          "x": 0,
-          "y": 0,
+          "x": 24,
+          "y": -113,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ],
       "eyes": [
         {
           "tab": "eyes",
           "name": "Justin Normal",
-          "x": 0,
-          "y": 0,
+          "x": 28,
+          "y": -177,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ]
     },
     "angry": {
+      "enabled": true,
       "mouth": [
         {
           "tab": "mouths",
           "name": "Justin Teeth",
-          "x": 0,
-          "y": 0,
+          "x": 23,
+          "y": -110,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ],
       "eyes": [
         {
           "tab": "eyes",
           "name": "Justin Angry",
-          "x": 0,
-          "y": 0,
+          "x": 27,
+          "y": -171,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ]
     },
     "confused": {
+      "enabled": true,
       "mouth": [
         {
           "tab": "mouths",
           "name": "Justin Open",
-          "x": 0,
-          "y": 0,
+          "x": 23,
+          "y": -108,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ],
       "eyes": [
         {
           "tab": "eyes",
           "name": "Justin Confused",
-          "x": 0,
-          "y": 0,
+          "x": 28,
+          "y": -176,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ]
     },
     "gasp": {
+      "enabled": true,
       "mouth": [
         {
           "tab": "mouths",
           "name": "Justin Wide Open",
-          "x": 0,
-          "y": 0,
+          "x": 17,
+          "y": -108,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ],
       "eyes": [
         {
           "tab": "eyes",
           "name": "Justin Sad",
-          "x": 0,
-          "y": 0,
+          "x": 27,
+          "y": -177,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ]
     },
     "ooo": {
+      "enabled": true,
       "mouth": [
         {
           "tab": "mouths",
           "name": "Justin Ooo",
-          "x": 0,
-          "y": 0,
+          "x": 33,
+          "y": -107,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ],
       "eyes": [
         {
           "tab": "eyes",
           "name": "Justin Excited",
-          "x": 0,
-          "y": 0,
+          "x": 26,
+          "y": -179,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ]
     },
     "sad": {
+      "enabled": true,
       "mouth": [
         {
           "tab": "mouths",
           "name": "Justin Closed",
-          "x": 0,
-          "y": 0,
+          "x": 24,
+          "y": -113,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ],
       "eyes": [
         {
           "tab": "eyes",
           "name": "Justin Sad",
-          "x": 0,
-          "y": 0,
+          "x": 27,
+          "y": -177,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ]
     },
     "veryangry": {
+      "enabled": true,
       "mouth": [
         {
           "tab": "mouths",
           "name": "Justin Teeth",
-          "x": 0,
-          "y": 0,
+          "x": 23,
+          "y": -110,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ],
       "eyes": [
         {
           "tab": "eyes",
           "name": "Justin Very Angry",
-          "x": 0,
-          "y": 0,
+          "x": 29,
+          "y": -168,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ]
     }
@@ -183,11 +206,14 @@
     {
       "tab": "hats",
       "name": "Justin Goggles",
-      "x": 0,
-      "y": 0,
+      "x": 13,
+      "y": -215,
       "rotation": 0,
-      "scale": 1
+      "scaleX": 1,
+      "scaleY": 1
     }
   ],
-  "props": []
+  "props": [],
+  "name": "Justin",
+  "id": 4
 }

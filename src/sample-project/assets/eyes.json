@@ -97,5 +97,8 @@
   },
   "Coe Wink": {
     "location": "eyes/coe_wink.png"
+  },
+  "Dots": {
+    "location": "eyes/dots.png"
   }
 }

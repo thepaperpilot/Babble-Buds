@@ -11,11 +11,11 @@ babble.init('screen', project.project, project.assets, project.assetsPath, loadP
 
 function loadPuppets() {
     // Add Puppet
-    puppet = babble.addPuppet(createPuppet(project.puppet), 1)
+    puppet = babble.addPuppet(createPuppet(project.actor), 1)
 
     // Create Hotbar Puppets
     for (var i = 0; i < project.project.hotbar.length; i++) {
-        if (project.project.hotbar[i] !== '')
+        if (project.project.hotbar[i] !== '' && project.project.hotbar[i] > 0)
             hotbar[i] = babble.createPuppet(project.characters[project.project.hotbar[i]])
     }
 
@@ -24,7 +24,7 @@ function loadPuppets() {
 }
 
 function createPuppet(actor) {
-    var puppet = Object.create(project.characters[actor.name])
+    var puppet = Object.create(project.characters[actor.id])
     puppet.position = actor.position
     puppet.emote = actor.emote
     puppet.facingLeft = actor.facingLeft
@@ -97,11 +97,11 @@ electron.ipcRenderer.on('connect', function() {
 
 electron.ipcRenderer.on('disconnect', () => {
     babble.clearPuppets()
-    puppet = babble.addPuppet(createPuppet(project.puppet), 1)
+    puppet = babble.addPuppet(createPuppet(project.actor), 1)
 })
 
 electron.ipcRenderer.on('assign puppet', (event, id) => {
-    puppet = babble.addPuppet(createPuppet(project.puppet), id)
+    puppet = babble.addPuppet(createPuppet(project.actor), id)
 })
 electron.ipcRenderer.on('add puppet', (event, puppet) => {
     babble.addPuppet(createPuppet(puppet), puppet.id)

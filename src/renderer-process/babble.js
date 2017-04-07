@@ -27,6 +27,7 @@ var puppets = [] // Puppets on screen
 var stage // pixi stage
 var renderer // pixi renderer
 var screen // element on webpage where stage is
+var listeners = [] // listeners on each puppet
 
 // Exports
 exports.init = function(element, proj, imgs, assetspath, callback) {
@@ -56,6 +57,12 @@ exports.init = function(element, proj, imgs, assetspath, callback) {
     loader.load(function() { if (callback) callback(); setup(); })
 }
 
+exports.registerPuppetListener = function(event, callback) {
+    listeners.push({"event": event, "callback": callback})
+    for (var i = 0; i < puppets.length; i++)
+        puppets[i].container.on(event, callback)
+}
+
 exports.addAsset = function(tab, asset) {
     if (!assets[tab])
         assets[tab] = {}
@@ -77,7 +84,7 @@ exports.resize = function() {
         slotWidth = project.minSlotWidth
     } else stage.scale.x = stage.scale.y = 1
     for (var i = 0; i < puppets.length; i++) {
-        puppets[i].container.y = screen.clientHeight / stage.scale.y - puppets[i].body.height / 2
+        puppets[i].container.y = screen.clientHeight / stage.scale.y
         puppets[i].container.x = (puppets[i].position - .5) * slotWidth
     }
 }
@@ -90,7 +97,9 @@ exports.addPuppet = function(obj, id) {
     var puppet = new Puppet(obj, id)
     puppets.push(puppet)
     stage.addChild(puppet.container)
-    puppet.container.y = screen.clientHeight / stage.scale.y - puppet.body.height / 2
+    for (var i = 0; i < listeners.length; i++)
+        puppet.container.on(listeners[i].event, listeners[i].callback)
+    puppet.container.y = screen.clientHeight / stage.scale.y
     puppet.container.x = (puppet.position - .5) * slotWidth
     return puppet
 }
@@ -130,7 +139,9 @@ exports.setPuppet = function(id, newPuppet) {
     newPuppet.facingLeft = oldPuppet.facingLeft
     newPuppet.container.scale.x = newPuppet.facingLeft ? -1 : 1
 
-    newPuppet.container.y = screen.clientHeight / stage.scale.y - newPuppet.body.height / 2
+    for (var i = 0; i < listeners.length; i++)
+        newPuppet.container.on(listeners[i].event, listeners[i].callback)
+    newPuppet.container.y = screen.clientHeight / stage.scale.y
     newPuppet.container.x = (newPuppet.position - .5) * slotWidth
 
     puppets[puppets.indexOf(oldPuppet)] = newPuppet
@@ -177,7 +188,7 @@ function gameLoop() {
             // Scale in a sin formation such that it does 3 half circles per slot, plus 2 more at the end
             puppet.container.scale.y = 1 + Math.sin((1 + puppet.movingAnim * 5) * Math.PI) / 80
             // Update y value so it doesn't leave the bottom of the screen while bouncing
-            puppet.container.y = screen.clientHeight / stage.scale.y - puppet.body.height * puppet.container.scale.y / 2
+            puppet.container.y = screen.clientHeight / stage.scale.y
             // Linearly move across the slot, unless we're in the (.6 - 1) part of the animation
             puppet.container.x = (puppet.position + direction * (puppet.movingAnim >= .6 ? 0 : puppet.movingAnim / .6) - .5) * slotWidth
 
@@ -201,10 +212,12 @@ function gameLoop() {
             // Update eyes
             if (puppet.eyesAnim >= puppet.eyesDuration && puppet.eyes.length) {
                 if (puppet.emotes[puppet.emote]) puppet.emotes[puppet.emote].eyes.visible = false
+                puppet.emotes['default'].eyes.visible = false
                 for (var j = 0; j < puppet.eyes.length; j++) {
-                    puppet.emotes[puppet.eyes[j]].eyes.visible = false
+                    if (puppet.emotes[puppet.eyes[j]]) puppet.emotes[puppet.eyes[j]].eyes.visible = false
                 }
-                puppet.emotes[puppet.eyes[Math.floor(Math.random() * puppet.eyes.length)]].eyes.visible = true
+                var eyes = puppet.eyes[Math.floor(Math.random() * puppet.eyes.length)]
+                puppet.emotes[puppet.emotes[eyes] ? eyes : 'default'].eyes.visible = true
                 puppet.eyesAnim = 0
                 puppet.eyesDuration = Math.random() * 2000 + 200
             }
@@ -212,10 +225,12 @@ function gameLoop() {
             // Update mouth
             if (puppet.mouthAnim >= puppet.mouthDuration && puppet.mouths.length) {
                 if (puppet.emotes[puppet.emote]) puppet.emotes[puppet.emote].mouth.visible = false
+                puppet.emotes['default'].mouth.visible = false
                 for (var j = 0; j < puppet.mouths.length; j++) {
-                    puppet.emotes[puppet.mouths[j]].mouth.visible = false
+                    if (puppet.emotes[puppet.mouths[j]]) puppet.emotes[puppet.mouths[j]].mouth.visible = false
                 }
-                puppet.emotes[puppet.mouths[Math.floor(Math.random() * puppet.mouths.length)]].mouth.visible = true
+                var mouth = puppet.mouths[Math.floor(Math.random() * puppet.mouths.length)]
+                puppet.emotes[puppet.emotes[mouth] ? mouth : 'default'].mouth.visible = true
                 puppet.mouthAnim = 0
                 puppet.mouthDuration = Math.random() * 200 + 50
                 if (puppet.deadbonesStyle)
@@ -234,10 +249,12 @@ function gameLoop() {
                     puppet.deadbonesDuration = 100 + Math.random() * 200
                     puppet.deadbonesStartY = puppet.head.y = puppet.deadbonesTargetY
                     puppet.deadbonesStartRotation = puppet.head.rotation = puppet.deadbonesTargetRotation
-                    puppet.deadbonesTargetY = Math.random() * -20
+                    puppet.deadbonesTargetY = Math.random() * - 20 - puppet.headBase.height / 2
                     puppet.deadbonesTargetRotation = .1 - Math.random() * .2
                 } else {
                     puppet.deadbonesDuration = 0
+                    puppet.head.y = puppet.deadbonesTargetY
+                    puppet.head.rotation = puppet.deadbonesTargetRotation
                 }
             } else {
                 var percent = (puppet.deadbonesAnim / puppet.deadbonesDuration) * (puppet.deadbonesAnim / puppet.deadbonesDuration)
@@ -256,7 +273,6 @@ var Puppet = function(puppet, id) {
     this.id = id
     this.name = puppet.name
     this.container = new Container()
-    this.container.pivot.x = this.container.pivot.y = .5
     this.position = this.target = puppet.position
     this.facingLeft = puppet.facingLeft
     this.eyes = puppet.eyes
@@ -275,15 +291,23 @@ var Puppet = function(puppet, id) {
     this.container.addChild(this.body)
 
     this.head = new Container()
+    this.headBase = new Container()
+    for (var i = 0; i < puppet.head.length; i++) {
+        this.headBase.addChild(getAsset(puppet.head[i]))
+    }
+    this.head.addChild(this.headBase)
     this.emotes = {}
+    this.mouthsContainer = new Container()
+    this.eyesContainer = new Container()
     var emotes = Object.keys(puppet.emotes)
     for (var i = 0; i < emotes.length; i++) {
+        if (!puppet.emotes[emotes[i]].enabled) continue
         this.emotes[emotes[i]] = {
             "mouth": new Container(),
             "eyes": new Container()
         }
-        this.head.addChild(this.emotes[emotes[i]].mouth)
-        this.head.addChild(this.emotes[emotes[i]].eyes)
+        this.mouthsContainer.addChild(this.emotes[emotes[i]].mouth)
+        this.eyesContainer.addChild(this.emotes[emotes[i]].eyes)
         for (var j = 0; j < puppet.emotes[emotes[i]].mouth.length; j++) {
             this.emotes[emotes[i]].mouth.addChild(getAsset(puppet.emotes[emotes[i]].mouth[j]))
         }
@@ -291,11 +315,16 @@ var Puppet = function(puppet, id) {
             this.emotes[emotes[i]].eyes.addChild(getAsset(puppet.emotes[emotes[i]].eyes[j]))
         }
     }
+    this.head.addChild(this.mouthsContainer)
+    this.head.addChild(this.eyesContainer)
     this.hat = new Container()
     for (var i = 0; i < puppet.hat.length; i++) {
         this.hat.addChild(getAsset(puppet.hat[i]))
     }
     this.head.addChild(this.hat)
+    this.head.pivot.y = - this.headBase.height / 2
+    this.head.y = - this.headBase.height / 2
+    this.deadbonesTargetY = this.deadbonesStartY = - this.headBase.height / 2
     this.container.addChild(this.head)
 
     this.props = new Container()
@@ -308,7 +337,9 @@ var Puppet = function(puppet, id) {
     this.changeEmote(puppet.emote)
 
     // Place Puppet on Stage
-    this.container.y = screen.clientHeight / stage.scale.y - this.container.height / 2
+    this.container.interactive = true
+    this.container.puppet = puppet
+    this.container.y = screen.clientHeight / stage.scale.y
     this.container.x = (this.position - .5) * slotWidth
     if (this.facingLeft) this.container.scale.x = -1
 }
@@ -366,7 +397,7 @@ Puppet.prototype.setBabbling = function(babble) {
         if (this.deadbonesStyle) {
             this.deadbonesAnim = 0
             this.deadbonesDuration = 100
-            this.deadbonesTargetY = 0
+            this.deadbonesTargetY = - this.headBase.height / 2
             this.deadbonesTargetRotation = 0
             this.deadbonesStartY = this.head.y
             this.deadbonesStartRotation = this.head.rotation
@@ -381,6 +412,7 @@ function getAsset(asset) {
     sprite.x = asset.x
     sprite.y = asset.y
     sprite.rotation = asset.rotation
-    sprite.scale.x = sprite.scale.y = asset.scale
+    sprite.scale.x = asset.scaleX
+    sprite.scale.y = asset.scaleY
     return sprite
 }

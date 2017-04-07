@@ -4,12 +4,14 @@
     {
       "tab": "bodies",
       "name": "Coe",
-      "x": 0,
-      "y": 0,
+      "x": -10,
+      "y": -131,
       "rotation": 0,
-      "scale": 1
+      "scaleX": 1,
+      "scaleY": 1
     }
   ],
+  "head": [],
   "mouths": [
     "default",
     "angry",
@@ -25,222 +27,252 @@
   ],
   "emotes": {
     "default": {
+      "enabled": true,
       "mouth": [
         {
           "tab": "mouths",
           "name": "Coe Closed",
-          "x": 0,
-          "y": 0,
+          "x": 36,
+          "y": -133,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ],
       "eyes": [
         {
           "tab": "eyes",
           "name": "Coe Normal",
-          "x": 0,
-          "y": 0,
+          "x": 37,
+          "y": -195,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ]
     },
     "angry": {
+      "enabled": true,
       "mouth": [
         {
           "tab": "mouths",
           "name": "Coe Teeth",
-          "x": 0,
-          "y": 0,
+          "x": 36,
+          "y": -131,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ],
       "eyes": [
         {
           "tab": "eyes",
           "name": "Coe Angry",
-          "x": 0,
-          "y": 0,
+          "x": 36,
+          "y": -185,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ]
     },
     "confused": {
+      "enabled": true,
       "mouth": [
         {
           "tab": "mouths",
           "name": "Coe Open",
-          "x": 0,
-          "y": 0,
+          "x": 35,
+          "y": -130,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ],
       "eyes": [
         {
           "tab": "eyes",
           "name": "Coe Confused",
-          "x": 0,
-          "y": 0,
+          "x": 37,
+          "y": -189,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ]
     },
     "gasp": {
+      "enabled": true,
       "mouth": [
         {
           "tab": "mouths",
           "name": "Coe Wide Open",
-          "x": 0,
-          "y": 0,
+          "x": 36,
+          "y": -127,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ],
       "eyes": [
         {
           "tab": "eyes",
           "name": "Coe Sad",
-          "x": 0,
-          "y": 0,
+          "x": 36,
+          "y": -193,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ]
     },
     "ooo": {
+      "enabled": true,
       "mouth": [
         {
           "tab": "mouths",
           "name": "Coe Ooo",
-          "x": 0,
-          "y": 0,
+          "x": 45,
+          "y": -127,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ],
       "eyes": [
         {
           "tab": "eyes",
           "name": "Coe Excited",
-          "x": 0,
-          "y": 0,
+          "x": 35,
+          "y": -191,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ]
     },
     "happy": {
+      "enabled": true,
       "mouth": [
         {
           "tab": "mouths",
           "name": "Coe Happy",
-          "x": 0,
-          "y": 0,
+          "x": 35,
+          "y": -131,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ],
       "eyes": [
         {
           "tab": "eyes",
           "name": "Coe Excited",
-          "x": 0,
-          "y": 0,
+          "x": 35,
+          "y": -191,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ]
     },
     "sad": {
+      "enabled": true,
       "mouth": [
         {
           "tab": "mouths",
           "name": "Coe Closed",
-          "x": 0,
-          "y": 0,
+          "x": 36,
+          "y": -133,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ],
       "eyes": [
         {
           "tab": "eyes",
           "name": "Coe Sad",
-          "x": 0,
-          "y": 0,
+          "x": 36,
+          "y": -193,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ]
     },
     "veryangry": {
+      "enabled": true,
       "mouth": [
         {
           "tab": "mouths",
           "name": "Coe Teeth",
-          "x": 0,
-          "y": 0,
+          "x": 36,
+          "y": -131,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ],
       "eyes": [
         {
           "tab": "eyes",
           "name": "Coe Very Angry",
-          "x": 0,
-          "y": 0,
+          "x": 36,
+          "y": -182,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ]
     },
     "verysad": {
+      "enabled": true,
       "mouth": [
         {
           "tab": "mouths",
           "name": "Coe Closed",
-          "x": 0,
-          "y": 0,
+          "x": 36,
+          "y": -133,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ],
       "eyes": [
         {
           "tab": "eyes",
           "name": "Coe Very Sad",
-          "x": 0,
-          "y": 0,
+          "x": 37,
+          "y": -189,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ]
     },
     "wink": {
+      "enabled": true,
       "mouth": [
         {
           "tab": "mouths",
           "name": "Coe Closed",
-          "x": 0,
-          "y": 0,
+          "x": 36,
+          "y": -133,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ],
       "eyes": [
         {
           "tab": "eyes",
           "name": "Coe Wink",
-          "x": 0,
-          "y": 0,
+          "x": 34,
+          "y": -181,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ]
     }
@@ -249,11 +281,14 @@
     {
       "tab": "hats",
       "name": "Dragonwan",
-      "x": 0,
-      "y": 0,
+      "x": 4,
+      "y": -189,
       "rotation": 0,
-      "scale": 1
+      "scaleX": 1,
+      "scaleY": 1
     }
   ],
-  "props": []
+  "props": [],
+  "name": "Coestar",
+  "id": 5
 }

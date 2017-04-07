@@ -4,12 +4,14 @@
     {
       "tab": "bodies",
       "name": "Rob",
-      "x": 0,
-      "y": 0,
+      "x": -4,
+      "y": -132,
       "rotation": 0,
-      "scale": 1
+      "scaleX": 1,
+      "scaleY": 1
     }
   ],
+  "head": [],
   "mouths": [
     "default",
     "angry",
@@ -24,138 +26,158 @@
   ],
   "emotes": {
     "default": {
+      "enabled": true,
       "mouth": [
         {
           "tab": "mouths",
           "name": "Rob Closed",
-          "x": 0,
-          "y": 0,
+          "x": 31,
+          "y": -112,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ],
       "eyes": [
         {
           "tab": "eyes",
           "name": "Rob Normal",
-          "x": 0,
-          "y": 0,
+          "x": 23,
+          "y": -184,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ]
     },
     "angry": {
+      "enabled": true,
       "mouth": [
         {
           "tab": "mouths",
           "name": "Rob Teeth",
-          "x": 0,
-          "y": 0,
+          "x": 33,
+          "y": -110,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ],
       "eyes": [
         {
           "tab": "eyes",
           "name": "Rob Angry",
-          "x": 0,
-          "y": 0,
+          "x": 21,
+          "y": -181,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ]
     },
     "confused": {
+      "enabled": true,
       "mouth": [
         {
           "tab": "mouths",
           "name": "Rob Open",
-          "x": 0,
-          "y": 0,
+          "x": 32,
+          "y": -108,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ],
       "eyes": [
         {
           "tab": "eyes",
           "name": "Rob Confused",
-          "x": 0,
-          "y": 0,
+          "x": 26,
+          "y": -181,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ]
     },
     "gasp": {
+      "enabled": true,
       "mouth": [
         {
           "tab": "mouths",
           "name": "Rob Wide Open",
-          "x": 0,
-          "y": 0,
+          "x": 27,
+          "y": -107,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ],
       "eyes": [
         {
           "tab": "eyes",
           "name": "Rob Sad",
-          "x": 0,
-          "y": 0,
+          "x": 26,
+          "y": -181,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ]
     },
     "ooo": {
+      "enabled": true,
       "mouth": [
         {
           "tab": "mouths",
           "name": "Rob Ooo",
-          "x": 0,
-          "y": 0,
+          "x": 43,
+          "y": -106,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ],
       "eyes": [
         {
           "tab": "eyes",
           "name": "Rob Excited",
-          "x": 0,
-          "y": 0,
+          "x": 26,
+          "y": -189,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ]
     },
     "sad": {
+      "enabled": true,
       "mouth": [
         {
           "tab": "mouths",
           "name": "Rob Closed",
-          "x": 0,
-          "y": 0,
+          "x": 31,
+          "y": -112,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ],
       "eyes": [
         {
           "tab": "eyes",
           "name": "Rob Sad",
-          "x": 0,
-          "y": 0,
+          "x": 26,
+          "y": -181,
           "rotation": 0,
-          "scale": 1
+          "scaleX": 1,
+          "scaleY": 1
         }
       ]
     }
   },
   "hat": [],
-  "props": []
+  "props": [],
+  "name": "Rob",
+  "id": 1
 }

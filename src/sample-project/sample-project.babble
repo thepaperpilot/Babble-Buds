@@ -8,22 +8,27 @@
   "characters": [
     {
       "name": "Rob",
+      "id": 1,
       "location": "rob.json"
     },
     {
       "name": "Deadbones",
+      "id": 2,
       "location": "deadbones.json"
     },
     {
       "name": "Roamin",
+      "id": 3,
       "location": "roamin.json"
     },
     {
       "name": "Justin",
+      "id": 4,
       "location": "justin.json"
     },
     {
       "name": "Coestar",
+      "id": 5,
       "location": "coestar.json"
     }
   ],
@@ -33,31 +38,35 @@
       "location": "bodies.json"
     },
     {
+      "name": "heads",
+      "location": "heads.json"
+    },
+    {
       "name": "eyes",
       "location": "eyes.json"
     },
     {
-      "name": "hats",
-      "location": "hats.json"
-    },
-    {
       "name": "mouths",
       "location": "mouths.json"
+    },
+    {
+      "name": "hats",
+      "location": "hats.json"
     }
   ],
   "hotbar": [
-    "Rob",
-    "Deadbones",
-    "Roamin",
-    "Justin",
-    "Coestar",
-    "",
-    "",
-    "",
-    ""
+    1,
+    2,
+    3,
+    4,
+    5,
+    0,
+    0,
+    0,
+    0
   ],
-  "puppet": {
-    "name": "Rob",
+  "actor": {
+    "id": 1,
     "position": 1,
     "facingLeft": false,
     "emote": "default"

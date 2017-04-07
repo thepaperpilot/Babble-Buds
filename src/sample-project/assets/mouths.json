@@ -1,19 +1,4 @@
 {
-  "Deadbones Straight": {
-    "location": "mouths/deadbones_straight.png"
-  },
-  "Deadbones Up": {
-    "location": "mouths/deadbones_up.png"
-  },
-  "Deadbones Down": {
-    "location": "mouths/deadbones_down.png"
-  },
-  "Deadbones Center Up": {
-    "location": "mouths/deadbones_centerup.png"
-  },
-  "Deadbones Center Down": {
-    "location": "mouths/deadbones_centerdown.png"
-  },
   "Roamin Closed": {
     "location": "mouths/roamin_closed.png"
   },
