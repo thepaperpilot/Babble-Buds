@@ -6,6 +6,7 @@ const electron = require('electron')
 const remote = electron.remote
 const BrowserWindow = remote.BrowserWindow
 const babble = require('./babble.js')
+const editor = require('./editor.js')
 const project = remote.require('./main-process/project')
 const path = require('path')
 const url = require('url')
@@ -23,18 +24,74 @@ var numPuppets = 1
 
 babble.init('screen', project.project, project.assets, project.assetsPath, loadPuppets)
 
+// Editor callback functions
+function updateCharacter(character, thumbnail) {
+	var index = project.project.hotbar.indexOf(character.id)
+	if (index > -1) {
+		hotbar[index] = babble.createPuppet(character)
+		if (('' + document.getElementById('char ' + index).className).indexOf('selected') > -1) {
+			setPuppet(index)
+			if (popout)
+				popout.webContents.send('keyUp', index + 49)
+		}
+		document.getElementById('char ' + index).getElementsByClassName('desc')[0].innerHTML = character.name
+	}
+	fs.ensureDirSync(path.join(project.assetsPath, '..', 'thumbnails'))
+	fs.writeFile(path.join(project.assetsPath, '..', 'thumbnails', character.id + '.png'), new Buffer(thumbnail, 'base64'), (err) => {
+        if (err) console.log(err)
+        if (index > -1) {
+        	document.getElementById('char ' + index).style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', character.id + '.png?random=' + new Date().getTime()) + ')'
+        }
+    })
+}
+
+function deleteCharacter(character) {
+	var index = project.project.hotbar.indexOf(character.id)
+	if (index > -1) {
+		hotbar[index] = null
+		project.updateHotbar(index, parseInt(''))
+		document.getElementById('char ' + index).getElementsByClassName('desc')[0].innerHTML = ''
+		document.getElementById('char ' + index).style.backgroundImage = ''
+	}
+	for (var i = 0; i < project.project.characters.length; i++) {
+        if (project.project.characters[i].id == character.id) {
+            project.project.characters.splice(i, 1)
+            delete project.characters[character.id]
+        }
+    }
+}
+
+function addAsset(tab, asset) {
+	if (!project.assets[tab])
+		project.assets[tab] = {}
+	project.assets[tab][asset] = {"location": path.join(tab, asset + '.png')}
+	project.addAsset(tab, asset)
+	babble.addAsset(tab, asset)
+	editor.addAsset(tab, asset)
+	if (popout)
+		popout.webContents.send('add asset', tab, asset)
+	if (server)
+		server.emit('add asset', tab, asset)
+}
+
+// Set everything up once babble has finished init'ing
 function loadPuppets() {
 	// Add Puppet
-	puppet = babble.addPuppet(createPuppet(project.puppet), 1)
+	puppet = babble.addPuppet(createPuppet(project.actor), 1)
+	editor.setup(updateCharacter, deleteCharacter, addAsset)
+
+	babble.registerPuppetListener('mousedown', (e) => {
+		editor.setPuppet(JSON.parse(project.duplicateCharacter(e.target.puppet)))
+	})
 
 	// Create Hotbar Puppets
 	for (var i = 0; i < project.project.hotbar.length; i++) {
-		if (project.project.hotbar[i] !== '')
+		if (project.project.hotbar[i] !== '' && project.project.hotbar[i] > 0)
 			hotbar[i] = babble.createPuppet(project.characters[project.project.hotbar[i]])
 	}
 
 	// Update Editor
-	var available = document.getElementsByClassName("available")
+	var available = document.getElementById('emotes').getElementsByClassName("available")
 	while (available.length)
 		available[0].classList.remove("available")
 
@@ -46,12 +103,12 @@ function loadPuppets() {
 	for (var i = 0; i < emotes.length; i++)
 		document.getElementById(emotes[i]).className += " available"
 
-	document.getElementById('char ' + project.project.hotbar.indexOf(puppet.name)).className += " selected"
+	document.getElementById('char ' + project.project.hotbar.indexOf(project.actor.id)).className += " selected"
 	document.getElementById(puppet.emote).className += " selected"
 }
 
 function createPuppet(actor) {
-	var puppet = JSON.parse(JSON.stringify(project.characters[actor.name]))
+	var puppet = JSON.parse(JSON.stringify(project.characters[actor.id]))
 	puppet.position = actor.position
 	puppet.emote = actor.emote
 	puppet.facingLeft = actor.facingLeft
@@ -68,7 +125,7 @@ function setPuppet(index) {
 	puppet = hotbar[index]
 
 	// Update Editor
-	var available = document.getElementsByClassName("available")
+	var available = document.getElementById('emotes').getElementsByClassName("available")
 	while (available.length)
 		available[0].classList.remove("available")
 
@@ -77,17 +134,17 @@ function setPuppet(index) {
 		selected[0].classList.remove("selected")
 
 	var emotes = Object.keys(puppet.emotes)
-	for (var i = 0; i < emotes.length; i++)
+	for (var i = 0; i < emotes.length; i++) 
 		document.getElementById(emotes[i]).className += " available"
 
-	document.getElementById('char ' + project.project.hotbar.indexOf(hotbar[index].name)).className += " selected"
+	document.getElementById('char ' + index).className += " selected"
 
 	// Update Project
-	project.puppet.name = hotbar[index].name
+	project.actor.id = project.project.hotbar[index]
 
 	// Update Server
 	if (server)	{
-		server.emit('set puppet', puppet.id, createPuppet(project.puppet))
+		server.emit('set puppet', puppet.id, createPuppet(project.actor))
 	}
 }
 
@@ -103,7 +160,7 @@ function setEmote(string) {
 	document.getElementById(string).className += " selected"
 
 	// Update Project
-	project.puppet.emote = string
+	project.actor.emote = string
 
 	// Update Server
 	if (server) {
@@ -116,8 +173,8 @@ function moveLeft() {
 	puppet.moveLeft()
 
 	// Update Project
-	project.puppet.facingLeft = puppet.facingLeft
-	project.puppet.position = puppet.target
+	project.actor.facingLeft = puppet.facingLeft
+	project.actor.position = puppet.target
 
 	// Update Server
 	if (server)	{
@@ -130,8 +187,8 @@ function moveRight() {
 	puppet.moveRight()
 
 	// Update Project
-	project.puppet.facingLeft = puppet.facingLeft
-	project.puppet.position = puppet.target
+	project.actor.facingLeft = puppet.facingLeft
+	project.actor.position = puppet.target
 
 	// Update Server
 	if (server)	{
@@ -169,12 +226,12 @@ function stopBabbling() {
 function setHotbar(e) {
 	var i = e.target.i
 	var puppet = e.target.puppet
+	document.getElementById('chars').style.display = 'block'
+	document.getElementById('charselect').style.display = 'none'
 	if (('' + document.getElementById('char ' + i).className).indexOf('selected') > -1 && puppet === '') {
-		document.getElementById('chars').style.display = 'block'
-		document.getElementById('charselect').style.display = 'none'
 		return
 	}
-	project.updateHotbar(i, puppet)
+	project.updateHotbar(i, parseInt(puppet))
 	if (puppet === '') {
 		hotbar[i] = null
 	} else {
@@ -185,9 +242,13 @@ function setHotbar(e) {
 		if (popout)
 			popout.webContents.send('keyUp', i + 49)
 	}
-	document.getElementById('char ' + i).getElementsByClassName('desc')[0].innerHTML = puppet	
-	document.getElementById('chars').style.display = 'block'
-	document.getElementById('charselect').style.display = 'none'
+	if (project.project.hotbar[i] && project.project.hotbar[i] != 0) {
+		document.getElementById('char ' + i).getElementsByClassName('desc')[0].innerHTML = project.characters[puppet].name
+		document.getElementById('char ' + i).style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', puppet + '.png?random=' + new Date().getTime()) + ')'
+	} else {
+		document.getElementById('char ' + i).getElementsByClassName('desc')[0].innerHTML = ''
+		document.getElementById('char ' + i).style.backgroundImage = ''
+	}
 }
 
 for (var i = 0; i < 9; i++) {
@@ -203,33 +264,43 @@ for (var i = 0; i < 9; i++) {
 		var i = e.target.i
 		document.getElementById('chars').style.display = 'none'
 		document.getElementById('charselect').style.display = 'block'
-		document.getElementById('char selected').getElementsByClassName('desc')[0].innerHTML = project.project.hotbar[i]
+		if (project.project.hotbar[i]) {
+			document.getElementById('char selected').getElementsByClassName('desc')[0].innerHTML = project.characters[project.project.hotbar[i]].name
+			document.getElementById('char selected').style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', project.project.hotbar[i] + '.png?random=' + new Date().getTime()) + ')'
+		} else {
+			document.getElementById('char selected').getElementsByClassName('desc')[0].innerHTML = ''
+			document.getElementById('char selected').style.backgroundImage = ''
+		}
+		document.getElementById('char null').i = i
 		var charList = document.getElementById('char list')
 		charList.innerHTML = ''
 		var characters = Object.keys(project.characters)
 		for (var j = 0; j < characters.length; j++) {
 			var selector = document.createElement('div')
-			selector.id = characters[j].toLowerCase()
+			selector.id = project.characters[characters[j]].name.toLowerCase()
 			selector.className = "char"
+			selector.style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', characters[j] + '.png?random=' + new Date().getTime()) + ')'
 			charList.appendChild(selector)
-			selector.innerHTML = '<div class="desc">' + characters[j] + '</div>'
-			document.getElementById('char null').i = i
+			selector.innerHTML = '<div class="desc">' + project.characters[characters[j]].name + '</div>'
 			selector.i = i
 			selector.puppet = characters[j]
-			if (project.project.hotbar.indexOf(characters[j]) > -1) {
+			if (project.project.hotbar.indexOf(parseInt(characters[j])) > -1) {
 				selector.className += " disabled"
 			} else {
 				selector.addEventListener('click', setHotbar)
 			}
 		}
 	})
-	element.getElementsByClassName('desc')[0].innerHTML = project.project.hotbar[i]
+	if (project.project.hotbar[i]) {
+		element.getElementsByClassName('desc')[0].innerHTML = project.characters[project.project.hotbar[i]].name
+		element.style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', project.project.hotbar[i] + '.png?random=' + new Date().getTime()) + ')'
+	}
 }
 
 document.getElementById('char null').addEventListener('click', setHotbar)
 document.getElementById('char null').puppet = ''
 
-document.getElementById('char search').addEventListener('keyup', (e) => {
+function updateCharSearch(e) {
 	var list = document.getElementById('char list')
 	if (e.target.value === '') {
 		for (var i = 0; i < list.children.length; i++)
@@ -242,7 +313,12 @@ document.getElementById('char search').addEventListener('keyup', (e) => {
 			chars[i].style.display = 'inline-block'
 		}
 	}
-})
+}
+
+document.getElementById('char search').addEventListener('keyup', updateCharSearch)
+
+// This one's so that we capture clearing the search bar
+document.getElementById('char search').addEventListener('search', updateCharSearch)
 
 document.getElementById('char selected').addEventListener('click', () => {
 	document.getElementById('chars').style.display = 'block'
@@ -286,7 +362,10 @@ function popIn() {
 }
 
 function popOut() {
-	popout = new BrowserWindow({frame: false, parent: remote.getCurrentWindow(), backgroundColor: project.project.greenScreen, transparent: project.project.transparent})
+	if (project.project.transparent)
+		popout = new BrowserWindow({frame: false, parent: remote.getCurrentWindow(), transparent: true})
+	else
+		popout = new BrowserWindow({frame: false, parent: remote.getCurrentWindow(), backgroundColor: project.project.greenScreen})
 	// popout.setIgnoreMouseEvents(true)
 	popout.on('close', () => {
 		document.getElementById('popout').innerHTML = 'Pop Out Show Panel'
@@ -365,7 +444,7 @@ document.getElementById('port').addEventListener('change', (e) => {
 
 function stopNetworking() {
 	babble.clearPuppets()
-	puppet = babble.addPuppet(createPuppet(project.puppet), 1)
+	puppet = babble.addPuppet(createPuppet(project.actor), 1)
 	server.close()
 	server = null
 	numPuppets = 1
@@ -419,10 +498,11 @@ document.getElementById('host').addEventListener('click', () => {
 			socket.emit('set slots', project.project.numCharacters)
 			puppet.socket = socket.id
 			numPuppets++
-			babble.addPuppet(createPuppet(puppet), numPuppets)
+			babble.addPuppet(puppet, numPuppets)
 			puppet.id = numPuppets
-			project.puppet.id = 1
-			socket.emit('add puppet', project.puppet)
+			var ourPuppet = createPuppet(project.actor)
+			ourPuppet.id = 1
+			socket.emit('add puppet', ourPuppet)
 			for (var i = 0; i < puppets.length; i++) {
 				socket.emit('add puppet', puppets[i])
 			}
@@ -531,6 +611,7 @@ document.getElementById('host').addEventListener('click', () => {
 					project.assets[tab][asset] = {"location": path.join(tab, asset + '.png')}
 					project.addAsset(tab, asset)
 					babble.addAsset(tab, asset)
+					editor.addAsset(tab, asset)
 					if (popout)
 						popout.webContents.send('add asset', tab, asset)
 					socket.broadcast.emit('add asset', tab, asset)
@@ -564,7 +645,7 @@ document.getElementById('connect').addEventListener('click', () => {
 	// Add a connect listener
 	socket.on('connect', function() {
 		puppets = []
-	    socket.emit('add puppet', project.puppet)
+	    socket.emit('add puppet', createPuppet(project.actor))
 		// Send list of assets
 		var tabs = Object.keys(project.assets)
 		for (var i = 0; i < tabs.length; i++) {
@@ -582,18 +663,17 @@ document.getElementById('connect').addEventListener('click', () => {
 
 	// Add Application Listeners
 	socket.on('assign puppet', (id) => {
-		puppet = babble.addPuppet(createPuppet(project.puppet), id)
+		puppet = babble.addPuppet(createPuppet(project.actor), id)
 		if (popout)
 			popout.webContents.send('assign puppet', id)
 	})
 	socket.on('add puppet', (puppet) => {
-		babble.addPuppet(createPuppet(puppet), puppet.id)
+		babble.addPuppet(puppet, puppet.id)
 		if (popout)
 			popout.webContents.send('add puppet', puppet)
 		puppets.push(puppet)
 	})
 	socket.on('set puppet', (id, puppet) => {
-		console.log(puppet, project.assets)
 		babble.setPuppet(id, babble.createPuppet(puppet))
 		if (popout)
 			popout.webContents.send('set puppet', id, puppet)
@@ -670,18 +750,17 @@ document.getElementById('connect').addEventListener('click', () => {
 			popout.webContents.send('resize')
 	})
 	socket.on('add asset', (tab, asset) => {
-		console.log(tab, asset)
 		if (!(project.assets[tab] && project.assets[tab][asset])) {
 			var stream = ss.createStream()
 			fs.ensureDirSync(path.join(project.assetsPath, tab))
 			ss(socket).emit('request asset', stream, tab, asset)
 			stream.on('end', () => {
-				console.log('finished', tab, asset)
 				if (!project.assets[tab])
 					project.assets[tab] = {}
 				project.assets[tab][asset] = {"location": path.join(tab, asset + '.png')}
 				project.addAsset(tab, asset)
 				babble.addAsset(tab, asset)
+				editor.addAsset(tab, asset)
 				if (popout)
 					popout.webContents.send('add asset', tab, asset)
 			})
@@ -689,7 +768,6 @@ document.getElementById('connect').addEventListener('click', () => {
 		}
 	})
 	ss(socket).on('request asset', function(stream, tab, asset) {
-		console.log('request asset', tab, asset)
 		fs.createReadStream(path.join(project.assetsPath, project.assets[tab][asset].location)).pipe(stream)
 	})
 })
@@ -712,7 +790,7 @@ window.onkeydown = function(e) {
 window.onkeyup = function(e) {
 	var key = e.keyCode ? e.keyCode : e.which
 
-	if (e.target && (e.target.type === 'number' || e.target.type === 'text'))
+	if (e.target && (e.target.type === 'number' || e.target.type === 'text' || e.target.type === 'search'))
 		return
 
 	if (key > 48 && key < 58) {
