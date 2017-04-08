@@ -98,6 +98,7 @@ select option {
 .main {
 	height: calc( 100% - 290px );
 	padding: 0;
+	user-select: none;
 	width: calc( 100% - 450px );
 }
 
@@ -105,6 +106,7 @@ select option {
 	background-color: #2a323d;
 	height: calc( 100% - 90px );
 	position: relative;
+	user-select: none;
 }
 
 .editormain button {
