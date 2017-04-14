@@ -165,12 +165,14 @@ exports.setPuppet = function(newCharacter) {
 }
 
 function drawBox(box) {
-    box.lineStyle(4)
+    box.lineStyle(4, 0x242a33)
     box.moveTo(screen.clientWidth / 2 / scale - selected.width / 2 - 12, screen.clientHeight / scale + selected.height / 2 + 12)
     box.lineTo(screen.clientWidth / 2 / scale - selected.width / 2 - 12, screen.clientHeight / scale - selected.height / 2 - 12)
     box.lineTo(screen.clientWidth / 2 / scale + selected.width / 2 + 12, screen.clientHeight / scale - selected.height / 2 - 12)
     box.lineTo(screen.clientWidth / 2 / scale + selected.width / 2 + 12, screen.clientHeight / scale + selected.height / 2 + 12)
     box.lineTo(screen.clientWidth / 2 / scale - selected.width / 2 - 12, screen.clientHeight / scale + selected.height / 2 + 12)
+    box.lineStyle(2, 0x242a33, .5)
+    box.drawCircle(screen.clientWidth / 2 / scale + selected.width / 2 + 12, screen.clientHeight / scale - selected.height / 2 - 12, 24)
 }
 
 function editorMousedown(e) {
@@ -201,19 +203,32 @@ function editorMousedown(e) {
         var corners = []
         for (var i = 0; i < 4; i++) {
             var graphics = new Graphics()
-            graphics.lineStyle(4)
-            graphics.drawCircle(0, 0, 8)
+            graphics.lineStyle(2, 0x5464d4)
+            graphics.beginFill(0x242a33)
+            graphics.drawCircle(0, 0, 6)
             corners[i] = new Sprite(graphics.generateCanvasTexture(1))
-            corners[i].x = screen.clientWidth / 2 / scale - selected.width / 2 - 22 + (24 + selected.width) * (i % 2)
-            corners[i].y = screen.clientHeight / scale - selected.height / 2 - 22 + (24 + selected.height) * Math.floor(i / 2)
+            corners[i].x = screen.clientWidth / 2 / scale - selected.width / 2 - 20 + (24 + selected.width) * (i % 2)
+            corners[i].y = screen.clientHeight / scale - selected.height / 2 - 20 + (24 + selected.height) * Math.floor(i / 2)
             selectedGui.addChild(corners[i])
             corners[i].i = i
             corners[i].interactive = true
             corners[i].on('mousedown', resizeMousedown)
         }
         selectedGui.corners = corners
-        selectedGui.position.x = selected.position.x
-        selectedGui.position.y = selected.position.y
+        var rotate = new Sprite.fromImage(path.join('assets', 'icons', 'rotate.png'))
+        rotate.pivot.x = rotate.pivot.y = .5
+        rotate.width = rotate.height = 24
+        rotate.interactive = true
+        rotate.on('mousedown', rotateMousedown)
+        rotate.x = corners[1].x + 12
+        rotate.y = corners[1].y - 24
+        selectedGui.addChild(rotate)
+        selectedGui.rotate = rotate
+        selectedGui.pivot.x = screen.clientWidth / 2 / scale - selected.width / 2 - 12 + (24 + selected.width) * .5
+        selectedGui.pivot.y = screen.clientHeight / scale - selected.height / 2 - 12 + (24 + selected.height) * .5
+        selectedGui.x = selected.x + selectedGui.pivot.x
+        selectedGui.y = selected.y + selectedGui.pivot.y
+        selectedGui.rotation = selected.rotation
         stage.addChild(selectedGui)
     } else if (selected) {
         selected = null
@@ -226,8 +241,8 @@ function editorMousemove(e) {
         var position = e.data.getLocalPosition(selected.parent)
         selected.x = position.x - selected.start.x
         selected.y = position.y - selected.start.y
-        selectedGui.x = selected.x
-        selectedGui.y = selected.y
+        selectedGui.x = selected.x + selectedGui.pivot.x
+        selectedGui.y = selected.y + selectedGui.pivot.y
     }
 }
 
@@ -248,27 +263,48 @@ function resizeMousedown(e) {
     selectedGui.origWidth = selected.width
     selectedGui.origHeight = selected.height
     selectedGui.i = e.currentTarget.i
+    var i = 1 - (selectedGui.i % 2) + 2 - 2 * Math.floor(selectedGui.i / 2)
+    selectedGui.corner = {
+        "x": selectedGui.corners[i].worldTransform.tx / scale - screen.clientWidth / 2 / scale - (i % 2 == 1 ? 1 : -1) * Math.cos(selected.rotation - Math.PI / 4) * 17 - Math.sin(selected.rotation - Math.PI / 4) * 11,
+        "y": selectedGui.corners[i].worldTransform.ty / scale - screen.clientHeight / scale + (Math.floor(i / 2) == 1 ? 1 : -1) * Math.sin(selected.rotation - Math.PI / 4) * 17 + Math.cos(selected.rotation - Math.PI / 4) * 11
+    }
+    if (i == 0) {
+        selectedGui.corner.x -= Math.sin(selected.rotation) * 24
+        selectedGui.corner.y += Math.sin(selected.rotation) * 24
+    } else if (i == 3) {
+        selectedGui.corner.x += Math.sin(selected.rotation) * 24
+        selectedGui.corner.y -= Math.sin(selected.rotation) * 24
+    }
     selectedGui.startX = e.data.global.x
     selectedGui.startY = e.data.global.y
 }
 
 function resizeMousemove(e) {
-    var oldWidth = selected.width
-    selected.width = Math.max(0, selectedGui.origWidth + (selectedGui.i % 2 == 1 ? 1 : -1) * (e.data.global.x - selectedGui.startX) / scale)
-    selected.x -= (selectedGui.i % 2 == 1 ? 1 : -1) * (oldWidth - selected.width) / 2
+    var dist = Math.hypot(e.data.global.x - selectedGui.startX, e.data.global.y - selectedGui.startY) / scale
+    var rotation = Math.atan2(e.data.global.y - selectedGui.startY, e.data.global.x - selectedGui.startX)
 
-    var oldHeight = selected.height
-    selected.height = Math.max(0, selectedGui.origHeight + (Math.floor(selectedGui.i / 2) == 1 ? 1 : -1) * (e.data.global.y - selectedGui.startY) / scale)
-    selected.y -= (Math.floor(selectedGui.i / 2) == 1 ? 1 : -1) * (oldHeight - selected.height) / 2
+    var odx = (selectedGui.i % 2 == 1 ? 1 : -1) * Math.cos(rotation - selected.rotation) * dist
+    var ody = (Math.floor(selectedGui.i / 2) == 1 ? 1 : -1) * Math.sin(rotation - selected.rotation) * dist
+
+    selected.width = Math.max(0, selectedGui.origWidth + odx)
+    selected.height = Math.max(0, selectedGui.origHeight + ody)
+
+    selected.x = selectedGui.corner.x + (selectedGui.i % 2 == 1 ? 1 : -1) * Math.cos(selected.rotation) * selected.width / 2 - (Math.floor(selectedGui.i / 2) == 1 ? 1 : -1) * Math.sin(selected.rotation) * selected.height / 2
+    selected.y = selectedGui.corner.y + (Math.floor(selectedGui.i / 2) == 1 ? 1 : -1) * Math.cos(selected.rotation) * selected.height / 2 + (selectedGui.i % 2 == 1 ? 1 : -1) * Math.sin(selected.rotation) * selected.width / 2
 
     selectedGui.box.clear()
     drawBox(selectedGui.box)
     for (var i = 0; i < selectedGui.corners.length; i++) {
-        selectedGui.corners[i].x = screen.clientWidth / 2 / scale - selected.width / 2 - 22 + (24 + selected.width) * (i % 2)
-        selectedGui.corners[i].y = screen.clientHeight / scale - selected.height / 2 - 22 + (24 + selected.height) * Math.floor(i / 2)
+        selectedGui.corners[i].x = screen.clientWidth / 2 / scale - selected.width / 2 - 20 + (24 + selected.width) * (i % 2)
+        selectedGui.corners[i].y = screen.clientHeight / scale - selected.height / 2 - 20 + (24 + selected.height) * Math.floor(i / 2)
     }
-    selectedGui.x = selected.x
-    selectedGui.y = selected.y
+    var angle = Math.atan2(selected.height, selected.width)
+    selectedGui.rotate.x = selectedGui.corners[1].x + 12
+    selectedGui.rotate.y = selectedGui.corners[1].y - 24
+    selectedGui.pivot.x = screen.clientWidth / 2 / scale - selected.width / 2 - 12 + (24 + selected.width) * .5
+    selectedGui.pivot.y = screen.clientHeight / scale - selected.height / 2 - 12 + (24 + selected.height) * .5
+    selectedGui.x = selected.x + selectedGui.pivot.x
+    selectedGui.y = selected.y + selectedGui.pivot.y
 }
 
 function resizeMouseup(e) {
@@ -277,6 +313,30 @@ function resizeMouseup(e) {
     stage.off('mouseup', resizeMouseup)
     selected.asset.scaleX /= selectedGui.origWidth / selected.width
     selected.asset.scaleY /= selectedGui.origHeight / selected.height
+    selected.asset.x = selected.x
+    selected.asset.y = selected.y
+}
+
+function rotateMousedown(e) {
+    e.stopPropagation()
+    selectedGui.dragging = true
+    stage.on('mousemove', rotateMousemove)
+    stage.on('mouseup', rotateMouseup)
+    selectedGui.startRotation = Math.atan2((screen.clientHeight - e.data.global.y) / scale + selected.asset.y, (e.data.global.x - screen.clientWidth / 2) / scale - selected.asset.x) + selected.asset.rotation
+}
+
+function rotateMousemove(e) {
+    var rotation = selectedGui.startRotation - Math.atan2((screen.clientHeight - e.data.global.y) / scale + selected.asset.y, (e.data.global.x - screen.clientWidth / 2) / scale - selected.asset.x)
+    selected.rotation = rotation
+    selectedGui.rotation = rotation
+}
+
+function rotateMouseup(e) {
+    console.log(selected.rotation)
+    selectedGui.dragging = false
+    stage.off('mousemove', rotateMousemove)
+    stage.off('mouseup', rotateMouseup)
+    selected.asset.rotation = selected.rotation
 }
 
 function createPuppet(actor) {
