@@ -2,13 +2,13 @@
 
 > This is an **ALPHA** release. It is not yet feature complete, and existing features are not thoroughly tested. 
 
-A public, open source version of URealms' Puppet Pals software, written in electron and PIXI.js.
+Babble buds is a free, open source puppet show software. It is heavily based on the non-public software called "Puppet Pals", used in URealms Live. The software is written in electron and PIXI.js.
 
-Never heard of puppet pals? Well basically, you can create little people called "puppets" with different faces for different emotions, and then use the puppet on a stage where you and other users can each make your puppets move, change emotions, and "babble" at each other. The stage has a green screen feature and can be popped out, which gives the users tons of possibilities in terms of using the program for a role playing live stream, faux video chatting with friends, game development, or whatever you want! 
+Users can create puppets with different faces for different emotions, and then use the puppet on a stage where you and other users can each make your respective puppets move, change emotions, and "babble" at each other. The stage has a green screen feature and can be popped out, which gives the users tons of possibilities in terms of using the program for a role playing live stream, faux video chatting with friends, game development, or whatever ellse you want! 
 
 ## Why not just use Marionette Mates?
 
-Well, until I port over all the puppets in Marionette Mates, that might be the best choice for you. However, already this program has the following advantages:
+You may have heard of a Puppet Pals clone called Marionette Mates. It was based off the first version of puppet pals, however, and therefore lacks many features, most noticeably a puppet editor. At the moment Marionette Mates has more puppets, but those can be ported over. Additionally, I believe my software has the following advantages over Marionette Mates:
 
 - Native executables for each platform (Win, macOS, and Linux)
 - Better performance
@@ -20,7 +20,7 @@ Well, until I port over all the puppets in Marionette Mates, that might be the b
 - Support for multiple project folders
 - Ability to seamlessly connect to servers with characters and assets you don't have
 
-... and many more. If you've used Marionette Mates I highly recommend trying this out. Of course, even while the character might not be ported over, you can import all the assets and recreate them in the program fairly easily.
+... and many more. 
 
 ## Feature Roadmaps
 
@@ -66,6 +66,6 @@ First off, thanks for wanting to help! It means a lot, truly. There are two ways
 
 ## Thanks
 
-Thanks to Marionette Mates for ripping assets so I didn't have to. 
+Thanks to Marionette Mates for originally collecting all the assets I've ported over. 
 
 Thanks to Rob and the rest of the buffalo wizards for making so much amazing content, and particularly URealms Live for inspiring this project. 
