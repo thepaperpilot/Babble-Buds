@@ -1,5 +1,6 @@
 // Imports
-const remote = require('electron').remote
+const electron = require('electron')
+const remote = electron.remote
 const PIXI = require('pixi.js')
 const path = require('path')
 const fs = require('fs-extra')
@@ -175,6 +176,46 @@ function drawBox(box) {
     box.drawCircle(screen.clientWidth / 2 / scale + selected.width / 2 + 12, screen.clientHeight / scale - selected.height / 2 - 12, 24)
 }
 
+function setSelected(asset) {
+    selected = asset
+    if (selectedGui) stage.removeChild(selectedGui)
+    selectedGui = new Container()
+    var box = new Graphics()
+    drawBox(box)
+    selectedGui.addChild(box)
+    selectedGui.box = box
+    var corners = []
+    for (var i = 0; i < 4; i++) {
+        var graphics = new Graphics()
+        graphics.lineStyle(2, 0x5464d4)
+        graphics.beginFill(0x242a33)
+        graphics.drawCircle(0, 0, 6)
+        corners[i] = new Sprite(graphics.generateCanvasTexture(1))
+        corners[i].x = screen.clientWidth / 2 / scale - selected.width / 2 - 20 + (24 + selected.width) * (i % 2)
+        corners[i].y = screen.clientHeight / scale - selected.height / 2 - 20 + (24 + selected.height) * Math.floor(i / 2)
+        selectedGui.addChild(corners[i])
+        corners[i].i = i
+        corners[i].interactive = true
+        corners[i].on('mousedown', resizeMousedown)
+    }
+    selectedGui.corners = corners
+    var rotate = new Sprite.fromImage(path.join('assets', 'icons', 'rotate.png'))
+    rotate.pivot.x = rotate.pivot.y = .5
+    rotate.width = rotate.height = 24
+    rotate.interactive = true
+    rotate.on('mousedown', rotateMousedown)
+    rotate.x = corners[1].x + 12
+    rotate.y = corners[1].y - 24
+    selectedGui.addChild(rotate)
+    selectedGui.rotate = rotate
+    selectedGui.pivot.x = screen.clientWidth / 2 / scale - selected.width / 2 - 12 + (24 + selected.width) * .5
+    selectedGui.pivot.y = screen.clientHeight / scale - selected.height / 2 - 12 + (24 + selected.height) * .5
+    selectedGui.x = selected.x + selectedGui.pivot.x
+    selectedGui.y = selected.y + selectedGui.pivot.y
+    selectedGui.rotation = selected.rotation
+    stage.addChild(selectedGui)
+}
+
 function editorMousedown(e) {
     var closest = null
     var distance = -1
@@ -191,45 +232,9 @@ function editorMousedown(e) {
         }
     }
     if (closest) {
-        selected = closest
-        selected.dragging = true
-        selected.start = {"x": e.data.getLocalPosition(closest.parent).x - selected.position.x, "y": e.data.getLocalPosition(closest.parent).y - selected.position.y}
-        if (selectedGui) stage.removeChild(selectedGui)
-        selectedGui = new Container()
-        var box = new Graphics()
-        drawBox(box)
-        selectedGui.addChild(box)
-        selectedGui.box = box
-        var corners = []
-        for (var i = 0; i < 4; i++) {
-            var graphics = new Graphics()
-            graphics.lineStyle(2, 0x5464d4)
-            graphics.beginFill(0x242a33)
-            graphics.drawCircle(0, 0, 6)
-            corners[i] = new Sprite(graphics.generateCanvasTexture(1))
-            corners[i].x = screen.clientWidth / 2 / scale - selected.width / 2 - 20 + (24 + selected.width) * (i % 2)
-            corners[i].y = screen.clientHeight / scale - selected.height / 2 - 20 + (24 + selected.height) * Math.floor(i / 2)
-            selectedGui.addChild(corners[i])
-            corners[i].i = i
-            corners[i].interactive = true
-            corners[i].on('mousedown', resizeMousedown)
-        }
-        selectedGui.corners = corners
-        var rotate = new Sprite.fromImage(path.join('assets', 'icons', 'rotate.png'))
-        rotate.pivot.x = rotate.pivot.y = .5
-        rotate.width = rotate.height = 24
-        rotate.interactive = true
-        rotate.on('mousedown', rotateMousedown)
-        rotate.x = corners[1].x + 12
-        rotate.y = corners[1].y - 24
-        selectedGui.addChild(rotate)
-        selectedGui.rotate = rotate
-        selectedGui.pivot.x = screen.clientWidth / 2 / scale - selected.width / 2 - 12 + (24 + selected.width) * .5
-        selectedGui.pivot.y = screen.clientHeight / scale - selected.height / 2 - 12 + (24 + selected.height) * .5
-        selectedGui.x = selected.x + selectedGui.pivot.x
-        selectedGui.y = selected.y + selectedGui.pivot.y
-        selectedGui.rotation = selected.rotation
-        stage.addChild(selectedGui)
+        setSelected(closest)
+        closest.dragging = true
+        closest.start = {"x": e.data.getLocalPosition(closest.parent).x - selected.position.x, "y": e.data.getLocalPosition(closest.parent).y - selected.position.y}
     } else if (selected) {
         selected = null
         stage.removeChild(selectedGui)
@@ -777,6 +782,52 @@ document.getElementById('zoom in').addEventListener('click', () => {
 document.getElementById('zoom out').addEventListener('click', () => {
     scale /= 2
     resize()
+})
+
+electron.ipcRenderer.on('cut', () => {
+    if (selected) {
+        electron.clipboard.writeText(JSON.stringify(selected.asset))
+        puppet[layer].removeChild(selected)
+        character[layer].splice(character[layer].indexOf(selected.asset), 1)
+        selected = null
+        stage.removeChild(selectedGui)
+    }
+})
+
+electron.ipcRenderer.on('copy', () => {
+    if (selected) electron.clipboard.writeText(JSON.stringify(selected.asset))
+})
+
+electron.ipcRenderer.on('paste', () => {
+    var newAsset
+    try {
+        newAsset = JSON.parse(electron.clipboard.readText())
+    } catch (e) {
+        return
+    }
+    var asset = getAsset(newAsset, layer)
+    if (layer.indexOf('-emote') > -1) {
+        if (document.getElementById('eyemouth').checked) {
+            puppet.emotes[layer.replace(/-emote/, '')].eyes.addChild(asset)
+            character.emotes[layer.replace(/-emote/, '')].eyes.push(newAsset)
+        } else {
+            puppet.emotes[layer.replace(/-emote/, '')].mouth.addChild(asset)
+            character.emotes[layer.replace(/-emote/, '')].mouth.push(newAsset)
+        }
+    } else {
+        puppet[layer].addChild(asset)
+        character[layer].push(newAsset)
+    }
+    setSelected(asset)
+})
+
+electron.ipcRenderer.on('delete', () => {
+    if (selected) {
+        puppet[layer].removeChild(selected)
+        character[layer].splice(character[layer].indexOf(selected.asset), 1)
+        selected = null
+        stage.removeChild(selectedGui)
+    }
 })
 
 // Puppet Prototype
