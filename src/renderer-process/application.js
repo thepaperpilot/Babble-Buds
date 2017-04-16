@@ -479,8 +479,10 @@ document.getElementById('host').addEventListener('click', () => {
 	})
 	serv.listen(project.project.port)
 	server = io.listen(serv)
-	if (popout)
+	if (popout) {
 		popout.webContents.send('connect')
+		popout.webContents.send('assign puppet')
+	}
 
 	// Add a connect listener
 	server.sockets.on('connection', function(socket) {
@@ -499,9 +501,9 @@ document.getElementById('host').addEventListener('click', () => {
 			puppet.socket = socket.id
 			numPuppets++
 			babble.addPuppet(puppet, numPuppets)
-			puppet.id = numPuppets
+			puppet.charId = numPuppets
 			var ourPuppet = createPuppet(project.actor)
-			ourPuppet.id = 1
+			ourPuppet.charId = 1
 			socket.emit('add puppet', ourPuppet)
 			for (var i = 0; i < puppets.length; i++) {
 				socket.emit('add puppet', puppets[i])
@@ -518,9 +520,9 @@ document.getElementById('host').addEventListener('click', () => {
 			if (popout)
 				popout.webContents.send('set puppet', id, puppet)
 			for (var i = 0; i < puppets.length; i++) {
-				if (puppets[i].id == id) {
+				if (puppets[i].charId == id) {
 					puppet.socket = puppets[i].socket
-					puppet.id = puppets[i].id
+					puppet.charId = puppets[i].charId
 					puppets[i] = puppet
 					break
 				}
@@ -532,7 +534,7 @@ document.getElementById('host').addEventListener('click', () => {
 			if (popout)
 				popout.webContents.send('set emote', id, emote)
 			for (var i = 0; i < puppets.length; i++) {
-				if (puppets[i].id == id) {
+				if (puppets[i].charId == id) {
 					puppets[i].emote = emote
 					break
 				}
@@ -545,7 +547,7 @@ document.getElementById('host').addEventListener('click', () => {
 			if (popout)
 				popout.webContents.send('move left', id)
 			for (var i = 0; i < puppets.length; i++) {
-				if (puppets[i].id == id) {
+				if (puppets[i].charId == id) {
 					puppets[i].position = puppet.target
 					puppets[i].facingLeft = puppet.facingLeft
 					break
@@ -559,7 +561,7 @@ document.getElementById('host').addEventListener('click', () => {
 			if (popout)
 				popout.webContents.send('move right', id)
 			for (var i = 0; i < puppets.length; i++) {
-				if (puppets[i].id == id) {
+				if (puppets[i].charId == id) {
 					puppets[i].position = puppet.target
 					puppets[i].facingLeft = puppet.facingLeft
 					break
@@ -590,10 +592,10 @@ document.getElementById('host').addEventListener('click', () => {
 		socket.on('disconnect', () => {
 			for (var i = 0; i < puppets.length; i++) {
 				if (puppets[i].socket === socket.id) {
-					server.emit('remove puppet', puppets[i].id)
+					server.emit('remove puppet', puppets[i].charId)
 					if (popout)
-						popout.webContents.send('remove puppet', puppets[i].id)
-					babble.removePuppet(puppets[i].id)
+						popout.webContents.send('remove puppet', puppets[i].charId)
+					babble.removePuppet(puppets[i].charId)
 					puppets.splice(i, 1)
 					break
 				}
@@ -668,7 +670,7 @@ document.getElementById('connect').addEventListener('click', () => {
 			popout.webContents.send('assign puppet', id)
 	})
 	socket.on('add puppet', (puppet) => {
-		babble.addPuppet(puppet, puppet.id)
+		babble.addPuppet(puppet, puppet.charId)
 		if (popout)
 			popout.webContents.send('add puppet', puppet)
 		puppets.push(puppet)
@@ -678,7 +680,7 @@ document.getElementById('connect').addEventListener('click', () => {
 		if (popout)
 			popout.webContents.send('set puppet', id, puppet)
 		for (var i = 0; i < puppets.length; i++) {
-			if (puppets[i].id == id) {
+			if (puppets[i].charId == id) {
 				puppet.socket = puppets[i].socket
 				puppet.id = puppets[i].id
 				puppets[i] = puppet
@@ -691,7 +693,7 @@ document.getElementById('connect').addEventListener('click', () => {
 		if (popout)
 			popout.webContents.send('set emote', id, emote)
 		for (var i = 0; i < puppets.length; i++) {
-			if (puppets[i].id == id) {
+			if (puppets[i].charId == id) {
 				puppets[i].emote = emote
 				break
 			}
@@ -702,7 +704,7 @@ document.getElementById('connect').addEventListener('click', () => {
 		if (popout)
 			popout.webContents.send('move left', id)
 		for (var i = 0; i < puppets.length; i++) {
-			if (puppets[i].id == id) {
+			if (puppets[i].charId == id) {
 				puppets[i].position = puppet.target
 				puppets[i].facingLeft = puppet.facingLeft
 				break
@@ -714,7 +716,7 @@ document.getElementById('connect').addEventListener('click', () => {
 		if (popout)
 			popout.webContents.send('move right', id)
 		for (var i = 0; i < puppets.length; i++) {
-			if (puppets[i].id == id) {
+			if (puppets[i].charId == id) {
 				puppets[i].position = puppet.target
 				puppets[i].facingLeft = puppet.facingLeft
 				break
@@ -736,7 +738,7 @@ document.getElementById('connect').addEventListener('click', () => {
 		if (popout)
 			popout.webContents.send('remove puppet', id)
 		for (var i = 0; i < puppets.length; i++) {
-			if (puppets[i].id == id) {
+			if (puppets[i].charId == id) {
 				puppets.splice(i, 1)
 				break
 			}

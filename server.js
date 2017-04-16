@@ -42,7 +42,7 @@ server.sockets.on('connection', function(socket) {
 		socket.emit('set slots', numCharacters)
 		puppet.socket = socket.id
 		numPuppets++
-		puppet.id = numPuppets
+		puppet.charId = numPuppets
 		for (var i = 0; i < puppets.length; i++) {
 			socket.emit('add puppet', puppets[i])
 		}
@@ -53,9 +53,9 @@ server.sockets.on('connection', function(socket) {
 	socket.on('set puppet', (id, puppet) => {
 		socket.broadcast.emit('set puppet', id, puppet)
 		for (var i = 0; i < puppets.length; i++) {
-			if (puppets[i].id == id) {
+			if (puppets[i].charId == id) {
 				puppet.socket = puppets[i].socket
-				puppet.id = puppets[i].id
+				puppet.charId = puppets[i].charId
 				puppets[i] = puppet
 				break
 			}
@@ -64,7 +64,7 @@ server.sockets.on('connection', function(socket) {
 	socket.on('set emote', (id, emote) => {
 		socket.broadcast.emit('set emote', id, emote)
 		for (var i = 0; i < puppets.length; i++) {
-			if (puppets[i].id == id) {
+			if (puppets[i].charId == id) {
 				puppets[i].emote = emote
 				break
 			}
@@ -73,7 +73,7 @@ server.sockets.on('connection', function(socket) {
 	socket.on('move left', (id) => {
 		socket.broadcast.emit('move left', id)
 		for (var i = 0; i < puppets.length; i++) {
-			if (puppets[i].id == id) {
+			if (puppets[i].charId == id) {
 				if (puppets[i].facingLeft)
 					puppets[i].position--
 				else
@@ -85,7 +85,7 @@ server.sockets.on('connection', function(socket) {
 	socket.on('move right', (id) => {
 		socket.broadcast.emit('move right', id)
 		for (var i = 0; i < puppets.length; i++) {
-			if (puppets[i].id == id) {
+			if (puppets[i].charId == id) {
 				if (puppets[i].facingLeft)
 					puppets[i].facingLeft = true
 				else
@@ -108,7 +108,7 @@ server.sockets.on('connection', function(socket) {
 	socket.on('disconnect', () => {
 		for (var i = 0; i < puppets.length; i++) {
 			if (puppets[i].socket === socket.id) {
-				server.emit('remove puppet', puppets[i].id)
+				server.emit('remove puppet', puppets[i].charId)
 				puppets.splice(i, 1)
 				break
 			}

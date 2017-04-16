@@ -6,7 +6,6 @@ const project = remote.require('./main-process/project')
 var puppet
 var hotbar = []
 
-console.log(project.assets)
 babble.init('screen', project.project, project.assets, project.assetsPath, loadPuppets)
 
 function loadPuppets() {
@@ -24,7 +23,7 @@ function loadPuppets() {
 }
 
 function createPuppet(actor) {
-    var puppet = Object.create(project.characters[actor.id])
+    var puppet = JSON.parse(JSON.stringify(project.characters[actor.id]))
     puppet.position = actor.position
     puppet.emote = actor.emote
     puppet.facingLeft = actor.facingLeft
@@ -88,7 +87,7 @@ electron.ipcRenderer.on('resize', () => {
 
 electron.ipcRenderer.on('init', (event, puppets) => {
     for (var i = 0; i < puppets.length; i++)
-        console.log(babble.addPuppet(createPuppet(puppets[i]), puppets[i].id))
+        babble.addPuppet(createPuppet(puppets[i]), puppets[i].charId)
 })
 
 electron.ipcRenderer.on('connect', function() {
@@ -104,7 +103,7 @@ electron.ipcRenderer.on('assign puppet', (event, id) => {
     puppet = babble.addPuppet(createPuppet(project.actor), id)
 })
 electron.ipcRenderer.on('add puppet', (event, puppet) => {
-    babble.addPuppet(createPuppet(puppet), puppet.id)
+    babble.addPuppet(createPuppet(puppet), puppet.charId)
 })
 electron.ipcRenderer.on('set puppet', (event, id, puppet) => {
     babble.setPuppet(id, babble.createPuppet(puppet))
