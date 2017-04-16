@@ -19,6 +19,9 @@ var Container = PIXI.Container,
     Text = PIXI.Text,
     Ticker = PIXI.ticker.Ticker;
 
+// Constants
+const ROUND_ROTATION = Math.PI / 4 // When rounding angles, this is the step size to use
+
 // Vars
 var asset // asset being moved (outside of pixi)
 var scale = 1 // scale of the editor view
@@ -235,6 +238,8 @@ function editorMousedown(e) {
         setSelected(closest)
         closest.dragging = true
         closest.start = {"x": e.data.getLocalPosition(closest.parent).x - selected.position.x, "y": e.data.getLocalPosition(closest.parent).y - selected.position.y}
+        selectedGui.startX = e.data.global.x
+        selectedGui.startY = e.data.global.y
     } else if (selected) {
         selected = null
         stage.removeChild(selectedGui)
@@ -243,11 +248,21 @@ function editorMousedown(e) {
 
 function editorMousemove(e) {
     if (selected && selected.dragging) {
-        var position = e.data.getLocalPosition(selected.parent)
-        selected.x = position.x - selected.start.x
-        selected.y = position.y - selected.start.y
-        selectedGui.x = selected.x + selectedGui.pivot.x
-        selectedGui.y = selected.y + selectedGui.pivot.y
+        if (e.data.originalEvent.ctrlKey) {
+            var rotation = Math.atan2(e.data.global.y - selectedGui.startY, e.data.global.x - selectedGui.startX)
+            rotation = Math.round(rotation / ROUND_ROTATION) * ROUND_ROTATION
+            var dist = Math.hypot(Math.cos(rotation) * (e.data.global.x - selectedGui.startX), Math.sin(rotation) * (e.data.global.y - selectedGui.startY)) / scale
+            selected.x = selected.asset.x + Math.cos(rotation) * dist
+            selected.y = selected.asset.y + Math.sin(rotation) * dist
+            selectedGui.x = selected.x + selectedGui.pivot.x
+            selectedGui.y = selected.y + selectedGui.pivot.y
+        } else {
+            var position = e.data.getLocalPosition(selected.parent)
+            selected.x = position.x - selected.start.x
+            selected.y = position.y - selected.start.y
+            selectedGui.x = selected.x + selectedGui.pivot.x
+            selectedGui.y = selected.y + selectedGui.pivot.y
+        }
     }
 }
 
@@ -285,17 +300,32 @@ function resizeMousedown(e) {
 }
 
 function resizeMousemove(e) {
-    var dist = Math.hypot(e.data.global.x - selectedGui.startX, e.data.global.y - selectedGui.startY) / scale
+    var dx, dy
     var rotation = Math.atan2(e.data.global.y - selectedGui.startY, e.data.global.x - selectedGui.startX)
+    var dist = Math.hypot(e.data.global.x - selectedGui.startX, e.data.global.y - selectedGui.startY) / scale
+    if (e.data.originalEvent.ctrlKey && selectedGui.origHeight != 0) {
+        dy = (Math.floor(selectedGui.i / 2) == 1 ? 1 : -1) * Math.sin(rotation - selected.rotation) * dist
+        dx = (Math.max(0, selectedGui.origHeight + dy) - selectedGui.origHeight) * selectedGui.origWidth / selectedGui.origHeight
+    } else {
+        rotation = Math.atan2(e.data.global.y - selectedGui.startY, e.data.global.x - selectedGui.startX)
+        var dist = Math.hypot(e.data.global.x - selectedGui.startX, e.data.global.y - selectedGui.startY) / scale
+        dx = (selectedGui.i % 2 == 1 ? 1 : -1) * Math.cos(rotation - selected.rotation) * dist
+        dy = (Math.floor(selectedGui.i / 2) == 1 ? 1 : -1) * Math.sin(rotation - selected.rotation) * dist
+    }
 
-    var odx = (selectedGui.i % 2 == 1 ? 1 : -1) * Math.cos(rotation - selected.rotation) * dist
-    var ody = (Math.floor(selectedGui.i / 2) == 1 ? 1 : -1) * Math.sin(rotation - selected.rotation) * dist
+    if (e.data.originalEvent.shiftKey) {
+        selected.width = Math.max(0, selectedGui.origWidth + 2 * dx)
+        selected.height = Math.max(0, selectedGui.origHeight + 2 * dy)
 
-    selected.width = Math.max(0, selectedGui.origWidth + odx)
-    selected.height = Math.max(0, selectedGui.origHeight + ody)
+        selected.x = selected.asset.x
+        selected.y = selected.asset.y
+    } else {
+        selected.width = Math.max(0, selectedGui.origWidth + dx)
+        selected.height = Math.max(0, selectedGui.origHeight + dy)
 
-    selected.x = selectedGui.corner.x + (selectedGui.i % 2 == 1 ? 1 : -1) * Math.cos(selected.rotation) * selected.width / 2 - (Math.floor(selectedGui.i / 2) == 1 ? 1 : -1) * Math.sin(selected.rotation) * selected.height / 2
-    selected.y = selectedGui.corner.y + (Math.floor(selectedGui.i / 2) == 1 ? 1 : -1) * Math.cos(selected.rotation) * selected.height / 2 + (selectedGui.i % 2 == 1 ? 1 : -1) * Math.sin(selected.rotation) * selected.width / 2
+        selected.x = selectedGui.corner.x + (selectedGui.i % 2 == 1 ? 1 : -1) * Math.cos(selected.rotation) * selected.width / 2 - (Math.floor(selectedGui.i / 2) == 1 ? 1 : -1) * Math.sin(selected.rotation) * selected.height / 2
+        selected.y = selectedGui.corner.y + (Math.floor(selectedGui.i / 2) == 1 ? 1 : -1) * Math.cos(selected.rotation) * selected.height / 2 + (selectedGui.i % 2 == 1 ? 1 : -1) * Math.sin(selected.rotation) * selected.width / 2
+    }
 
     selectedGui.box.clear()
     drawBox(selectedGui.box)
@@ -332,12 +362,13 @@ function rotateMousedown(e) {
 
 function rotateMousemove(e) {
     var rotation = selectedGui.startRotation - Math.atan2((screen.clientHeight - e.data.global.y) / scale + selected.asset.y, (e.data.global.x - screen.clientWidth / 2) / scale - selected.asset.x)
+    if (e.data.originalEvent.ctrlKey)
+        rotation = Math.round(rotation / ROUND_ROTATION) * ROUND_ROTATION
     selected.rotation = rotation
     selectedGui.rotation = rotation
 }
 
 function rotateMouseup(e) {
-    console.log(selected.rotation)
     selectedGui.dragging = false
     stage.off('mousemove', rotateMousemove)
     stage.off('mouseup', rotateMouseup)
