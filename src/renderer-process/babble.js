@@ -210,7 +210,7 @@ function gameLoop() {
             puppet.mouthAnim += delta
 
             // Update eyes
-            if (puppet.eyesAnim >= puppet.eyesDuration && puppet.eyes.length) {
+            if (puppet.eyesAnim >= puppet.eyesDuration && puppet.eyes.length && (puppet.emote === 'default' || !puppet.emotes[puppet.emote])) {
                 if (puppet.emotes[puppet.emote]) puppet.emotes[puppet.emote].eyes.visible = false
                 puppet.emotes['default'].eyes.visible = false
                 for (var j = 0; j < puppet.eyes.length; j++) {
