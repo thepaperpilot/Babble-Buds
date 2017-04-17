@@ -1,4 +1,4 @@
-const {app, BrowserWindow, globalShortcut, Menu, dialog} = require('electron')
+const {app, BrowserWindow} = require('electron')
 const settings = require('./main-process/settings')
 const project = require('./main-process/project')
 

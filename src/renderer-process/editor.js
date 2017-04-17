@@ -17,8 +17,7 @@ var Container = PIXI.Container,
     Rectangle = PIXI.Rectangle,
     NineSlicePlane = PIXI.mesh.NineSlicePlane,
     Graphics = PIXI.Graphics,
-    Text = PIXI.Text,
-    Ticker = PIXI.ticker.Ticker;
+    Ticker = PIXI.ticker.Ticker
 
 // Constants
 const ROUND_ROTATION = Math.PI / 4 // When rounding angles, this is the step size to use
@@ -176,7 +175,7 @@ function drawBox(box) {
     box.lineTo(screen.clientWidth / 2 / scale + selected.width / 2 + 12, screen.clientHeight / scale - selected.height / 2 - 12)
     box.lineTo(screen.clientWidth / 2 / scale + selected.width / 2 + 12, screen.clientHeight / scale + selected.height / 2 + 12)
     box.lineTo(screen.clientWidth / 2 / scale - selected.width / 2 - 12, screen.clientHeight / scale + selected.height / 2 + 12)
-    box.lineStyle(2, 0x242a33, .5)
+    box.lineStyle(2, 0x242a33, 0.5)
     box.drawCircle(screen.clientWidth / 2 / scale + selected.width / 2 + 12, screen.clientHeight / scale - selected.height / 2 - 12, 24)
 }
 
@@ -204,7 +203,7 @@ function setSelected(asset) {
     }
     selectedGui.corners = corners
     var rotate = new Sprite.fromImage(path.join('assets', 'icons', 'rotate.png'))
-    rotate.pivot.x = rotate.pivot.y = .5
+    rotate.pivot.x = rotate.pivot.y = 0.5
     rotate.width = rotate.height = 24
     rotate.interactive = true
     rotate.on('mousedown', rotateMousedown)
@@ -212,8 +211,8 @@ function setSelected(asset) {
     rotate.y = corners[1].y - 24
     selectedGui.addChild(rotate)
     selectedGui.rotate = rotate
-    selectedGui.pivot.x = screen.clientWidth / 2 / scale - selected.width / 2 - 12 + (24 + selected.width) * .5
-    selectedGui.pivot.y = screen.clientHeight / scale - selected.height / 2 - 12 + (24 + selected.height) * .5
+    selectedGui.pivot.x = screen.clientWidth / 2 / scale - selected.width / 2 - 12 + (24 + selected.width) * 0.5
+    selectedGui.pivot.y = screen.clientHeight / scale - selected.height / 2 - 12 + (24 + selected.height) * 0.5
     selectedGui.x = selected.x + selectedGui.pivot.x
     selectedGui.y = selected.y + selectedGui.pivot.y
     selectedGui.rotation = selected.rotation
@@ -267,12 +266,11 @@ function editorMousemove(e) {
     }
 }
 
-function editorMouseup(e) {
+function editorMouseup() {
     if (selected) {
         selected.dragging = false
         selected.asset.x = selected.x
         selected.asset.y = selected.y
-        assetClicked = true
     }
 }
 
@@ -289,7 +287,7 @@ function resizeMousedown(e) {
         "x": selectedGui.corners[i].worldTransform.tx / scale - screen.clientWidth / 2 / scale - (i % 2 == 1 ? 1 : -1) * Math.cos(selected.rotation - Math.PI / 4) * 17 - Math.sin(selected.rotation - Math.PI / 4) * 11,
         "y": selectedGui.corners[i].worldTransform.ty / scale - screen.clientHeight / scale + (Math.floor(i / 2) == 1 ? 1 : -1) * Math.sin(selected.rotation - Math.PI / 4) * 17 + Math.cos(selected.rotation - Math.PI / 4) * 11
     }
-    if (i == 0) {
+    if (i === 0) {
         selectedGui.corner.x -= Math.sin(selected.rotation) * 24
         selectedGui.corner.y += Math.sin(selected.rotation) * 24
     } else if (i == 3) {
@@ -304,12 +302,10 @@ function resizeMousemove(e) {
     var dx, dy
     var rotation = Math.atan2(e.data.global.y - selectedGui.startY, e.data.global.x - selectedGui.startX)
     var dist = Math.hypot(e.data.global.x - selectedGui.startX, e.data.global.y - selectedGui.startY) / scale
-    if (e.data.originalEvent.ctrlKey && selectedGui.origHeight != 0) {
+    if (e.data.originalEvent.ctrlKey && selectedGui.origHeight !== 0) {
         dy = (Math.floor(selectedGui.i / 2) == 1 ? 1 : -1) * Math.sin(rotation - selected.rotation) * dist
         dx = (Math.max(0, selectedGui.origHeight + dy) - selectedGui.origHeight) * selectedGui.origWidth / selectedGui.origHeight
     } else {
-        rotation = Math.atan2(e.data.global.y - selectedGui.startY, e.data.global.x - selectedGui.startX)
-        var dist = Math.hypot(e.data.global.x - selectedGui.startX, e.data.global.y - selectedGui.startY) / scale
         dx = (selectedGui.i % 2 == 1 ? 1 : -1) * Math.cos(rotation - selected.rotation) * dist
         dy = (Math.floor(selectedGui.i / 2) == 1 ? 1 : -1) * Math.sin(rotation - selected.rotation) * dist
     }
@@ -334,16 +330,15 @@ function resizeMousemove(e) {
         selectedGui.corners[i].x = screen.clientWidth / 2 / scale - selected.width / 2 - 20 + (24 + selected.width) * (i % 2)
         selectedGui.corners[i].y = screen.clientHeight / scale - selected.height / 2 - 20 + (24 + selected.height) * Math.floor(i / 2)
     }
-    var angle = Math.atan2(selected.height, selected.width)
     selectedGui.rotate.x = selectedGui.corners[1].x + 12
     selectedGui.rotate.y = selectedGui.corners[1].y - 24
-    selectedGui.pivot.x = screen.clientWidth / 2 / scale - selected.width / 2 - 12 + (24 + selected.width) * .5
-    selectedGui.pivot.y = screen.clientHeight / scale - selected.height / 2 - 12 + (24 + selected.height) * .5
+    selectedGui.pivot.x = screen.clientWidth / 2 / scale - selected.width / 2 - 12 + (24 + selected.width) * 0.5
+    selectedGui.pivot.y = screen.clientHeight / scale - selected.height / 2 - 12 + (24 + selected.height) * 0.5
     selectedGui.x = selected.x + selectedGui.pivot.x
     selectedGui.y = selected.y + selectedGui.pivot.y
 }
 
-function resizeMouseup(e) {
+function resizeMouseup() {
     selectedGui.dragging = false
     stage.off('mousemove', resizeMousemove)
     stage.off('mouseup', resizeMouseup)
@@ -369,18 +364,11 @@ function rotateMousemove(e) {
     selectedGui.rotation = rotation
 }
 
-function rotateMouseup(e) {
+function rotateMouseup() {
     selectedGui.dragging = false
     stage.off('mousemove', rotateMousemove)
     stage.off('mouseup', rotateMouseup)
     selected.asset.rotation = selected.rotation
-}
-
-function createPuppet(actor) {
-    var puppet = JSON.parse(JSON.stringify(project.characters[actor.id]))
-    puppet.emote = 'default'
-    puppet.facingLeft = false
-    return puppet
 }
 
 function resize() {
@@ -521,25 +509,27 @@ var buttons = document.getElementById('editor-layers-panel').getElementsByTagNam
 for (var i = 0; i < buttons.length; i++)
     buttons[i].addEventListener('click', setLayer)
 
+function layerContextMenu(e) {
+    var emote = e.target.id.replace(/-emote/, '')
+    if (character.emotes[emote] && character.emotes[emote].enabled && emote !== 'default') {
+        character.emotes[emote].enabled = false
+        e.target.classList.remove('available')
+    } else {
+        if (character.emotes[emote])
+            character.emotes[emote].enabled = true
+        else
+            character.emotes[emote] = {
+                "enabled": true,
+                "mouth": [],
+                "eyes": []
+            }
+        e.target.className += " available"
+    }
+}
+
 var emotes = document.getElementById('editor-layers-panel').getElementsByClassName('emote')
 for (var i = 0; i < emotes.length; i++)
-    emotes[i].addEventListener('contextmenu', (e) => {
-        var emote = e.target.id.replace(/-emote/, '')
-        if (character.emotes[emote] && character.emotes[emote].enabled && emote !== 'default') {
-            character.emotes[emote].enabled = false
-            e.target.classList.remove('available')
-        } else {
-            if (character.emotes[emote])
-                character.emotes[emote].enabled = true
-            else
-                character.emotes[emote] = {
-                    "enabled": true,
-                    "mouth": [],
-                    "eyes": []
-                }
-            e.target.className += " available"
-        }
-    })
+    emotes[i].addEventListener('contextmenu', layerContextMenu)
 
 document.getElementById('editor-babble').addEventListener('click', () => {
     document.getElementById('editor-open-panel').style.display = 'none'
@@ -555,31 +545,35 @@ document.getElementById('editor-babble').addEventListener('click', () => {
     }
 })
 
+function mouthLayerClick(e) {
+    var emote = e.target.id.replace(/-mouth/, '')
+    if (character.mouths.indexOf(emote) > -1) {
+        character.mouths.splice(character.mouths.indexOf(emote), 1)
+        e.target.classList.remove('available')
+    } else {
+        character.mouths.push(emote)
+        e.target.className += ' available'
+    }
+}
+
 emotes = document.getElementById('babble-mouths').getElementsByClassName('emote')
 for (var i = 0; i < emotes.length; i++)
-    emotes[i].addEventListener('click', (e) => {
-        var emote = e.target.id.replace(/-mouth/, '')
-        if (character.mouths.indexOf(emote) > -1) {
-            character.mouths.splice(character.mouths.indexOf(emote), 1)
-            e.target.classList.remove('available')
-        } else {
-            character.mouths.push(emote)
-            e.target.className += ' available'
-        }
-    })
+    emotes[i].addEventListener('click', mouthLayerClick)
+
+function eyesLayerClick(e) {
+    var emote = e.target.id.replace(/-eyes/, '')
+    if (character.eyes.indexOf(emote) > -1) {
+        character.eyes.splice(character.eyes.indexOf(emote), 1)
+        e.target.classList.remove('available')
+    } else {
+        character.eyes.push(emote)
+        e.target.className += ' available'
+    }
+}
 
 emotes = document.getElementById('babble-eyes').getElementsByClassName('emote')
 for (var i = 0; i < emotes.length; i++)
-    emotes[i].addEventListener('click', (e) => {
-        var emote = e.target.id.replace(/-eyes/, '')
-        if (character.eyes.indexOf(emote) > -1) {
-            character.eyes.splice(character.eyes.indexOf(emote), 1)
-            e.target.classList.remove('available')
-        } else {
-            character.eyes.push(emote)
-            e.target.className += ' available'
-        }
-    })
+    emotes[i].addEventListener('click', eyesLayerClick)
 
 document.getElementById('editor-settings').addEventListener('click', () => {
     document.getElementById('editor-open-panel').style.display = 'none'
@@ -870,7 +864,7 @@ var Puppet = function(puppet) {
     this.babbling = false
     this.name = puppet.name
     this.container = new Container()
-    this.container.pivot.x = this.container.pivot.y = .5
+    this.container.pivot.x = this.container.pivot.y = 0.5
     this.eyes = puppet.eyes
     this.mouths = puppet.mouths
     this.deadbonesStyle = puppet.deadbonesStyle

@@ -9,16 +9,16 @@ const project = require('electron').remote.require('./main-process/project')
 const fs = require('fs-extra')
 
 document.getElementById('location').value = path.join(app.getPath('home'), 'projects')
-document.getElementById('open').addEventListener('click', function(e) {
+document.getElementById('open').addEventListener('click', function() {
 	util.openProject()
 })
-document.getElementById('browse').addEventListener('click', function(e) {
+document.getElementById('browse').addEventListener('click', function() {
 	 util.selectDirectory(function (filepaths) {
 		if (filepaths)
 			document.getElementById('location').value = filepaths[0];
 	})
 })
-document.getElementById('create').addEventListener('click', function(e) {
+document.getElementById('create').addEventListener('click', function() {
 	// Find paths
 	var src = path.join(path.dirname(require.main.filename), 'sample-project')
 	var location = document.getElementById('location').value

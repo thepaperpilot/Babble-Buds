@@ -12,7 +12,7 @@ exports.init = function() {
 }
 
 exports.log = function(string, setLock) {
-	if (setLock != null) {
+	if (setLock !== null) {
 		lock = setLock
 	} else if (lock) return
 	status.innerText = string

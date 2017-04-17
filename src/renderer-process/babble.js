@@ -3,20 +3,14 @@ const PIXI = require('pixi.js')
 const path = require('path')
 
 // Constants
-const MOVE_DURATION = .75 // in seconds
+const MOVE_DURATION = 0.75 // in seconds
 
 // Aliases
 var Container = PIXI.Container,
     autoDetectRenderer = PIXI.autoDetectRenderer,
     loader = PIXI.loader,
-    resources = PIXI.loader.resources,
     Sprite = PIXI.Sprite,
-    TextureCache = PIXI.utils.TextureCache,
-    Rectangle = PIXI.Rectangle,
-    NineSlicePlane = PIXI.mesh.NineSlicePlane,
-    Graphics = PIXI.Graphics,
-    Text = PIXI.Text,
-    Ticker = PIXI.ticker.Ticker;
+    TextureCache = PIXI.utils.TextureCache
 
 // vars
 var project // settings
@@ -85,7 +79,7 @@ exports.resize = function() {
     } else stage.scale.x = stage.scale.y = 1
     for (var i = 0; i < puppets.length; i++) {
         puppets[i].container.y = screen.clientHeight / stage.scale.y
-        puppets[i].container.x = (puppets[i].position - .5) * slotWidth
+        puppets[i].container.x = (puppets[i].position - 0.5) * slotWidth
     }
 }
 
@@ -100,7 +94,7 @@ exports.addPuppet = function(obj, id) {
     for (var i = 0; i < listeners.length; i++)
         puppet.container.on(listeners[i].event, listeners[i].callback)
     puppet.container.y = screen.clientHeight / stage.scale.y
-    puppet.container.x = (puppet.position - .5) * slotWidth
+    puppet.container.x = (puppet.position - 0.5) * slotWidth
     return puppet
 }
 
@@ -118,7 +112,7 @@ exports.removePuppet = function(id) {
 }
 
 exports.clearPuppets = function() {
-    while (puppets.length != 0) {
+    while (puppets.length !== 0) {
         stage.removeChild(puppets[0].container)
         puppets.splice(0, 1)
     }
@@ -142,7 +136,7 @@ exports.setPuppet = function(id, newPuppet) {
     for (var i = 0; i < listeners.length; i++)
         newPuppet.container.on(listeners[i].event, listeners[i].callback)
     newPuppet.container.y = screen.clientHeight / stage.scale.y
-    newPuppet.container.x = (newPuppet.position - .5) * slotWidth
+    newPuppet.container.x = (newPuppet.position - 0.5) * slotWidth
 
     puppets[puppets.indexOf(oldPuppet)] = newPuppet
     stage.removeChild(oldPuppet.container)
@@ -169,7 +163,7 @@ function gameLoop() {
         // Movement animations
         // I've tried to emulate what puppet pals does as closely as possible
         // But frankly it's difficult to tell
-        if (puppet.target != puppet.position || puppet.movingAnim != 0) {
+        if (puppet.target != puppet.position || puppet.movingAnim !== 0) {
             // Whether its going left or right
             var direction = puppet.target > puppet.position ? 1 : -1
             // Update how far into the animation we are
@@ -178,7 +172,7 @@ function gameLoop() {
             // We want to do a bit of animation when they arrive at the target slot. 
             //  in order to do that we have part of the animation (0 - .6) be for each slot
             //  and the rest (.6 - 1) only plays at the destination slot
-            if (puppet.movingAnim >= .6 && puppet.movingAnim - delta / (1000 * MOVE_DURATION) < .6) {
+            if (puppet.movingAnim >= 0.6 && puppet.movingAnim - delta / (1000 * MOVE_DURATION) < 0.6) {
                 // Once we pass .6, update our new slot position
                 puppet.position += direction
                 // If we're not at the final slot yet, reset the animation
@@ -190,7 +184,7 @@ function gameLoop() {
             // Update y value so it doesn't leave the bottom of the screen while bouncing
             puppet.container.y = screen.clientHeight / stage.scale.y
             // Linearly move across the slot, unless we're in the (.6 - 1) part of the animation
-            puppet.container.x = (puppet.position + direction * (puppet.movingAnim >= .6 ? 0 : puppet.movingAnim / .6) - .5) * slotWidth
+            puppet.container.x = (puppet.position + direction * (puppet.movingAnim >= 0.6 ? 0 : puppet.movingAnim / 0.6) - 0.5) * slotWidth
 
             // Wrap Edges
             if (puppet.target > project.numCharacters + 1 && puppet.position >= project.numCharacters + 1 && puppet.movingAnim > 0) {
@@ -241,7 +235,7 @@ function gameLoop() {
         // I'm not sure what Puppet Pals does, but I'm pretty sure this isn't it
         // But I think this looks "close enough", and probably the best I'm going
         // to get without Rob actually telling people how Puppet Pals does it
-        if (puppet.deadbonesStyle && (puppet.babbling || puppet.deadbonesDuration != 0)) {
+        if (puppet.deadbonesStyle && (puppet.babbling || puppet.deadbonesDuration !== 0)) {
             puppet.deadbonesAnim += delta
             if (puppet.deadbonesAnim >= puppet.deadbonesDuration) {
                 puppet.deadbonesAnim = 0
@@ -250,7 +244,7 @@ function gameLoop() {
                     puppet.deadbonesStartY = puppet.head.y = puppet.deadbonesTargetY
                     puppet.deadbonesStartRotation = puppet.head.rotation = puppet.deadbonesTargetRotation
                     puppet.deadbonesTargetY = Math.random() * - 20 - puppet.headBase.height / 2
-                    puppet.deadbonesTargetRotation = .1 - Math.random() * .2
+                    puppet.deadbonesTargetRotation = 0.1 - Math.random() * 0.2
                 } else {
                     puppet.deadbonesDuration = 0
                     puppet.head.y = puppet.deadbonesTargetY
@@ -340,7 +334,7 @@ var Puppet = function(puppet, id) {
     this.container.interactive = true
     this.container.puppet = puppet
     this.container.y = screen.clientHeight / stage.scale.y
-    this.container.x = (this.position - .5) * slotWidth
+    this.container.x = (this.position - 0.5) * slotWidth
     if (this.facingLeft) this.container.scale.x = -1
 }
 
@@ -362,7 +356,7 @@ Puppet.prototype.changeEmote = function (emote) {
 
 Puppet.prototype.moveLeft = function() {
     if (this.target > this.position) return
-    if (this.facingLeft || this.position == 0 || this.position == project.numCharacters + 1) {
+    if (this.facingLeft || this.position === 0 || this.position == project.numCharacters + 1) {
         this.target--
         this.facingLeft = true
         this.container.scale.x = -1
@@ -374,7 +368,7 @@ Puppet.prototype.moveLeft = function() {
 
 Puppet.prototype.moveRight = function() {
     if (this.target < this.position) return
-    if (!this.facingLeft || this.position == 0 || this.position == project.numCharacters + 1) {
+    if (!this.facingLeft || this.position === 0 || this.position == project.numCharacters + 1) {
         this.target++
         this.facingLeft = false
         this.container.scale.x = 1

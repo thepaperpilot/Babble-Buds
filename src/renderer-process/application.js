@@ -251,7 +251,7 @@ function setHotbar(e) {
 		if (popout)
 			popout.webContents.send('keyUp', i + 49)
 	}
-	if (project.project.hotbar[i] && project.project.hotbar[i] != 0) {
+	if (project.project.hotbar[i] && project.project.hotbar[i] !== 0) {
 		document.getElementById('char ' + i).getElementsByClassName('desc')[0].innerHTML = project.characters[puppet].name
 		document.getElementById('char ' + i).style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', puppet + '.png?random=' + new Date().getTime()) + ')'
 	} else {
@@ -260,46 +260,50 @@ function setHotbar(e) {
 	}
 }
 
+function charClick(e) {
+	var i = e.target.i
+	setPuppet(i)
+	if (popout)
+		popout.webContents.send('keyUp', i + 49)
+}
+
+function charContextMenu(e) {
+	var i = e.target.i
+	document.getElementById('chars').style.display = 'none'
+	document.getElementById('charselect').style.display = 'block'
+	if (project.project.hotbar[i]) {
+		document.getElementById('char selected').getElementsByClassName('desc')[0].innerHTML = project.characters[project.project.hotbar[i]].name
+		document.getElementById('char selected').style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', project.project.hotbar[i] + '.png?random=' + new Date().getTime()) + ')'
+	} else {
+		document.getElementById('char selected').getElementsByClassName('desc')[0].innerHTML = ''
+		document.getElementById('char selected').style.backgroundImage = ''
+	}
+	document.getElementById('char null').i = i
+	var charList = document.getElementById('char list')
+	charList.innerHTML = ''
+	var characters = Object.keys(project.characters)
+	for (var j = 0; j < characters.length; j++) {
+		var selector = document.createElement('div')
+		selector.id = project.characters[characters[j]].name.toLowerCase()
+		selector.className = "char"
+		selector.style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', characters[j] + '.png?random=' + new Date().getTime()) + ')'
+		charList.appendChild(selector)
+		selector.innerHTML = '<div class="desc">' + project.characters[characters[j]].name + '</div>'
+		selector.i = i
+		selector.puppet = characters[j]
+		if (project.project.hotbar.indexOf(parseInt(characters[j])) > -1) {
+			selector.className += " disabled"
+		} else {
+			selector.addEventListener('click', setHotbar)
+		}
+	}
+}
+
 for (var i = 0; i < 9; i++) {
 	var element = document.getElementById('char ' + i)
 	element.i = i
-	element.addEventListener('click', function(e) {
-		var i = e.target.i
-		setPuppet(i)
-		if (popout)
-			popout.webContents.send('keyUp', i + 49)
-	})
-	element.addEventListener('contextmenu', function(e) {
-		var i = e.target.i
-		document.getElementById('chars').style.display = 'none'
-		document.getElementById('charselect').style.display = 'block'
-		if (project.project.hotbar[i]) {
-			document.getElementById('char selected').getElementsByClassName('desc')[0].innerHTML = project.characters[project.project.hotbar[i]].name
-			document.getElementById('char selected').style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', project.project.hotbar[i] + '.png?random=' + new Date().getTime()) + ')'
-		} else {
-			document.getElementById('char selected').getElementsByClassName('desc')[0].innerHTML = ''
-			document.getElementById('char selected').style.backgroundImage = ''
-		}
-		document.getElementById('char null').i = i
-		var charList = document.getElementById('char list')
-		charList.innerHTML = ''
-		var characters = Object.keys(project.characters)
-		for (var j = 0; j < characters.length; j++) {
-			var selector = document.createElement('div')
-			selector.id = project.characters[characters[j]].name.toLowerCase()
-			selector.className = "char"
-			selector.style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', characters[j] + '.png?random=' + new Date().getTime()) + ')'
-			charList.appendChild(selector)
-			selector.innerHTML = '<div class="desc">' + project.characters[characters[j]].name + '</div>'
-			selector.i = i
-			selector.puppet = characters[j]
-			if (project.project.hotbar.indexOf(parseInt(characters[j])) > -1) {
-				selector.className += " disabled"
-			} else {
-				selector.addEventListener('click', setHotbar)
-			}
-		}
-	})
+	element.addEventListener('click', charClick)
+	element.addEventListener('contextmenu', charContextMenu)
 	if (project.project.hotbar[i]) {
 		element.getElementsByClassName('desc')[0].innerHTML = project.characters[project.project.hotbar[i]].name
 		element.style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', project.project.hotbar[i] + '.png?random=' + new Date().getTime()) + ')'
@@ -334,33 +338,34 @@ document.getElementById('char selected').addEventListener('click', () => {
 	document.getElementById('charselect').style.display = 'none'
 })
 
+function emoteClick(e) {
+	setEmote(e.target.emote)
+	if (popout)
+		switch (e.target.emote) {
+			default: popout.webContents.send('keyUp', 'u'); break;
+			case 'happy': popout.webContents.send('keyUp', 'i'); break;
+			case 'wink': popout.webContents.send('keyUp', 'o'); break;
+			case 'kiss': popout.webContents.send('keyUp', 'p'); break;
+			case 'angry': popout.webContents.send('keyUp', 'j'); break;
+			case 'sad': popout.webContents.send('keyUp', 'k'); break;
+			case 'ponder': popout.webContents.send('keyUp', 'l'); break;
+			case 'gasp': popout.webContents.send('keyUp', ';'); break;
+			case 'veryangry': popout.webContents.send('keyUp', 'm'); break;
+			case 'verysad': popout.webContents.send('keyUp', ','); break;
+			case 'confused': popout.webContents.send('keyUp', '.'); break;
+			case 'ooo': popout.webContents.send('keyUp', '/'); break;
+		}
+}
+
 for (var i = 0; i < emotes.length; i++) {
-	(function() {
-		var emote = emotes[i]
-		document.getElementById(emotes[i]).addEventListener('click', function() {
-			setEmote(emote)
-			if (popout)
-				switch (emote) {
-					default: popout.webContents.send('keyUp', 'u'); break;
-					case 'happy': popout.webContents.send('keyUp', 'i'); break;
-					case 'wink': popout.webContents.send('keyUp', 'o'); break;
-					case 'kiss': popout.webContents.send('keyUp', 'p'); break;
-					case 'angry': popout.webContents.send('keyUp', 'j'); break;
-					case 'sad': popout.webContents.send('keyUp', 'k'); break;
-					case 'ponder': popout.webContents.send('keyUp', 'l'); break;
-					case 'gasp': popout.webContents.send('keyUp', ';'); break;
-					case 'veryangry': popout.webContents.send('keyUp', 'm'); break;
-					case 'verysad': popout.webContents.send('keyUp', ','); break;
-					case 'confused': popout.webContents.send('keyUp', '.'); break;
-					case 'ooo': popout.webContents.send('keyUp', '/'); break;
-				}
-		})
-	}())
+	var element = document.getElementById(emotes[i])
+	element.emote = emotes[i]
+	element.addEventListener('click', emoteClick)
 }
 
 document.getElementById('greenscreen').addEventListener('click', () => {
 	var style = document.getElementById('screen').style
-	if (style.backgroundColor == '')
+	if (style.backgroundColor === '')
 		style.backgroundColor = project.project.greenScreen
 	else 
 		style.backgroundColor = ''
@@ -418,7 +423,7 @@ document.getElementById('settings').addEventListener('click', () => {
 
 document.getElementById('colorpicker').addEventListener('change', (e) => {
 	project.project.greenScreen = e.target.value
-	if (document.getElementById('screen').style.backgroundColor != '')
+	if (document.getElementById('screen').style.backgroundColor !== '')
 		document.getElementById('screen').style.backgroundColor = project.project.greenScreen
 })
 
@@ -634,7 +639,7 @@ document.getElementById('host').addEventListener('click', () => {
 		})
 	})
 
-	socket.on('error', (e) => {
+	server.sockets.on('error', (e) => {
 		status.error('Server Error.', e)
 	})
 
@@ -643,7 +648,6 @@ document.getElementById('host').addEventListener('click', () => {
 
 document.getElementById('connect').addEventListener('click', () => {
 	if (server) {
-		console.log(server)
 		stopNetworking()
 		if (server.io) return
 	}
@@ -688,11 +692,11 @@ document.getElementById('connect').addEventListener('click', () => {
 		status.error('Server error.', e)
 	})
 
-	socket.on('reconnect', (e) => {
+	socket.on('reconnect', () => {
 		status.log('Reconnected.')
 	})
 
-	socket.on('reconnecting', (e) => {
+	socket.on('reconnecting', () => {
 		status.log('Reconnecting...')
 	})
 
