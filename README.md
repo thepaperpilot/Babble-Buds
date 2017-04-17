@@ -35,7 +35,6 @@ Features I'm hoping to add before creating a beta release:
 - Asset bundles (e.g. make a bundle for deadbones' head, and be able to add the whole head onto any puppet)
 - Undo and redo actions in editor
 - Configurable local AND global hotkeys
-- Status indicators when connecting, downloading assets, etc.
 - Button to remove unused assets, stray files, etc.
 
 ### Roadmap to 1.0

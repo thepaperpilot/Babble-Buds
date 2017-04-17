@@ -7,6 +7,7 @@ const remote = electron.remote
 const BrowserWindow = remote.BrowserWindow
 const babble = require('./babble.js')
 const editor = require('./editor.js')
+const status = require('./status.js')
 const project = remote.require('./main-process/project')
 const path = require('path')
 const url = require('url')
@@ -22,6 +23,8 @@ var server
 var puppets = []
 var numPuppets = 1
 
+status.init()
+status.log('Loading project...')
 babble.init('screen', project.project, project.assets, project.assetsPath, loadPuppets)
 
 // Editor callback functions
@@ -62,6 +65,7 @@ function deleteCharacter(character) {
 }
 
 function addAsset(tab, asset) {
+	status.log('Loading asset...')
 	if (!project.assets[tab])
 		project.assets[tab] = {}
 	project.assets[tab][asset] = {"location": path.join(tab, asset + '.png')}
@@ -72,10 +76,13 @@ function addAsset(tab, asset) {
 		popout.webContents.send('add asset', tab, asset)
 	if (server)
 		server.emit('add asset', tab, asset)
+	status.log('Asset loaded!')
 }
 
 // Set everything up once babble has finished init'ing
 function loadPuppets() {
+	status.log('Loading puppets...', true)
+
 	// Add Puppet
 	puppet = babble.addPuppet(createPuppet(project.actor), 1)
 	editor.setup(updateCharacter, deleteCharacter, addAsset)
@@ -105,6 +112,8 @@ function loadPuppets() {
 
 	document.getElementById('char ' + project.project.hotbar.indexOf(project.actor.id)).className += " selected"
 	document.getElementById(puppet.emote).className += " selected"
+
+	status.log('Project Loaded!', false)
 }
 
 function createPuppet(actor) {
@@ -384,7 +393,6 @@ function popOut() {
 		protocol: 'file:',
 		slashes: true
 	  }))
-	popout.webContents.openDevTools()
 	document.getElementById('popout').innerHTML ='Close Pop Out'
 	document.getElementById('popout').removeEventListener('click', popOut)
 	document.getElementById('popout').addEventListener('click', popIn)
@@ -452,19 +460,16 @@ function stopNetworking() {
 	document.getElementById('connect').innerHTML = 'Connect to Server'
 	if (popout)
 		popout.webContents.send('disconnect')
+	status.log('Disconnected.')
 }
 
 document.getElementById('host').addEventListener('click', () => {
 	if (server) {
-		if (server.connected) {
-			server.disconnect()
-		} else {
-			server.close()
-			stopNetworking()
-			return
-		}
+		stopNetworking()
+		if (!server.io) return
 	}
 
+	status.log('Starting host...')
 	document.getElementById('host').innerHTML = 'Close Server'
 	puppets = []
 
@@ -604,6 +609,7 @@ document.getElementById('host').addEventListener('click', () => {
 
 		socket.on('add asset', (tab, asset) => {
 			if (!(project.assets[tab] && project.assets[tab][asset])) {
+				status.increment('Retrieving %x Asset%s')
 				var stream = ss.createStream()
 				fs.ensureDirSync(path.join(project.assetsPath, tab))
 				ss(socket).emit('request asset', stream, tab, asset)
@@ -617,6 +623,8 @@ document.getElementById('host').addEventListener('click', () => {
 					if (popout)
 						popout.webContents.send('add asset', tab, asset)
 					socket.broadcast.emit('add asset', tab, asset)
+					if (status.decrement('Retrieving %x Asset%s'))
+						status.log('Synced Assets!')
 				})
 				stream.pipe(fs.createWriteStream(path.join(project.assetsPath, tab, asset + '.png')))
 			}
@@ -625,18 +633,22 @@ document.getElementById('host').addEventListener('click', () => {
 			fs.createReadStream(path.join(project.assetsPath, project.assets[tab][asset].location)).pipe(stream)
 		})
 	})
+
+	socket.on('error', (e) => {
+		status.error('Server Error.', e)
+	})
+
+	status.log('Hosting successful!')
 })
 
 document.getElementById('connect').addEventListener('click', () => {
 	if (server) {
-		if (server.connected) {
-			server.disconnect()
-			return
-		} 
-		server.close()
-		document.getElementById('host').innerHTML = 'Host Server'
+		console.log(server)
+		stopNetworking()
+		if (server.io) return
 	}
 
+	status.log('Connecting to server...')
 	document.getElementById('connect').innerHTML = 'Disconnect from Server'
 
 	// Connect to server
@@ -659,9 +671,39 @@ document.getElementById('connect').addEventListener('click', () => {
 	    babble.clearPuppets()
 		if (popout)
 			popout.webContents.send('connect')
+		status.log('Connected to server!')
 	})
 
 	socket.on('disconnect', stopNetworking)
+
+	socket.on('connect_error', (e) => {
+		status.error('Failed to connect.', e)
+	})
+
+	socket.on('connect_timeout', (e) => {
+		status.error('Connection timed out.', e)
+	})
+
+	socket.on('error', (e) => {
+		status.error('Server error.', e)
+	})
+
+	socket.on('reconnect', (e) => {
+		status.log('Reconnected.')
+	})
+
+	socket.on('reconnecting', (e) => {
+		status.log('Reconnecting...')
+	})
+
+	socket.on('reconnect_error', (e) => {
+		status.error('Failed to reconnect.', e)
+	})
+
+	socket.on('recconect_failed', (e) => {
+		status.error('Failed to reconnect.', e)
+		stopNetworking();
+	})
 
 	// Add Application Listeners
 	socket.on('assign puppet', (id) => {
@@ -753,6 +795,7 @@ document.getElementById('connect').addEventListener('click', () => {
 	})
 	socket.on('add asset', (tab, asset) => {
 		if (!(project.assets[tab] && project.assets[tab][asset])) {
+			status.increment('Retrieving %x Asset%s')
 			var stream = ss.createStream()
 			fs.ensureDirSync(path.join(project.assetsPath, tab))
 			ss(socket).emit('request asset', stream, tab, asset)
@@ -765,6 +808,8 @@ document.getElementById('connect').addEventListener('click', () => {
 				editor.addAsset(tab, asset)
 				if (popout)
 					popout.webContents.send('add asset', tab, asset)
+				if (status.decrement('Retrieving %x Asset%s'))
+					status.log('Synced Assets!')
 			})
 			stream.pipe(fs.createWriteStream(path.join(project.assetsPath, tab, asset + '.png')))
 		}

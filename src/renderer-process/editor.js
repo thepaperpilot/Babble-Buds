@@ -4,6 +4,7 @@ const remote = electron.remote
 const PIXI = require('pixi.js')
 const path = require('path')
 const fs = require('fs-extra')
+const status = require('./status.js')
 const project = remote.require('./main-process/project')
 
 // Aliases
@@ -397,12 +398,14 @@ function gameLoop() {
 }
 
 document.getElementById('editor-save').addEventListener('click', () => {
+    status.log('Saving puppet...')
     project.characters[character.id] = character
     project.saveCharacter(character)
     selected = null
     if (selectedGui) stage.removeChild(selectedGui)
     renderer.render(stage)
     updateCharacter(character, renderer.view.toDataURL().replace(/^data:image\/\w+;base64,/, ""))
+    status.log('Puppet saved!')
 })
 
 document.getElementById('editor-new').addEventListener('click', () => {

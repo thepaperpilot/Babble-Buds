@@ -96,7 +96,7 @@ select option {
 }
 
 .main {
-	height: calc( 100% - 290px );
+	height: calc( 100% - 340px );
 	padding: 0;
 	user-select: none;
 	width: calc( 100% - 450px );
@@ -155,6 +155,12 @@ select option {
 
 .v5 {
 	height: 50%;
+}
+
+.status {
+	height: 20px;
+	text-align: center;
+	width: calc( 100% - 470px );
 }
 
 .buttons {
