@@ -171,3 +171,11 @@ exports.deleteCharacter = function(character) {
 		}
 	}
 }
+
+exports.getPuppet = function() {
+	var puppet = JSON.parse(JSON.stringify(exports.characters[exports.actor.id]))
+	puppet.position = exports.actor.position
+	puppet.emote = exports.actor.emote
+	puppet.facingLeft = exports.actor.facingLeft
+	return puppet
+}

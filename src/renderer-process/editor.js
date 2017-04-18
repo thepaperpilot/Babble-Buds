@@ -3,69 +3,71 @@ const electron = require('electron')
 const remote = electron.remote
 const PIXI = require('pixi.js')
 const path = require('path')
-const fs = require('fs-extra')
+const application = require('./application.js')
+const controller = require('./controller.js')
 const status = require('./status.js')
+const Stage = require('./stage.js').Stage
 const project = remote.require('./main-process/project')
+const fs = require('fs-extra')
 
 // Aliases
 var Container = PIXI.Container,
-    autoDetectRenderer = PIXI.autoDetectRenderer,
-    loader = PIXI.loader,
-    resources = PIXI.loader.resources,
     Sprite = PIXI.Sprite,
     TextureCache = PIXI.utils.TextureCache,
-    Rectangle = PIXI.Rectangle,
-    NineSlicePlane = PIXI.mesh.NineSlicePlane,
-    Graphics = PIXI.Graphics,
-    Ticker = PIXI.ticker.Ticker
+    Graphics = PIXI.Graphics
 
 // Constants
 const ROUND_ROTATION = Math.PI / 4 // When rounding angles, this is the step size to use
 
 // Vars
+var stage // Stage instance
 var asset // asset being moved (outside of pixi)
 var scale = 1 // scale of the editor view
 var puppet // puppet being edited
 var character // character being edited
-var stage // pixi stage
-var renderer // pixi renderer
-var screen // element on webpage where stage is
 var layer // layer being edited
 var clickableAssets = [] // assets in editor that are clickable
 var selected // selected asset inside of pixi
 var selectedGui // gui that appears around selected
 
-// Callback functions
-var updateCharacter
-var deleteCharacter
-var addAsset
-
-exports.setup = function(updateChar, deleteChar, addA) {
-    // Save passed functions
-    updateCharacter = updateChar
-    deleteCharacter = deleteChar
-    addAsset = addA
-
+exports.init = function() {
     // Create some basic objects
-    stage = new Container()
-    renderer = autoDetectRenderer(1, 1, {antialias: true, transparent: true})
-    screen = document.getElementById('editor-screen')
-    screen.appendChild(renderer.view)
-    stage.interactive = true
-    stage.on('mousedown', editorMousedown)
-    stage.on('mousemove', editorMousemove)
-    stage.on('mouseup', editorMouseup)
+    stage = new Stage('editor-screen', {'numCharacters': 1, 'minSlotWidth': 0, 'assets': project.project.assets}, project.assets, project.assetsPath)
+    stage.stage.interactive = true
+    stage.stage.on('mousedown', editorMousedown)
+    stage.stage.on('mousemove', editorMousemove)
+    stage.stage.on('mouseup', editorMouseup)
+    window.addEventListener('mouseup', mouseUp, false)
+
+    // Override some parts of the stage
+    stage.resize = function() {
+        this.renderer.resize(this.screen.clientWidth, this.screen.clientHeight)
+        this.slotWidth = this.screen.clientWidth / this.project.numCharacters
+        this.stage.scale.x = this.stage.scale.y = scale
+        puppet.container.y = this.screen.clientHeight / scale
+        puppet.container.x = (this.screen.clientWidth / scale) / 2
+        selected = null
+        if (selectedGui) this.stage.removeChild(selectedGui)
+    }
+    stage.getAsset = function(asset, layer) {
+        var sprite = new Sprite(TextureCache[path.join(this.assetsPath, this.assets[asset.tab][asset.name].location)])
+        sprite.anchor.set(0.5)
+        sprite.x = asset.x
+        sprite.y = asset.y
+        sprite.rotation = asset.rotation
+        sprite.scale.x = asset.scaleX
+        sprite.scale.y = asset.scaleY
+        sprite.layer = layer
+        sprite.asset = asset
+        clickableAssets.push(sprite)
+        return sprite
+    }
 
     // Make mousedown work on entire stage
     var backdrop = new PIXI.Container();
     backdrop.interactive = true;
     backdrop.containsPoint = () => true;
-    stage.addChild(backdrop)
-
-    // Make the game fit the entire window
-    renderer.view.style.position = "absolute";
-    renderer.view.style.display = "block";
-    renderer.autoResize = true;
+    stage.stage.addChild(backdrop)
 
     // Update Editor
     var tabs = document.getElementById('asset list')
@@ -90,12 +92,137 @@ exports.setup = function(updateChar, deleteChar, addA) {
     if (assetKeys[0])
         document.getElementById('tab ' + assetKeys[0]).style.display = ''
 
+    // DOM listeners
+    document.getElementById('editor-save').addEventListener('click', savePuppet)
+    document.getElementById('editor-new').addEventListener('click', newPuppet)
+    document.getElementById('editor-duplicate').addEventListener('click', dupePuppet)
+    document.getElementById('editor-import').addEventListener('click', importPuppet)
+    document.getElementById('editor-open').addEventListener('click', openPuppetPanel)
+    document.getElementById('char open search').addEventListener('keyup', updateCharSearch)
+    document.getElementById('char open search').addEventListener('search', updateCharSearch)
+    document.getElementById('editor-layers').addEventListener('click', toggleLayers)
+    var buttons = document.getElementById('editor-layers-panel').getElementsByTagName('button')
+    for (var i = 0; i < buttons.length; i++)
+        buttons[i].addEventListener('click', setLayer)
+    var emotes = document.getElementById('editor-layers-panel').getElementsByClassName('emote')
+    for (var i = 0; i < emotes.length; i++)
+        emotes[i].addEventListener('contextmenu', layerContextMenu)
+    document.getElementById('editor-babble').addEventListener('click', toggleBabble)
+    emotes = document.getElementById('babble-mouths').getElementsByClassName('emote')
+    for (var i = 0; i < emotes.length; i++)
+        emotes[i].addEventListener('click', mouthLayerClick)
+    emotes = document.getElementById('babble-eyes').getElementsByClassName('emote')
+    for (var i = 0; i < emotes.length; i++)
+        emotes[i].addEventListener('click', eyesLayerClick)
+    document.getElementById('editor-settings').addEventListener('click', toggleSettings)
+    document.getElementById('editor-name').addEventListener('change', nameChange)
+    document.getElementById('deadbonesstyle').addEventListener('click', bobbleChange)
+    document.getElementById('delete-character').addEventListener('click', deleteCharacter)
+    document.getElementById('add-asset').addEventListener('click', addAsset)
+    document.getElementById('new-asset-bundle').addEventListener('click', () => {
+        // TODO implement
+    })
+    document.getElementById('edit-asset-list').addEventListener('click', () => {
+        // TODO implement
+    })
+    document.getElementById('new-asset-list').addEventListener('click', () => {
+        // TODO implement
+    })
+    document.getElementById('import-asset-list').addEventListener('click', () => {
+        // TODO implement
+    })
+    document.getElementById('asset selected').addEventListener('click', selectAsset)
+    for (var i = 0; i < project.project.assets.length; i++) {
+        var tabOption = document.createElement('option')
+        tabOption.text = project.project.assets[i].name
+        document.getElementById('asset-tab').add(tabOption)
+    }
+    document.getElementById('asset-tab').addEventListener('change', function(e) {
+        // TODO implement moving assets to new list
+        // move asset to new folder
+        // remove asset from current tab
+        // add asset to new tab
+        // update any character using asset in project
+        // update character in editor if using it
+        // tell server to tell other clients to move it
+    })
+    document.getElementById('asset-name').addEventListener('change', (e) => {
+        // TODO implement renaming assets
+        // rename asset in asset list
+        // rename asset in project
+        // update any character using asset in project
+        // update character in editor if using it
+        // tell server to tell other clients to rename it
+    })
+    document.getElementById('delete-asset').addEventListener('click', (e) => {
+        // TODO implement deleting assets
+        // remove asset from asset list
+        // remove asset from project
+        // remove asset from any character using it
+        // update any character in babble using asset
+        // update character in editor if using asset
+        // tell server to tell other clients to delete asset
+    })
+    document.getElementById('asset tabs').addEventListener('change', assetTabs)
+    document.getElementById('asset search').addEventListener('keyup', updateAssetSearch)
+    document.getElementById('asset search').addEventListener('search', updateAssetSearch)
+    document.getElementById('zoom in').addEventListener('click', zoomIn)
+    document.getElementById('zoom out').addEventListener('click', zoomOut)
+
+    // Receive messages from application menu
+    electron.ipcRenderer.on('cut', () => {
+        if (selected) {
+            electron.clipboard.writeText(JSON.stringify(selected.asset))
+            puppet[layer].removeChild(selected)
+            character[layer === 'headBase' ? 'head' : layer].splice(character[layer === 'headBase' ? 'head' : layer].indexOf(selected.asset), 1)
+            selected = null
+            stage.stage.removeChild(selectedGui)
+        }
+    })
+    electron.ipcRenderer.on('copy', () => {
+        if (selected) electron.clipboard.writeText(JSON.stringify(selected.asset))
+    })
+    electron.ipcRenderer.on('paste', () => {
+        var newAsset
+        try {
+            newAsset = JSON.parse(electron.clipboard.readText())
+        } catch (e) {
+            return
+        }
+        var asset = stage.getAsset(newAsset, layer)
+        if (layer.indexOf('-emote') > -1) {
+            if (document.getElementById('eyemouth').checked) {
+                puppet.emotes[layer.replace(/-emote/, '')].eyes.addChild(asset)
+                character.emotes[layer.replace(/-emote/, '')].eyes.push(newAsset)
+            } else {
+                puppet.emotes[layer.replace(/-emote/, '')].mouth.addChild(asset)
+                character.emotes[layer.replace(/-emote/, '')].mouth.push(newAsset)
+            }
+        } else {
+            puppet[layer].addChild(asset)
+            character[layer === 'headBase' ? 'head' : layer].push(newAsset)
+        }
+        setSelected(asset)
+    })
+    electron.ipcRenderer.on('delete', () => {
+        if (selected) {
+            puppet[layer].removeChild(selected)
+            character[layer === 'headBase' ? 'head' : layer].splice(character[layer === 'headBase' ? 'head' : layer].indexOf(selected.asset), 1)
+            selected = null
+            stage.stage.removeChild(selectedGui)
+        }
+    })
+
     // Setup Puppet
     layer = 'body'
-    exports.setPuppet(JSON.parse(JSON.stringify(project.characters[project.actor.id])))
-    resize()
-    window.addEventListener("resize", resize)
-    gameLoop()
+    character = JSON.parse(JSON.stringify(project.characters[project.actor.id]))
+    character.position = 1
+    character.facingLeft = false
+    character.emote = 'default'
+    puppet = stage.addPuppet(character, 1)
+    // I realize it's slightly redundant, but I want to update the editor panels
+    //  while also adding the initial puppet so stage.setPuppet will work
+    exports.setPuppet(character)
 }
 
 exports.addAsset = function(tab, asset) {
@@ -116,20 +243,12 @@ exports.addAsset = function(tab, asset) {
 
 exports.setPuppet = function(newCharacter) {
     selected = null
-    if (selectedGui) stage.removeChild(selectedGui)
+    if (selectedGui) stage.stage.removeChild(selectedGui)
     clickableAssets = []
 
     character = newCharacter
-    var newPuppet = new Puppet(newCharacter)
-
-    newPuppet.container.y = screen.clientHeight / scale
-    newPuppet.container.x = (screen.clientWidth / scale) / 2
-
-    if (puppet)
-        stage.removeChild(puppet.container)
-    puppet = newPuppet
-    stage.addChild(puppet.container)
-    resize()
+    puppet = stage.createPuppet(character)
+    stage.setPuppet(1, puppet)
 
     // Update Editor Panels
     var panel = document.getElementById('editor-layers-panel')
@@ -170,18 +289,18 @@ exports.setPuppet = function(newCharacter) {
 
 function drawBox(box) {
     box.lineStyle(4, 0x242a33)
-    box.moveTo(screen.clientWidth / 2 / scale - selected.width / 2 - 12, screen.clientHeight / scale + selected.height / 2 + 12)
-    box.lineTo(screen.clientWidth / 2 / scale - selected.width / 2 - 12, screen.clientHeight / scale - selected.height / 2 - 12)
-    box.lineTo(screen.clientWidth / 2 / scale + selected.width / 2 + 12, screen.clientHeight / scale - selected.height / 2 - 12)
-    box.lineTo(screen.clientWidth / 2 / scale + selected.width / 2 + 12, screen.clientHeight / scale + selected.height / 2 + 12)
-    box.lineTo(screen.clientWidth / 2 / scale - selected.width / 2 - 12, screen.clientHeight / scale + selected.height / 2 + 12)
+    box.moveTo(stage.screen.clientWidth / 2 / scale - selected.width / 2 - 12, stage.screen.clientHeight / scale + selected.height / 2 + 12)
+    box.lineTo(stage.screen.clientWidth / 2 / scale - selected.width / 2 - 12, stage.screen.clientHeight / scale - selected.height / 2 - 12)
+    box.lineTo(stage.screen.clientWidth / 2 / scale + selected.width / 2 + 12, stage.screen.clientHeight / scale - selected.height / 2 - 12)
+    box.lineTo(stage.screen.clientWidth / 2 / scale + selected.width / 2 + 12, stage.screen.clientHeight / scale + selected.height / 2 + 12)
+    box.lineTo(stage.screen.clientWidth / 2 / scale - selected.width / 2 - 12, stage.screen.clientHeight / scale + selected.height / 2 + 12)
     box.lineStyle(2, 0x242a33, 0.5)
-    box.drawCircle(screen.clientWidth / 2 / scale + selected.width / 2 + 12, screen.clientHeight / scale - selected.height / 2 - 12, 24)
+    box.drawCircle(stage.screen.clientWidth / 2 / scale + selected.width / 2 + 12, stage.screen.clientHeight / scale - selected.height / 2 - 12, 24)
 }
 
 function setSelected(asset) {
     selected = asset
-    if (selectedGui) stage.removeChild(selectedGui)
+    if (selectedGui) stage.stage.removeChild(selectedGui)
     selectedGui = new Container()
     var box = new Graphics()
     drawBox(box)
@@ -194,8 +313,8 @@ function setSelected(asset) {
         graphics.beginFill(0x242a33)
         graphics.drawCircle(0, 0, 6)
         corners[i] = new Sprite(graphics.generateCanvasTexture(1))
-        corners[i].x = screen.clientWidth / 2 / scale - selected.width / 2 - 20 + (24 + selected.width) * (i % 2)
-        corners[i].y = screen.clientHeight / scale - selected.height / 2 - 20 + (24 + selected.height) * Math.floor(i / 2)
+        corners[i].x = stage.screen.clientWidth / 2 / scale - selected.width / 2 - 20 + (24 + selected.width) * (i % 2)
+        corners[i].y = stage.screen.clientHeight / scale - selected.height / 2 - 20 + (24 + selected.height) * Math.floor(i / 2)
         selectedGui.addChild(corners[i])
         corners[i].i = i
         corners[i].interactive = true
@@ -211,12 +330,12 @@ function setSelected(asset) {
     rotate.y = corners[1].y - 24
     selectedGui.addChild(rotate)
     selectedGui.rotate = rotate
-    selectedGui.pivot.x = screen.clientWidth / 2 / scale - selected.width / 2 - 12 + (24 + selected.width) * 0.5
-    selectedGui.pivot.y = screen.clientHeight / scale - selected.height / 2 - 12 + (24 + selected.height) * 0.5
+    selectedGui.pivot.x = stage.screen.clientWidth / 2 / scale - selected.width / 2 - 12 + (24 + selected.width) * 0.5
+    selectedGui.pivot.y = stage.screen.clientHeight / scale - selected.height / 2 - 12 + (24 + selected.height) * 0.5
     selectedGui.x = selected.x + selectedGui.pivot.x
     selectedGui.y = selected.y + selectedGui.pivot.y
     selectedGui.rotation = selected.rotation
-    stage.addChild(selectedGui)
+    stage.stage.addChild(selectedGui)
 }
 
 function editorMousedown(e) {
@@ -242,7 +361,7 @@ function editorMousedown(e) {
         selectedGui.startY = e.data.global.y
     } else if (selected) {
         selected = null
-        stage.removeChild(selectedGui)
+        stage.stage.removeChild(selectedGui)
     }  
 }
 
@@ -277,15 +396,15 @@ function editorMouseup() {
 function resizeMousedown(e) {
     e.stopPropagation()
     selectedGui.dragging = true
-    stage.on('mousemove', resizeMousemove)
-    stage.on('mouseup', resizeMouseup)
+    stage.stage.on('mousemove', resizeMousemove)
+    stage.stage.on('mouseup', resizeMouseup)
     selectedGui.origWidth = selected.width
     selectedGui.origHeight = selected.height
     selectedGui.i = e.currentTarget.i
     var i = 1 - (selectedGui.i % 2) + 2 - 2 * Math.floor(selectedGui.i / 2)
     selectedGui.corner = {
-        "x": selectedGui.corners[i].worldTransform.tx / scale - screen.clientWidth / 2 / scale - (i % 2 == 1 ? 1 : -1) * Math.cos(selected.rotation - Math.PI / 4) * 17 - Math.sin(selected.rotation - Math.PI / 4) * 11,
-        "y": selectedGui.corners[i].worldTransform.ty / scale - screen.clientHeight / scale + (Math.floor(i / 2) == 1 ? 1 : -1) * Math.sin(selected.rotation - Math.PI / 4) * 17 + Math.cos(selected.rotation - Math.PI / 4) * 11
+        "x": selectedGui.corners[i].worldTransform.tx / scale - stage.screen.clientWidth / 2 / scale - (i % 2 == 1 ? 1 : -1) * Math.cos(selected.rotation - Math.PI / 4) * 17 - Math.sin(selected.rotation - Math.PI / 4) * 11,
+        "y": selectedGui.corners[i].worldTransform.ty / scale - stage.screen.clientHeight / scale + (Math.floor(i / 2) == 1 ? 1 : -1) * Math.sin(selected.rotation - Math.PI / 4) * 17 + Math.cos(selected.rotation - Math.PI / 4) * 11
     }
     if (i === 0) {
         selectedGui.corner.x -= Math.sin(selected.rotation) * 24
@@ -327,21 +446,21 @@ function resizeMousemove(e) {
     selectedGui.box.clear()
     drawBox(selectedGui.box)
     for (var i = 0; i < selectedGui.corners.length; i++) {
-        selectedGui.corners[i].x = screen.clientWidth / 2 / scale - selected.width / 2 - 20 + (24 + selected.width) * (i % 2)
-        selectedGui.corners[i].y = screen.clientHeight / scale - selected.height / 2 - 20 + (24 + selected.height) * Math.floor(i / 2)
+        selectedGui.corners[i].x = stage.screen.clientWidth / 2 / scale - selected.width / 2 - 20 + (24 + selected.width) * (i % 2)
+        selectedGui.corners[i].y = stage.screen.clientHeight / scale - selected.height / 2 - 20 + (24 + selected.height) * Math.floor(i / 2)
     }
     selectedGui.rotate.x = selectedGui.corners[1].x + 12
     selectedGui.rotate.y = selectedGui.corners[1].y - 24
-    selectedGui.pivot.x = screen.clientWidth / 2 / scale - selected.width / 2 - 12 + (24 + selected.width) * 0.5
-    selectedGui.pivot.y = screen.clientHeight / scale - selected.height / 2 - 12 + (24 + selected.height) * 0.5
+    selectedGui.pivot.x = stage.screen.clientWidth / 2 / scale - selected.width / 2 - 12 + (24 + selected.width) * 0.5
+    selectedGui.pivot.y = stage.screen.clientHeight / scale - selected.height / 2 - 12 + (24 + selected.height) * 0.5
     selectedGui.x = selected.x + selectedGui.pivot.x
     selectedGui.y = selected.y + selectedGui.pivot.y
 }
 
 function resizeMouseup() {
     selectedGui.dragging = false
-    stage.off('mousemove', resizeMousemove)
-    stage.off('mouseup', resizeMouseup)
+    stage.stage.off('mousemove', resizeMousemove)
+    stage.stage.off('mouseup', resizeMouseup)
     selected.asset.scaleX /= selectedGui.origWidth / selected.width
     selected.asset.scaleY /= selectedGui.origHeight / selected.height
     selected.asset.x = selected.x
@@ -351,13 +470,13 @@ function resizeMouseup() {
 function rotateMousedown(e) {
     e.stopPropagation()
     selectedGui.dragging = true
-    stage.on('mousemove', rotateMousemove)
-    stage.on('mouseup', rotateMouseup)
-    selectedGui.startRotation = Math.atan2((screen.clientHeight - e.data.global.y) / scale + selected.asset.y, (e.data.global.x - screen.clientWidth / 2) / scale - selected.asset.x) + selected.asset.rotation
+    stage.stage.on('mousemove', rotateMousemove)
+    stage.stage.on('mouseup', rotateMouseup)
+    selectedGui.startRotation = Math.atan2((stage.screen.clientHeight - e.data.global.y) / scale + selected.asset.y, (e.data.global.x - stage.screen.clientWidth / 2) / scale - selected.asset.x) + selected.asset.rotation
 }
 
 function rotateMousemove(e) {
-    var rotation = selectedGui.startRotation - Math.atan2((screen.clientHeight - e.data.global.y) / scale + selected.asset.y, (e.data.global.x - screen.clientWidth / 2) / scale - selected.asset.x)
+    var rotation = selectedGui.startRotation - Math.atan2((stage.screen.clientHeight - e.data.global.y) / scale + selected.asset.y, (e.data.global.x - stage.screen.clientWidth / 2) / scale - selected.asset.x)
     if (e.data.originalEvent.ctrlKey)
         rotation = Math.round(rotation / ROUND_ROTATION) * ROUND_ROTATION
     selected.rotation = rotation
@@ -366,295 +485,10 @@ function rotateMousemove(e) {
 
 function rotateMouseup() {
     selectedGui.dragging = false
-    stage.off('mousemove', rotateMousemove)
-    stage.off('mouseup', rotateMouseup)
+    stage.stage.off('mousemove', rotateMousemove)
+    stage.stage.off('mouseup', rotateMouseup)
     selected.asset.rotation = selected.rotation
 }
-
-function resize() {
-    renderer.resize(screen.clientWidth, screen.clientHeight)
-    stage.scale.x = stage.scale.y = scale
-    puppet.container.y = screen.clientHeight / scale
-    puppet.container.x = (screen.clientWidth / scale) / 2
-    selected = null
-    if (selectedGui) stage.removeChild(selectedGui)
-}
-
-function gameLoop() {
-    requestAnimationFrame(gameLoop)
-    renderer.render(stage)
-}
-
-document.getElementById('editor-save').addEventListener('click', () => {
-    status.log('Saving puppet...')
-    project.characters[character.id] = character
-    project.saveCharacter(character)
-    selected = null
-    if (selectedGui) stage.removeChild(selectedGui)
-    renderer.render(stage)
-    updateCharacter(character, renderer.view.toDataURL().replace(/^data:image\/\w+;base64,/, ""))
-    status.log('Puppet saved!')
-})
-
-document.getElementById('editor-new').addEventListener('click', () => {
-    exports.setPuppet(JSON.parse(project.getEmptyCharacter()))
-})
-
-document.getElementById('editor-duplicate').addEventListener('click', () =>  {
-    exports.setPuppet(JSON.parse(project.duplicateCharacter(character)))
-})
-
-document.getElementById('editor-import').addEventListener('click', () => {
-    remote.dialog.showOpenDialog(remote.BrowserWindow.getFocusedWindow(), {
-        title: 'Import Character',
-        filters: [
-          {name: 'JSON Files', extensions: ['json']},
-          {name: 'All Files', extensions: ['*']}
-        ],
-        properties: [
-          'openFile'
-        ] 
-      }, (filepaths) => {
-        if (filepaths)
-            fs.readJson(filepaths[0], (err, character) => {
-                if (err) console.log(err)
-                else exports.setPuppet(JSON.parse(project.duplicateCharacter(character)))
-            })
-      })
-})
-
-function openPuppet(e) {
-    document.getElementById('editor-screen').style.display = ''
-    document.getElementById('editor-open-panel').style.display = 'none'
-    exports.setPuppet(JSON.parse(JSON.stringify(project.characters[e.target.charid])))
-}
-
-document.getElementById('editor-open').addEventListener('click', () => {
-    document.getElementById('editor-layers-panel').style.display = 'none'
-    document.getElementById('editor-babble-panel').style.display = 'none'
-    document.getElementById('editor-settings-panel').style.display = 'none'
-    var panel = document.getElementById('editor-open-panel')
-    if (panel.style.display === 'none') {
-        document.getElementById('editor-screen').style.display = 'none'
-        panel.style.display = ''
-        var charList = document.getElementById('char open list')
-        charList.innerHTML = ''
-        var characters = Object.keys(project.characters)
-        for (var j = 0; j < characters.length; j++) {
-            var selector = document.createElement('div')
-            selector.id = project.characters[characters[j]].name.toLowerCase()
-            selector.className = "char"
-            selector.style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', characters[j] + '.png?random=' + new Date().getTime()) + ')'
-            charList.appendChild(selector)
-            selector.innerHTML = '<div class="desc">' + project.characters[characters[j]].name + '</div>'
-            selector.charid = characters[j]
-            selector.addEventListener('click', openPuppet)
-        }
-    } else {
-        document.getElementById('editor-screen').style.display = ''
-        panel.style.display = 'none'
-    }
-})
-
-function updateCharSearch(e) {
-    var list = document.getElementById('char open list')
-    if (e.target.value === '') {
-        for (var i = 0; i < list.children.length; i++)
-            list.children[i].style.display = 'inline-block'
-    } else {
-        for (var i = 0; i < list.children.length; i++)
-            list.children[i].style.display = 'none'
-        var chars = list.querySelectorAll("[id*='" + e.target.value.toLowerCase() + "']")
-        for (var i = 0; i < chars.length; i++) {
-            chars[i].style.display = 'inline-block'
-        }
-    }
-}
-
-document.getElementById('char open search').addEventListener('keyup', updateCharSearch)
-
-// This one's so that we capture clearing the search bar
-document.getElementById('char open search').addEventListener('search', updateCharSearch)
-
-function setLayer(e) {
-    document.getElementById('editor-screen').style.display = ''
-    document.getElementById('editor-layers-panel').style.display = 'none'
-    layer = e.target.id
-    if (layer.indexOf('-emote') > -1) {
-        puppet.changeEmote(layer.replace(/-emote/, ''))
-    }
-    var selected = document.getElementById('editor-layers-panel').getElementsByClassName("selected")
-    while (selected.length)
-        selected[0].classList.remove("selected")
-    document.getElementById(layer).className += " selected"
-    selected = null
-    if (selectedGui) stage.removeChild(selectedGui)
-}
-
-document.getElementById('editor-layers').addEventListener('click', () => {
-    document.getElementById('editor-open-panel').style.display = 'none'
-    document.getElementById('editor-babble-panel').style.display = 'none'
-    document.getElementById('editor-settings-panel').style.display = 'none'
-    var panel = document.getElementById('editor-layers-panel')
-    if (panel.style.display === 'none') {
-        document.getElementById('editor-screen').style.display = 'none'
-        panel.style.display = ''
-    } else {
-        document.getElementById('editor-screen').style.display = ''
-        panel.style.display = 'none'
-    }
-})
-
-var buttons = document.getElementById('editor-layers-panel').getElementsByTagName('button')
-for (var i = 0; i < buttons.length; i++)
-    buttons[i].addEventListener('click', setLayer)
-
-function layerContextMenu(e) {
-    var emote = e.target.id.replace(/-emote/, '')
-    if (character.emotes[emote] && character.emotes[emote].enabled && emote !== 'default') {
-        character.emotes[emote].enabled = false
-        e.target.classList.remove('available')
-    } else {
-        if (character.emotes[emote])
-            character.emotes[emote].enabled = true
-        else
-            character.emotes[emote] = {
-                "enabled": true,
-                "mouth": [],
-                "eyes": []
-            }
-        e.target.className += " available"
-    }
-}
-
-var emotes = document.getElementById('editor-layers-panel').getElementsByClassName('emote')
-for (var i = 0; i < emotes.length; i++)
-    emotes[i].addEventListener('contextmenu', layerContextMenu)
-
-document.getElementById('editor-babble').addEventListener('click', () => {
-    document.getElementById('editor-open-panel').style.display = 'none'
-    document.getElementById('editor-layers-panel').style.display = 'none'
-    document.getElementById('editor-settings-panel').style.display = 'none'
-    var panel = document.getElementById('editor-babble-panel')
-    if (panel.style.display === 'none') {
-        document.getElementById('editor-screen').style.display = 'none'
-        panel.style.display = ''
-    } else {
-        document.getElementById('editor-screen').style.display = ''
-        panel.style.display = 'none'
-    }
-})
-
-function mouthLayerClick(e) {
-    var emote = e.target.id.replace(/-mouth/, '')
-    if (character.mouths.indexOf(emote) > -1) {
-        character.mouths.splice(character.mouths.indexOf(emote), 1)
-        e.target.classList.remove('available')
-    } else {
-        character.mouths.push(emote)
-        e.target.className += ' available'
-    }
-}
-
-emotes = document.getElementById('babble-mouths').getElementsByClassName('emote')
-for (var i = 0; i < emotes.length; i++)
-    emotes[i].addEventListener('click', mouthLayerClick)
-
-function eyesLayerClick(e) {
-    var emote = e.target.id.replace(/-eyes/, '')
-    if (character.eyes.indexOf(emote) > -1) {
-        character.eyes.splice(character.eyes.indexOf(emote), 1)
-        e.target.classList.remove('available')
-    } else {
-        character.eyes.push(emote)
-        e.target.className += ' available'
-    }
-}
-
-emotes = document.getElementById('babble-eyes').getElementsByClassName('emote')
-for (var i = 0; i < emotes.length; i++)
-    emotes[i].addEventListener('click', eyesLayerClick)
-
-document.getElementById('editor-settings').addEventListener('click', () => {
-    document.getElementById('editor-open-panel').style.display = 'none'
-    document.getElementById('editor-layers-panel').style.display = 'none'
-    document.getElementById('editor-babble-panel').style.display = 'none'
-    var panel = document.getElementById('editor-settings-panel')
-    if (panel.style.display === 'none') {
-        document.getElementById('editor-screen').style.display = 'none'
-        panel.style.display = ''
-    } else {
-        document.getElementById('editor-screen').style.display = ''
-        panel.style.display = 'none'
-    }
-})
-
-document.getElementById('editor-name').addEventListener('change', (e) => {
-    character.name = e.target.value
-})
-
-document.getElementById('deadbonesstyle').addEventListener('click', (e) => {
-    character.deadbonesStyle = e.target.checked
-})
-
-document.getElementById('delete-character').addEventListener('click', () => {
-    if (character.id == project.actor.id) {
-        remote.dialog.showErrorBox("Can't delete character", "You can't delete your active character. Please switch characters and try again.")
-        return
-    }
-    project.deleteCharacter(character)
-    deleteCharacter(character)
-    for (var i = 0; i < project.project.characters.length; i++) {
-        if (project.project.characters[i].id == character.id) {
-            project.project.characters.splice(i, 1)
-            delete project.characters[character.id]
-        }
-    }
-    document.getElementById('editor-screen').style.display = ''
-    document.getElementById('editor-settings-panel').style.display = 'none'
-    exports.setPuppet(project.characters[project.actor.id])
-})
-
-document.getElementById('add-asset').addEventListener('click', () => {
-    remote.dialog.showOpenDialog(remote.BrowserWindow.getFocusedWindow(), {
-        title: 'Add Assets',
-        filters: [
-          {name: 'Image', extensions: ['png']}
-        ],
-        properties: [
-          'openFile',
-          'multiSelections'
-        ] 
-    }, (filepaths) => {
-        for (var i = 0; i < filepaths.length; i++) {
-            var filename = filepaths[i].replace(/^.*[\\\/]/, '')
-            var tab = document.getElementById('asset tabs').value
-            fs.copySync(filepaths[i], path.join(project.assetsPath, tab, filename))
-            if (!project.assets[tab])
-                project.assets[tab] = {}
-            project.assets[tab][asset] = {"location": path.join(tab, asset + '.png')}
-            addAsset(tab, filename.replace(/.png/, ''))
-        }
-    })
-})
-
-document.getElementById('new-asset-bundle').addEventListener('click', () => {
-    // TODO implement
-})
-
-document.getElementById('edit-asset-list').addEventListener('click', () => {
-    // TODO implement
-})
-
-document.getElementById('new-asset-list').addEventListener('click', () => {
-    // TODO implement
-})
-
-document.getElementById('import-asset-list').addEventListener('click', () => {
-    // TODO implement
-})
-
-window.addEventListener('mouseup', mouseUp, false);
 
 function mouseUp(e) {
     if (asset) {
@@ -668,7 +502,7 @@ function mouseUp(e) {
             var rect = document.getElementById('editor-screen').getBoundingClientRect()
             if (rect.left < e.clientX && rect.right > e.clientX && rect.top < e.clientY && rect.bottom > e.clientY) {
                 selected = null
-                if (selectedGui) stage.removeChild(selectedGui)
+                if (selectedGui) stage.stage.removeChild(selectedGui)
                 var newAsset = {
                     "tab": asset.tab,
                     "name": asset.asset,
@@ -680,15 +514,15 @@ function mouseUp(e) {
                 }
                 if (layer.indexOf('-emote') > -1) {
                     if (document.getElementById('eyemouth').checked) {
-                        puppet.emotes[layer.replace(/-emote/, '')].eyes.addChild(getAsset(newAsset, layer))
+                        puppet.emotes[layer.replace(/-emote/, '')].eyes.addChild(stage.getAsset(newAsset, layer))
                         character.emotes[layer.replace(/-emote/, '')].eyes.push(newAsset)
                     } else {
-                        puppet.emotes[layer.replace(/-emote/, '')].mouth.addChild(getAsset(newAsset, layer))
+                        puppet.emotes[layer.replace(/-emote/, '')].mouth.addChild(stage.getAsset(newAsset, layer))
                         character.emotes[layer.replace(/-emote/, '')].mouth.push(newAsset)
                     }
                 } else {
-                    puppet[layer].addChild(getAsset(newAsset, layer))
-                    character[layer].push(newAsset)
+                    puppet[layer].addChild(stage.getAsset(newAsset, layer))
+                    character[layer === 'headBase' ? 'head' : layer].push(newAsset)
                 }
             } 
             asset = null
@@ -726,58 +560,256 @@ function mouseDown(e) {
     }
 }
 
-document.getElementById('asset selected').addEventListener('click', () => {
-    document.getElementById('assets').style.display = ''
-    document.getElementById('asset editor').style.display = 'none'
-})
-
-for (var i = 0; i < project.project.assets.length; i++) {
-    var tabOption = document.createElement('option')
-    tabOption.text = project.project.assets[i].name
-    document.getElementById('asset-tab').add(tabOption)
-}
-
-document.getElementById('asset-tab').addEventListener('change', function(e) {
-    // TODO implement moving assets to new list
-    // move asset to new folder
-    // remove asset from current tab
-    // add asset to new tab
-    // update any character using asset in project
-    // update character in editor if using it
-    // tell server to tell other clients to move it
-})
-
-document.getElementById('asset-name').addEventListener('change', (e) => {
-    // TODO implement renaming assets
-    // rename asset in asset list
-    // rename asset in project
-    // update any character using asset in project
-    // update character in editor if using it
-    // tell server to tell other clients to rename it
-})
-
-document.getElementById('delete-asset').addEventListener('click', (e) => {
-    // TODO implement deleting assets
-    // remove asset from asset list
-    // remove asset from project
-    // remove asset from any character using it
-    // update any character in babble using asset
-    // update character in editor if using asset
-    // tell server to tell other clients to delete asset
-})
-
 function moveAsset(e) {
     asset.dragging = true
     asset.style.top = (e.clientY - asset.height / 2) + 'px'
     asset.style.left = (e.clientX - asset.width / 2) + 'px'
 }
 
-document.getElementById('asset tabs').addEventListener('change', function(e) {
+function savePuppet() {
+    status.log('Saving puppet...')
+    project.characters[character.id] = character
+    project.saveCharacter(character)
+    selected = null
+    if (selectedGui) stage.stage.removeChild(selectedGui)
+    stage.renderer.render(stage.stage)
+    application.updateCharacter(character, stage.renderer.view.toDataURL().replace(/^data:image\/\w+;base64,/, ""))
+    status.log('Puppet saved!')
+}
+
+function newPuppet() {
+    exports.setPuppet(JSON.parse(project.getEmptyCharacter()))
+}
+
+function dupePuppet() {
+    exports.setPuppet(JSON.parse(project.duplicateCharacter(character)))
+}
+
+function importPuppet() {
+    remote.dialog.showOpenDialog(remote.BrowserWindow.getFocusedWindow(), {
+        title: 'Import Character',
+        filters: [
+            {name: 'JSON Files', extensions: ['json']},
+            {name: 'All Files', extensions: ['*']}
+        ],
+        properties: [
+            'openFile'
+        ] 
+    }, (filepaths) => {
+        if (filepaths)
+            fs.readJson(filepaths[0], (err, character) => {
+                if (err) console.log(err)
+                else exports.setPuppet(JSON.parse(project.duplicateCharacter(character)))
+            })
+    })
+}
+
+function openPuppet(e) {
+    document.getElementById('editor-screen').style.display = ''
+    document.getElementById('editor-open-panel').style.display = 'none'
+    exports.setPuppet(JSON.parse(JSON.stringify(project.characters[e.target.charid])))
+}
+
+function updateCharSearch(e) {
+    var list = document.getElementById('char open list')
+    if (e.target.value === '') {
+        for (var i = 0; i < list.children.length; i++)
+            list.children[i].style.display = 'inline-block'
+    } else {
+        for (var i = 0; i < list.children.length; i++)
+            list.children[i].style.display = 'none'
+        var chars = list.querySelectorAll("[id*='" + e.target.value.toLowerCase() + "']")
+        for (var i = 0; i < chars.length; i++) {
+            chars[i].style.display = 'inline-block'
+        }
+    }
+}
+
+function openPuppetPanel() {
+    document.getElementById('editor-layers-panel').style.display = 'none'
+    document.getElementById('editor-babble-panel').style.display = 'none'
+    document.getElementById('editor-settings-panel').style.display = 'none'
+    var panel = document.getElementById('editor-open-panel')
+    if (panel.style.display === 'none') {
+        document.getElementById('editor-screen').style.display = 'none'
+        panel.style.display = ''
+        var charList = document.getElementById('char open list')
+        charList.innerHTML = ''
+        var characters = Object.keys(project.characters)
+        for (var j = 0; j < characters.length; j++) {
+            var selector = document.createElement('div')
+            selector.id = project.characters[characters[j]].name.toLowerCase()
+            selector.className = "char"
+            selector.style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', characters[j] + '.png?random=' + new Date().getTime()) + ')'
+            charList.appendChild(selector)
+            selector.innerHTML = '<div class="desc">' + project.characters[characters[j]].name + '</div>'
+            selector.charid = characters[j]
+            selector.addEventListener('click', openPuppet)
+        }
+    } else {
+        document.getElementById('editor-screen').style.display = ''
+        panel.style.display = 'none'
+    }
+}
+
+function toggleLayers() {
+    document.getElementById('editor-open-panel').style.display = 'none'
+    document.getElementById('editor-babble-panel').style.display = 'none'
+    document.getElementById('editor-settings-panel').style.display = 'none'
+    var panel = document.getElementById('editor-layers-panel')
+    if (panel.style.display === 'none') {
+        document.getElementById('editor-screen').style.display = 'none'
+        panel.style.display = ''
+    } else {
+        document.getElementById('editor-screen').style.display = ''
+        panel.style.display = 'none'
+    }
+}
+
+function toggleBabble() {
+    document.getElementById('editor-open-panel').style.display = 'none'
+    document.getElementById('editor-layers-panel').style.display = 'none'
+    document.getElementById('editor-settings-panel').style.display = 'none'
+    var panel = document.getElementById('editor-babble-panel')
+    if (panel.style.display === 'none') {
+        document.getElementById('editor-screen').style.display = 'none'
+        panel.style.display = ''
+    } else {
+        document.getElementById('editor-screen').style.display = ''
+        panel.style.display = 'none'
+    }
+}
+
+function toggleSettings() {
+    document.getElementById('editor-open-panel').style.display = 'none'
+    document.getElementById('editor-layers-panel').style.display = 'none'
+    document.getElementById('editor-babble-panel').style.display = 'none'
+    var panel = document.getElementById('editor-settings-panel')
+    if (panel.style.display === 'none') {
+        document.getElementById('editor-screen').style.display = 'none'
+        panel.style.display = ''
+    } else {
+        document.getElementById('editor-screen').style.display = ''
+        panel.style.display = 'none'
+    }
+}
+
+function setLayer(e) {
+    document.getElementById('editor-screen').style.display = ''
+    document.getElementById('editor-layers-panel').style.display = 'none'
+    layer = e.target.id
+    if (layer.indexOf('-emote') > -1) {
+        puppet.changeEmote(layer.replace(/-emote/, ''))
+    }
+    var selected = document.getElementById('editor-layers-panel').getElementsByClassName("selected")
+    while (selected.length)
+        selected[0].classList.remove("selected")
+    document.getElementById(layer).className += " selected"
+    selected = null
+    if (selectedGui) stage.stage.removeChild(selectedGui)
+}
+
+function layerContextMenu(e) {
+    var emote = e.target.id.replace(/-emote/, '')
+    if (character.emotes[emote] && character.emotes[emote].enabled && emote !== 'default') {
+        character.emotes[emote].enabled = false
+        e.target.classList.remove('available')
+    } else {
+        if (character.emotes[emote])
+            character.emotes[emote].enabled = true
+        else
+            character.emotes[emote] = {
+                "enabled": true,
+                "mouth": [],
+                "eyes": []
+            }
+        e.target.className += " available"
+    }
+}
+
+function mouthLayerClick(e) {
+    var emote = e.target.id.replace(/-mouth/, '')
+    if (character.mouths.indexOf(emote) > -1) {
+        character.mouths.splice(character.mouths.indexOf(emote), 1)
+        e.target.classList.remove('available')
+    } else {
+        character.mouths.push(emote)
+        e.target.className += ' available'
+    }
+}
+
+function eyesLayerClick(e) {
+    var emote = e.target.id.replace(/-eyes/, '')
+    if (character.eyes.indexOf(emote) > -1) {
+        character.eyes.splice(character.eyes.indexOf(emote), 1)
+        e.target.classList.remove('available')
+    } else {
+        character.eyes.push(emote)
+        e.target.className += ' available'
+    }
+}
+
+function nameChange(e) {
+    character.name = e.target.value
+}
+
+function bobbleChange(e) {
+    character.deadbonesStyle = e.target.checked
+}
+
+function deleteCharacter() {
+    if (character.id == project.actor.id) {
+        status.error("You can't delete your active character. Please switch characters and try again.")
+        return
+    }
+    project.deleteCharacter(character)
+    controller.deleteCharacter(character)
+    for (var i = 0; i < project.project.characters.length; i++) {
+        if (project.project.characters[i].id == character.id) {
+            project.project.characters.splice(i, 1)
+            delete project.characters[character.id]
+        }
+    }
+    document.getElementById('editor-screen').style.display = ''
+    document.getElementById('editor-settings-panel').style.display = 'none'
+    exports.setPuppet(project.characters[project.actor.id])
+}
+
+function addAsset() {
+    remote.dialog.showOpenDialog(remote.BrowserWindow.getFocusedWindow(), {
+        title: 'Add Assets',
+        filters: [
+          {name: 'Image', extensions: ['png']}
+        ],
+        properties: [
+          'openFile',
+          'multiSelections'
+        ] 
+    }, (filepaths) => {
+        if (!filepaths) return
+        for (var i = 0; i < filepaths.length; i++) {
+            var filename = filepaths[i].replace(/^.*[\\\/]/, '')
+            var tab = document.getElementById('asset tabs').value
+            fs.copySync(filepaths[i], path.join(project.assetsPath, tab, filename))
+            if (!project.assets[tab])
+                project.assets[tab] = {}
+            project.assets[tab][asset] = {"location": path.join(tab, asset + '.png')}
+            controller.addAsset(tab, filename.replace(/.png/, ''))
+        }
+    })
+}
+
+function selectAsset() {
+    document.getElementById('assets').style.display = ''
+    document.getElementById('asset editor').style.display = 'none'
+}
+
+function assetTabs(e) {
     var assetKeys = Object.keys(project.assets)
     for (var i = 0; i < assetKeys.length; i++)
         document.getElementById('tab ' + assetKeys[i]).style.display = 'none'
     document.getElementById('tab ' + e.target.value).style.display = ''
-})
+}
 
 function updateAssetSearch(e) {
     var assetKeys = Object.keys(project.assets)
@@ -797,169 +829,12 @@ function updateAssetSearch(e) {
     }
 }
 
-document.getElementById('asset search').addEventListener('keyup', updateAssetSearch)
-
-// This one's so that we capture clearing the search bar
-document.getElementById('asset search').addEventListener('search', updateAssetSearch)
-
-document.getElementById('zoom in').addEventListener('click', () => {
+function zoomIn() {
     scale *= 2
-    resize()
-})
+    stage.resize()
+}
 
-document.getElementById('zoom out').addEventListener('click', () => {
+function zoomOut() {
     scale /= 2
-    resize()
-})
-
-electron.ipcRenderer.on('cut', () => {
-    if (selected) {
-        electron.clipboard.writeText(JSON.stringify(selected.asset))
-        puppet[layer].removeChild(selected)
-        character[layer].splice(character[layer].indexOf(selected.asset), 1)
-        selected = null
-        stage.removeChild(selectedGui)
-    }
-})
-
-electron.ipcRenderer.on('copy', () => {
-    if (selected) electron.clipboard.writeText(JSON.stringify(selected.asset))
-})
-
-electron.ipcRenderer.on('paste', () => {
-    var newAsset
-    try {
-        newAsset = JSON.parse(electron.clipboard.readText())
-    } catch (e) {
-        return
-    }
-    var asset = getAsset(newAsset, layer)
-    if (layer.indexOf('-emote') > -1) {
-        if (document.getElementById('eyemouth').checked) {
-            puppet.emotes[layer.replace(/-emote/, '')].eyes.addChild(asset)
-            character.emotes[layer.replace(/-emote/, '')].eyes.push(newAsset)
-        } else {
-            puppet.emotes[layer.replace(/-emote/, '')].mouth.addChild(asset)
-            character.emotes[layer.replace(/-emote/, '')].mouth.push(newAsset)
-        }
-    } else {
-        puppet[layer].addChild(asset)
-        character[layer].push(newAsset)
-    }
-    setSelected(asset)
-})
-
-electron.ipcRenderer.on('delete', () => {
-    if (selected) {
-        puppet[layer].removeChild(selected)
-        character[layer].splice(character[layer].indexOf(selected.asset), 1)
-        selected = null
-        stage.removeChild(selectedGui)
-    }
-})
-
-// Puppet Prototype
-var Puppet = function(puppet) {
-    // Init Variables
-    this.babbling = false
-    this.name = puppet.name
-    this.container = new Container()
-    this.container.pivot.x = this.container.pivot.y = 0.5
-    this.eyes = puppet.eyes
-    this.mouths = puppet.mouths
-    this.deadbonesStyle = puppet.deadbonesStyle
-    this.eyesAnim = this.mouthAnim = this.deadbonesAnim = 0
-    this.eyesDuration = this.mouthDuration = this.deadbonesDuration = 0
-    this.deadbonesTargetY = this.deadbonesStartY = 0
-    this.deadbonesTargetRotation = this.deadbonesStartRotation = 0
-
-    // Construct Puppet
-    this.body = new Container()
-    for (var i = 0; i < puppet.body.length; i++) {
-        this.body.addChild(getAsset(puppet.body[i], 'body'))
-    }
-    this.container.addChild(this.body)
-
-    this.head = new Container()
-    this.headBase = new Container()
-    for (var i = 0; i < puppet.head.length; i++) {
-        this.headBase.addChild(getAsset(puppet.head[i], 'head'))
-    }
-    this.head.addChild(this.headBase)
-    this.emotes = {}
-    this.mouthsContainer = new Container()
-    this.eyesContainer = new Container()
-    var emotes = Object.keys(puppet.emotes)
-    for (var i = 0; i < emotes.length; i++) {
-        if (!puppet.emotes[emotes[i]].enabled) continue
-        this.emotes[emotes[i]] = {
-            "mouth": new Container(),
-            "eyes": new Container()
-        }
-        this.mouthsContainer.addChild(this.emotes[emotes[i]].mouth)
-        this.eyesContainer.addChild(this.emotes[emotes[i]].eyes)
-        for (var j = 0; j < puppet.emotes[emotes[i]].mouth.length; j++) {
-            this.emotes[emotes[i]].mouth.addChild(getAsset(puppet.emotes[emotes[i]].mouth[j], emotes[i] + '-emote'))
-        }
-        for (var j = 0; j < puppet.emotes[emotes[i]].eyes.length; j++) {
-            this.emotes[emotes[i]].eyes.addChild(getAsset(puppet.emotes[emotes[i]].eyes[j], emotes[i] + '-emote'))
-        }
-    }
-    this.head.addChild(this.mouthsContainer)
-    this.head.addChild(this.eyesContainer)
-    this.hat = new Container()
-    for (var i = 0; i < puppet.hat.length; i++) {
-        this.hat.addChild(getAsset(puppet.hat[i], 'hat'))
-    }
-    this.head.addChild(this.hat)
-    this.head.pivot.y = - this.headBase.height / 2
-    this.head.y = - this.headBase.height / 2
-    this.deadbonesTargetY = this.deadbonesStartY = - this.headBase.height / 2
-    this.container.addChild(this.head)
-
-    this.props = new Container()
-    for (var i = 0; i < puppet.props.length; i++) {
-        this.props.addChild(getAsset(puppet.props[i], 'props'))
-    }
-    this.container.addChild(this.props)
-
-    // Finish Setup
-    this.changeEmote(puppet.emote)
-
-    // Place Puppet on Stage
-    this.container.y = screen.clientHeight / scale
-    this.container.x = (screen.clientWidth / scale) / 2
-
-    // Face right
-    this.container.scale.x = 1
-}
-
-Puppet.prototype.changeEmote = function (emote) {
-    this.emote = emote
-    var emotes = Object.keys(this.emotes)
-    for (var i = 0; i < emotes.length; i++) {
-        this.emotes[emotes[i]].mouth.visible = false
-        this.emotes[emotes[i]].eyes.visible = false
-    }
-    if (this.emotes[emote]) {
-        this.emotes[emote].mouth.visible = true
-        this.emotes[emote].eyes.visible = true
-    } else {
-        this.emotes['default'].mouth.visible = true
-        this.emotes['default'].eyes.visible = true
-    }
-}
-
-function getAsset(asset, layer) {
-    var sprite = new Sprite(TextureCache[path.join(project.assetsPath, project.assets[asset.tab][asset.name].location)])
-    sprite.anchor.set(0.5)
-    sprite.x = asset.x
-    sprite.y = asset.y
-    sprite.rotation = asset.rotation
-    sprite.scale.x = asset.scaleX
-    sprite.scale.y = asset.scaleY
-    sprite.layer = layer
-    sprite.asset = asset
-    clickableAssets.push(sprite)
-    return sprite
+    stage.resize()
 }

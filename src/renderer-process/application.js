@@ -2,40 +2,118 @@
 // be executed in the renderer process for that window.
 // All of the Node.js APIs are available in this process.
 
+// Imports
 const electron = require('electron')
-const remote = electron.remote
-const BrowserWindow = remote.BrowserWindow
-const babble = require('./babble.js')
-const editor = require('./editor.js')
-const status = require('./status.js')
-const project = remote.require('./main-process/project')
+const controller = require('./controller.js')
+const network = require('./network.js')
+const project = electron.remote.require('./main-process/project')
 const path = require('path')
-const url = require('url')
-const http = require('http')
-const ss = require('socket.io-stream')
 const fs = require('fs-extra')
 
+// Constants
 var emotes = ['default', 'happy', 'wink', 'kiss', 'angry', 'sad', 'ponder', 'gasp', 'veryangry', 'verysad', 'confused', 'ooo']
-var hotbar = []
-var puppet
-var popout
-var server
-var puppets = []
-var numPuppets = 1
 
-status.init()
-status.log('Loading project...')
-babble.init('screen', project.project, project.assets, project.assetsPath, loadPuppets)
+exports.init = function() {
+	// Init everything
+	controller.init()
 
-// Editor callback functions
-function updateCharacter(character, thumbnail) {
+	// Window input events
+	window.onkeydown = keyDown
+	window.onkeyup = keyUp
+
+	// DOM listeners
+	for (var i = 0; i < 9; i++) {
+		var element = document.getElementById('char ' + i)
+		element.i = i
+		element.addEventListener('click', charClick)
+		element.addEventListener('contextmenu', charContextMenu)
+		if (project.project.hotbar[i]) {
+			element.getElementsByClassName('desc')[0].innerHTML = project.characters[project.project.hotbar[i]].name
+			element.style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', project.project.hotbar[i] + '.png?random=' + new Date().getTime()) + ')'
+		}
+	}
+	document.getElementById('char null').addEventListener('click', updateHotbar)
+	document.getElementById('char null').puppet = ''
+	document.getElementById('char search').addEventListener('keyup', updateCharSearch)
+	document.getElementById('char search').addEventListener('search', updateCharSearch)
+	document.getElementById('char selected').addEventListener('click', charSelectedClick)
+	document.getElementById('greenscreen').addEventListener('click', toggleGreenScreen)
+	for (var i = 0; i < emotes.length; i++) {
+		var element = document.getElementById(emotes[i])
+		element.emote = emotes[i]
+		element.addEventListener('click', emoteClick)
+	}
+	document.getElementById('popout').addEventListener('click', controller.popOut)
+	document.getElementById('settings').addEventListener('click', toggleSettings)
+	document.getElementById('colorpicker').addEventListener('change', colorpickerChange)
+	document.getElementById('transparent').addEventListener('click', toggleTransparent)
+	document.getElementById('minslotwidth').addEventListener('change', minslotwidthChange)
+	document.getElementById('numslots').addEventListener('change', numslotsChange)
+	document.getElementById('ip').addEventListener('change', ipChange)
+	document.getElementById('port').addEventListener('change', portChange)
+	document.getElementById('host').addEventListener('click', network.host)
+	document.getElementById('connect').addEventListener('click', network.connect)
+
+	// Handle input events from popout
+	electron.ipcRenderer.on('keyDown', (event, key) => {
+		window.onkeydown({"keyCode": key})
+	})
+	electron.ipcRenderer.on('keyUp', (event, key) => {
+		window.onkeyup({"keyCode": key})
+	})
+	electron.ipcRenderer.on('init', () => {
+		controller.emitPopout('init', network.getPuppets())
+	})
+
+	// Load settings values
+	document.getElementById('colorpicker').value = project.project.greenScreen
+	document.getElementById('transparent').checked = project.project.transparent
+	document.getElementById('minslotwidth').value = project.project.minSlotWidth
+	document.getElementById('numslots').value = project.project.numCharacters
+	document.getElementById('ip').value = project.project.ip
+	document.getElementById('port').value = project.project.port
+}
+
+// Update UI when user selects a new puppet
+// Specifically, tint the character in the hotbar,
+//  and tint available emotes for this puppet
+exports.setPuppet = function(i, emotes) {
+	var available = document.getElementById('emotes').getElementsByClassName("available")
+	while (available.length)
+		available[0].classList.remove("available")
+
+	var selected = document.getElementsByClassName("char selected")
+	while (selected.length)
+		selected[0].classList.remove("selected")
+
+	var emoteKeys = Object.keys(emotes)
+	for (var j = 0; j < emoteKeys.length; j++)
+		document.getElementById(emoteKeys[j]).className += " available"
+
+	document.getElementById('char ' + i).className += " selected"
+}
+
+// Change which emote is highlighted in the UI
+exports.setEmote = function(emote) {
+	var selected = document.getElementsByClassName("emote selected")
+	while (selected.length)
+		selected[0].classList.remove("selected")
+
+	document.getElementById(emote).className += " selected"
+}
+
+// Change whether the babble button is highlighted in the UI
+exports.setBabble = function(babbling) {
+	document.getElementById('babble').className = "babble" + (babbling ? " selected" : "")
+}
+
+// Update the hotbar button for a character
+exports.updateCharacter = function(character, thumbnail) {
 	var index = project.project.hotbar.indexOf(character.id)
 	if (index > -1) {
-		hotbar[index] = babble.createPuppet(character)
+		controller.updateCharacter(index, character)
 		if (('' + document.getElementById('char ' + index).className).indexOf('selected') > -1) {
-			setPuppet(index)
-			if (popout)
-				popout.webContents.send('keyUp', index + 49)
+			controller.setPuppetLocal(index)
 		}
 		document.getElementById('char ' + index).getElementsByClassName('desc')[0].innerHTML = character.name
 	}
@@ -48,223 +126,73 @@ function updateCharacter(character, thumbnail) {
     })
 }
 
-function deleteCharacter(character) {
-	var index = project.project.hotbar.indexOf(character.id)
-	if (index > -1) {
-		hotbar[index] = null
-		project.updateHotbar(index, parseInt(''))
-		document.getElementById('char ' + index).getElementsByClassName('desc')[0].innerHTML = ''
-		document.getElementById('char ' + index).style.backgroundImage = ''
-	}
-	for (var i = 0; i < project.project.characters.length; i++) {
-        if (project.project.characters[i].id == character.id) {
-            project.project.characters.splice(i, 1)
-            delete project.characters[character.id]
-        }
-    }
+// Remove a character from the hotbar
+exports.deleteCharacter = function(index) {
+	document.getElementById('char ' + index).getElementsByClassName('desc')[0].innerHTML = ''
+	document.getElementById('char ' + index).style.backgroundImage = ''
 }
 
-function addAsset(tab, asset) {
-	status.log('Loading asset...')
-	if (!project.assets[tab])
-		project.assets[tab] = {}
-	project.assets[tab][asset] = {"location": path.join(tab, asset + '.png')}
-	project.addAsset(tab, asset)
-	babble.addAsset(tab, asset)
-	editor.addAsset(tab, asset)
-	if (popout)
-		popout.webContents.send('add asset', tab, asset)
-	if (server)
-		server.emit('add asset', tab, asset)
-	status.log('Asset loaded!')
+// Pop the stage out
+exports.openPopout = function() {
+	document.getElementById('popout').innerHTML ='Close Pop Out'
+	document.getElementById('popout').removeEventListener('click', controller.popOut)
+	document.getElementById('popout').addEventListener('click', controller.popIn)
+	document.getElementById('screen').addEventListener('click', controller.popIn)
+	document.getElementById('screen').className = 'container main button'
+	document.getElementById('screen').innerHTML = '<div style="position: relative;top: 50%;transform: translateY(-50%);text-align:center;background-color:#242a33;">Click to Pop In Show Panel</div>'
 }
 
-// Set everything up once babble has finished init'ing
-function loadPuppets() {
-	status.log('Loading puppets...', true)
-
-	// Add Puppet
-	puppet = babble.addPuppet(createPuppet(project.actor), 1)
-	editor.setup(updateCharacter, deleteCharacter, addAsset)
-
-	babble.registerPuppetListener('mousedown', (e) => {
-		editor.setPuppet(JSON.parse(project.duplicateCharacter(e.target.puppet)))
-	})
-
-	// Create Hotbar Puppets
-	for (var i = 0; i < project.project.hotbar.length; i++) {
-		if (project.project.hotbar[i] !== '' && project.project.hotbar[i] > 0)
-			hotbar[i] = babble.createPuppet(project.characters[project.project.hotbar[i]])
-	}
-
-	// Update Editor
-	var available = document.getElementById('emotes').getElementsByClassName("available")
-	while (available.length)
-		available[0].classList.remove("available")
-
-	var selected = document.getElementsByClassName("char selected")
-	while (selected.length)
-		selected[0].classList.remove("selected")
-
-	var emotes = Object.keys(puppet.emotes)
-	for (var i = 0; i < emotes.length; i++)
-		document.getElementById(emotes[i]).className += " available"
-
-	document.getElementById('char ' + project.project.hotbar.indexOf(project.actor.id)).className += " selected"
-	document.getElementById(puppet.emote).className += " selected"
-
-	status.log('Project Loaded!', false)
+// Reattach stage
+exports.closePopout = function() {
+	document.getElementById('popout').innerHTML = 'Pop Out Show Panel'
+	document.getElementById('popout').addEventListener('click', controller.popOut)
+	document.getElementById('popout').removeEventListener('click', controller.popIn)
+	document.getElementById('screen').removeEventListener('click', controller.popIn)
+	document.getElementById('screen').className = 'container main'
+	document.getElementById('screen').innerHTML = ''
 }
 
-function createPuppet(actor) {
-	var puppet = JSON.parse(JSON.stringify(project.characters[actor.id]))
-	puppet.position = actor.position
-	puppet.emote = actor.emote
-	puppet.facingLeft = actor.facingLeft
-	if (actor.socket) puppet.socket = actor.socket
-	if (actor.id) puppet.id = actor.id
-	return puppet
-}
+function keyDown(e) {
+	var key = e.keyCode ? e.keyCode : e.which
 
-function setPuppet(index) {
-	if (!hotbar[index]) return
-
-	// Set Puppet
-	babble.setPuppet(puppet.id, hotbar[index])
-	puppet = hotbar[index]
-
-	// Update Editor
-	var available = document.getElementById('emotes').getElementsByClassName("available")
-	while (available.length)
-		available[0].classList.remove("available")
-
-	var selected = document.getElementsByClassName("char selected")
-	while (selected.length)
-		selected[0].classList.remove("selected")
-
-	var emotes = Object.keys(puppet.emotes)
-	for (var i = 0; i < emotes.length; i++) 
-		document.getElementById(emotes[i]).className += " available"
-
-	document.getElementById('char ' + index).className += " selected"
-
-	// Update Project
-	project.actor.id = project.project.hotbar[index]
-
-	// Update Server
-	if (server)	{
-		server.emit('set puppet', puppet.id, createPuppet(project.actor))
-	}
-}
-
-function setEmote(string) {
-	// Change Emote
-	puppet.changeEmote(string)
-
-	// Update Editor
-	var selected = document.getElementsByClassName("emote selected")
-	while (selected.length)
-		selected[0].classList.remove("selected")
-
-	document.getElementById(string).className += " selected"
-
-	// Update Project
-	project.actor.emote = string
-
-	// Update Server
-	if (server) {
-		server.emit('set emote', puppet.id, string)
-	}
-}
-
-function moveLeft() {
-	// Move Left
-	puppet.moveLeft()
-
-	// Update Project
-	project.actor.facingLeft = puppet.facingLeft
-	project.actor.position = puppet.target
-
-	// Update Server
-	if (server)	{
-		server.emit('move left', puppet.id)
-	}
-}
-
-function moveRight() {
-	// Move Right
-	puppet.moveRight()
-
-	// Update Project
-	project.actor.facingLeft = puppet.facingLeft
-	project.actor.position = puppet.target
-
-	// Update Server
-	if (server)	{
-		server.emit('move right', puppet.id)
-	}
-}
-
-function startBabbling() {
-	if (puppet.babbling) return
-	// Start Babbling
-	puppet.setBabbling(true)
-
-	// Update Editor
-	document.getElementById('babble').className = "babble selected"
-
-	// Update Server
-	if (server)	{
-		server.emit('start babbling', puppet.id)
-	}
-}
-
-function stopBabbling() {
-	// Stop Babbling
-	puppet.setBabbling(false)
-
-	// Update Editor
-	document.getElementById('babble').className = "babble"
-
-	// Update Server
-	if (server)	{
-		server.emit('stop babbling', puppet.id)
-	}
-}
-
-function setHotbar(e) {
-	var i = e.target.i
-	var puppet = e.target.puppet
-	document.getElementById('chars').style.display = 'block'
-	document.getElementById('charselect').style.display = 'none'
-	if (('' + document.getElementById('char ' + i).className).indexOf('selected') > -1 && puppet === '') {
+	if (e.target && (e.target.type === 'number' || e.target.type === 'text' || e.target.type === 'search'))
 		return
+
+	if (key == 32) {
+		controller.startBabblingLocal()
+		if (e.preventDefault) e.preventDefault()
 	}
-	project.updateHotbar(i, parseInt(puppet))
-	if (puppet === '') {
-		hotbar[i] = null
-	} else {
-		hotbar[i] = babble.createPuppet(project.characters[puppet])
-	}
-	if (('' + document.getElementById('char ' + i).className).indexOf('selected') > -1) {
-		setPuppet(i)
-		if (popout)
-			popout.webContents.send('keyUp', i + 49)
-	}
-	if (project.project.hotbar[i] && project.project.hotbar[i] !== 0) {
-		document.getElementById('char ' + i).getElementsByClassName('desc')[0].innerHTML = project.characters[puppet].name
-		document.getElementById('char ' + i).style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', puppet + '.png?random=' + new Date().getTime()) + ')'
-	} else {
-		document.getElementById('char ' + i).getElementsByClassName('desc')[0].innerHTML = ''
-		document.getElementById('char ' + i).style.backgroundImage = ''
-	}
+}
+
+function keyUp(e) {
+	var key = e.keyCode ? e.keyCode : e.which
+
+	if (e.target && (e.target.type === 'number' || e.target.type === 'text' || e.target.type === 'search'))
+		return
+
+	if (key > 48 && key < 58) {
+		if (project.project.hotbar.length > key - 49) {
+			controller.setPuppetLocal(key - 49)
+		}
+	} else if (key == 85) controller.setEmoteLocal('default')
+	else if (key == 73) controller.setEmoteLocal('happy')
+	else if (key == 79) controller.setEmoteLocal('wink')
+	else if (key == 80) controller.setEmoteLocal('kiss')
+	else if (key == 74) controller.setEmoteLocal('angry')
+	else if (key == 75) controller.setEmoteLocal('sad')
+	else if (key == 76) controller.setEmoteLocal('ponder')
+	else if (key == 186) controller.setEmoteLocal('gasp')
+	else if (key == 77) controller.setEmoteLocal('veryangry')
+	else if (key == 188) controller.setEmoteLocal('verysad')
+	else if (key == 190) controller.setEmoteLocal('confused')
+	else if (key == 191) controller.setEmoteLocal('ooo')
+	else if (key == 37) controller.moveLeftLocal()
+	else if (key == 39) controller.moveRightLocal()
+	else if (key == 32) controller.stopBabblingLocal()
 }
 
 function charClick(e) {
-	var i = e.target.i
-	setPuppet(i)
-	if (popout)
-		popout.webContents.send('keyUp', i + 49)
+	controller.setPuppetLocal(e.target.i)
 }
 
 function charContextMenu(e) {
@@ -294,24 +222,31 @@ function charContextMenu(e) {
 		if (project.project.hotbar.indexOf(parseInt(characters[j])) > -1) {
 			selector.className += " disabled"
 		} else {
-			selector.addEventListener('click', setHotbar)
+			selector.addEventListener('click', updateHotbar)
 		}
 	}
 }
 
-for (var i = 0; i < 9; i++) {
-	var element = document.getElementById('char ' + i)
-	element.i = i
-	element.addEventListener('click', charClick)
-	element.addEventListener('contextmenu', charContextMenu)
-	if (project.project.hotbar[i]) {
-		element.getElementsByClassName('desc')[0].innerHTML = project.characters[project.project.hotbar[i]].name
-		element.style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', project.project.hotbar[i] + '.png?random=' + new Date().getTime()) + ')'
+function updateHotbar(e) {
+	var i = e.target.i
+	var puppet = e.target.puppet
+	document.getElementById('chars').style.display = 'block'
+	document.getElementById('charselect').style.display = 'none'
+	if (('' + document.getElementById('char ' + i).className).indexOf('selected') > -1 && puppet === '') {
+		return
+	}
+	controller.updateHotbar(i, puppet)
+	if (('' + document.getElementById('char ' + i).className).indexOf('selected') > -1) {
+		controller.setPuppet(i)
+	}
+	if (project.project.hotbar[i] && project.project.hotbar[i] !== 0) {
+		document.getElementById('char ' + i).getElementsByClassName('desc')[0].innerHTML = project.characters[puppet].name
+		document.getElementById('char ' + i).style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', puppet + '.png?random=' + new Date().getTime()) + ')'
+	} else {
+		document.getElementById('char ' + i).getElementsByClassName('desc')[0].innerHTML = ''
+		document.getElementById('char ' + i).style.backgroundImage = ''
 	}
 }
-
-document.getElementById('char null').addEventListener('click', setHotbar)
-document.getElementById('char null').puppet = ''
 
 function updateCharSearch(e) {
 	var list = document.getElementById('char list')
@@ -328,87 +263,24 @@ function updateCharSearch(e) {
 	}
 }
 
-document.getElementById('char search').addEventListener('keyup', updateCharSearch)
-
-// This one's so that we capture clearing the search bar
-document.getElementById('char search').addEventListener('search', updateCharSearch)
-
-document.getElementById('char selected').addEventListener('click', () => {
+function charSelectedClick() {
 	document.getElementById('chars').style.display = 'block'
 	document.getElementById('charselect').style.display = 'none'
-})
-
-function emoteClick(e) {
-	setEmote(e.target.emote)
-	if (popout)
-		switch (e.target.emote) {
-			default: popout.webContents.send('keyUp', 'u'); break;
-			case 'happy': popout.webContents.send('keyUp', 'i'); break;
-			case 'wink': popout.webContents.send('keyUp', 'o'); break;
-			case 'kiss': popout.webContents.send('keyUp', 'p'); break;
-			case 'angry': popout.webContents.send('keyUp', 'j'); break;
-			case 'sad': popout.webContents.send('keyUp', 'k'); break;
-			case 'ponder': popout.webContents.send('keyUp', 'l'); break;
-			case 'gasp': popout.webContents.send('keyUp', ';'); break;
-			case 'veryangry': popout.webContents.send('keyUp', 'm'); break;
-			case 'verysad': popout.webContents.send('keyUp', ','); break;
-			case 'confused': popout.webContents.send('keyUp', '.'); break;
-			case 'ooo': popout.webContents.send('keyUp', '/'); break;
-		}
 }
 
-for (var i = 0; i < emotes.length; i++) {
-	var element = document.getElementById(emotes[i])
-	element.emote = emotes[i]
-	element.addEventListener('click', emoteClick)
-}
-
-document.getElementById('greenscreen').addEventListener('click', () => {
+function toggleGreenScreen() {
 	var style = document.getElementById('screen').style
 	if (style.backgroundColor === '')
 		style.backgroundColor = project.project.greenScreen
 	else 
 		style.backgroundColor = ''
-})
-
-function popIn() {
-	popout.close()
 }
 
-function popOut() {
-	if (project.project.transparent)
-		popout = new BrowserWindow({frame: false, parent: remote.getCurrentWindow(), transparent: true})
-	else
-		popout = new BrowserWindow({frame: false, parent: remote.getCurrentWindow(), backgroundColor: project.project.greenScreen})
-	// popout.setIgnoreMouseEvents(true)
-	popout.on('close', () => {
-		document.getElementById('popout').innerHTML = 'Pop Out Show Panel'
-		document.getElementById('popout').addEventListener('click', popOut)
-		document.getElementById('popout').removeEventListener('click', popIn)
-		document.getElementById('screen').removeEventListener('click', popIn)
-		document.getElementById('screen').className = 'container main'
-		document.getElementById('screen').innerHTML = ''
-		babble.reattach('screen')
-		//babble.clearPuppets()
-		//loadPuppets()
-		popout = null
-	})
-	popout.loadURL(url.format({
-		pathname: path.join(__dirname, '../popout.html'),
-		protocol: 'file:',
-		slashes: true
-	  }))
-	document.getElementById('popout').innerHTML ='Close Pop Out'
-	document.getElementById('popout').removeEventListener('click', popOut)
-	document.getElementById('popout').addEventListener('click', popIn)
-	document.getElementById('screen').addEventListener('click', popIn)
-	document.getElementById('screen').className = 'container main button'
-	document.getElementById('screen').innerHTML = '<div style="position: relative;top: 50%;transform: translateY(-50%);text-align:center;background-color:#242a33;">Click to Pop In Show Panel</div>'
+function emoteClick(e) {
+	controller.setEmoteLocal(e.target.emote)
 }
 
-document.getElementById('popout').addEventListener('click', popOut)
-
-document.getElementById('settings').addEventListener('click', () => {
+function toggleSettings() {
 	if (document.getElementById('settings-panel').style.display == 'none') {
 		document.getElementById('settings-panel').style.display = 'block'
 		document.getElementById('chars').style.display = 'none'
@@ -419,471 +291,33 @@ document.getElementById('settings').addEventListener('click', () => {
 		document.getElementById('chars').style.display = 'block'
 		document.getElementById('emotes').style.display = 'block'
 	}
-})
+}
 
-document.getElementById('colorpicker').addEventListener('change', (e) => {
+function colorpickerChange(e) {
 	project.project.greenScreen = e.target.value
 	if (document.getElementById('screen').style.backgroundColor !== '')
 		document.getElementById('screen').style.backgroundColor = project.project.greenScreen
-})
+}
 
-document.getElementById('transparent').addEventListener('click', (e) => {
+function toggleTransparent(e) {
 	project.project.transparent = e.target.checked
-})
+}
 
-document.getElementById('minslotwidth').addEventListener('change', (e) => {
+function minslotwidthChange(e) {
 	project.project.minSlotWidth = parseInt(e.target.value)
-	babble.resize()
-	if (popout)
-		popout.webContents.send('resize')
-})
+	controller.resize()
+}
 
-document.getElementById('numslots').addEventListener('change', (e) => {
+function numslotsChange(e) {
 	project.project.numCharacters = parseInt(e.target.value)
-	babble.resize()
-	if (popout)
-		popout.webContents.send('resize')
-	if (server)
-		server.emit('set slots', project.project.numCharacters)
-})
+	controller.resize()
+	network.emit('set slots', project.project.numCharacters)
+}
 
-document.getElementById('ip').addEventListener('change', (e) => {
+function ipChange(e) {
 	project.project.ip = e.target.value
-})
+}
 
-document.getElementById('port').addEventListener('change', (e) => {
+function portChange(e) {
 	project.project.port = parseInt(e.target.value)
-})
-
-function stopNetworking() {
-	babble.clearPuppets()
-	puppet = babble.addPuppet(createPuppet(project.actor), 1)
-	server.close()
-	server = null
-	numPuppets = 1
-	document.getElementById('host').innerHTML = 'Host Server'
-	document.getElementById('connect').innerHTML = 'Connect to Server'
-	if (popout)
-		popout.webContents.send('disconnect')
-	status.log('Disconnected.')
 }
-
-document.getElementById('host').addEventListener('click', () => {
-	if (server) {
-		stopNetworking()
-		if (!server.io) return
-	}
-
-	status.log('Starting host...')
-	document.getElementById('host').innerHTML = 'Close Server'
-	puppets = []
-
-	// Load requirements
-	const io = require('socket.io')
-
-	// Create server & socket
-	var serv = http.createServer(function(req, res) {
-		// Send HTML headers and message
-		res.writeHead(404, {'Content-Type': 'text/html'})
-		res.end('<h1>404</h1>')
-	})
-	serv.listen(project.project.port)
-	server = io.listen(serv)
-	if (popout) {
-		popout.webContents.send('connect')
-		popout.webContents.send('assign puppet')
-	}
-
-	// Add a connect listener
-	server.sockets.on('connection', function(socket) {
-		// Send list of assets
-		var tabs = Object.keys(project.assets)
-		for (var i = 0; i < tabs.length; i++) {
-			var assetKeys = Object.keys(project.assets[tabs[i]])
-			for (var j = 0; j < assetKeys.length; j++) {
-				socket.emit('add asset', tabs[i], assetKeys[j])
-			}
-		}
-
-		// Add Application Listeners
-		socket.on('add puppet', (puppet) => {
-			socket.emit('set slots', project.project.numCharacters)
-			puppet.socket = socket.id
-			numPuppets++
-			babble.addPuppet(puppet, numPuppets)
-			puppet.charId = numPuppets
-			var ourPuppet = createPuppet(project.actor)
-			ourPuppet.charId = 1
-			socket.emit('add puppet', ourPuppet)
-			for (var i = 0; i < puppets.length; i++) {
-				socket.emit('add puppet', puppets[i])
-			}
-			puppets.push(puppet)
-			socket.emit('assign puppet', numPuppets)
-			socket.broadcast.emit('add puppet', puppet)
-			if (popout)
-				popout.webContents.send('add puppet', puppet)
-		})
-		socket.on('set puppet', (id, puppet) => {
-			babble.setPuppet(id, babble.createPuppet(puppet))
-			socket.broadcast.emit('set puppet', id, puppet)
-			if (popout)
-				popout.webContents.send('set puppet', id, puppet)
-			for (var i = 0; i < puppets.length; i++) {
-				if (puppets[i].charId == id) {
-					puppet.socket = puppets[i].socket
-					puppet.charId = puppets[i].charId
-					puppets[i] = puppet
-					break
-				}
-			}
-		})
-		socket.on('set emote', (id, emote) => {
-			babble.getPuppet(id).changeEmote(emote)
-			socket.broadcast.emit('set emote', id, emote)
-			if (popout)
-				popout.webContents.send('set emote', id, emote)
-			for (var i = 0; i < puppets.length; i++) {
-				if (puppets[i].charId == id) {
-					puppets[i].emote = emote
-					break
-				}
-			}
-		})
-		socket.on('move left', (id) => {
-			var puppet = babble.getPuppet(id)
-			puppet.moveLeft()
-			socket.broadcast.emit('move left', id)
-			if (popout)
-				popout.webContents.send('move left', id)
-			for (var i = 0; i < puppets.length; i++) {
-				if (puppets[i].charId == id) {
-					puppets[i].position = puppet.target
-					puppets[i].facingLeft = puppet.facingLeft
-					break
-				}
-			}
-		})
-		socket.on('move right', (id) => {
-			var puppet = babble.getPuppet(id)
-			puppet.moveRight()
-			socket.broadcast.emit('move right', id)
-			if (popout)
-				popout.webContents.send('move right', id)
-			for (var i = 0; i < puppets.length; i++) {
-				if (puppets[i].charId == id) {
-					puppets[i].position = puppet.target
-					puppets[i].facingLeft = puppet.facingLeft
-					break
-				}
-			}
-		})
-		socket.on('start babbling', (id) => {
-			babble.getPuppet(id).setBabbling(true)
-			socket.broadcast.emit('start babbling', id)
-			if (popout)
-				popout.webContents.send('start babbling', id)
-		})
-		socket.on('stop babbling', (id) => {
-			babble.getPuppet(id).setBabbling(false)
-			socket.broadcast.emit('stop babbling', id)
-			if (popout)
-				popout.webContents.send('stop babbling', id)
-		})
-		socket.on('set slots', (slots) => {
-			project.project.numCharacters = slots
-			document.getElementById('numslots').value = slots
-			babble.resize()
-			socket.broadcast.emit('set slots', slots)
-			if (popout)
-				popout.webContents.send('resize')
-		})
-
-		socket.on('disconnect', () => {
-			for (var i = 0; i < puppets.length; i++) {
-				if (puppets[i].socket === socket.id) {
-					server.emit('remove puppet', puppets[i].charId)
-					if (popout)
-						popout.webContents.send('remove puppet', puppets[i].charId)
-					babble.removePuppet(puppets[i].charId)
-					puppets.splice(i, 1)
-					break
-				}
-			}
-		})
-
-		socket.on('add asset', (tab, asset) => {
-			if (!(project.assets[tab] && project.assets[tab][asset])) {
-				status.increment('Retrieving %x Asset%s')
-				var stream = ss.createStream()
-				fs.ensureDirSync(path.join(project.assetsPath, tab))
-				ss(socket).emit('request asset', stream, tab, asset)
-				stream.on('end', () => {
-					if (!project.assets[tab])
-						project.assets[tab] = {}
-					project.assets[tab][asset] = {"location": path.join(tab, asset + '.png')}
-					project.addAsset(tab, asset)
-					babble.addAsset(tab, asset)
-					editor.addAsset(tab, asset)
-					if (popout)
-						popout.webContents.send('add asset', tab, asset)
-					socket.broadcast.emit('add asset', tab, asset)
-					if (status.decrement('Retrieving %x Asset%s'))
-						status.log('Synced Assets!')
-				})
-				stream.pipe(fs.createWriteStream(path.join(project.assetsPath, tab, asset + '.png')))
-			}
-		})
-		ss(socket).on('request asset', function(stream, tab, asset) {
-			fs.createReadStream(path.join(project.assetsPath, project.assets[tab][asset].location)).pipe(stream)
-		})
-	})
-
-	server.sockets.on('error', (e) => {
-		status.error('Server Error.', e)
-	})
-
-	status.log('Hosting successful!')
-})
-
-document.getElementById('connect').addEventListener('click', () => {
-	if (server) {
-		stopNetworking()
-		if (server.io) return
-	}
-
-	status.log('Connecting to server...')
-	document.getElementById('connect').innerHTML = 'Disconnect from Server'
-
-	// Connect to server
-	var io = require('socket.io-client')
-	var socket = io.connect('http://' + project.project.ip + ':' + project.project.port, {reconnect: true, transports: ['websocket', 'xhr-polling']})
-	server = socket
-
-	// Add a connect listener
-	socket.on('connect', function() {
-		puppets = []
-	    socket.emit('add puppet', createPuppet(project.actor))
-		// Send list of assets
-		var tabs = Object.keys(project.assets)
-		for (var i = 0; i < tabs.length; i++) {
-			var assetKeys = Object.keys(project.assets[tabs[i]])
-			for (var j = 0; j < assetKeys.length; j++) {
-				socket.emit('add asset', tabs[i], assetKeys[j])
-			}
-		}
-	    babble.clearPuppets()
-		if (popout)
-			popout.webContents.send('connect')
-		status.log('Connected to server!')
-	})
-
-	socket.on('disconnect', stopNetworking)
-
-	socket.on('connect_error', (e) => {
-		status.error('Failed to connect.', e)
-	})
-
-	socket.on('connect_timeout', (e) => {
-		status.error('Connection timed out.', e)
-	})
-
-	socket.on('error', (e) => {
-		status.error('Server error.', e)
-	})
-
-	socket.on('reconnect', () => {
-		status.log('Reconnected.')
-	})
-
-	socket.on('reconnecting', () => {
-		status.log('Reconnecting...')
-	})
-
-	socket.on('reconnect_error', (e) => {
-		status.error('Failed to reconnect.', e)
-	})
-
-	socket.on('recconect_failed', (e) => {
-		status.error('Failed to reconnect.', e)
-		stopNetworking();
-	})
-
-	// Add Application Listeners
-	socket.on('assign puppet', (id) => {
-		puppet = babble.addPuppet(createPuppet(project.actor), id)
-		if (popout)
-			popout.webContents.send('assign puppet', id)
-	})
-	socket.on('add puppet', (puppet) => {
-		babble.addPuppet(puppet, puppet.charId)
-		if (popout)
-			popout.webContents.send('add puppet', puppet)
-		puppets.push(puppet)
-	})
-	socket.on('set puppet', (id, puppet) => {
-		babble.setPuppet(id, babble.createPuppet(puppet))
-		if (popout)
-			popout.webContents.send('set puppet', id, puppet)
-		for (var i = 0; i < puppets.length; i++) {
-			if (puppets[i].charId == id) {
-				puppet.socket = puppets[i].socket
-				puppet.id = puppets[i].id
-				puppets[i] = puppet
-				break
-			}
-		}
-	})
-	socket.on('set emote', (id, emote) => {
-		babble.getPuppet(id).changeEmote(emote)
-		if (popout)
-			popout.webContents.send('set emote', id, emote)
-		for (var i = 0; i < puppets.length; i++) {
-			if (puppets[i].charId == id) {
-				puppets[i].emote = emote
-				break
-			}
-		}
-	})
-	socket.on('move left', (id) => {
-		babble.getPuppet(id).moveLeft()
-		if (popout)
-			popout.webContents.send('move left', id)
-		for (var i = 0; i < puppets.length; i++) {
-			if (puppets[i].charId == id) {
-				puppets[i].position = puppet.target
-				puppets[i].facingLeft = puppet.facingLeft
-				break
-			}
-		}
-	})
-	socket.on('move right', (id) => {
-		babble.getPuppet(id).moveRight()
-		if (popout)
-			popout.webContents.send('move right', id)
-		for (var i = 0; i < puppets.length; i++) {
-			if (puppets[i].charId == id) {
-				puppets[i].position = puppet.target
-				puppets[i].facingLeft = puppet.facingLeft
-				break
-			}
-		}
-	})
-	socket.on('start babbling', (id) => {
-		babble.getPuppet(id).setBabbling(true)
-		if (popout)
-			popout.webContents.send('start babbling', id)
-	})
-	socket.on('stop babbling', (id) => {
-		babble.getPuppet(id).setBabbling(false)
-		if (popout)
-			popout.webContents.send('stop babbling', id)
-	})
-	socket.on('remove puppet', (id) => {
-		babble.removePuppet(id)
-		if (popout)
-			popout.webContents.send('remove puppet', id)
-		for (var i = 0; i < puppets.length; i++) {
-			if (puppets[i].charId == id) {
-				puppets.splice(i, 1)
-				break
-			}
-		}
-	})
-	socket.on('set slots', (slots) => {
-		project.project.numCharacters = slots
-		document.getElementById('numslots').value = slots
-		babble.resize()
-		if (popout)
-			popout.webContents.send('resize')
-	})
-	socket.on('add asset', (tab, asset) => {
-		if (!(project.assets[tab] && project.assets[tab][asset])) {
-			status.increment('Retrieving %x Asset%s')
-			var stream = ss.createStream()
-			fs.ensureDirSync(path.join(project.assetsPath, tab))
-			ss(socket).emit('request asset', stream, tab, asset)
-			stream.on('end', () => {
-				if (!project.assets[tab])
-					project.assets[tab] = {}
-				project.assets[tab][asset] = {"location": path.join(tab, asset + '.png')}
-				project.addAsset(tab, asset)
-				babble.addAsset(tab, asset)
-				editor.addAsset(tab, asset)
-				if (popout)
-					popout.webContents.send('add asset', tab, asset)
-				if (status.decrement('Retrieving %x Asset%s'))
-					status.log('Synced Assets!')
-			})
-			stream.pipe(fs.createWriteStream(path.join(project.assetsPath, tab, asset + '.png')))
-		}
-	})
-	ss(socket).on('request asset', function(stream, tab, asset) {
-		fs.createReadStream(path.join(project.assetsPath, project.assets[tab][asset].location)).pipe(stream)
-	})
-})
-
-window.onkeydown = function(e) {
-	var key = e.keyCode ? e.keyCode : e.which
-
-	if (e.target && (e.target.type === 'number' || e.target.type === 'text' || e.target.type === 'search'))
-		return
-
-	if (key == 32) {
-		startBabbling()
-		if (e.preventDefault) e.preventDefault()
-	}
-
-	if (popout) 
-		popout.webContents.send('keyDown', key)
-}
-
-window.onkeyup = function(e) {
-	var key = e.keyCode ? e.keyCode : e.which
-
-	if (e.target && (e.target.type === 'number' || e.target.type === 'text' || e.target.type === 'search'))
-		return
-
-	if (key > 48 && key < 58) {
-		if (project.project.hotbar.length > key - 49) {
-			setPuppet(key - 49)
-		}
-	} else if (key == 85) setEmote('default')
-	else if (key == 73) setEmote('happy')
-	else if (key == 79) setEmote('wink')
-	else if (key == 80) setEmote('kiss')
-	else if (key == 74) setEmote('angry')
-	else if (key == 75) setEmote('sad')
-	else if (key == 76) setEmote('ponder')
-	else if (key == 186) setEmote('gasp')
-	else if (key == 77) setEmote('veryangry')
-	else if (key == 188) setEmote('verysad')
-	else if (key == 190) setEmote('confused')
-	else if (key == 191) setEmote('ooo')
-	else if (key == 37) moveLeft()
-	else if (key == 39) moveRight()
-	else if (key == 32) stopBabbling()
-
-	if (popout)
-		popout.webContents.send('keyUp', key)
-}
-
-// Handle input events from popout
-electron.ipcRenderer.on('keyDown', (event, key) => {
-	window.onkeydown({"keyCode": key})
-})
-electron.ipcRenderer.on('keyUp', (event, key) => {
-	window.onkeyup({"keyCode": key})
-})
-
-electron.ipcRenderer.on('init', () => {
-	popout.webContents.send('init', puppets)
-})
-
-// Load settings values
-document.getElementById('colorpicker').value = project.project.greenScreen
-document.getElementById('transparent').checked = project.project.transparent
-document.getElementById('minslotwidth').value = project.project.minSlotWidth
-document.getElementById('numslots').value = project.project.numCharacters
-document.getElementById('ip').value = project.project.ip
-document.getElementById('port').value = project.project.port

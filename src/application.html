@@ -106,7 +106,7 @@
                             </label>
                         </div>
                     </div>
-                    <button id="head" class="babble">Head</button>
+                    <button id="headBase" class="babble">Head</button>
                     <button id="body" class="babble">Body</button>
                     <button id="bundles" class="babble">Asset Bundles</button>
                 </div>
@@ -179,6 +179,6 @@
 
     <script>
         // You can also require other files to run in this process
-        require('./renderer-process/application.js')
+        require('./renderer-process/application.js').init()
     </script>
 </html>

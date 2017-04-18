@@ -12,120 +12,123 @@ var Container = PIXI.Container,
     Sprite = PIXI.Sprite,
     TextureCache = PIXI.utils.TextureCache
 
-// vars
-var project // settings
-var assets // images
-var assetsPath
-var slotWidth // Width of each puppet slot
-var puppets = [] // Puppets on screen
-var stage // pixi stage
-var renderer // pixi renderer
-var screen // element on webpage where stage is
-var listeners = [] // listeners on each puppet
-
 // Exports
-exports.init = function(element, proj, imgs, assetspath, callback) {
-    project = proj
-    assets = imgs
-    assetsPath = assetspath
+exports.Stage = Stage
+
+function Stage(element, project, assets, assetsPath, callback) {
+    this.project = project
+    this.assets = assets
+    this.assetsPath = assetsPath
 
     // Create some basic objects
-    stage = new Container();
-    renderer = autoDetectRenderer(1, 1, {antialias: true, transparent: true});
-    screen = document.getElementById(element)
-    screen.appendChild(renderer.view);
+    this.stage = new Container()
+    this.renderer = autoDetectRenderer(1, 1, {antialias: true, transparent: true})
+    this.screen = document.getElementById(element)
+    this.screen.appendChild(this.renderer.view)
+    
+    this.lastFrame = new Date()
+    this.puppets = []
+    this.listeners = []
 
     // Make the game fit the entire window
-    renderer.view.style.position = "absolute";
-    renderer.view.style.display = "block";
-    renderer.autoResize = true;
+    this.renderer.view.style.position = "absolute";
+    this.renderer.view.style.display = "block";
+    this.renderer.autoResize = true;
 
     // Load Assets
     for (var i = 0; i < project.assets.length; i++) {
         var tab = assets[project.assets[i].name]
         var keys = Object.keys(tab)
         for (var j = 0; j < keys.length; j++) {
-            loader.add(path.join(assetsPath, tab[keys[j]].location))
+            if (!TextureCache[path.join(assetsPath, tab[keys[j]].location)])
+                loader.add(path.join(assetsPath, tab[keys[j]].location))
         }
     }
-    loader.load(function() { if (callback) callback(); setup(); })
+    var stage = this
+    loader.onComplete.add(function() { 
+        stage.resize()
+        window.addEventListener("resize", stage.resize.bind(stage))
+        if (callback) callback()
+        stage.gameLoop()
+    })
+    loader.load()
 }
 
-exports.registerPuppetListener = function(event, callback) {
-    listeners.push({"event": event, "callback": callback})
-    for (var i = 0; i < puppets.length; i++)
-        puppets[i].container.on(event, callback)
+Stage.prototype.registerPuppetListener = function(event, callback) {
+    this.listeners.push({"event": event, "callback": callback})
+    for (var i = 0; i < this.puppets.length; i++)
+        this.puppets[i].container.on(event, callback)
 }
 
-exports.addAsset = function(tab, asset) {
-    if (!assets[tab])
-        assets[tab] = {}
-    assets[tab][asset] = {"location": path.join(tab, asset + '.png')}
-    TextureCache[path.join(assetsPath, assets[tab][asset].location)] = PIXI.Texture.fromImage(path.join(assetsPath, assets[tab][asset].location))
+Stage.prototype.addAsset = function(tab, asset) {
+    if (!this.assets[tab])
+        this.assets[tab] = {}
+    this.assets[tab][asset] = {"location": path.join(tab, asset + '.png')}
+    TextureCache[path.join(this.assetsPath, this.assets[tab][asset].location)] = PIXI.Texture.fromImage(path.join(this.assetsPath, this.assets[tab][asset].location))
 }
 
-exports.reattach = function(element) {
-    screen = document.getElementById(element)
-    screen.appendChild(renderer.view)
-    exports.resize()
+Stage.prototype.reattach = function(element) {
+    this.screen = document.getElementById(element)
+    this.screen.appendChild(this.renderer.view)
+    this.resize()
 }
 
-exports.resize = function() {
-    renderer.resize(screen.clientWidth, screen.clientHeight)
-    slotWidth = screen.clientWidth / project.numCharacters
-    if (slotWidth < project.minSlotWidth) {
-        stage.scale.x = stage.scale.y = slotWidth / project.minSlotWidth
-        slotWidth = project.minSlotWidth
-    } else stage.scale.x = stage.scale.y = 1
-    for (var i = 0; i < puppets.length; i++) {
-        puppets[i].container.y = screen.clientHeight / stage.scale.y
-        puppets[i].container.x = (puppets[i].position - 0.5) * slotWidth
+Stage.prototype.resize = function() {
+    this.renderer.resize(this.screen.clientWidth, this.screen.clientHeight)
+    this.slotWidth = this.screen.clientWidth / this.project.numCharacters
+    if (this.slotWidth < this.project.minSlotWidth) {
+        this.stage.scale.x = this.stage.scale.y = this.slotWidth / this.project.minSlotWidth
+        this.slotWidth = this.project.minSlotWidth
+    } else this.stage.scale.x = this.stage.scale.y = 1
+    for (var i = 0; i < this.puppets.length; i++) {
+        this.puppets[i].container.y = this.screen.clientHeight / this.stage.scale.y
+        this.puppets[i].container.x = (this.puppets[i].position - 0.5) * this.slotWidth
     }
 }
 
-exports.createPuppet = function(obj) {
-    return new Puppet(obj, -1)
+Stage.prototype.createPuppet = function(obj) {
+    return new Puppet(this, obj, -1)
 }
 
-exports.addPuppet = function(obj, id) {
-    var puppet = new Puppet(obj, id)
-    puppets.push(puppet)
-    stage.addChild(puppet.container)
-    for (var i = 0; i < listeners.length; i++)
-        puppet.container.on(listeners[i].event, listeners[i].callback)
-    puppet.container.y = screen.clientHeight / stage.scale.y
-    puppet.container.x = (puppet.position - 0.5) * slotWidth
+Stage.prototype.addPuppet = function(obj, id) {
+    var puppet = new Puppet(this, obj, id)
+    this.puppets.push(puppet)
+    this.stage.addChild(puppet.container)
+    for (var i = 0; i < this.listeners.length; i++)
+        puppet.container.on(this.listeners[i].event, this.listeners[i].callback)
+    puppet.container.y = this.screen.clientHeight / this.stage.scale.y
+    puppet.container.x = (puppet.position - 0.5) * this.slotWidth
     return puppet
 }
 
-exports.removePuppet = function(id) {
+Stage.prototype.removePuppet = function(id) {
     var puppet
-    for (var i = 0; i < puppets.length; i++)
-        if (puppets[i].id == id) {
-            puppet = puppets[i]
+    for (var i = 0; i < this.puppets.length; i++)
+        if (this.puppets[i].id == id) {
+            puppet = this.puppets[i]
             break
         }
     if (puppet) {
-        puppets.splice(puppets.indexOf(puppet), 1)
-        stage.removeChild(puppet.container)
+        this.puppets.splice(this.puppets.indexOf(puppet), 1)
+        this.stage.removeChild(puppet.container)
     }
 }
 
-exports.clearPuppets = function() {
-    while (puppets.length !== 0) {
-        stage.removeChild(puppets[0].container)
-        puppets.splice(0, 1)
+Stage.prototype.clearPuppets = function() {
+    while (this.puppets.length !== 0) {
+        this.stage.removeChild(this.puppets[0].container)
+        this.puppets.splice(0, 1)
     }
 }
 
-exports.getPuppet = function(id) {
-    for (var i = 0; i < puppets.length; i++)
-        if (puppets[i].id == id)
-            return puppets[i]
+Stage.prototype.getPuppet = function(id) {
+    for (var i = 0; i < this.puppets.length; i++)
+        if (this.puppets[i].id == id)
+            return this.puppets[i]
 }
 
-exports.setPuppet = function(id, newPuppet) {
-    var oldPuppet = exports.getPuppet(id)
+Stage.prototype.setPuppet = function(id, newPuppet) {
+    var oldPuppet = this.getPuppet(id)
     newPuppet.changeEmote(oldPuppet.emote)
     newPuppet.id = oldPuppet.id
     newPuppet.position = oldPuppet.position
@@ -133,33 +136,24 @@ exports.setPuppet = function(id, newPuppet) {
     newPuppet.facingLeft = oldPuppet.facingLeft
     newPuppet.container.scale.x = newPuppet.facingLeft ? -1 : 1
 
-    for (var i = 0; i < listeners.length; i++)
-        newPuppet.container.on(listeners[i].event, listeners[i].callback)
-    newPuppet.container.y = screen.clientHeight / stage.scale.y
-    newPuppet.container.x = (newPuppet.position - 0.5) * slotWidth
+    for (var i = 0; i < this.listeners.length; i++)
+        newPuppet.container.on(this.listeners[i].event, this.listeners[i].callback)
+    newPuppet.container.y = this.screen.clientHeight / this.stage.scale.y
+    newPuppet.container.x = (newPuppet.position - 0.5) * this.slotWidth
 
-    puppets[puppets.indexOf(oldPuppet)] = newPuppet
-    stage.removeChild(oldPuppet.container)
-    stage.addChild(newPuppet.container)
+    this.puppets[this.puppets.indexOf(oldPuppet)] = newPuppet
+    this.stage.removeChild(oldPuppet.container)
+    this.stage.addChild(newPuppet.container)
 }
 
-// Setup
-function setup() {
-    exports.resize()
-    window.addEventListener("resize", exports.resize)
-    gameLoop()
-}
-
-// Game Loop
-var lastFrame = new Date()
-function gameLoop() {
+Stage.prototype.gameLoop = function() {
     var thisFrame = new Date()
-    var delta = thisFrame - lastFrame
-    lastFrame = thisFrame
+    var delta = thisFrame - this.lastFrame
+    this.lastFrame = thisFrame
 
-    requestAnimationFrame(gameLoop)
-    for (var i = 0; i < puppets.length; i++) {
-        var puppet = puppets[i]
+    requestAnimationFrame(this.gameLoop.bind(this))
+    for (var i = 0; i < this.puppets.length; i++) {
+        var puppet = this.puppets[i]
         // Movement animations
         // I've tried to emulate what puppet pals does as closely as possible
         // But frankly it's difficult to tell
@@ -177,25 +171,26 @@ function gameLoop() {
                 puppet.position += direction
                 // If we're not at the final slot yet, reset the animation
                 if (puppet.position != puppet.target) puppet.movingAnim = 0
+
             } else if (puppet.movingAnim >= 1) puppet.movingAnim = 0
 
             // Scale in a sin formation such that it does 3 half circles per slot, plus 2 more at the end
             puppet.container.scale.y = 1 + Math.sin((1 + puppet.movingAnim * 5) * Math.PI) / 80
             // Update y value so it doesn't leave the bottom of the screen while bouncing
-            puppet.container.y = screen.clientHeight / stage.scale.y
+            puppet.container.y = this.screen.clientHeight / this.stage.scale.y
             // Linearly move across the slot, unless we're in the (.6 - 1) part of the animation
-            puppet.container.x = (puppet.position + direction * (puppet.movingAnim >= 0.6 ? 0 : puppet.movingAnim / 0.6) - 0.5) * slotWidth
+            puppet.container.x = (puppet.position + direction * (puppet.movingAnim >= 0.6 ? 0 : puppet.movingAnim / 0.6) - 0.5) * this.slotWidth
 
             // Wrap Edges
-            if (puppet.target > project.numCharacters + 1 && puppet.position >= project.numCharacters + 1 && puppet.movingAnim > 0) {
-                puppet.container.x -= (project.numCharacters + 1) * slotWidth
+            if (puppet.target > this.project.numCharacters + 1 && puppet.position >= this.project.numCharacters + 1 && puppet.movingAnim > 0) {
+                puppet.container.x -= (this.project.numCharacters + 1) * this.slotWidth
                 puppet.position = 0
-                puppet.target -= project.numCharacters + 1
+                puppet.target -= this.project.numCharacters + 1
             }
             if (puppet.target < 0 && puppet.position <= 0 && puppet.movingAnim > 0) {
-                puppet.container.x += (project.numCharacters + 1) * slotWidth
-                puppet.position = project.numCharacters + 1
-                puppet.target += project.numCharacters + 1
+                puppet.container.x += (this.project.numCharacters + 1) * this.slotWidth
+                puppet.position = this.project.numCharacters + 1
+                puppet.target += this.project.numCharacters + 1
             }
         }
         if (puppet.babbling) {
@@ -257,13 +252,27 @@ function gameLoop() {
             }
         }
     }
-    renderer.render(stage)
+    this.renderer.render(this.stage)
+}
+
+Stage.prototype.getAsset = function(asset, layer) {
+    var sprite = new Sprite(TextureCache[path.join(this.assetsPath, this.assets[asset.tab][asset.name].location)])
+    sprite.anchor.set(0.5)
+    sprite.x = asset.x
+    sprite.y = asset.y
+    sprite.rotation = asset.rotation
+    sprite.scale.x = asset.scaleX
+    sprite.scale.y = asset.scaleY
+    sprite.layer = layer
+    sprite.asset = asset
+    return sprite
 }
 
 // Puppet Prototype
-var Puppet = function(puppet, id) {
+var Puppet = function(stage, puppet, id) {
     // Init Variables
     this.babbling = false
+    this.stage = stage
     this.id = id
     this.name = puppet.name
     this.container = new Container()
@@ -280,14 +289,14 @@ var Puppet = function(puppet, id) {
     // Construct Puppet
     this.body = new Container()
     for (var i = 0; i < puppet.body.length; i++) {
-        this.body.addChild(getAsset(puppet.body[i]))
+        this.body.addChild(stage.getAsset(puppet.body[i], 'body'))
     }
     this.container.addChild(this.body)
 
     this.head = new Container()
     this.headBase = new Container()
     for (var i = 0; i < puppet.head.length; i++) {
-        this.headBase.addChild(getAsset(puppet.head[i]))
+        this.headBase.addChild(stage.getAsset(puppet.head[i], 'headBase'))
     }
     this.head.addChild(this.headBase)
     this.emotes = {}
@@ -303,17 +312,17 @@ var Puppet = function(puppet, id) {
         this.mouthsContainer.addChild(this.emotes[emotes[i]].mouth)
         this.eyesContainer.addChild(this.emotes[emotes[i]].eyes)
         for (var j = 0; j < puppet.emotes[emotes[i]].mouth.length; j++) {
-            this.emotes[emotes[i]].mouth.addChild(getAsset(puppet.emotes[emotes[i]].mouth[j]))
+            this.emotes[emotes[i]].mouth.addChild(stage.getAsset(puppet.emotes[emotes[i]].mouth[j], emotes[i] + '-emote'))
         }
         for (var j = 0; j < puppet.emotes[emotes[i]].eyes.length; j++) {
-            this.emotes[emotes[i]].eyes.addChild(getAsset(puppet.emotes[emotes[i]].eyes[j]))
+            this.emotes[emotes[i]].eyes.addChild(stage.getAsset(puppet.emotes[emotes[i]].eyes[j], emotes[i] + '-emote'))
         }
     }
     this.head.addChild(this.mouthsContainer)
     this.head.addChild(this.eyesContainer)
     this.hat = new Container()
     for (var i = 0; i < puppet.hat.length; i++) {
-        this.hat.addChild(getAsset(puppet.hat[i]))
+        this.hat.addChild(stage.getAsset(puppet.hat[i], 'hat'))
     }
     this.head.addChild(this.hat)
     this.head.pivot.y = - this.headBase.height / 2
@@ -323,7 +332,7 @@ var Puppet = function(puppet, id) {
 
     this.props = new Container()
     for (var i = 0; i < puppet.props.length; i++) {
-        this.props.addChild(getAsset(puppet.props[i]))
+        this.props.addChild(stage.getAsset(puppet.props[i], 'props'))
     }
     this.container.addChild(this.props)
 
@@ -333,8 +342,8 @@ var Puppet = function(puppet, id) {
     // Place Puppet on Stage
     this.container.interactive = true
     this.container.puppet = puppet
-    this.container.y = screen.clientHeight / stage.scale.y
-    this.container.x = (this.position - 0.5) * slotWidth
+    this.container.y = stage.screen.clientHeight / stage.stage.scale.y
+    this.container.x = (this.position - 0.5) * stage.slotWidth
     if (this.facingLeft) this.container.scale.x = -1
 }
 
@@ -356,7 +365,7 @@ Puppet.prototype.changeEmote = function (emote) {
 
 Puppet.prototype.moveLeft = function() {
     if (this.target > this.position) return
-    if (this.facingLeft || this.position === 0 || this.position == project.numCharacters + 1) {
+    if (this.facingLeft || this.position === 0 || this.position == this.stage.project.numCharacters + 1) {
         this.target--
         this.facingLeft = true
         this.container.scale.x = -1
@@ -368,7 +377,7 @@ Puppet.prototype.moveLeft = function() {
 
 Puppet.prototype.moveRight = function() {
     if (this.target < this.position) return
-    if (!this.facingLeft || this.position === 0 || this.position == project.numCharacters + 1) {
+    if (!this.facingLeft || this.position === 0 || this.position == this.stage.project.numCharacters + 1) {
         this.target++
         this.facingLeft = false
         this.container.scale.x = 1
@@ -397,16 +406,4 @@ Puppet.prototype.setBabbling = function(babble) {
             this.deadbonesStartRotation = this.head.rotation
         }
     }
-}
-
-// Load Asset
-function getAsset(asset) {
-    var sprite = new Sprite(TextureCache[path.join(assetsPath, assets[asset.tab][asset.name].location)])
-    sprite.anchor.set(0.5)
-    sprite.x = asset.x
-    sprite.y = asset.y
-    sprite.rotation = asset.rotation
-    sprite.scale.x = asset.scaleX
-    sprite.scale.y = asset.scaleY
-    return sprite
 }
