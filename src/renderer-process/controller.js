@@ -199,19 +199,19 @@ exports.updateHotbar = function(i, puppet) {
 	}
 }
 
-exports.addAsset = function(tab, asset) {
-	exports.addAssetLocal(tab, asset)
-	network.emit('add asset', tab, asset)
+exports.addAsset = function(asset) {
+	exports.addAssetLocal(asset)
+	network.emit('add asset', asset)
 }
 
-exports.addAssetLocal = function(tab, asset) {
-	if (!project.assets[tab])
-		project.assets[tab] = {}
-	project.assets[tab][asset] = {"location": path.join(tab, asset + '.png')}
-	project.addAsset(tab, asset)
-	stage.addAsset(tab, asset)
-	editor.addAsset(tab, asset)
-	exports.emitPopout('add asset', tab, asset)
+exports.addAssetLocal = function(asset) {
+	if (!project.assets[asset.tab])
+		project.assets[asset.tab] = {}
+	project.assets[asset.tab][asset.hash] = {"name": asset.name, "location": path.join(asset.tab, asset.hash + '.png')}
+	project.addAsset(asset)
+	stage.addAsset(asset)
+	editor.addAsset(asset.tab, asset.hash)
+	exports.emitPopout('add asset', asset)
 }
 
 exports.deleteCharacter = function(character) {

@@ -60,11 +60,11 @@ Stage.prototype.registerPuppetListener = function(event, callback) {
         this.puppets[i].container.on(event, callback)
 }
 
-Stage.prototype.addAsset = function(tab, asset) {
-    if (!this.assets[tab])
-        this.assets[tab] = {}
-    this.assets[tab][asset] = {"location": path.join(tab, asset + '.png')}
-    TextureCache[path.join(this.assetsPath, this.assets[tab][asset].location)] = PIXI.Texture.fromImage(path.join(this.assetsPath, this.assets[tab][asset].location))
+Stage.prototype.addAsset = function(asset) {
+    if (!this.assets[asset.tab])
+        this.assets[asset.tab] = {}
+    this.assets[asset.tab][asset.hash] = {"name": asset.name, "location": path.join(asset.tab, asset.hash + '.png')}
+    TextureCache[path.join(this.assetsPath, this.assets[asset.tab][asset.hash].location)] = PIXI.Texture.fromImage(path.join(this.assetsPath, this.assets[asset.tab][asset.hash].location))
 }
 
 Stage.prototype.reattach = function(element) {
@@ -256,7 +256,7 @@ Stage.prototype.gameLoop = function() {
 }
 
 Stage.prototype.getAsset = function(asset, layer) {
-    var sprite = new Sprite(TextureCache[path.join(this.assetsPath, this.assets[asset.tab][asset.name].location)])
+    var sprite = new Sprite(TextureCache[path.join(this.assetsPath, this.assets[asset.tab][asset.hash].location)])
     sprite.anchor.set(0.5)
     sprite.x = asset.x
     sprite.y = asset.y

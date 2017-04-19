@@ -76,6 +76,6 @@ electron.ipcRenderer.on('stop babbling', (event, id) => {
 electron.ipcRenderer.on('remove puppet', (event, id) => {
     stage.removePuppet(id)
 })
-electron.ipcRenderer.on('add asset', (event, tab, asset) => {
-    stage.addAsset(tab, asset)
+electron.ipcRenderer.on('add asset', (event, asset) => {
+    stage.addAsset(asset)
 })

@@ -112,12 +112,12 @@ exports.updateHotbar = function(i, id) {
 	exports.project.hotbar[i] = id
 }
 
-exports.addAsset = function(tab, asset) {
-	if (!exports.assets[tab]) {
-		exports.assets[tab] = {}
+exports.addAsset = function(asset) {
+	if (!exports.assets[asset.tab]) {
+		exports.assets[asset.tab] = {}
 		exports.project.assets.push({"name": tab, "location": tab.toLowerCase() + '.json'})
 	}
-	exports.assets[tab][asset] = {"location": path.join(tab, asset + '.png')}
+	exports.assets[asset.tab][asset.hash] = {"name": asset.name, "location": path.join(asset.tab, asset.hash + '.png')}
 }
 
 exports.saveCharacter = function(character) {

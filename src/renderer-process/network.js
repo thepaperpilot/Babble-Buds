@@ -44,7 +44,8 @@ exports.host = function() {
 		for (var i = 0; i < tabs.length; i++) {
 			var assetKeys = Object.keys(project.assets[tabs[i]])
 			for (var j = 0; j < assetKeys.length; j++) {
-				socket.emit('add asset', tabs[i], assetKeys[j])
+				var asset = project.assets[tabs[i]][assetKeys[j]]
+				socket.emit('add asset', {"tab": tabs[i], "hash": assetKeys[j], "name": asset.name})
 			}
 		}
 
@@ -135,19 +136,19 @@ exports.host = function() {
 			}
 		})
 
-		socket.on('add asset', (tab, asset) => {
-			if (!(project.assets[tab] && project.assets[tab][asset])) {
+		socket.on('add asset', (asset) => {
+			if (!(project.assets[asset.tab] && project.assets[asset.tab][asset.hash])) {
 				status.increment('Retrieving %x Asset%s')
 				var stream = ss.createStream()
-				fs.ensureDirSync(path.join(project.assetsPath, tab))
-				ss(socket).emit('request asset', stream, tab, asset)
+				fs.ensureDirSync(path.join(project.assetsPath, asset.tab))
+				ss(socket).emit('request asset', stream, asset)
 				stream.on('end', () => {
-					controller.addAssetLocal(tab, asset)
-					socket.broadcast.emit('add asset', tab, asset)
+					controller.addAssetLocal(asset)
+					socket.broadcast.emit('add asset', asset)
 					if (status.decrement('Retrieving %x Asset%s'))
 						status.log('Synced Assets!')
 				})
-				stream.pipe(fs.createWriteStream(path.join(project.assetsPath, tab, asset + '.png')))
+				stream.pipe(fs.createWriteStream(path.join(project.assetsPath, asset.tab, asset.hash + '.png')))
 			}
 		})
 		ss(socket).on('request asset', requestAsset)
@@ -185,7 +186,8 @@ exports.connect = function() {
 		for (var i = 0; i < tabs.length; i++) {
 			var assetKeys = Object.keys(project.assets[tabs[i]])
 			for (var j = 0; j < assetKeys.length; j++) {
-				socket.emit('add asset', tabs[i], assetKeys[j])
+				var asset = project.assets[tabs[i]][assetKeys[j]]
+				socket.emit('add asset', {"tab": tabs[i], "hash": assetKeys[j], "name": asset.name})
 			}
 		}
 		controller.connect()
@@ -287,18 +289,18 @@ exports.connect = function() {
 		document.getElementById('numslots').value = slots
 		controller.resize()
 	})
-	socket.on('add asset', (tab, asset) => {
-		if (!(project.assets[tab] && project.assets[tab][asset])) {
+	socket.on('add asset', (asset) => {
+		if (!(project.assets[asset.tab] && project.assets[asset.tab][asset.hash])) {
 			status.increment('Retrieving %x Asset%s')
 			var stream = ss.createStream()
-			fs.ensureDirSync(path.join(project.assetsPath, tab))
-			ss(socket).emit('request asset', stream, tab, asset)
+			fs.ensureDirSync(path.join(project.assetsPath, asset.tab))
+			ss(socket).emit('request asset', stream, asset)
 			stream.on('end', () => {
-				controller.addAssetLocal(tab, asset)
+				controller.addAssetLocal(asset)
 				if (status.decrement('Retrieving %x Asset%s'))
 					status.log('Synced Assets!')
 			})
-			stream.pipe(fs.createWriteStream(path.join(project.assetsPath, tab, asset + '.png')))
+			stream.pipe(fs.createWriteStream(path.join(project.assetsPath, asset.tab, asset.hash + '.png')))
 		}
 	})
 	ss(socket).on('request asset', requestAsset)
@@ -324,6 +326,6 @@ function stopNetworking() {
 	status.log('Disconnected.')
 }
 
-function requestAsset(stream, tab, asset) {
-	fs.createReadStream(path.join(project.assetsPath, project.assets[tab][asset].location)).pipe(stream)
+function requestAsset(stream, asset) {
+	fs.createReadStream(path.join(project.assetsPath, project.assets[asset.tab][asset.hash].location)).pipe(stream)
 }

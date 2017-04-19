@@ -50,7 +50,7 @@ exports.init = function() {
         if (selectedGui) this.stage.removeChild(selectedGui)
     }
     stage.getAsset = function(asset, layer) {
-        var sprite = new Sprite(TextureCache[path.join(this.assetsPath, this.assets[asset.tab][asset.name].location)])
+        var sprite = new Sprite(TextureCache[path.join(this.assetsPath, this.assets[asset.tab][asset.hash].location)])
         sprite.anchor.set(0.5)
         sprite.x = asset.x
         sprite.y = asset.y
@@ -228,9 +228,9 @@ exports.init = function() {
 exports.addAsset = function(tab, asset) {
     var assetElement = document.createElement('div')
     document.getElementById('tab ' + tab).appendChild(assetElement)
-    assetElement.id = asset.toLowerCase()
+    assetElement.id = asset
     assetElement.className = "asset"
-    assetElement.innerHTML = '<div class="desc">' + asset + '</div>'
+    assetElement.innerHTML = '<div class="desc">' + project.assets[tab][asset].name + '</div>'
     var assetDraggable = document.createElement('img')
     assetElement.appendChild(assetDraggable)
     assetDraggable.tab = tab
@@ -505,7 +505,7 @@ function mouseUp(e) {
                 if (selectedGui) stage.stage.removeChild(selectedGui)
                 var newAsset = {
                     "tab": asset.tab,
-                    "name": asset.asset,
+                    "hash": asset.asset,
                     "x": (e.clientX - rect.left - rect.width / 2) / scale,
                     "y": (e.clientY - rect.bottom) / scale,
                     "rotation": 0,
@@ -788,13 +788,19 @@ function addAsset() {
     }, (filepaths) => {
         if (!filepaths) return
         for (var i = 0; i < filepaths.length; i++) {
-            var filename = filepaths[i].replace(/^.*[\\\/]/, '')
+            var file = fs.readFileSync(filepaths[i])
+            var name = filepaths[i].replace(/^.*[\\\/]/, '').replace(/.png/, '')
+            var fileString = file.toString('base64')
+            var hash = 0, char, j, l
+            for (j = 0, l = fileString.length; j < l; j++) {
+                char  = fileString.charCodeAt(j)
+                hash  = ((hash<<5)-hash)+char
+                hash |= 0
+            }
+            hash = "" + hash
             var tab = document.getElementById('asset tabs').value
-            fs.copySync(filepaths[i], path.join(project.assetsPath, tab, filename))
-            if (!project.assets[tab])
-                project.assets[tab] = {}
-            project.assets[tab][asset] = {"location": path.join(tab, asset + '.png')}
-            controller.addAsset(tab, filename.replace(/.png/, ''))
+            fs.writeFileSync(path.join(project.assetsPath, tab, hash + '.png'), file)
+            controller.addAsset({"tab": tab, "hash": hash, "name": name})
         }
     })
 }
