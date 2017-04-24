@@ -163,48 +163,10 @@ exports.init = function() {
     document.getElementById('zoom out').addEventListener('click', zoomOut)
 
     // Receive messages from application menu
-    electron.ipcRenderer.on('cut', () => {
-        if (selected) {
-            electron.clipboard.writeText(JSON.stringify(selected.asset))
-            puppet[layer].removeChild(selected)
-            character[layer === 'headBase' ? 'head' : layer].splice(character[layer === 'headBase' ? 'head' : layer].indexOf(selected.asset), 1)
-            selected = null
-            stage.stage.removeChild(selectedGui)
-        }
-    })
-    electron.ipcRenderer.on('copy', () => {
-        if (selected) electron.clipboard.writeText(JSON.stringify(selected.asset))
-    })
-    electron.ipcRenderer.on('paste', () => {
-        var newAsset
-        try {
-            newAsset = JSON.parse(electron.clipboard.readText())
-        } catch (e) {
-            return
-        }
-        var asset = stage.getAsset(newAsset, layer)
-        if (layer.indexOf('-emote') > -1) {
-            if (document.getElementById('eyemouth').checked) {
-                puppet.emotes[layer.replace(/-emote/, '')].eyes.addChild(asset)
-                character.emotes[layer.replace(/-emote/, '')].eyes.push(newAsset)
-            } else {
-                puppet.emotes[layer.replace(/-emote/, '')].mouth.addChild(asset)
-                character.emotes[layer.replace(/-emote/, '')].mouth.push(newAsset)
-            }
-        } else {
-            puppet[layer].addChild(asset)
-            character[layer === 'headBase' ? 'head' : layer].push(newAsset)
-        }
-        setSelected(asset)
-    })
-    electron.ipcRenderer.on('delete', () => {
-        if (selected) {
-            puppet[layer].removeChild(selected)
-            character[layer === 'headBase' ? 'head' : layer].splice(character[layer === 'headBase' ? 'head' : layer].indexOf(selected.asset), 1)
-            selected = null
-            stage.stage.removeChild(selectedGui)
-        }
-    })
+    electron.ipcRenderer.on('cut', cut)
+    electron.ipcRenderer.on('copy', copy)
+    electron.ipcRenderer.on('paste', paste)
+    electron.ipcRenderer.on('delete', deleteKey)
 
     // Setup Puppet
     layer = 'body'
@@ -844,4 +806,50 @@ function zoomIn() {
 function zoomOut() {
     scale /= 2
     stage.resize()
+}
+
+function cut() {
+    if (selected) {
+        electron.clipboard.writeText(JSON.stringify(selected.asset))
+        puppet[layer].removeChild(selected)
+        character[layer === 'headBase' ? 'head' : layer].splice(character[layer === 'headBase' ? 'head' : layer].indexOf(selected.asset), 1)
+        selected = null
+        stage.stage.removeChild(selectedGui)
+    }
+}
+
+function copy() {
+    if (selected) electron.clipboard.writeText(JSON.stringify(selected.asset))
+}
+
+function paste() {
+    var newAsset
+    try {
+        newAsset = JSON.parse(electron.clipboard.readText())
+    } catch (e) {
+        return
+    }
+    var asset = stage.getAsset(newAsset, layer)
+    if (layer.indexOf('-emote') > -1) {
+        if (document.getElementById('eyemouth').checked) {
+            puppet.emotes[layer.replace(/-emote/, '')].eyes.addChild(asset)
+            character.emotes[layer.replace(/-emote/, '')].eyes.push(newAsset)
+        } else {
+            puppet.emotes[layer.replace(/-emote/, '')].mouth.addChild(asset)
+            character.emotes[layer.replace(/-emote/, '')].mouth.push(newAsset)
+        }
+    } else {
+        puppet[layer].addChild(asset)
+        character[layer === 'headBase' ? 'head' : layer].push(newAsset)
+    }
+    setSelected(asset)
+}
+
+function deleteKey() {
+    if (selected) {
+        puppet[layer].removeChild(selected)
+        character[layer === 'headBase' ? 'head' : layer].splice(character[layer === 'headBase' ? 'head' : layer].indexOf(selected.asset), 1)
+        selected = null
+        stage.stage.removeChild(selectedGui)
+    }
 }
