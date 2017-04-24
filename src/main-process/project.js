@@ -120,6 +120,10 @@ exports.addAsset = function(asset) {
 	exports.assets[asset.tab][asset.hash] = {"name": asset.name, "location": path.join(asset.tab, asset.hash + '.png')}
 }
 
+exports.saveAsset = function(tab, hash, asset) {
+	exports.assets[tab][hash] = asset
+}
+
 exports.saveCharacter = function(character) {
 	var exists = false
 	for (var i = 0; i < exports.project.characters.length; i++) {

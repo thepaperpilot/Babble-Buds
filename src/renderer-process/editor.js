@@ -146,14 +146,7 @@ exports.init = function() {
         // update character in editor if using it
         // tell server to tell other clients to move it
     })
-    document.getElementById('asset-name').addEventListener('change', (e) => {
-        // TODO implement renaming assets
-        // rename asset in asset list
-        // rename asset in project
-        // update any character using asset in project
-        // update character in editor if using it
-        // tell server to tell other clients to rename it
-    })
+    document.getElementById('asset-name').addEventListener('change', renameAsset)
     document.getElementById('delete-asset').addEventListener('click', (e) => {
         // TODO implement deleting assets
         // remove asset from asset list
@@ -228,7 +221,7 @@ exports.init = function() {
 exports.addAsset = function(tab, asset) {
     var assetElement = document.createElement('div')
     document.getElementById('tab ' + tab).appendChild(assetElement)
-    assetElement.id = asset
+    assetElement.id = project.assets[tab][asset].name
     assetElement.className = "asset"
     assetElement.innerHTML = '<div class="desc">' + project.assets[tab][asset].name + '</div>'
     var assetDraggable = document.createElement('img')
@@ -544,19 +537,19 @@ function mouseDown(e) {
         asset.style.left = (e.clientX - asset.width / 2) + 'px'
         e.preventDefault()
         window.addEventListener('mousemove', moveAsset, true);
-    } else { /* TODO NYI
+    } else {
         document.getElementById('assets').style.display = 'none'
         document.getElementById('asset editor').style.display = ''
-        document.getElementById('asset selected').getElementsByClassName('desc')[0].innerHTML = e.target.asset
+        document.getElementById('asset selected').getElementsByClassName('desc')[0].innerHTML = project.assets[e.target.tab][e.target.asset].name
         document.getElementById('asset selected').getElementsByTagName('img')[0].src = path.join(project.assetsPath, project.assets[e.target.tab][e.target.asset].location)
         document.getElementById('asset-tab').value = e.target.tab
-        document.getElementById('asset-name').value = e.target.asset
+        document.getElementById('asset-name').value = project.assets[e.target.tab][e.target.asset].name
         document.getElementById('asset-tab').tab = e.target.tab
         document.getElementById('asset-tab').asset = e.target.asset
         document.getElementById('asset-name').tab = e.target.tab
         document.getElementById('asset-name').asset = e.target.asset
         document.getElementById('delete-asset').tab = e.target.tab
-        document.getElementById('delete-asset').asset = e.target.asset */
+        document.getElementById('delete-asset').asset = e.target.asset
     }
 }
 
@@ -808,6 +801,14 @@ function addAsset() {
 function selectAsset() {
     document.getElementById('assets').style.display = ''
     document.getElementById('asset editor').style.display = 'none'
+}
+
+function renameAsset(e) {
+    project.assets[e.target.tab][e.target.asset].name = e.target.value
+    project.saveAsset(e.target.tab, e.target.asset, project.assets[e.target.tab][e.target.asset])
+    document.getElementById('asset selected').getElementsByClassName('desc')[0].innerHTML = e.target.value
+    var list = document.getElementById('tab ' + e.target.tab)
+    list.querySelectorAll("[id*='" + e.target.value.toLowerCase() + "']")[0].getElementsByClassName('desc')[0].innerHTML = e.target.value
 }
 
 function assetTabs(e) {
