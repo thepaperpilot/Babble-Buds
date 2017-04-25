@@ -448,12 +448,6 @@ function rotateMouseup() {
 function mouseUp(e) {
     if (asset) {
         if (asset.dragging || asset.clicked) {
-            window.removeEventListener('mousemove', moveAsset, true);
-            asset.style.position = 'static'
-            asset.style.cursor = ''
-            asset.style.top = asset.style.left = ""
-            asset.style.width = asset.style.height = 120 + "px"
-            asset.style.zIndex = ''
             var rect = document.getElementById('editor-screen').getBoundingClientRect()
             if (rect.left < e.clientX && rect.right > e.clientX && rect.top < e.clientY && rect.bottom > e.clientY) {
                 selected = null
@@ -480,7 +474,15 @@ function mouseUp(e) {
                     character[layer === 'headBase' ? 'head' : layer].push(newAsset)
                 }
             } 
-            asset = null
+            if (!e.shiftKey) {
+                window.removeEventListener('mousemove', moveAsset, true);
+                asset.style.position = 'static'
+                asset.style.cursor = ''
+                asset.style.top = asset.style.left = ""
+                asset.style.width = asset.style.height = 120 + "px"
+                asset.style.zIndex = ''
+                asset = null
+            }
         } else asset.clicked = true
     }
 }
