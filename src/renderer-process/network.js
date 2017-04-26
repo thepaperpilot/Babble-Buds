@@ -124,6 +124,10 @@ exports.host = function() {
 			controller.resize()
 			socket.broadcast.emit('set slots', slots)
 		})
+		socket.on('move asset', (tab, asset, newTab) => {
+			controller.moveAssetLocal(tab, asset, newTab)
+			socket.broadcast.emit('move asset', tab, asset, newTab)
+		})
 
 		socket.on('disconnect', () => {
 			for (var i = 0; i < puppets.length; i++) {
@@ -289,6 +293,7 @@ exports.connect = function() {
 		document.getElementById('numslots').value = slots
 		controller.resize()
 	})
+	socket.on('move asset', controller.moveAssetLocal)
 	socket.on('add asset', (asset) => {
 		if (!(project.assets[asset.tab] && project.assets[asset.tab][asset.hash])) {
 			status.increment('Retrieving %x Asset%s')

@@ -137,15 +137,7 @@ exports.init = function() {
         tabOption.text = project.project.assets[i].name
         document.getElementById('asset-tab').add(tabOption)
     }
-    document.getElementById('asset-tab').addEventListener('change', function(e) {
-        // TODO implement moving assets to new list
-        // move asset to new folder
-        // remove asset from current tab
-        // add asset to new tab
-        // update any character using asset in project
-        // update character in editor if using it
-        // tell server to tell other clients to move it
-    })
+    document.getElementById('asset-tab').addEventListener('change', migrateAsset)
     document.getElementById('asset-name').addEventListener('change', renameAsset)
     document.getElementById('delete-asset').addEventListener('click', (e) => {
         // TODO implement deleting assets
@@ -184,7 +176,7 @@ exports.addAsset = function(tab, asset) {
     var assetElement = document.createElement('div')
     document.getElementById('tab ' + tab).appendChild(assetElement)
     assetElement.id = project.assets[tab][asset].name
-    assetElement.className = "asset"
+    assetElement.className = "asset " + asset
     assetElement.innerHTML = '<div class="desc">' + project.assets[tab][asset].name + '</div>'
     var assetDraggable = document.createElement('img')
     assetElement.appendChild(assetDraggable)
@@ -194,6 +186,28 @@ exports.addAsset = function(tab, asset) {
     assetDraggable.className = 'contain'
     assetDraggable.src = path.join(project.assetsPath, project.assets[tab][asset].location)
     assetDraggable.addEventListener('mousedown', mouseDown, false)
+}
+
+exports.migrateAsset = function(tab, asset, newTab) {
+    fs.moveSync(path.join(project.assetsPath, project.assets[tab][asset].location), path.join(project.assetsPath, newTab, asset + '.png'))
+    project.assets[newTab][asset] = {"name": project.assets[tab][asset].name, "location": path.join(newTab, asset + '.png')}
+    delete project.assets[tab][asset]
+    if (document.getElementById('asset-tab').tab === tab && document.getElementById('asset-tab').asset === asset) {
+        document.getElementById('asset-tab').tab = document.getElementById('asset-tab').value = newTab
+        document.getElementById('asset-name').tab = newTab
+        document.getElementById('delete-asset').tab = newTab
+    }
+    document.getElementById('tab ' + newTab).appendChild(document.getElementById('tab ' + tab).getElementsByClassName(asset)[0])
+    var topLevel = ["body", "head", "hat", "props"]
+    for (var j = 0; j < topLevel.length; j++)
+        for (var k = 0; k < character[topLevel[j]].length; k++)
+            if (character[topLevel[j]][k].tab === tab && character[topLevel[j]][k].hash === asset)
+                character[topLevel[j]][k].tab = newTab
+    var emotes = Object.keys(character.emotes)
+    for (var j = 0; j < emotes.length; j++)
+        for (var k = 0; k < character.emotes[emotes[j]].length; k++)
+            if (character.emotes[emotes[j]][k].tab === tab && character.emotes[emotes[j]][k].hash === asset)
+                character.emotes[emotes[j]][k].tab = newTab
 }
 
 exports.setPuppet = function(newCharacter) {
@@ -240,6 +254,12 @@ exports.setPuppet = function(newCharacter) {
 
     document.getElementById('editor-name').value = character.name
     document.getElementById('deadbonesstyle').checked = character.deadbonesStyle
+}
+
+exports.saveCharacter = function(character, thumbnail) {
+    project.characters[character.id] = character
+    project.saveCharacter(character)
+    application.updateCharacter(character, thumbnail)
 }
 
 function drawBox(box) {
@@ -525,12 +545,10 @@ function moveAsset(e) {
 
 function savePuppet() {
     status.log('Saving puppet...')
-    project.characters[character.id] = character
-    project.saveCharacter(character)
     selected = null
     if (selectedGui) stage.stage.removeChild(selectedGui)
     stage.renderer.render(stage.stage)
-    application.updateCharacter(character, stage.renderer.view.toDataURL().replace(/^data:image\/\w+;base64,/, ""))
+    exports.saveCharacter(character, stage.renderer.view.toDataURL().replace(/^data:image\/\w+;base64,/, ""))
     status.log('Puppet saved!')
 }
 
@@ -767,12 +785,17 @@ function selectAsset() {
     document.getElementById('asset editor').style.display = 'none'
 }
 
+function migrateAsset(e) {
+    controller.moveAsset(e.target.tab, e.target.asset, e.target.value)
+    e.target.tab = e.target.value
+}
+
 function renameAsset(e) {
     project.assets[e.target.tab][e.target.asset].name = e.target.value
     project.saveAsset(e.target.tab, e.target.asset, project.assets[e.target.tab][e.target.asset])
     document.getElementById('asset selected').getElementsByClassName('desc')[0].innerHTML = e.target.value
     var list = document.getElementById('tab ' + e.target.tab)
-    list.querySelectorAll("[id*='" + e.target.value.toLowerCase() + "']")[0].getElementsByClassName('desc')[0].innerHTML = e.target.value
+    list.getElementsByClassName(e.target.asset)[0].getElementsByClassName('desc')[0].innerHTML = e.target.value
 }
 
 function assetTabs(e) {

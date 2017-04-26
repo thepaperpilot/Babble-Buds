@@ -214,6 +214,36 @@ exports.addAssetLocal = function(asset) {
 	exports.emitPopout('add asset', asset)
 }
 
+exports.moveAsset = function(tab, asset, newTab) {
+	exports.moveAssetLocal(tab, asset, newTab)
+	network.emit('move asset', tab, asset, newTab)
+}
+
+exports.moveAssetLocal = function(tab, asset, newTab) {
+    status.log("Moving asset to " + newTab + " list...")
+	editor.migrateAsset(tab, asset, newTab)
+	project.assets[newTab][asset] = {"name": project.assets[tab][asset].name, "location": path.join(newTab, asset + '.png')}
+	delete project.assets[tab][asset]
+	project.moveAsset(tab, asset, newTab)
+	stage.addAsset({"tab": newTab, "hash": asset, "name": project.assets[newTab][asset].name})
+    var characters = Object.keys(project.characters)
+    for (var i = 0; i < characters.length; i++) {
+    	var character = project.characters[characters[i]]
+    	var topLevel = ["body", "head", "hat", "props"]
+    	for (var j = 0; j < topLevel.length; j++)
+	        for (var k = 0; k < character[topLevel[j]].length; k++)
+	        	if (character[topLevel[j]][k].tab === tab && character[topLevel[j]][k].hash === asset)
+	        		character[topLevel[j]][k].tab = newTab
+	    var emotes = Object.keys(character.emotes)
+	    for (var j = 0; j < emotes.length; j++)
+	    	for (var k = 0; k < character.emotes[emotes[j]].length; k++)
+	    		if (character.emotes[emotes[j]][k].tab === tab && character.emotes[emotes[j]][k].hash === asset)
+	    			character.emotes[emotes[j]][k].tab = newTab
+	    editor.saveCharacter(character)
+    }
+    status.log("Moved asset!")
+}
+
 exports.deleteCharacter = function(character) {
 	var index = project.project.hotbar.indexOf(character.id)
 	if (index > -1) {

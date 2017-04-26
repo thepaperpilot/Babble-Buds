@@ -120,6 +120,11 @@ exports.addAsset = function(asset) {
 	exports.assets[asset.tab][asset.hash] = {"name": asset.name, "location": path.join(asset.tab, asset.hash + '.png')}
 }
 
+exports.moveAsset = function(tab, asset, newTab) {
+	exports.assets[newTab][asset] = {"name": exports.assets[tab][asset].name, "location": path.join(newTab, asset + '.png')}
+	delete exports.assets[tab][asset]
+}
+
 exports.saveAsset = function(tab, hash, asset) {
 	exports.assets[tab][hash] = asset
 }

@@ -117,13 +117,15 @@ exports.updateCharacter = function(character, thumbnail) {
 		}
 		document.getElementById('char ' + index).getElementsByClassName('desc')[0].innerHTML = character.name
 	}
-	fs.ensureDirSync(path.join(project.assetsPath, '..', 'thumbnails'))
-	fs.writeFile(path.join(project.assetsPath, '..', 'thumbnails', character.id + '.png'), new Buffer(thumbnail, 'base64'), (err) => {
-        if (err) console.log(err)
-        if (index > -1) {
-        	document.getElementById('char ' + index).style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', character.id + '.png?random=' + new Date().getTime()) + ')'
-        }
-    })
+	if (thumbnail) {
+		fs.ensureDirSync(path.join(project.assetsPath, '..', 'thumbnails'))
+		fs.writeFile(path.join(project.assetsPath, '..', 'thumbnails', character.id + '.png'), new Buffer(thumbnail, 'base64'), (err) => {
+	        if (err) console.log(err)
+	        if (index > -1) {
+	        	document.getElementById('char ' + index).style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', character.id + '.png?random=' + new Date().getTime()) + ')'
+	        }
+	    })
+	}
 }
 
 // Remove a character from the hotbar
