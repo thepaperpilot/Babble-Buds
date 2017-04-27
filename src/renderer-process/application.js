@@ -6,20 +6,21 @@
 const electron = require('electron')
 const controller = require('./controller.js')
 const network = require('./network.js')
-const project = electron.remote.require('./main-process/project')
 const path = require('path')
 const fs = require('fs-extra')
+
+var project
 
 // Constants
 var emotes = ['default', 'happy', 'wink', 'kiss', 'angry', 'sad', 'ponder', 'gasp', 'veryangry', 'verysad', 'confused', 'ooo']
 
 exports.init = function() {
-	// Init everything
-	controller.init()
+	project = electron.remote.getGlobal('project').project
 
 	// Window input events
 	window.onkeydown = keyDown
 	window.onkeyup = keyUp
+	window.onbeforeunload = beforeUnload
 
 	// DOM listeners
 	for (var i = 0; i < 9; i++) {
@@ -63,6 +64,15 @@ exports.init = function() {
 	})
 	electron.ipcRenderer.on('init', () => {
 		controller.emitPopout('init', network.getPuppets())
+	})
+	electron.ipcRenderer.on('save', () => {
+		project.saveProject()
+	})
+	electron.ipcRenderer.on('close', () => {
+		project.closeProject()
+	})
+	electron.ipcRenderer.on('loaded', () => {
+		controller.emitPopout('setup', project, project.getPuppet())
 	})
 
 	// Load settings values
@@ -193,6 +203,11 @@ function keyUp(e) {
 	else if (key == 32) controller.stopBabblingLocal()
 }
 
+function beforeUnload() {
+	if (!project.checkChanges())
+		return false
+}
+
 function charClick(e) {
 	controller.setPuppetLocal(e.target.i)
 }
@@ -306,7 +321,7 @@ function toggleTransparent(e) {
 }
 
 function minslotwidthChange(e) {
-	project.project.minSlotWidth = parseInt(e.target.value)
+	project.project.minSlotwidth = parseInt(e.target.value)
 	controller.resize()
 }
 

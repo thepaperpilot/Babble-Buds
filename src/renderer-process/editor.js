@@ -3,11 +3,9 @@ const electron = require('electron')
 const remote = electron.remote
 const PIXI = require('pixi.js')
 const path = require('path')
-const application = require('./application.js')
 const controller = require('./controller.js')
 const status = require('./status.js')
 const Stage = require('./stage.js').Stage
-const project = remote.require('./main-process/project')
 const fs = require('fs-extra')
 
 // Aliases
@@ -20,6 +18,7 @@ var Container = PIXI.Container,
 const ROUND_ROTATION = Math.PI / 4 // When rounding angles, this is the step size to use
 
 // Vars
+var project
 var stage // Stage instance
 var asset // asset being moved (outside of pixi)
 var scale = 1 // scale of the editor view
@@ -31,6 +30,7 @@ var selected // selected asset inside of pixi
 var selectedGui // gui that appears around selected
 
 exports.init = function() {
+    project = remote.getGlobal('project').project
     // Create some basic objects
     stage = new Stage('editor-screen', {'numCharacters': 1, 'minSlotWidth': 0, 'assets': project.project.assets}, project.assets, project.assetsPath)
     stage.stage.interactive = true
@@ -139,15 +139,7 @@ exports.init = function() {
     }
     document.getElementById('asset-tab').addEventListener('change', migrateAsset)
     document.getElementById('asset-name').addEventListener('change', renameAsset)
-    document.getElementById('delete-asset').addEventListener('click', (e) => {
-        // TODO implement deleting assets
-        // remove asset from asset list
-        // remove asset from project
-        // remove asset from any character using it
-        // update any character in babble using asset
-        // update character in editor if using asset
-        // tell server to tell other clients to delete asset
-    })
+    document.getElementById('delete-asset').addEventListener('click', deleteAsset)
     document.getElementById('asset tabs').addEventListener('change', assetTabs)
     document.getElementById('asset search').addEventListener('keyup', updateAssetSearch)
     document.getElementById('asset search').addEventListener('search', updateAssetSearch)
@@ -190,8 +182,6 @@ exports.addAsset = function(tab, asset) {
 
 exports.migrateAsset = function(tab, asset, newTab) {
     fs.moveSync(path.join(project.assetsPath, project.assets[tab][asset].location), path.join(project.assetsPath, newTab, asset + '.png'))
-    project.assets[newTab][asset] = {"name": project.assets[tab][asset].name, "location": path.join(newTab, asset + '.png')}
-    delete project.assets[tab][asset]
     if (document.getElementById('asset-tab').tab === tab && document.getElementById('asset-tab').asset === asset) {
         document.getElementById('asset-tab').tab = document.getElementById('asset-tab').value = newTab
         document.getElementById('asset-name').tab = newTab
@@ -208,6 +198,25 @@ exports.migrateAsset = function(tab, asset, newTab) {
         for (var k = 0; k < character.emotes[emotes[j]].length; k++)
             if (character.emotes[emotes[j]][k].tab === tab && character.emotes[emotes[j]][k].hash === asset)
                 character.emotes[emotes[j]][k].tab = newTab
+}
+
+exports.deleteAsset = function(tab, asset) {
+    if (document.getElementById('delete-asset').tab === tab && document.getElementById('delete-asset').asset === asset) {
+        selectAsset()
+    }
+    var element = document.getElementById('tab ' + tab).getElementsByClassName(asset)[0]
+    element.parentNode.removeChild(element)
+    var topLevel = ["body", "head", "hat", "props"]
+    for (var j = 0; j < topLevel.length; j++)
+        for (var k = 0; k < character[topLevel[j]].length; k++)
+            if (character[topLevel[j]][k].tab === tab && character[topLevel[j]][k].hash === asset)
+                character[topLevel[j]].splice(k, 1)
+    var emotes = Object.keys(character.emotes)
+    for (var j = 0; j < emotes.length; j++)
+        for (var k = 0; k < character.emotes[emotes[j]].length; k++)
+            if (character.emotes[emotes[j]][k].tab === tab && character.emotes[emotes[j]][k].hash === asset)
+                character.emotes[emotes[j]].splice(k, 1)
+    exports.setPuppet(character)
 }
 
 exports.setPuppet = function(newCharacter) {
@@ -254,12 +263,6 @@ exports.setPuppet = function(newCharacter) {
 
     document.getElementById('editor-name').value = character.name
     document.getElementById('deadbonesstyle').checked = character.deadbonesStyle
-}
-
-exports.saveCharacter = function(character, thumbnail) {
-    project.characters[character.id] = character
-    project.saveCharacter(character)
-    application.updateCharacter(character, thumbnail)
 }
 
 function drawBox(box) {
@@ -548,7 +551,7 @@ function savePuppet() {
     selected = null
     if (selectedGui) stage.stage.removeChild(selectedGui)
     stage.renderer.render(stage.stage)
-    exports.saveCharacter(character, stage.renderer.view.toDataURL().replace(/^data:image\/\w+;base64,/, ""))
+    controller.saveCharacter(character, stage.renderer.view.toDataURL().replace(/^data:image\/\w+;base64,/, ""))
     status.log('Puppet saved!')
 }
 
@@ -739,12 +742,6 @@ function deleteCharacter() {
     }
     project.deleteCharacter(character)
     controller.deleteCharacter(character)
-    for (var i = 0; i < project.project.characters.length; i++) {
-        if (project.project.characters[i].id == character.id) {
-            project.project.characters.splice(i, 1)
-            delete project.characters[character.id]
-        }
-    }
     document.getElementById('editor-screen').style.display = ''
     document.getElementById('editor-settings-panel').style.display = 'none'
     exports.setPuppet(project.characters[project.actor.id])
@@ -791,11 +788,14 @@ function migrateAsset(e) {
 }
 
 function renameAsset(e) {
-    project.assets[e.target.tab][e.target.asset].name = e.target.value
-    project.saveAsset(e.target.tab, e.target.asset, project.assets[e.target.tab][e.target.asset])
+    project.renameAsset(e.target.tab, e.target.asset, e.target.value)
     document.getElementById('asset selected').getElementsByClassName('desc')[0].innerHTML = e.target.value
     var list = document.getElementById('tab ' + e.target.tab)
     list.getElementsByClassName(e.target.asset)[0].getElementsByClassName('desc')[0].innerHTML = e.target.value
+}
+
+function deleteAsset(e) {
+    controller.deleteAsset(e.target.tab, e.target.asset, e.target.value)
 }
 
 function assetTabs(e) {

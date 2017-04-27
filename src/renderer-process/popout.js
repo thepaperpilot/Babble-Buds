@@ -1,13 +1,18 @@
 const electron = require('electron')
 const remote = electron.remote
-const project = remote.require('./main-process/project')
 const Stage = require('./stage.js').Stage
 
-var stage = new Stage('screen', project.project, project.assets, project.assetsPath, loadPuppets)
+var stage
+var puppet
 
 function loadPuppets() {
     // Add Puppet
-    var puppet = stage.addPuppet(project.getPuppet(), 1)
+    stage.addPuppet(puppet, 1)
+
+    // Puppet doesn't appear for some reason until you do something to it
+    // here's something that doesn't actually do something to it, but tricks
+    // the puppet into appearing
+    stage.getPuppet(1).setBabbling(false)
 
     // Request initial puppets
     remote.getCurrentWindow().getParentWindow().webContents.send('init')
@@ -35,6 +40,11 @@ electron.ipcRenderer.on('resize', () => {
     stage.resize()
 })
 
+electron.ipcRenderer.on('setup', (event, project, mypuppet) => {
+    puppet = mypuppet
+    stage = new Stage('screen', project.project, project.assets, project.assetsPath, loadPuppets)
+})
+
 electron.ipcRenderer.on('init', (event, puppets) => {
     for (var i = 0; i < puppets.length; i++)
         stage.addPuppet(puppets[i], puppets[i].charId)
@@ -44,13 +54,13 @@ electron.ipcRenderer.on('connect', function() {
     stage.clearPuppets()
 })
 
-electron.ipcRenderer.on('disconnect', () => {
+electron.ipcRenderer.on('disconnect', (event, puppet) => {
     stage.clearPuppets()
-    stage.addPuppet(project.getPuppet(), 1)
+    stage.addPuppet(puppet, 1)
 })
 
-electron.ipcRenderer.on('assign puppet', (event, id) => {
-    stage.addPuppet(project.getPuppet(), id)
+electron.ipcRenderer.on('assign puppet', (event, puppet, id) => {
+    stage.addPuppet(puppet, id)
 })
 electron.ipcRenderer.on('add puppet', (event, puppet) => {
     stage.addPuppet(puppet, puppet.charId)
@@ -79,3 +89,5 @@ electron.ipcRenderer.on('remove puppet', (event, id) => {
 electron.ipcRenderer.on('add asset', (event, asset) => {
     stage.addAsset(asset)
 })
+
+remote.getCurrentWindow().getParentWindow().webContents.send('loaded')

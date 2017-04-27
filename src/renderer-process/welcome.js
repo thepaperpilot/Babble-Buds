@@ -3,9 +3,10 @@
 // All of the Node.js APIs are available in this process.
 
 const path = require('path')
-const {app, dialog} = require('electron').remote
+const remote = require('electron').remote
+const app = remote.app
+const dialog = remote.dialog
 const util = require('electron').remote.require('./main-process/util')
-const project = require('electron').remote.require('./main-process/project')
 const fs = require('fs-extra')
 
 document.getElementById('location').value = path.join(app.getPath('home'), 'projects')
@@ -39,5 +40,6 @@ document.getElementById('create').addEventListener('click', function() {
 	fs.moveSync(path.join(dest, 'sample-project.babble'), path.join(dest, name + '.babble'))
 
 	// Open new project
-	project.readProject(path.join(dest, name + '.babble'))
+	remote.require('./main').setFilepath(path.join(dest, name + '.babble'))
+	remote.require('./main').redirect('application.html')
 })

@@ -1,5 +1,4 @@
 const {BrowserWindow, Menu, app, dialog} = require('electron')
-const project = require('../project')
 const util = require('../util')
 
 // Create menu
@@ -17,17 +16,15 @@ const template = [
       {
         label: 'Close Project',
         accelerator: 'CommandOrControl+W',
-        enabled: project.project !== null,
-        click () {
-          project.closeProject()
+        click (item, focusedWindow) {
+          focusedWindow.webContents.send('close')
         }
       },
       {
         label: 'Save Project',
         accelerator: 'CommandOrControl+S',
-        enabled: project.project !== null,
-        click () {
-          project.saveProject()
+        click (item, focusedWindow) {
+          focusedWindow.webContents.send('save')
         }
       },
       {
@@ -79,20 +76,8 @@ const template = [
         }
       }
     ]
-  },
-  {
-    label: 'Project',
-    enabled: project.project !== null,
-    submenu: []
   }
 ]
 
 const menu = Menu.buildFromTemplate(template)
 Menu.setApplicationMenu(menu)
-
-exports.updateMenu = function() {
-  var enabled = project.project !== null
-  menu.items[0].submenu.items[1].enabled = enabled
-  menu.items[0].submenu.items[2].enabled = enabled
-  menu.items[2].enabled = enabled
-}

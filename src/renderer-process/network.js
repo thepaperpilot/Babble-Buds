@@ -1,7 +1,6 @@
 // Imports
 const controller = require('./controller.js')
 const status = require('./status.js')
-const project = require('electron').remote.require('./main-process/project')
 const ss = require('socket.io-stream')
 const io = require('socket.io')
 const ioClient = require('socket.io-client')
@@ -10,9 +9,14 @@ const fs = require('fs-extra')
 const path = require('path')
 
 // Vars
+var project
 var server
 var puppets = []
 var numPuppets = 1
+
+exports.init = function() {
+	project = require('electron').remote.getGlobal('project').project
+}
 
 exports.host = function() {
 	if (server) {
@@ -127,6 +131,10 @@ exports.host = function() {
 		socket.on('move asset', (tab, asset, newTab) => {
 			controller.moveAssetLocal(tab, asset, newTab)
 			socket.broadcast.emit('move asset', tab, asset, newTab)
+		})
+		socket.on('delete asset', (tab, asset) => {
+			controller.deleteAssetLocal(tab, asset)
+			socket.broadcast.emit('delete asset', tab, asset)
 		})
 
 		socket.on('disconnect', () => {
@@ -294,6 +302,7 @@ exports.connect = function() {
 		controller.resize()
 	})
 	socket.on('move asset', controller.moveAssetLocal)
+	socket.on('delete asset', controller.deleteAssetLocal)
 	socket.on('add asset', (asset) => {
 		if (!(project.assets[asset.tab] && project.assets[asset.tab][asset.hash])) {
 			status.increment('Retrieving %x Asset%s')

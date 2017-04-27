@@ -1,6 +1,5 @@
 const {app, BrowserWindow} = require('electron')
 const settings = require('./main-process/settings')
-const project = require('./main-process/project')
 
 const path = require('path')
 const url = require('url')
@@ -8,6 +7,8 @@ const url = require('url')
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
+
+global.project = {}
 
 function createWindow () {
   // Load application settings
@@ -18,7 +19,7 @@ function createWindow () {
 
   // and load the index.html of the app.
   mainWindow.loadURL(url.format({
-    pathname: path.join(__dirname, project.project ? 'application.html' : 'welcome.html'),
+    pathname: path.join(__dirname, settings.settings.openProject ? 'application.html' : 'welcome.html'),
     protocol: 'file:',
     slashes: true
   }))
@@ -57,17 +58,16 @@ app.on('activate', function () {
   }
 })
 
-app.on('before-quit', function (e) {
-  if (!project.checkChanges())
-    e.preventDefault()
-})
-
 exports.redirect = function (file) {
   mainWindow.loadURL(url.format({
         pathname: path.join(__dirname, file),
         protocol: 'file:',
         slashes: true
     }))
+}
+
+exports.setFilepath = function(filepath) {
+  global.project.filepath = filepath
 }
 
 // In this file you can include the rest of your app's specific main process

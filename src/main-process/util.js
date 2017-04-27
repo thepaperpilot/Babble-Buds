@@ -1,6 +1,6 @@
 var path = require('path')
 var {app, dialog, BrowserWindow} = require('electron')
-var project = require('./project')
+var main = require('./../main')
 
 // This should totally be possible using remote, but I keep getting an error
 //  and this is how I solved it
@@ -26,7 +26,9 @@ exports.openProject = function() {
           'openFile'
         ] 
       }, (filepaths) => {
-        if (filepaths)
-          project.readProject(filepaths[0])
+        if (filepaths) {
+          global.project.filepath = filepaths[0]
+          main.redirect('application.html')
+        }
       })
 }

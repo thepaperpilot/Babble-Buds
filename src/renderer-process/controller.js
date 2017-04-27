@@ -6,19 +6,22 @@ const editor = require('./editor.js')
 const network = require('./network.js')
 const status = require('./status.js')
 const Stage = require('./stage.js').Stage
-const project = remote.require('./main-process/project')
 const path = require('path')
 const url = require('url')
 
 // Vars
+var project
 var stage
 var puppet
 var hotbar = []
 var popout
 
 exports.init = function() {
+	project = remote.getGlobal('project').project
 	status.init()
 	status.log('Loading project...')
+	application.init()
+	network.init()
 	stage = new Stage('screen', project.project, project.assets, project.assetsPath, loadPuppets)
 }
 
@@ -191,7 +194,7 @@ exports.resize = function() {
 }
 
 exports.updateHotbar = function(i, puppet) {
-	project.updateHotbar(i, parseInt(puppet))
+	project.project.hotbar[i] = parseInt(puppet)
 	if (puppet === '') {
 		hotbar[i] = null
 	} else {
@@ -205,9 +208,6 @@ exports.addAsset = function(asset) {
 }
 
 exports.addAssetLocal = function(asset) {
-	if (!project.assets[asset.tab])
-		project.assets[asset.tab] = {}
-	project.assets[asset.tab][asset.hash] = {"name": asset.name, "location": path.join(asset.tab, asset.hash + '.png')}
 	project.addAsset(asset)
 	stage.addAsset(asset)
 	editor.addAsset(asset.tab, asset.hash)
@@ -222,8 +222,6 @@ exports.moveAsset = function(tab, asset, newTab) {
 exports.moveAssetLocal = function(tab, asset, newTab) {
     status.log("Moving asset to " + newTab + " list...")
 	editor.migrateAsset(tab, asset, newTab)
-	project.assets[newTab][asset] = {"name": project.assets[tab][asset].name, "location": path.join(newTab, asset + '.png')}
-	delete project.assets[tab][asset]
 	project.moveAsset(tab, asset, newTab)
 	stage.addAsset({"tab": newTab, "hash": asset, "name": project.assets[newTab][asset].name})
     var characters = Object.keys(project.characters)
@@ -239,28 +237,44 @@ exports.moveAssetLocal = function(tab, asset, newTab) {
 	    	for (var k = 0; k < character.emotes[emotes[j]].length; k++)
 	    		if (character.emotes[emotes[j]][k].tab === tab && character.emotes[emotes[j]][k].hash === asset)
 	    			character.emotes[emotes[j]][k].tab = newTab
-	    editor.saveCharacter(character)
+	    exports.saveCharacter(character)
     }
     status.log("Moved asset!")
+}
+
+exports.deleteAsset = function(tab, asset) {
+	exports.deleteAssetLocal(tab, asset)
+	network.emit('delete asset', tab, asset)
+}
+
+exports.deleteAssetLocal = function(tab, asset) {
+    status.log("Deleting asset...")
+	editor.deleteAsset(tab, asset)
+	project.deleteAsset(tab, asset)
+    var characters = Object.keys(project.characters)
+    for (var i = 0; i < characters.length; i++) {
+    	project.deleteCharAssets(characters[i], tab, asset)
+	    exports.saveCharacter(project.characters[characters[i]])
+    }
+    status.log("Deleted asset!")
 }
 
 exports.deleteCharacter = function(character) {
 	var index = project.project.hotbar.indexOf(character.id)
 	if (index > -1) {
 		hotbar[index] = null
-		project.updateHotbar(index, parseInt(''))
+		project.project.hotbar[index] = parseInt('')
 		application.deleteCharacter(index)
 	}
-	for (var i = 0; i < project.project.characters.length; i++) {
-        if (project.project.characters[i].id == character.id) {
-            project.project.characters.splice(i, 1)
-            delete project.characters[character.id]
-        }
-    }
 }
 
 exports.updateCharacter = function(index, character) {
 	hotbar[index] = stage.createPuppet(character)
+}
+
+exports.saveCharacter = function(character, thumbnail) {
+    project.saveCharacter(character)
+    application.updateCharacter(character, thumbnail)
 }
 
 exports.connect = function() {
@@ -271,19 +285,19 @@ exports.connect = function() {
 exports.disconnect = function() {
 	stage.clearPuppets()
 	puppet = stage.addPuppet(project.getPuppet(), 1)
-	if (popout) popout.webContents.send('disconnect')
+	if (popout) popout.webContents.send('disconnect', project.getPuppet())
 }
 
 exports.host = function() {
 	if (popout) {
 		popout.webContents.send('connect')
-		popout.webContents.send('assign puppet')
+		popout.webContents.send('assign puppet', project.getPuppet())
 	}
 }
 
 exports.assign = function(id) {
 	puppet = stage.addPuppet(project.getPuppet(), id)
-	if (popout) popout.webContents.send('assign puppet', id)
+	if (popout) popout.webContents.send('assign puppet', project.getPuppet(), id)
 }
 
 exports.addPuppet = function(puppet) {
