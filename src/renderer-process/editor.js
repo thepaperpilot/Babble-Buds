@@ -1,6 +1,3 @@
-// This file handles the UI for the puppet editor and passes actions along
-//  to the controller
-
 // Imports
 const electron = require('electron')
 const remote = electron.remote

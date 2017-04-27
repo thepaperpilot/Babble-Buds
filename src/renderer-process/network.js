@@ -1,5 +1,3 @@
-// This file handles hosting and connecting servers
-
 // Imports
 const controller = require('./controller.js')
 const status = require('./status.js')

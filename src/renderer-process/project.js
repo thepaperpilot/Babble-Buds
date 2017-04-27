@@ -1,5 +1,3 @@
-// This file manages shared project data
-
 const fs = require('fs-extra')
 const remote = require('electron').remote
 const dialog = remote.dialog

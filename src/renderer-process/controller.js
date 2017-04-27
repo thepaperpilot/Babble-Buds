@@ -1,5 +1,3 @@
-// This file handles communications between the various parts of the program
-
 // Imports
 const remote = require('electron').remote
 const BrowserWindow = remote.BrowserWindow
