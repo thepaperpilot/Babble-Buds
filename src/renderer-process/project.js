@@ -132,8 +132,19 @@ module.exports = exports = remote.getGlobal('project').project = {
 	renameAsset: function(tab, hash, name) {
 		this.assets[tab][hash].name = name
 	},
+	renameAssetList: function(tab, newTab) {
+		this.assets[newTab] = this.assets[tab]
+		delete this.assets[tab]
+		var list = this.project.assets.find((x) => x.name === tab)
+		list.name = newTab
+		list.location = newTab + ".json"
+	},
     deleteAsset: function(tab, asset) {
         delete this.assets[tab][asset]
+    },
+    deleteAssetList: function(tab) {
+        delete this.assets[tab]
+        this.project.assets.splice(this.project.assets.indexOf(this.project.assets.find((x) => x.name === tab)), 1)
     },
     saveCharacter: function(character) {
         var exists = false
@@ -152,19 +163,6 @@ module.exports = exports = remote.getGlobal('project').project = {
         character.id = this.numCharacters
         return JSON.stringify(character)
     },
-    deleteCharAssets: function(charId, tab, asset) {
-        var character = this.characters[charId]
-        var topLevel = ["body", "head", "hat", "props"]
-        for (var j = 0; j < topLevel.length; j++)
-            for (var k = 0; k < character[topLevel[j]].length; k++)
-                if (character[topLevel[j]][k].tab === tab && character[topLevel[j]][k].hash === asset)
-                    character[topLevel[j]].splice(k, 1)
-        var emotes = Object.keys(character.emotes)
-        for (var j = 0; j < emotes.length; j++)
-            for (var k = 0; k < character.emotes[emotes[j]].length; k++)
-                if (character.emotes[emotes[j]][k].tab === tab && character.emotes[emotes[j]][k].hash === asset)
-                    character.emotes[emotes[j]].splice(k, 1)
-    },
     deleteCharacter: function(character) {
         for (var i = 0; i < this.project.characters.length; i++) {
             if (this.project.characters[i].id == character.id) {
@@ -174,7 +172,7 @@ module.exports = exports = remote.getGlobal('project').project = {
                 break
             }
         }
-    },
+	},
     getEmptyCharacter: function() {
         this.numCharacters++
         return JSON.stringify({

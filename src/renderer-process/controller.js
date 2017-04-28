@@ -233,10 +233,14 @@ exports.moveAssetLocal = function(tab, asset, newTab) {
 	        	if (character[topLevel[j]][k].tab === tab && character[topLevel[j]][k].hash === asset)
 	        		character[topLevel[j]][k].tab = newTab
 	    var emotes = Object.keys(character.emotes)
-	    for (var j = 0; j < emotes.length; j++)
-	    	for (var k = 0; k < character.emotes[emotes[j]].length; k++)
-	    		if (character.emotes[emotes[j]][k].tab === tab && character.emotes[emotes[j]][k].hash === asset)
-	    			character.emotes[emotes[j]][k].tab = newTab
+	    for (var j = 0; j < emotes.length; j++) {
+	    	for (var k = 0; k < character.emotes[emotes[j]].eyes.length; k++)
+	    		if (character.emotes[emotes[j]].eyes[k].tab === tab && character.emotes[emotes[j]].eyes[k].hash === asset)
+	    			character.emotes[emotes[j]].eyes[k].tab = newTab
+	    	for (var k = 0; k < character.emotes[emotes[j]].mouth.length; k++)
+	    		if (character.emotes[emotes[j]].mouth[k].tab === tab && character.emotes[emotes[j]].mouth[k].hash === asset)
+	    			character.emotes[emotes[j]].mouth[k].tab = newTab
+	    }
 	    exports.saveCharacter(character)
     }
     status.log("Moved asset!")
@@ -253,10 +257,67 @@ exports.deleteAssetLocal = function(tab, asset) {
 	project.deleteAsset(tab, asset)
     var characters = Object.keys(project.characters)
     for (var i = 0; i < characters.length; i++) {
-    	project.deleteCharAssets(characters[i], tab, asset)
+    	var character = project.characters[characters[i]]
+    	var topLevel = ["body", "head", "hat", "props"]
+    	for (var j = 0; j < topLevel.length; j++)
+	        for (var k = 0; k < character[topLevel[j]].length; k++)
+	        	if (character[topLevel[j]][k].tab === tab && character[topLevel[j]][k].hash === asset)
+	        		character[topLevel[j]].splice(k, 1)
+	    var emotes = Object.keys(character.emotes)
+	    for (var j = 0; j < emotes.length; j++) {
+	    	for (var k = 0; k < character.emotes[emotes[j]].eyes.length; k++) 
+	    		if (character.emotes[emotes[j]].eyes[k].tab === tab && character.emotes[emotes[j]].eyes[k].hash === asset)
+                    character.emotes[emotes[j]].eyes.splice(k, 1)
+	    	for (var k = 0; k < character.emotes[emotes[j]].mouth.length; k++)
+	    		if (character.emotes[emotes[j]].mouth[k].tab === tab && character.emotes[emotes[j]].mouth[k].hash === asset)
+                    character.emotes[emotes[j]].mouth.splice(k, 1)
+	    }
 	    exports.saveCharacter(project.characters[characters[i]])
     }
     status.log("Deleted asset!")
+}
+
+exports.renameAssetList = function(tab, newTab) {
+	exports.renameAssetListLocal(tab, newTab)
+	network.emit('rename asset list', tab, newTab)
+}
+
+exports.renameAssetListLocal = function(tab, newTab) {
+	editor.renameAssetList(tab, newTab)
+	project.renameAssetList(tab, newTab)
+    var characters = Object.keys(project.characters)
+    for (var i = 0; i < characters.length; i++) {
+    	var character = project.characters[characters[i]]
+    	var topLevel = ["body", "head", "hat", "props"]
+    	for (var j = 0; j < topLevel.length; j++)
+	        for (var k = 0; k < character[topLevel[j]].length; k++)
+	        	if (character[topLevel[j]][k].tab === tab)
+	        		character[topLevel[j]][k].tab = newTab
+	    var emotes = Object.keys(character.emotes)
+	    for (var j = 0; j < emotes.length; j++) {
+	    	for (var k = 0; k < character.emotes[emotes[j]].eyes.length; k++)
+	    		if (character.emotes[emotes[j]].eyes[k].tab === tab)
+	    			character.emotes[emotes[j]].eyes[k].tab = newTab
+	    	for (var k = 0; k < character.emotes[emotes[j]].mouth.length; k++)
+	    		if (character.emotes[emotes[j]].mouth[k].tab === tab)
+	    			character.emotes[emotes[j]].mouth[k].tab = newTab
+	    }
+	    exports.saveCharacter(project.characters[characters[i]])
+    }
+}
+
+exports.deleteAssetList = function(tab) {
+	exports.deleteAssetListLocal(tab)
+	network.emit('delete asset list', tab)
+}
+
+exports.deleteAssetListLocal = function(tab) {
+	var keys = Object.keys(project.assets[tab])
+    for (var i = 0; i < keys.length; i++) {
+        exports.deleteAsset(tab, keys[i])
+    }
+    project.deleteAssetList(tab)
+    editor.deleteAssetList(tab)
 }
 
 exports.deleteCharacter = function(character) {

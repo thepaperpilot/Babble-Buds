@@ -79,6 +79,7 @@ exports.init = function() {
         var tabElement = document.createElement('div')
         var tabOption = document.createElement('option')
         tabOption.text = assetKeys[i]
+        tabOption.id = "tab option " + assetKeys[i]
         tabsList.add(tabOption)
         tabs.appendChild(tabElement)
         tabElement.style.display = 'none'
@@ -122,15 +123,17 @@ exports.init = function() {
     document.getElementById('new-asset-bundle').addEventListener('click', () => {
         // TODO implement
     })
-    document.getElementById('edit-asset-list').addEventListener('click', () => {
-        // TODO implement
-    })
+    document.getElementById('edit-asset-list').addEventListener('click', editAssetList)
+    document.getElementById('close-edit-asset-list').addEventListener('click', closeAssetListEditor)
+    document.getElementById('asset-list-name').addEventListener('change', renameAssetList)
+    document.getElementById('delete-asset-list').addEventListener('click', deleteAssetList)
     document.getElementById('new-asset-list').addEventListener('click', newAssetList)
     document.getElementById('import-asset-list').addEventListener('click', importAssetList)
     document.getElementById('asset selected').addEventListener('click', selectAsset)
     for (var i = 0; i < project.project.assets.length; i++) {
         var tabOption = document.createElement('option')
         tabOption.text = project.project.assets[i].name
+        tabOption.id = 'asset-tab option ' + project.project.assets[i].name
         document.getElementById('asset-tab').add(tabOption)
     }
     document.getElementById('asset-tab').addEventListener('change', migrateAsset)
@@ -190,10 +193,49 @@ exports.migrateAsset = function(tab, asset, newTab) {
             if (character[topLevel[j]][k].tab === tab && character[topLevel[j]][k].hash === asset)
                 character[topLevel[j]][k].tab = newTab
     var emotes = Object.keys(character.emotes)
-    for (var j = 0; j < emotes.length; j++)
-        for (var k = 0; k < character.emotes[emotes[j]].length; k++)
-            if (character.emotes[emotes[j]][k].tab === tab && character.emotes[emotes[j]][k].hash === asset)
-                character.emotes[emotes[j]][k].tab = newTab
+    for (var j = 0; j < emotes.length; j++) {
+        for (var k = 0; k < character.emotes[emotes[j]].eyes.length; k++)
+            if (character.emotes[emotes[j]].eyes[k].tab === tab && character.emotes[emotes[j]].eyes[k].hash === asset)
+                character.emotes[emotes[j]].eyes[k].tab = newTab
+        for (var k = 0; k < character.emotes[emotes[j]].mouth.length; k++)
+            if (character.emotes[emotes[j]].mouth[k].tab === tab && character.emotes[emotes[j]].mouth[k].hash === asset)
+                character.emotes[emotes[j]].mouth[k].tab = newTab
+    }
+}
+
+exports.renameAssetList = function(tab, newTab) {
+    document.getElementById('tab ' + tab).id = 'tab ' + newTab
+    document.getElementById('tab option ' + tab).text = newTab
+    document.getElementById('tab option ' + tab).id = 'tab option ' + newTab
+    document.getElementById('asset-tab option ' + tab).text = newTab
+    document.getElementById('asset-tab option ' + tab).id = 'asset-tab option ' + newTab
+    document.getElementById('asset-list-name').tab = newTab
+    document.getElementById('delete-asset-list').tab = newTab
+    var topLevel = ["body", "head", "hat", "props"]
+    for (var j = 0; j < topLevel.length; j++)
+        for (var k = 0; k < character[topLevel[j]].length; k++)
+            if (character[topLevel[j]][k].tab === tab)
+                character[topLevel[j]][k].tab = newTab
+    var emotes = Object.keys(character.emotes)
+    for (var j = 0; j < emotes.length; j++) {
+        for (var k = 0; k < character.emotes[emotes[j]].eyes.length; k++)
+            if (character.emotes[emotes[j]].eyes[k].tab === tab)
+                character.emotes[emotes[j]].eyes[k].tab = newTab
+        for (var k = 0; k < character.emotes[emotes[j]].mouth.length; k++)
+            if (character.emotes[emotes[j]].mouth[k].tab === tab)
+                character.emotes[emotes[j]].mouth[k].tab = newTab
+    }
+}
+
+exports.deleteAssetList = function(tab) {
+    document.getElementById('asset list').removeChild(document.getElementById('tab ' + tab))
+    document.getElementById('asset tabs').removeChild(document.getElementById('tab option ' + tab))
+    document.getElementById('asset-tab').removeChild(document.getElementById('asset-tab option ' + tab))
+    var assetKeys = Object.keys(project.assets)
+    if (assetKeys[0])
+        document.getElementById('tab ' + assetKeys[0]).style.display = ''
+    document.getElementById('assets').style.display = ''
+    document.getElementById('asset list editor').style.display = 'none'
 }
 
 exports.deleteAsset = function(tab, asset) {
@@ -208,10 +250,14 @@ exports.deleteAsset = function(tab, asset) {
             if (character[topLevel[j]][k].tab === tab && character[topLevel[j]][k].hash === asset)
                 character[topLevel[j]].splice(k, 1)
     var emotes = Object.keys(character.emotes)
-    for (var j = 0; j < emotes.length; j++)
-        for (var k = 0; k < character.emotes[emotes[j]].length; k++)
-            if (character.emotes[emotes[j]][k].tab === tab && character.emotes[emotes[j]][k].hash === asset)
-                character.emotes[emotes[j]].splice(k, 1)
+    for (var j = 0; j < emotes.length; j++) {
+        for (var k = 0; k < character.emotes[emotes[j]].eyes.length; k++) 
+            if (character.emotes[emotes[j]].eyes[k].tab === tab && character.emotes[emotes[j]].eyes[k].hash === asset)
+                character.emotes[emotes[j]].eyes.splice(k, 1)
+        for (var k = 0; k < character.emotes[emotes[j]].mouth.length; k++)
+            if (character.emotes[emotes[j]].mouth[k].tab === tab && character.emotes[emotes[j]].mouth[k].hash === asset)
+                character.emotes[emotes[j]].mouth.splice(k, 1)
+    }
     exports.setPuppet(character)
 }
 
@@ -774,6 +820,28 @@ function addAsset() {
     })
 }
 
+function editAssetList() {
+    if (Object.keys(project.assets).length === 0) return
+    document.getElementById('assets').style.display = 'none'
+    document.getElementById('asset list editor').style.display = ''
+    document.getElementById('asset-list-name').value = document.getElementById('asset tabs').value
+    document.getElementById('asset-list-name').tab = document.getElementById('asset tabs').value
+    document.getElementById('delete-asset-list').tab = document.getElementById('asset tabs').value
+}
+
+function closeAssetListEditor() {
+    document.getElementById('assets').style.display = ''
+    document.getElementById('asset list editor').style.display = 'none'
+}
+
+function renameAssetList(e) {
+    controller.renameAssetList(e.target.tab, e.target.value)
+}
+
+function deleteAssetList(e) {
+    controller.deleteAssetList(e.target.tab)
+}
+
 function newAssetList() {
     // Calculate name for new asset list
     var name = "New Asset List", i = 0
@@ -782,18 +850,7 @@ function newAssetList() {
     // Create list
     project.addAssetList(name)
     // Add list to DOM
-    var tabOption = document.createElement('option')
-    tabOption.text = name
-    var tabElement = document.createElement('div')
-    tabElement.style.height = '100%'
-    tabElement.id = 'tab ' + name
-    tabElement.className = 'scroll'
-    document.getElementById('asset list').appendChild(tabElement)
-    document.getElementById('asset tabs').add(tabOption)
-    // needs to be a separate element
-    tabOption = document.createElement('option')
-    tabOption.text = name
-    document.getElementById('asset-tab').add(tabOption)
+    addAssetListToDom(name)
     // Select new list
     document.getElementById('asset tabs').value = name
     var assetKeys = Object.keys(project.assets)
@@ -818,9 +875,10 @@ function importAssetList() {
                 if (err) console.log(err)
                 else {
                     var listKeys = Object.keys(list)
+                    var tab = filepaths[0].replace(/^.*[\\\/]/, '').replace(/\.[^.]+$/, '')
+                    if (!project.assets[tab]) addAssetListToDom(tab)
                     for (var i = 0; i < listKeys.length; i++) {
                         status.log('Importing ' + (listKeys.length - i) + ' assets...')
-                        var tab = filepaths[0].replace(/^.*[\\\/]/, '').replace(/\.[^.]+$/, '')
                         if (project.assets[tab] && project.assets[tab][listKeys[i]]) continue
                         fs.copySync(path.join(filepaths[0], '..', list[listKeys[i]].location), path.join(project.assetsPath, tab, listKeys[i] + '.png'))
                         controller.addAsset({"tab": tab, "hash": listKeys[i], "name": list[listKeys[i]].name})
@@ -829,6 +887,22 @@ function importAssetList() {
                 }
             })
     })
+}
+
+function addAssetListToDom(name) {
+    var tabElement = document.createElement('div')
+    tabElement.style.height = '100%'
+    tabElement.id = 'tab ' + name
+    tabElement.className = 'scroll'
+    document.getElementById('asset list').appendChild(tabElement)
+    var tabOption = document.createElement('option')
+    tabOption.text = name
+    tabOption.id = "asset-tab option " + name
+    document.getElementById('asset-tab').add(tabOption)
+    tabOption = document.createElement('option')
+    tabOption.text = name
+    tabOption.id = "tab option " + name
+    document.getElementById('asset tabs').add(tabOption)
 }
 
 function selectAsset() {
@@ -849,7 +923,7 @@ function renameAsset(e) {
 }
 
 function deleteAsset(e) {
-    controller.deleteAsset(e.target.tab, e.target.asset, e.target.value)
+    controller.deleteAsset(e.target.tab, e.target.asset)
 }
 
 function assetTabs(e) {
