@@ -125,9 +125,7 @@ exports.init = function() {
     document.getElementById('edit-asset-list').addEventListener('click', () => {
         // TODO implement
     })
-    document.getElementById('new-asset-list').addEventListener('click', () => {
-        // TODO implement
-    })
+    document.getElementById('new-asset-list').addEventListener('click', newAssetList)
     document.getElementById('import-asset-list').addEventListener('click', importAssetList)
     document.getElementById('asset selected').addEventListener('click', selectAsset)
     for (var i = 0; i < project.project.assets.length; i++) {
@@ -769,10 +767,39 @@ function addAsset() {
             }
             hash = "" + hash
             var tab = document.getElementById('asset tabs').value
+            fs.ensureDirSync(path.join(project.assetsPath, tab))
             fs.writeFileSync(path.join(project.assetsPath, tab, hash + '.png'), file)
             controller.addAsset({"tab": tab, "hash": hash, "name": name})
         }
     })
+}
+
+function newAssetList() {
+    // Calculate name for new asset list
+    var name = "New Asset List", i = 0
+    while (project.assets[name])
+        name = "New Asset List (" + (++i) + ")"
+    // Create list
+    project.addAssetList(name)
+    // Add list to DOM
+    var tabOption = document.createElement('option')
+    tabOption.text = name
+    var tabElement = document.createElement('div')
+    tabElement.style.height = '100%'
+    tabElement.id = 'tab ' + name
+    tabElement.className = 'scroll'
+    document.getElementById('asset list').appendChild(tabElement)
+    document.getElementById('asset tabs').add(tabOption)
+    // needs to be a separate element
+    tabOption = document.createElement('option')
+    tabOption.text = name
+    document.getElementById('asset-tab').add(tabOption)
+    // Select new list
+    document.getElementById('asset tabs').value = name
+    var assetKeys = Object.keys(project.assets)
+    for (var i = 0; i < assetKeys.length; i++)
+        document.getElementById('tab ' + assetKeys[i]).style.display = 'none'
+    document.getElementById('tab ' + name).style.display = ''
 }
 
 function importAssetList() {

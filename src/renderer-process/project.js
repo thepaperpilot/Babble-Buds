@@ -115,9 +115,14 @@ module.exports = exports = remote.getGlobal('project').project = {
 	addAsset: function(asset) {
 		if (!this.assets[asset.tab]) {
 			this.assets[asset.tab] = {}
-			this.project.assets.push({"name": asset.tab, "location": asset.tab.toLowerCase() + '.json'})
+			this.project.assets.push({"name": asset.tab, "location": asset.tab + '.json'})
 		}
 		this.assets[asset.tab][asset.hash] = {"name": asset.name, "location": path.join(asset.tab, asset.hash + '.png')}
+	},
+	addAssetList: function(tab) {
+		if (this.assets[tab]) return
+		this.project.assets.push({"name": tab, "location": tab + '.json'})
+		this.assets[tab] = {}
 	},
 	moveAsset: function(tab, asset, newTab) {
 		this.assets[newTab][asset] = this.assets[tab][asset]
@@ -139,7 +144,7 @@ module.exports = exports = remote.getGlobal('project').project = {
             }
         }
         if (!exists)
-            this.project.characters.push({"name": character.name, "id": character.id, "location": character.name.toLowerCase() + '_' + character.id + '.json'})
+            this.project.characters.push({"name": character.name, "id": character.id, "location": character.name + '_' + character.id + '.json'})
         this.characters[character.id] = character
     },
     duplicateCharacter: function(character) {
