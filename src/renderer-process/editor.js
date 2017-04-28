@@ -128,9 +128,7 @@ exports.init = function() {
     document.getElementById('new-asset-list').addEventListener('click', () => {
         // TODO implement
     })
-    document.getElementById('import-asset-list').addEventListener('click', () => {
-        // TODO implement
-    })
+    document.getElementById('import-asset-list').addEventListener('click', importAssetList)
     document.getElementById('asset selected').addEventListener('click', selectAsset)
     for (var i = 0; i < project.project.assets.length; i++) {
         var tabOption = document.createElement('option')
@@ -774,6 +772,35 @@ function addAsset() {
             fs.writeFileSync(path.join(project.assetsPath, tab, hash + '.png'), file)
             controller.addAsset({"tab": tab, "hash": hash, "name": name})
         }
+    })
+}
+
+function importAssetList() {
+    remote.dialog.showOpenDialog(remote.BrowserWindow.getFocusedWindow(), {
+        title: 'Import Asset List',
+        filters: [
+            {name: 'JSON Files', extensions: ['json']},
+            {name: 'All Files', extensions: ['*']}
+        ],
+        properties: [
+            'openFile'
+        ] 
+    }, (filepaths) => {
+        if (filepaths)
+            fs.readJson(filepaths[0], (err, list) => {
+                if (err) console.log(err)
+                else {
+                    var listKeys = Object.keys(list)
+                    for (var i = 0; i < listKeys.length; i++) {
+                        status.log('Importing ' + (listKeys.length - i) + ' assets...')
+                        var tab = filepaths[0].replace(/^.*[\\\/]/, '').replace(/\.[^.]+$/, '')
+                        if (project.assets[tab] && project.assets[tab][listKeys[i]]) continue
+                        fs.copySync(path.join(filepaths[0], '..', list[listKeys[i]].location), path.join(project.assetsPath, tab, listKeys[i] + '.png'))
+                        controller.addAsset({"tab": tab, "hash": listKeys[i], "name": list[listKeys[i]].name})
+                    }
+                    status.log('Imported ' + listKeys.length + ' assets!')
+                }
+            })
     })
 }
 
