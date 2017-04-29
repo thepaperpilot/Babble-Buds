@@ -166,7 +166,7 @@ exports.init = function() {
 exports.addAsset = function(tab, asset) {
     var assetElement = document.createElement('div')
     document.getElementById('tab ' + tab).appendChild(assetElement)
-    assetElement.id = project.assets[tab][asset].name
+    assetElement.id = project.assets[tab][asset].name.toLowerCase()
     assetElement.className = "asset " + asset
     assetElement.innerHTML = '<div class="desc">' + project.assets[tab][asset].name + '</div>'
     var assetDraggable = document.createElement('img')
@@ -920,6 +920,7 @@ function renameAsset(e) {
     document.getElementById('asset selected').getElementsByClassName('desc')[0].innerHTML = e.target.value
     var list = document.getElementById('tab ' + e.target.tab)
     list.getElementsByClassName(e.target.asset)[0].getElementsByClassName('desc')[0].innerHTML = e.target.value
+    list.getElementsByClassName(e.target.asset)[0].id = e.target.value.toLowerCase()
 }
 
 function deleteAsset(e) {
