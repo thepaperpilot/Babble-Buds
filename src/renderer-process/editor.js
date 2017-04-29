@@ -1003,8 +1003,18 @@ function paste() {
 
 function deleteKey() {
     if (selected) {
-        puppet[layer].removeChild(selected)
-        character[layer === 'headBase' ? 'head' : layer].splice(character[layer === 'headBase' ? 'head' : layer].indexOf(selected.asset), 1)
+        if (layer.indexOf('-emote') > -1) {
+            if (document.getElementById('eyemouth').checked) {
+                puppet.emotes[layer.replace(/-emote/, '')].eyes.removeChild(selected)
+                character.emotes[layer.replace(/-emote/, '')].eyes.splice(character.emotes[layer.replace(/-emote/, '')].eyes.indexOf(selected.asset), 1)
+            } else {
+                puppet.emotes[layer.replace(/-emote/, '')].mouth.removeChild(selected)
+                character.emotes[layer.replace(/-emote/, '')].mouth.splice(character.emotes[layer.replace(/-emote/, '')].mouth.indexOf(selected.asset), 1)
+            }
+        } else {
+            puppet[layer].removeChild(selected)
+            character[layer === 'headBase' ? 'head' : layer].splice(character[layer === 'headBase' ? 'head' : layer].indexOf(selected.asset), 1)
+        }
         selected = null
         stage.stage.removeChild(selectedGui)
     }
