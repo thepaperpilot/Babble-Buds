@@ -147,15 +147,17 @@ module.exports = exports = remote.getGlobal('project').project = {
         this.project.assets.splice(this.project.assets.indexOf(this.project.assets.find((x) => x.name === tab)), 1)
     },
     saveCharacter: function(character) {
-        var exists = false
+        var char
         for (var i = 0; i < this.project.characters.length; i++) {
             if (this.project.characters[i].id == character.id) {
-                exists = true
+                char = this.project.characters[i]
                 break
             }
         }
-        if (!exists)
-            this.project.characters.push({"name": character.name, "id": character.id, "location": character.name + '_' + character.id + '.json'})
+        if (char === null)
+            this.project.characters.push({"name": character.name, "id": character.id, "location": character.id + '.json'})
+        else
+        	char.name = character.name
         this.characters[character.id] = character
     },
     duplicateCharacter: function(character) {
