@@ -1,0 +1,30 @@
+{
+  "260003300": {
+    "name": "mouth_happy",
+    "location": "mouths/260003300.png"
+  },
+  "305161883": {
+    "name": "mouth_teethUpper",
+    "location": "mouths/305161883.png"
+  },
+  "509289366": {
+    "name": "mouth_sad",
+    "location": "mouths/509289366.png"
+  },
+  "537440389": {
+    "name": "mouth_straight",
+    "location": "mouths/537440389.png"
+  },
+  "1011022939": {
+    "name": "mouth_oh",
+    "location": "mouths/1011022939.png"
+  },
+  "1656284251": {
+    "name": "mouth_teethLower",
+    "location": "mouths/1656284251.png"
+  },
+  "-1396940202": {
+    "name": "mouth_glad",
+    "location": "mouths/-1396940202.png"
+  }
+}
