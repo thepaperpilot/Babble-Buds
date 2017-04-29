@@ -407,3 +407,13 @@ Puppet.prototype.setBabbling = function(babble) {
         }
     }
 }
+
+Puppet.prototype.addEmote = function(emote) {
+    if (this.emotes[emote]) return
+    this.emotes[emote] = {
+        "mouth": new Container(),
+        "eyes": new Container()
+    }
+    this.mouthsContainer.addChild(this.emotes[emote].mouth)
+    this.eyesContainer.addChild(this.emotes[emote].eyes)
+}

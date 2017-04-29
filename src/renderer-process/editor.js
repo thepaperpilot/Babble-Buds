@@ -527,6 +527,8 @@ function mouseUp(e) {
                     "scaleY": 1
                 }
                 if (layer.indexOf('-emote') > -1) {
+                    if (!puppet.emotes[layer.replace(/-emote/, '')])
+                        puppet.addEmote(layer.replace(/-emote/, ''))
                     if (document.getElementById('eyemouth').checked) {
                         puppet.emotes[layer.replace(/-emote/, '')].eyes.addChild(stage.getAsset(newAsset, layer))
                         character.emotes[layer.replace(/-emote/, '')].eyes.push(newAsset)
