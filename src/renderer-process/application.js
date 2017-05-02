@@ -146,17 +146,17 @@ exports.deleteCharacter = function(index) {
 
 // Pop the stage out
 exports.openPopout = function() {
-	document.getElementById('popout').innerHTML ='Close Pop Out'
+	document.getElementById('popout').innerHTML ='Pop In Stage'
 	document.getElementById('popout').removeEventListener('click', controller.popOut)
 	document.getElementById('popout').addEventListener('click', controller.popIn)
 	document.getElementById('screen').addEventListener('click', controller.popIn)
 	document.getElementById('screen').className = 'container main button'
-	document.getElementById('screen').innerHTML = '<div style="position: relative;top: 50%;transform: translateY(-50%);text-align:center;background-color:#242a33;">Click to Pop In Show Panel</div>'
+	document.getElementById('screen').innerHTML = '<div style="position: relative;top: 50%;transform: translateY(-50%);text-align:center;background-color:#242a33;">Click to Pop Stage Back In</div>'
 }
 
 // Reattach stage
 exports.closePopout = function() {
-	document.getElementById('popout').innerHTML = 'Pop Out Show Panel'
+	document.getElementById('popout').innerHTML = 'Pop Out Stage'
 	document.getElementById('popout').addEventListener('click', controller.popOut)
 	document.getElementById('popout').removeEventListener('click', controller.popIn)
 	document.getElementById('screen').removeEventListener('click', controller.popIn)
