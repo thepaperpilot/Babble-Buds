@@ -147,7 +147,7 @@ module.exports = exports = remote.getGlobal('project').project = {
         this.project.assets.splice(this.project.assets.indexOf(this.project.assets.find((x) => x.name === tab)), 1)
     },
     saveCharacter: function(character) {
-        var char
+        var char = null
         for (var i = 0; i < this.project.characters.length; i++) {
             if (this.project.characters[i].id == character.id) {
                 char = this.project.characters[i]
