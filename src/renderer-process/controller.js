@@ -188,6 +188,10 @@ exports.emitPopout = function(...args) {
 	if (popout) popout.webContents.send(...args)
 }
 
+exports.setupPopout = function() {
+	exports.emitPopout('setup', project, project.getPuppet(), puppet.id)
+}
+
 exports.resize = function() {
 	stage.resize()
 	exports.emitPopout('resize')

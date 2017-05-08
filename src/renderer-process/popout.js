@@ -7,12 +7,12 @@ var puppet
 
 function loadPuppets() {
     // Add Puppet
-    stage.addPuppet(puppet, 1)
+    stage.addPuppet(puppet, puppet.id)
 
     // Puppet doesn't appear for some reason until you do something to it
     // here's something that doesn't actually do something to it, but tricks
     // the puppet into appearing
-    stage.getPuppet(1).setBabbling(false)
+    stage.getPuppet(puppet.id).setBabbling(false)
 
     // Request initial puppets
     remote.getCurrentWindow().getParentWindow().webContents.send('init')
@@ -40,8 +40,9 @@ electron.ipcRenderer.on('resize', () => {
     stage.resize()
 })
 
-electron.ipcRenderer.on('setup', (event, project, mypuppet) => {
+electron.ipcRenderer.on('setup', (event, project, mypuppet, id) => {
     puppet = mypuppet
+    puppet.id = id
     stage = new Stage('screen', project.project, project.assets, project.assetsPath, loadPuppets)
 })
 

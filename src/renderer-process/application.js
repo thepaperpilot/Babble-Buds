@@ -71,9 +71,7 @@ exports.init = function() {
 	electron.ipcRenderer.on('close', () => {
 		project.closeProject()
 	})
-	electron.ipcRenderer.on('loaded', () => {
-		controller.emitPopout('setup', project, project.getPuppet())
-	})
+	electron.ipcRenderer.on('loaded', controller.setupPopout)
 
 	// Load settings values
 	document.getElementById('colorpicker').value = project.project.greenScreen
