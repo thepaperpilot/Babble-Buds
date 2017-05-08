@@ -350,6 +350,24 @@ function setSelected(asset) {
     rotate.y = corners[1].y - 24
     selectedGui.addChild(rotate)
     selectedGui.rotate = rotate
+    var flipVert = new Sprite.fromImage(path.join('assets', 'icons', 'flipVert.png'))
+    flipVert.pivot.x = flipVert.pivot.y = 0.5
+    flipVert.width = flipVert.height = 24
+    flipVert.interactive = true
+    flipVert.on('mousedown', flipVertically)
+    flipVert.x = corners[1].x + 24
+    flipVert.y = corners[1].y
+    selectedGui.addChild(flipVert)
+    selectedGui.flipVert = flipVert
+    var flipHoriz = new Sprite.fromImage(path.join('assets', 'icons', 'flipHoriz.png'))
+    flipHoriz.pivot.x = flipHoriz.pivot.y = 0.5
+    flipHoriz.width = flipHoriz.height = 24
+    flipHoriz.interactive = true
+    flipHoriz.on('mousedown', flipHorizontally)
+    flipHoriz.x = corners[1].x - 12
+    flipHoriz.y = corners[1].y - 32
+    selectedGui.addChild(flipHoriz)
+    selectedGui.flipHoriz = flipHoriz
     selectedGui.pivot.x = stage.screen.clientWidth / 2 / scale - selected.width / 2 - 12 + (24 + selected.width) * 0.5
     selectedGui.pivot.y = stage.screen.clientHeight / scale - selected.height / 2 - 12 + (24 + selected.height) * 0.5
     selectedGui.x = selected.x + selectedGui.pivot.x
@@ -471,6 +489,10 @@ function resizeMousemove(e) {
     }
     selectedGui.rotate.x = selectedGui.corners[1].x + 12
     selectedGui.rotate.y = selectedGui.corners[1].y - 24
+    selectedGui.flipHoriz.x = selectedGui.corners[1].x - 12
+    selectedGui.flipHoriz.y = selectedGui.corners[1].y - 32
+    selectedGui.flipVert.x = selectedGui.corners[1].x + 24
+    selectedGui.flipVert.y = selectedGui.corners[1].y
     selectedGui.pivot.x = stage.screen.clientWidth / 2 / scale - selected.width / 2 - 12 + (24 + selected.width) * 0.5
     selectedGui.pivot.y = stage.screen.clientHeight / scale - selected.height / 2 - 12 + (24 + selected.height) * 0.5
     selectedGui.x = selected.x + selectedGui.pivot.x
@@ -508,6 +530,18 @@ function rotateMouseup() {
     stage.stage.off('mousemove', rotateMousemove)
     stage.stage.off('mouseup', rotateMouseup)
     selected.asset.rotation = selected.rotation
+}
+
+function flipVertically(e) {
+    e.stopPropagation()
+    selected.height *= -1
+    selected.asset.scaleY *= -1
+}
+
+function flipHorizontally(e) {
+    e.stopPropagation()
+    selected.width *= -1
+    selected.asset.scaleX *= -1
 }
 
 function mouseUp(e) {
