@@ -24,7 +24,8 @@ Users can create puppets with different faces for different emotions, and then u
 - Installer
 - Undo and redo actions in editor
 - Configurable local AND global hotkeys
-- Button to remove unused assets, stray files, etc.
+- Button to clean up project (remove unused assets, stray files, move any assets into their proper spots, etc.)
+- Sorting assets and characters
 
 ## How to Contribute
 
