@@ -146,6 +146,7 @@ Stage.prototype.setPuppet = function(id, newPuppet) {
     this.puppets[this.puppets.indexOf(oldPuppet)] = newPuppet
     this.puppetStage.removeChild(oldPuppet.container)
     this.puppetStage.addChild(newPuppet.container)
+    this.resize()
 }
 
 Stage.prototype.gameLoop = function() {
