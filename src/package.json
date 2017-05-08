@@ -5,7 +5,7 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "package": "electron-packager ./ BabbleBuds --all --out ../out"
+    "package": "electron-packager ./ BabbleBuds --all --out ../out --icon icon.icns"
   },
   "repository": "https://github.com/thepaperpilot/babble-buds",
   "keywords": [

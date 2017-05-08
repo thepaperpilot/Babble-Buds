@@ -15,7 +15,7 @@ function createWindow () {
   settings.load()
 
   // Create the browser window.
-  mainWindow = new BrowserWindow({width: 1280, height: 720, backgroundColor: '#2a323d', minWidth: 1280, minHeight: 720})
+  mainWindow = new BrowserWindow({width: 1280, height: 720, backgroundColor: '#2a323d', minWidth: 1280, minHeight: 720, icon: path.join(__dirname, 'icon.ico')})
 
   // and load the index.html of the app.
   mainWindow.loadURL(url.format({
