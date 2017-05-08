@@ -387,6 +387,12 @@ function editorMousedown(e) {
         var dy = centerY - e.data.global.y;
         var dist = dx*dx + dy*dy; //Distance is not squared as it's not needed.
         if((dist < distance || distance == -1) && clickableAssets[i].visible && clickableAssets[i].containsPoint(e.data.global) && clickableAssets[i].layer === layer) {
+            if (layer.indexOf('-emote') > -1) {
+                if(document.getElementById('eyemouth').checked && character.emotes[layer.replace(/-emote/, '')].mouth.indexOf(clickableAssets[i].asset) > -1)
+                    continue
+                if(!document.getElementById('eyemouth').checked && character.emotes[layer.replace(/-emote/, '')].eyes.indexOf(clickableAssets[i].asset) > -1)
+                    continue
+            }
             closest = clickableAssets[i];
             distance = dist;
         }
