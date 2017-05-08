@@ -44,6 +44,8 @@ exports.init = function() {
 		element.emote = emotes[i]
 		element.addEventListener('click', emoteClick)
 	}
+	document.getElementById('babble').addEventListener('mousedown', controller.startBabblingLocal)
+	document.getElementById('babble').addEventListener('mouseup', controller.stopBabblingLocal)
 	document.getElementById('popout').addEventListener('click', controller.popOut)
 	document.getElementById('settings').addEventListener('click', toggleSettings)
 	document.getElementById('colorpicker').addEventListener('change', colorpickerChange)
