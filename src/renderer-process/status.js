@@ -37,3 +37,7 @@ exports.decrement = function(string) {
 	exports.log(string.replace('%x', counts[string]).replace('%s', counts[string] === 1 ? '' : 's'))
 	return counts[string] === 0
 }
+
+exports.getCount = function(string) {
+	return counts[string]
+}
