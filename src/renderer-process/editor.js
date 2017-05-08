@@ -121,7 +121,7 @@ exports.init = function() {
     document.getElementById('delete-character').addEventListener('click', deleteCharacter)
     document.getElementById('add-asset').addEventListener('click', addAsset)
     document.getElementById('new-asset-bundle').addEventListener('click', () => {
-        // TODO implement
+        status.log('Not Yet Implemented!')
     })
     document.getElementById('edit-asset-list').addEventListener('click', editAssetList)
     document.getElementById('close-edit-asset-list').addEventListener('click', closeAssetListEditor)
