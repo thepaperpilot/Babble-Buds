@@ -43,7 +43,7 @@ exports.init = function() {
     stage.resize = function() {
         this.renderer.resize(this.screen.clientWidth, this.screen.clientHeight)
         this.slotWidth = this.screen.clientWidth / this.project.numCharacters
-        this.stage.scale.x = this.stage.scale.y = scale
+        this.puppetStage.scale.x = this.puppetStage.scale.y = scale
         puppet.container.y = this.screen.clientHeight / scale
         puppet.container.x = (this.screen.clientWidth / scale) / 2
         selected = null
@@ -309,13 +309,13 @@ exports.setPuppet = function(newCharacter) {
 
 function drawBox(box) {
     box.lineStyle(4, 0x242a33)
-    box.moveTo(stage.screen.clientWidth / 2 / scale - selected.width / 2 - 12, stage.screen.clientHeight / scale + selected.height / 2 + 12)
-    box.lineTo(stage.screen.clientWidth / 2 / scale - selected.width / 2 - 12, stage.screen.clientHeight / scale - selected.height / 2 - 12)
-    box.lineTo(stage.screen.clientWidth / 2 / scale + selected.width / 2 + 12, stage.screen.clientHeight / scale - selected.height / 2 - 12)
-    box.lineTo(stage.screen.clientWidth / 2 / scale + selected.width / 2 + 12, stage.screen.clientHeight / scale + selected.height / 2 + 12)
-    box.lineTo(stage.screen.clientWidth / 2 / scale - selected.width / 2 - 12, stage.screen.clientHeight / scale + selected.height / 2 + 12)
+    box.moveTo(stage.screen.clientWidth / 2 - selected.width / 2 * scale - 12, stage.screen.clientHeight + selected.height / 2 * scale + 12)
+    box.lineTo(stage.screen.clientWidth / 2 - selected.width / 2 * scale - 12, stage.screen.clientHeight - selected.height / 2 * scale - 12)
+    box.lineTo(stage.screen.clientWidth / 2 + selected.width / 2 * scale + 12, stage.screen.clientHeight - selected.height / 2 * scale - 12)
+    box.lineTo(stage.screen.clientWidth / 2 + selected.width / 2 * scale + 12, stage.screen.clientHeight + selected.height / 2 * scale + 12)
+    box.lineTo(stage.screen.clientWidth / 2 - selected.width / 2 * scale - 12, stage.screen.clientHeight + selected.height / 2 * scale + 12)
     box.lineStyle(2, 0x242a33, 0.5)
-    box.drawCircle(stage.screen.clientWidth / 2 / scale + selected.width / 2 + 12, stage.screen.clientHeight / scale - selected.height / 2 - 12, 24)
+    box.drawCircle(stage.screen.clientWidth / 2 + selected.width / 2 * scale + 12, stage.screen.clientHeight - selected.height / 2 * scale - 12, 24)
 }
 
 function setSelected(asset) {
@@ -333,8 +333,8 @@ function setSelected(asset) {
         graphics.beginFill(0x242a33)
         graphics.drawCircle(0, 0, 6)
         corners[i] = new Sprite(graphics.generateCanvasTexture(1))
-        corners[i].x = stage.screen.clientWidth / 2 / scale - selected.width / 2 - 20 + (24 + selected.width) * (i % 2)
-        corners[i].y = stage.screen.clientHeight / scale - selected.height / 2 - 20 + (24 + selected.height) * Math.floor(i / 2)
+        corners[i].x = stage.screen.clientWidth / 2 - selected.width / 2 * scale - 20 + (24 + selected.width * scale) * (i % 2)
+        corners[i].y = stage.screen.clientHeight - selected.height / 2 * scale - 20 + (24 + selected.height * scale) * Math.floor(i / 2)
         selectedGui.addChild(corners[i])
         corners[i].i = i
         corners[i].interactive = true
@@ -368,10 +368,10 @@ function setSelected(asset) {
     flipHoriz.y = corners[1].y - 32
     selectedGui.addChild(flipHoriz)
     selectedGui.flipHoriz = flipHoriz
-    selectedGui.pivot.x = stage.screen.clientWidth / 2 / scale - selected.width / 2 - 12 + (24 + selected.width) * 0.5
-    selectedGui.pivot.y = stage.screen.clientHeight / scale - selected.height / 2 - 12 + (24 + selected.height) * 0.5
-    selectedGui.x = selected.x + selectedGui.pivot.x
-    selectedGui.y = selected.y + selectedGui.pivot.y
+    selectedGui.pivot.x = stage.screen.clientWidth / 2 - selected.width / 2 * scale - 12 + (24 + selected.width * scale) * 0.5
+    selectedGui.pivot.y = stage.screen.clientHeight - selected.height / 2 * scale - 12 + (24 + selected.height * scale) * 0.5
+    selectedGui.x = selected.x * scale + selectedGui.pivot.x
+    selectedGui.y = selected.y * scale + selectedGui.pivot.y
     selectedGui.rotation = selected.rotation
     stage.stage.addChild(selectedGui)
 }
@@ -417,14 +417,14 @@ function editorMousemove(e) {
             var dist = Math.hypot(Math.cos(rotation) * (e.data.global.x - selectedGui.startX), Math.sin(rotation) * (e.data.global.y - selectedGui.startY)) / scale
             selected.x = selected.asset.x + Math.cos(rotation) * dist
             selected.y = selected.asset.y + Math.sin(rotation) * dist
-            selectedGui.x = selected.x + selectedGui.pivot.x
-            selectedGui.y = selected.y + selectedGui.pivot.y
+            selectedGui.x = selected.x * scale + selectedGui.pivot.x
+            selectedGui.y = selected.y * scale + selectedGui.pivot.y
         } else {
             var position = e.data.getLocalPosition(selected.parent)
             selected.x = position.x - selected.start.x
             selected.y = position.y - selected.start.y
-            selectedGui.x = selected.x + selectedGui.pivot.x
-            selectedGui.y = selected.y + selectedGui.pivot.y
+            selectedGui.x = selected.x * scale + selectedGui.pivot.x
+            selectedGui.y = selected.y * scale + selectedGui.pivot.y
         }
     }
 }
@@ -499,10 +499,10 @@ function resizeMousemove(e) {
     selectedGui.flipHoriz.y = selectedGui.corners[1].y - 32
     selectedGui.flipVert.x = selectedGui.corners[1].x + 24
     selectedGui.flipVert.y = selectedGui.corners[1].y
-    selectedGui.pivot.x = stage.screen.clientWidth / 2 / scale - selected.width / 2 - 12 + (24 + selected.width) * 0.5
-    selectedGui.pivot.y = stage.screen.clientHeight / scale - selected.height / 2 - 12 + (24 + selected.height) * 0.5
-    selectedGui.x = selected.x + selectedGui.pivot.x
-    selectedGui.y = selected.y + selectedGui.pivot.y
+    selectedGui.pivot.x = stage.screen.clientWidth / 2 - selected.width / 2 * scale - 12 + (24 + selected.width * scale) * 0.5
+    selectedGui.pivot.y = stage.screen.clientHeight - selected.height / 2 * scale - 12 + (24 + selected.height * scale) * 0.5
+    selectedGui.x = selected.x * scale + selectedGui.pivot.x
+    selectedGui.y = selected.y * scale + selectedGui.pivot.y
 }
 
 function resizeMouseup() {

@@ -22,6 +22,8 @@ function Stage(element, project, assets, assetsPath, callback) {
 
     // Create some basic objects
     this.stage = new Container()
+    this.puppetStage = new Container()
+    this.stage.addChild(this.puppetStage)
     this.renderer = autoDetectRenderer(1, 1, {antialias: true, transparent: true})
     this.screen = document.getElementById(element)
     this.screen.appendChild(this.renderer.view)
@@ -77,11 +79,11 @@ Stage.prototype.resize = function() {
     this.renderer.resize(this.screen.clientWidth, this.screen.clientHeight)
     this.slotWidth = this.screen.clientWidth / this.project.numCharacters
     if (this.slotWidth < this.project.minSlotWidth) {
-        this.stage.scale.x = this.stage.scale.y = this.slotWidth / this.project.minSlotWidth
+        this.puppetStage.scale.x = this.puppetStage.scale.y = this.slotWidth / this.project.minSlotWidth
         this.slotWidth = this.project.minSlotWidth
-    } else this.stage.scale.x = this.stage.scale.y = 1
+    } else this.puppetStage.scale.x = this.puppetStage.scale.y = 1
     for (var i = 0; i < this.puppets.length; i++) {
-        this.puppets[i].container.y = this.screen.clientHeight / this.stage.scale.y
+        this.puppets[i].container.y = this.screen.clientHeight / this.puppetStage.scale.y
         this.puppets[i].container.x = (this.puppets[i].position - 0.5) * this.slotWidth
     }
 }
@@ -93,10 +95,10 @@ Stage.prototype.createPuppet = function(obj) {
 Stage.prototype.addPuppet = function(obj, id) {
     var puppet = new Puppet(this, obj, id)
     this.puppets.push(puppet)
-    this.stage.addChild(puppet.container)
+    this.puppetStage.addChild(puppet.container)
     for (var i = 0; i < this.listeners.length; i++)
         puppet.container.on(this.listeners[i].event, this.listeners[i].callback)
-    puppet.container.y = this.screen.clientHeight / this.stage.scale.y
+    puppet.container.y = this.screen.clientHeight / this.puppetStage.scale.y
     puppet.container.x = (puppet.position - 0.5) * this.slotWidth
     return puppet
 }
@@ -110,13 +112,13 @@ Stage.prototype.removePuppet = function(id) {
         }
     if (puppet) {
         this.puppets.splice(this.puppets.indexOf(puppet), 1)
-        this.stage.removeChild(puppet.container)
+        this.puppetStage.removeChild(puppet.container)
     }
 }
 
 Stage.prototype.clearPuppets = function() {
     while (this.puppets.length !== 0) {
-        this.stage.removeChild(this.puppets[0].container)
+        this.puppetStage.removeChild(this.puppets[0].container)
         this.puppets.splice(0, 1)
     }
 }
@@ -138,12 +140,12 @@ Stage.prototype.setPuppet = function(id, newPuppet) {
 
     for (var i = 0; i < this.listeners.length; i++)
         newPuppet.container.on(this.listeners[i].event, this.listeners[i].callback)
-    newPuppet.container.y = this.screen.clientHeight / this.stage.scale.y
+    newPuppet.container.y = this.screen.clientHeight / this.puppetStage.scale.y
     newPuppet.container.x = (newPuppet.position - 0.5) * this.slotWidth
 
     this.puppets[this.puppets.indexOf(oldPuppet)] = newPuppet
-    this.stage.removeChild(oldPuppet.container)
-    this.stage.addChild(newPuppet.container)
+    this.puppetStage.removeChild(oldPuppet.container)
+    this.puppetStage.addChild(newPuppet.container)
 }
 
 Stage.prototype.gameLoop = function() {
@@ -177,7 +179,7 @@ Stage.prototype.gameLoop = function() {
             // Scale in a sin formation such that it does 3 half circles per slot, plus 2 more at the end
             puppet.container.scale.y = 1 + Math.sin((1 + puppet.movingAnim * 5) * Math.PI) / 80
             // Update y value so it doesn't leave the bottom of the screen while bouncing
-            puppet.container.y = this.screen.clientHeight / this.stage.scale.y
+            puppet.container.y = this.screen.clientHeight / this.puppetStage.scale.y
             // Linearly move across the slot, unless we're in the (.6 - 1) part of the animation
             puppet.container.x = (puppet.position + direction * (puppet.movingAnim >= 0.6 ? 0 : puppet.movingAnim / 0.6) - 0.5) * this.slotWidth
 
@@ -342,7 +344,7 @@ var Puppet = function(stage, puppet, id) {
     // Place Puppet on Stage
     this.container.interactive = true
     this.container.puppet = puppet
-    this.container.y = stage.screen.clientHeight / stage.stage.scale.y
+    this.container.y = stage.screen.clientHeight / stage.puppetStage.scale.y
     this.container.x = (this.position - 0.5) * stage.slotWidth
     if (this.facingLeft) this.container.scale.x = -1
 }
