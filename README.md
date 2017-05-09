@@ -44,3 +44,5 @@ First off, thanks for wanting to help! It means a lot, truly. There are two ways
 Thanks to Marionette Mates for originally collecting all the assets I've ported over. 
 
 Thanks to Rob and the rest of the buffalo wizards for making so much amazing content, and particularly URealms Live for inspiring this project. 
+
+Thanks to [TheGravyNator](https://forums.urealms.com/profile/763/TheGravyNator) for the sample project!
