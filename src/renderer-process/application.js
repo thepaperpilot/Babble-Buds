@@ -201,7 +201,7 @@ function beforeUnload() {
 }
 
 function charClick(e) {
-	controller.setPuppetLocal(e.target.i)
+	controller.setPuppetLocal(e.target.i, e.shiftKey, e.ctrlKey)
 }
 
 function charContextMenu(e) {

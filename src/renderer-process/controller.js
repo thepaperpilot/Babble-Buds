@@ -14,6 +14,7 @@ const url = require('url')
 var project
 var stage
 var puppet
+var character
 var hotbar = []
 var popout
 
@@ -26,12 +27,31 @@ exports.init = function() {
 	stage = new Stage('screen', project.project, project.assets, project.assetsPath, loadPuppets)
 }
 
-exports.setPuppetLocal = function(index) {
+exports.setPuppetLocal = function(index, shiftKey, ctrlKey) {
 	if (!hotbar[index]) return
 
+	var newPuppet
+	var oldcharacter = character
+	character = JSON.parse(JSON.stringify(project.characters[project.project.hotbar[index]]))
+
+	if (shiftKey && !ctrlKey) {
+		character.head = oldcharacter.head
+		character.hat = oldcharacter.hat
+		character.emotes = oldcharacter.emotes
+		character.mouths = oldcharacter.mouths
+		character.eyes = oldcharacter.eyes
+		newPuppet = stage.createPuppet(character)
+	} else if (!shiftKey && ctrlKey) {
+		character.body = oldcharacter.body
+		character.props = oldcharacter.props
+		newPuppet = stage.createPuppet(character)
+	} else {
+		newPuppet = hotbar[index]
+	}
+
 	// Set Puppet
-	stage.setPuppet(puppet.id, hotbar[index])
-	puppet = hotbar[index]
+	stage.setPuppet(puppet.id, newPuppet)
+	puppet = newPuppet
 
 	// Update Editor
 	application.setPuppet(index, puppet.emotes)
@@ -359,6 +379,7 @@ exports.connect = function() {
 exports.disconnect = function() {
 	stage.clearPuppets()
 	puppet = stage.addPuppet(project.getPuppet(), 1)
+	character = JSON.parse(JSON.stringify(project.getPuppet()))
 	if (popout) popout.webContents.send('disconnect', project.getPuppet())
 }
 
@@ -371,6 +392,7 @@ exports.host = function() {
 
 exports.assign = function(id) {
 	puppet = stage.addPuppet(project.getPuppet(), id)
+	character = JSON.parse(JSON.stringify(project.getPuppet()))
 	if (popout) popout.webContents.send('assign puppet', project.getPuppet(), id)
 }
 
@@ -389,6 +411,7 @@ function loadPuppets() {
 
 	// Add Puppet
 	puppet = stage.addPuppet(project.getPuppet(), 1)
+	character = JSON.parse(JSON.stringify(project.getPuppet()))
 
 	// Puppet Editor
 	editor.init()
