@@ -16,6 +16,8 @@ var server
 var puppets = []
 var assets = {}
 var numPuppets = 1
+var addPuppet
+var assetsDownloading = 0
 
 // Create server & socket
 var serv = http.createServer(function(req, res) {
@@ -33,22 +35,20 @@ server.sockets.on('connection', function(socket) {
 	for (var i = 0; i < tabs.length; i++) {
 		var assetKeys = Object.keys(assets[tabs[i]])
 		for (var j = 0; j < assetKeys.length; j++) {
-			socket.emit('add asset', tabs[i], assetKeys[j])
+			var asset = assets[tabs[i]][assetKeys[j]]
+			socket.emit('add asset', {"tab": tabs[i], "hash": assetKeys[j], "name": asset.name})
 		}
 	}
 
 	// Add Application Listeners
 	socket.on('add puppet', (puppet) => {
 		socket.emit('set slots', numCharacters)
-		puppet.socket = socket.id
-		numPuppets++
-		puppet.charId = numPuppets
 		for (var i = 0; i < puppets.length; i++) {
 			socket.emit('add puppet', puppets[i])
 		}
-		puppets.push(puppet)
-		socket.emit('assign puppet', numPuppets)
-		socket.broadcast.emit('add puppet', puppet)
+		addPuppet = puppet
+		if (assetsDownloading === 0)
+			addPuppetServer(socket)
 	})
 	socket.on('set puppet', (id, puppet) => {
 		socket.broadcast.emit('set puppet', id, puppet)
@@ -104,6 +104,12 @@ server.sockets.on('connection', function(socket) {
 		numCharacters = slots
 		socket.broadcast.emit('set slots', slots)
 	})
+	socket.on('move asset', (tab, asset, newTab) => {
+		socket.broadcast.emit('move asset', tab, asset, newTab)
+	})
+	socket.on('delete asset', (tab, asset) => {
+		socket.broadcast.emit('delete asset', tab, asset)
+	})
 
 	socket.on('disconnect', () => {
 		for (var i = 0; i < puppets.length; i++) {
@@ -115,21 +121,38 @@ server.sockets.on('connection', function(socket) {
 		}
 	})
 
-	socket.on('add asset', (tab, asset) => {
-		if (!(assets[tab] && assets[tab][asset])) {
+	socket.on('add asset', (asset) => {
+		if (!(assets[asset.tab] && assets[asset.tab][asset.hash])) {
+			assetsDownloading++
 			var stream = ss.createStream()
-			fs.ensureDirSync(path.join(assetsPath, tab))
-			ss(socket).emit('request asset', stream, tab, asset)
+			fs.ensureDirSync(path.join(assetsPath, asset.tab))
+			ss(socket).emit('request asset', stream, asset)
 			stream.on('end', () => {
-				if (!assets[tab])
-					assets[tab] = {}
-				assets[tab][asset] = {"location": path.join(tab, asset + '.png')}
-				socket.broadcast.emit('add asset', tab, asset)
+				if (!assets[asset.tab]) {
+					assets[asset.tab] = {}
+				}
+				assets[asset.tab][asset.hash] = {"name": asset.name, "location": path.join(asset.tab, asset.hash + '.png')}
+				socket.broadcast.emit('add asset', asset)
+				assetsDownloading--
+				if (assetsDownloading === 0) {
+					if (addPuppet)
+						addPuppetServer(socket)
+				}
 			})
-			stream.pipe(fs.createWriteStream(path.join(assetsPath, tab, asset + '.png')))
+			stream.pipe(fs.createWriteStream(path.join(assetsPath, asset.tab, asset.hash + '.png')))
 		}
 	})
-	ss(socket).on('request asset', function(stream, tab, asset) {
-		fs.createReadStream(path.join(assetsPath, assets[tab][asset].location)).pipe(stream)
+	ss(socket).on('request asset', function(stream, asset) {
+		fs.createReadStream(path.join(assetsPath, assets[asset.tab][asset.hash].location)).pipe(stream)
 	})
 })
+
+function addPuppetServer(socket) {
+	numPuppets++
+	addPuppet.socket = socket.id
+	addPuppet.charId = numPuppets
+	puppets.push(addPuppet)
+	socket.emit('assign puppet', numPuppets)
+	socket.broadcast.emit('add puppet', addPuppet)
+	addPuppet = null
+}
