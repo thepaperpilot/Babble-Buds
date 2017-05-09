@@ -167,9 +167,9 @@ exports.popIn = function() {
 
 exports.popOut = function() {
 	if (project.project.transparent)
-		popout = new BrowserWindow({frame: false, parent: remote.getCurrentWindow(), icon: path.join(__dirname, '../icon.ico'), transparent: true})
+		popout = new BrowserWindow({frame: false, parent: remote.getCurrentWindow(), icon: path.join(__dirname, 'assets', 'icons', 'icon.ico'), transparent: true})
 	else
-		popout = new BrowserWindow({frame: false, parent: remote.getCurrentWindow(), icon: path.join(__dirname, '../icon.ico'), backgroundColor: project.project.greenScreen})
+		popout = new BrowserWindow({frame: false, parent: remote.getCurrentWindow(), icon: path.join(__dirname, 'assets', 'icons', 'icon.ico'), backgroundColor: project.project.greenScreen})
 	// popout.setIgnoreMouseEvents(true)
 	popout.on('close', () => {
 		application.closePopout()
