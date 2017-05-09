@@ -64,7 +64,7 @@ exports.host = function() {
 				socket.emit('add puppet', puppets[i])
 			}
 			addPuppet = puppet
-			if (status.getCount("Retrieving %x Asset%s") === 0)
+			if (!status.getCount("Retrieving %x Asset%s") || status.getCount("Retrieving %x Asset%s") === 0)
 				addPuppetServer(socket)
 		})
 		socket.on('set puppet', (id, puppet) => {
@@ -243,7 +243,7 @@ exports.connect = function() {
 	})
 	socket.on('add puppet', (puppet) => {
 		addPuppet = puppet
-		if (status.getCount("Retrieving %x Asset%s") === 0)
+		if (!status.getCount("Retrieving %x Asset%s") || status.getCount("Retrieving %x Asset%s") === 0)
 			addPuppetClient(socket)
 	})
 	socket.on('set puppet', (id, puppet) => {
