@@ -1,0 +1,30 @@
+{
+  "208380174": {
+    "name": "kobold",
+    "location": "hats\\208380174.png"
+  },
+  "354769791": {
+    "name": "seachef",
+    "location": "hats\\354769791.png"
+  },
+  "478565665": {
+    "name": "tophat",
+    "location": "hats\\478565665.png"
+  },
+  "-479894397": {
+    "name": "elf",
+    "location": "hats\\-479894397.png"
+  },
+  "-1611255066": {
+    "name": "petalwalker",
+    "location": "hats\\-1611255066.png"
+  },
+  "-5576877": {
+    "name": "porc",
+    "location": "hats\\-5576877.png"
+  },
+  "-1485571036": {
+    "name": "wizard",
+    "location": "hats\\-1485571036.png"
+  }
+}

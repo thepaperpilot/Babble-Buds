@@ -1,42 +1,6 @@
 {
-  "32449273": {
-    "name": "eyeBrown_small",
-    "location": "eyes/32449273.png"
-  },
-  "123266968": {
-    "name": "eyeBlue_small",
-    "location": "eyes/123266968.png"
-  },
-  "309706442": {
-    "name": "eyeBlack_large",
-    "location": "eyes/309706442.png"
-  },
-  "1030525431": {
-    "name": "eyeGreen_small",
-    "location": "eyes/1030525431.png"
-  },
-  "1348834734": {
-    "name": "eyeBrown_large",
-    "location": "eyes/1348834734.png"
-  },
-  "-1218835513": {
-    "name": "eyeBlack_small",
-    "location": "eyes/-1218835513.png"
-  },
-  "-410093830": {
-    "name": "eyeBlue_large",
-    "location": "eyes/-410093830.png"
-  },
-  "-481344963": {
-    "name": "eyeGreen_large",
-    "location": "eyes/-481344963.png"
-  },
-  "-1600750086": {
-    "name": "eyePine_large",
-    "location": "eyes/-1600750086.png"
-  },
-  "-545601396": {
-    "name": "eyePine_small",
-    "location": "eyes/-545601396.png"
+  "-679379193": {
+    "name": "eyes_normal",
+    "location": "eyes\\-679379193.png"
   }
 }

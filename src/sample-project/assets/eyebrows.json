@@ -1,98 +1,22 @@
 {
-  "252605006": {
-    "name": "greyBrow3",
-    "location": "eyebrows/252605006.png"
+  "94370077": {
+    "name": "brow_excited",
+    "location": "eyebrows\\94370077.png"
   },
-  "628870684": {
-    "name": "brown1Brow2",
-    "location": "eyebrows/628870684.png"
+  "-1478408941": {
+    "name": "brow_normal",
+    "location": "eyebrows\\-1478408941.png"
   },
-  "777265347": {
-    "name": "greyBrow1",
-    "location": "eyebrows/777265347.png"
+  "-1370165314": {
+    "name": "brow_confused",
+    "location": "eyebrows\\-1370165314.png"
   },
-  "811130004": {
-    "name": "whiteBrow2",
-    "location": "eyebrows/811130004.png"
+  "-894109551": {
+    "name": "brow_sad",
+    "location": "eyebrows\\-894109551.png"
   },
-  "1042383969": {
-    "name": "brown2Brow1",
-    "location": "eyebrows/1042383969.png"
-  },
-  "1388022209": {
-    "name": "blackBrow2",
-    "location": "eyebrows/1388022209.png"
-  },
-  "1616185455": {
-    "name": "blondeBrow2",
-    "location": "eyebrows/1616185455.png"
-  },
-  "1702389084": {
-    "name": "tanBrow3",
-    "location": "eyebrows/1702389084.png"
-  },
-  "1880227456": {
-    "name": "brown2Brow3",
-    "location": "eyebrows/1880227456.png"
-  },
-  "2023321363": {
-    "name": "tanBrow2",
-    "location": "eyebrows/2023321363.png"
-  },
-  "-133227719": {
-    "name": "blackBrow1",
-    "location": "eyebrows/-133227719.png"
-  },
-  "-533676313": {
-    "name": "blackBrow3",
-    "location": "eyebrows/-533676313.png"
-  },
-  "-1965003405": {
-    "name": "blondeBrow1",
-    "location": "eyebrows/-1965003405.png"
-  },
-  "-2053194103": {
-    "name": "blondeBrow3",
-    "location": "eyebrows/-2053194103.png"
-  },
-  "-590112520": {
-    "name": "brown1Brow1",
-    "location": "eyebrows/-590112520.png"
-  },
-  "-329113276": {
-    "name": "brown1Brow3",
-    "location": "eyebrows/-329113276.png"
-  },
-  "-305268600": {
-    "name": "brown2Brow2",
-    "location": "eyebrows/-305268600.png"
-  },
-  "-1572818179": {
-    "name": "greyBrow2",
-    "location": "eyebrows/-1572818179.png"
-  },
-  "-261110058": {
-    "name": "redBrow1",
-    "location": "eyebrows/-261110058.png"
-  },
-  "-579302669": {
-    "name": "redBrow2",
-    "location": "eyebrows/-579302669.png"
-  },
-  "-645407407": {
-    "name": "redBrow3",
-    "location": "eyebrows/-645407407.png"
-  },
-  "-198198725": {
-    "name": "tanBrow1",
-    "location": "eyebrows/-198198725.png"
-  },
-  "-2139200419": {
-    "name": "whiteBrow1",
-    "location": "eyebrows/-2139200419.png"
-  },
-  "-1806455056": {
-    "name": "whiteBrow3",
-    "location": "eyebrows/-1806455056.png"
+  "-1624236206": {
+    "name": "brow_angry",
+    "location": "eyebrows\\-1624236206.png"
   }
 }

@@ -7,12 +7,16 @@
   "port": 8080,
   "characters": [
     {
-      "name": "Gravy",
+      "name": "Kenney",
       "id": 1,
-      "location": "1.json"
+      "location": "Kenney.json"
     }
   ],
   "assets": [
+    {
+      "name": "hair",
+      "location": "hair.json"
+    },
     {
       "name": "eyebrows",
       "location": "eyebrows.json"
@@ -26,20 +30,16 @@
       "location": "mouths.json"
     },
     {
+      "name": "noses",
+      "location": "noses.json"
+    },
+    {
       "name": "shirts",
       "location": "shirts.json"
     },
     {
       "name": "skin",
       "location": "skin.json"
-    },
-    {
-      "name": "glasses",
-      "location": "glasses.json"
-    },
-    {
-      "name": "hats",
-      "location": "hats.json"
     }
   ],
   "hotbar": [
@@ -55,7 +55,7 @@
   ],
   "actor": {
     "id": 1,
-    "position": 3,
+    "position": 1,
     "facingLeft": false,
     "emote": "default"
   }
