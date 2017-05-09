@@ -702,7 +702,10 @@ function openPuppetPanel() {
             var selector = document.createElement('div')
             selector.id = project.characters[characters[j]].name.toLowerCase()
             selector.className = "char"
-            selector.style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', characters[j] + '.png?random=' + new Date().getTime()) + ')'
+            if (fs.existsSync(path.join(project.assetsPath, '..', 'thumbnails', 'new-' + characters[j] + '.png')))
+                selector.style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', 'new-' + characters[j] + '.png?random=' + new Date().getTime()) + ')'
+            else
+                selector.style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', characters[j] + '.png?random=' + new Date().getTime()) + ')'
             charList.appendChild(selector)
             selector.innerHTML = '<div class="desc">' + project.characters[characters[j]].name + '</div>'
             selector.charid = characters[j]

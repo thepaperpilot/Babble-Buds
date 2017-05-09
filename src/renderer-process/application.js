@@ -7,7 +7,6 @@ const electron = require('electron')
 const controller = require('./controller.js')
 const network = require('./network.js')
 const path = require('path')
-const fs = require('fs-extra')
 
 var project
 
@@ -118,7 +117,7 @@ exports.setBabble = function(babbling) {
 }
 
 // Update the hotbar button for a character
-exports.updateCharacter = function(character, thumbnail) {
+exports.updateCharacter = function(character, updateThumbnail) {
 	var index = project.project.hotbar.indexOf(character.id)
 	if (index > -1) {
 		controller.updateCharacter(index, character)
@@ -126,15 +125,8 @@ exports.updateCharacter = function(character, thumbnail) {
 			controller.setPuppetLocal(index)
 		}
 		document.getElementById('char ' + index).getElementsByClassName('desc')[0].innerHTML = character.name
-	}
-	if (thumbnail) {
-		fs.ensureDirSync(path.join(project.assetsPath, '..', 'thumbnails'))
-		fs.writeFile(path.join(project.assetsPath, '..', 'thumbnails', character.id + '.png'), new Buffer(thumbnail, 'base64'), (err) => {
-	        if (err) console.log(err)
-	        if (index > -1) {
-	        	document.getElementById('char ' + index).style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', character.id + '.png?random=' + new Date().getTime()) + ')'
-	        }
-	    })
+		if (updateThumbnail)
+			document.getElementById('char ' + index).style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', 'new-' + character.id + '.png?random=' + new Date().getTime()) + ')'
 	}
 }
 

@@ -58,8 +58,12 @@ module.exports = exports = remote.getGlobal('project').project = {
 		fs.writeJson(settings.settings.openProject, this.project)
 		for (var i = 0; i < this.project.assets.length; i++)
 			fs.writeJson(path.join(settings.settings.openProject, '..', 'assets', this.project.assets[i].location), this.assets[this.project.assets[i].name])
-		for (var i = 0; i < this.project.characters.length; i++)
+		for (var i = 0; i < this.project.characters.length; i++) {
 			fs.writeJson(path.join(settings.settings.openProject, '..', 'characters', this.project.characters[i].location), this.characters[this.project.characters[i].id])
+			if (fs.existsSync(path.join(this.assetsPath, '..', 'thumbnails', 'new-' + this.project.characters[i].id + '.png')))
+                fs.renameSync(path.join(this.assetsPath, '..', 'thumbnails', 'new-' + this.project.characters[i].id + '.png'), 
+                	path.join(this.assetsPath, '..', 'thumbnails', this.project.characters[i].id + '.png'))
+		}
 		this.oldProject = JSON.stringify(this.project)
 		this.oldAssets = JSON.stringify(this.assets)
 		this.oldCharacters = JSON.stringify(this.characters)

@@ -6,6 +6,7 @@ const editor = require('./editor.js')
 const network = require('./network.js')
 const status = require('./status.js')
 const Stage = require('./stage.js').Stage
+const fs = require('fs-extra')
 const path = require('path')
 const url = require('url')
 
@@ -339,7 +340,15 @@ exports.updateCharacter = function(index, character) {
 
 exports.saveCharacter = function(character, thumbnail) {
     project.saveCharacter(character)
-    application.updateCharacter(character, thumbnail)
+	if (thumbnail) {
+		fs.ensureDirSync(path.join(project.assetsPath, '..', 'thumbnails'))
+		fs.writeFile(path.join(project.assetsPath, '..', 'thumbnails', 'new-' + character.id + '.png'), new Buffer(thumbnail, 'base64'), (err) => {
+	        if (err) console.log(err)
+	        application.updateCharacter(character, true)
+	    })
+	} else {
+		application.updateCharacter(character)
+	}    
 }
 
 exports.connect = function() {
