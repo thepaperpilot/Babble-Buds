@@ -764,7 +764,21 @@ function setLayer(e) {
     document.getElementById('editor-layers-panel').style.display = 'none'
     layer = e.target.id
     if (layer.indexOf('-emote') > -1) {
-        puppet.changeEmote(layer.replace(/-emote/, ''))
+    var emote = layer.replace(/-emote/, '')
+        if (!(character.emotes[emote] && character.emotes[emote].enabled && emote !== 'default') && !character.emotes[emote]) {
+            character.emotes[emote] = {
+                "enabled": false,
+                "mouth": [],
+                "eyes": []
+            }
+            puppet.emotes[emote] = {
+                "mouth": new Container(),
+                "eyes": new Container()
+            }
+            puppet.mouthsContainer.addChild(puppet.emotes[emote].mouth)
+            puppet.eyesContainer.addChild(puppet.emotes[emote].eyes)
+        }
+        puppet.changeEmote(emote)
     }
     var selected = document.getElementById('editor-layers-panel').getElementsByClassName("selected")
     while (selected.length)
@@ -782,12 +796,19 @@ function layerContextMenu(e) {
     } else {
         if (character.emotes[emote])
             character.emotes[emote].enabled = true
-        else
+        else {
             character.emotes[emote] = {
                 "enabled": true,
                 "mouth": [],
                 "eyes": []
             }
+            puppet.emotes[emote] = {
+                "mouth": new Container(),
+                "eyes": new Container()
+            }
+            puppet.mouthsContainer.addChild(puppet.emotes[emote].mouth)
+            puppet.eyesContainer.addChild(puppet.emotes[emote].eyes)
+        }
         e.target.className += " available"
     }
 }
