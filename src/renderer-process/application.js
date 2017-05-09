@@ -7,6 +7,7 @@ const electron = require('electron')
 const controller = require('./controller.js')
 const network = require('./network.js')
 const path = require('path')
+const fs = require('fs-extra')
 
 var project
 
@@ -210,7 +211,10 @@ function charContextMenu(e) {
 	document.getElementById('charselect').style.display = 'block'
 	if (project.project.hotbar[i]) {
 		document.getElementById('char selected').getElementsByClassName('desc')[0].innerHTML = project.characters[project.project.hotbar[i]].name
-		document.getElementById('char selected').style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', project.project.hotbar[i] + '.png?random=' + new Date().getTime()) + ')'
+		if (fs.existsSync(path.join(project.assetsPath, '..', 'thumbnails', project.project.hotbar[i] + '.png')))
+			document.getElementById('char selected').style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', project.project.hotbar[i] + '.png?random=' + new Date().getTime()) + ')'
+		else
+			document.getElementById('char selected').style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', 'new-' + project.project.hotbar[i] + '.png?random=' + new Date().getTime()) + ')'
 	} else {
 		document.getElementById('char selected').getElementsByClassName('desc')[0].innerHTML = ''
 		document.getElementById('char selected').style.backgroundImage = ''
@@ -223,7 +227,10 @@ function charContextMenu(e) {
 		var selector = document.createElement('div')
 		selector.id = project.characters[characters[j]].name.toLowerCase()
 		selector.className = "char"
-		selector.style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', characters[j] + '.png?random=' + new Date().getTime()) + ')'
+		if (fs.existsSync(path.join(project.assetsPath, '..', 'thumbnails', characters[j] + '.png')))
+			selector.style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', characters[j] + '.png?random=' + new Date().getTime()) + ')'
+		else
+			selector.style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', 'new-' + characters[j] + '.png?random=' + new Date().getTime()) + ')'
 		charList.appendChild(selector)
 		selector.innerHTML = '<div class="desc">' + project.characters[characters[j]].name + '</div>'
 		selector.i = i
@@ -250,7 +257,10 @@ function updateHotbar(e) {
 	}
 	if (project.project.hotbar[i] && project.project.hotbar[i] !== 0) {
 		document.getElementById('char ' + i).getElementsByClassName('desc')[0].innerHTML = project.characters[puppet].name
-		document.getElementById('char ' + i).style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', puppet + '.png?random=' + new Date().getTime()) + ')'
+		if (fs.existsSync(path.join(project.assetsPath, '..', 'thumbnails', puppet + '.png')))
+			document.getElementById('char ' + i).style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', puppet + '.png?random=' + new Date().getTime()) + ')'
+		else
+			document.getElementById('char ' + i).style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', 'new-' + puppet + '.png?random=' + new Date().getTime()) + ')'
 	} else {
 		document.getElementById('char ' + i).getElementsByClassName('desc')[0].innerHTML = ''
 		document.getElementById('char ' + i).style.backgroundImage = ''
