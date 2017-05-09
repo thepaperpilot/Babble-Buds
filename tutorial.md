@@ -5,6 +5,7 @@
 - You can move your puppet around the stage using the left and right arrow keys
 - You can change emotes by either pressing the emote buttons under the stage or their associated hotkey
 - You can change puppets by either pressing the puppet buttons under the stage or their associated hotkey
+- Holding shift will only change your body, holding ctrl will only change your head
 - You can "babble" by holding down space
 - Right clicking on a puppet button allows you to replace what puppet is stored in that hotbar slot
 
