@@ -166,8 +166,9 @@ module.exports = exports = remote.getGlobal('project').project = {
     },
     duplicateCharacter: function(character) {
         this.numCharacters++
-        character.id = this.numCharacters
-        return JSON.stringify(character)
+        var char = JSON.parse(JSON.stringify(character))
+        char.id = this.numCharacters
+        return JSON.stringify(char)
     },
     deleteCharacter: function(character) {
         for (var i = 0; i < this.project.characters.length; i++) {
