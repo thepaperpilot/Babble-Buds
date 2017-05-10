@@ -117,10 +117,7 @@ module.exports = exports = remote.getGlobal('project').project = {
 	//	 name: string
 	// }
 	addAsset: function(asset) {
-		if (!this.assets[asset.tab]) {
-			this.assets[asset.tab] = {}
-			this.project.assets.push({"name": asset.tab, "location": asset.tab + '.json'})
-		}
+		this.addAssetList(asset.tab)
 		this.assets[asset.tab][asset.hash] = {"name": asset.name, "location": path.join(asset.tab, asset.hash + '.png')}
 	},
 	addAssetList: function(tab) {

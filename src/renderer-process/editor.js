@@ -165,6 +165,7 @@ exports.init = function() {
 
 exports.addAsset = function(tab, asset) {
     var assetElement = document.createElement('div')
+    if (!document.getElementById('tab ' + tab)) addAssetListToDom(tab)
     document.getElementById('tab ' + tab).appendChild(assetElement)
     assetElement.id = project.assets[tab][asset].name.toLowerCase()
     assetElement.className = "asset " + asset
@@ -959,6 +960,7 @@ function addAssetListToDom(name) {
     var tabElement = document.createElement('div')
     tabElement.style.height = '100%'
     tabElement.id = 'tab ' + name
+    tabElement.style.display = 'none'
     tabElement.className = 'scroll'
     document.getElementById('asset list').appendChild(tabElement)
     var tabOption = document.createElement('option')
