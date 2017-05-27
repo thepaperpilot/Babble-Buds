@@ -192,6 +192,7 @@ function keyUp(e) {
 	else if (key == 190) controller.setEmoteLocal('confused')
 	else if (key == 191) controller.setEmoteLocal('ooo')
 	else if (key == 37) controller.moveLeftLocal()
+	else if (key == 38) controller.jiggleLocal()
 	else if (key == 39) controller.moveRightLocal()
 	else if (key == 32) controller.stopBabblingLocal()
 }

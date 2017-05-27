@@ -118,6 +118,10 @@ exports.host = function() {
 			controller.stopBabbling(id)
 			socket.broadcast.emit('stop babbling', id)
 		})
+		socket.on('jiggle', (id) => {
+			controller.jiggle(id)
+			socket.broadcast.emit('jiggle', id)
+		})
 		socket.on('set slots', (slots) => {
 			project.project.numCharacters = slots
 			document.getElementById('numslots').value = slots
@@ -285,6 +289,7 @@ exports.connect = function() {
 	})
 	socket.on('start babbling', controller.startBabbling)
 	socket.on('stop babbling', controller.stopBabbling)
+	socket.on('jiggle', controller.jiggle)
 	socket.on('remove puppet', (id) => {
 		controller.removePuppet(id)
 		for (var i = 0; i < puppets.length; i++) {

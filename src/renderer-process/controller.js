@@ -126,6 +126,14 @@ exports.stopBabblingLocal = function() {
 	network.emit('stop babbling', puppet.id)
 }
 
+exports.jiggleLocal = function() {
+	// Stop Babbling
+	exports.jiggle(puppet.id)
+
+	// Update Server
+	network.emit('jiggle', puppet.id)
+}
+
 exports.setPuppet = function(id, puppet) {
 	// Set Puppet
 	stage.setPuppet(id, stage.createPuppet(puppet))
@@ -180,6 +188,14 @@ exports.stopBabbling = function(id) {
 
 	// Update popout
 	if (popout) popout.webContents.send('stop babbling', id)
+}
+
+exports.jiggle = function(id) {
+	// Jiggle
+	stage.getPuppet(id).jiggle();
+
+	// Update popout
+	if (popout) popout.webContents.send('jiggle', id)
 }
 
 exports.popIn = function() {

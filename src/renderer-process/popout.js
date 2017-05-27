@@ -84,6 +84,9 @@ electron.ipcRenderer.on('start babbling', (event, id) => {
 electron.ipcRenderer.on('stop babbling', (event, id) => {
     stage.getPuppet(id).setBabbling(false)
 })
+electron.ipcRenderer.on('jiggle', (event, id) => {
+    stage.getPuppet(id).jiggle()
+})
 electron.ipcRenderer.on('remove puppet', (event, id) => {
     stage.removePuppet(id)
 })

@@ -178,7 +178,7 @@ Stage.prototype.gameLoop = function() {
             } else if (puppet.movingAnim >= 1) puppet.movingAnim = 0
 
             // Scale in a sin formation such that it does 3 half circles per slot, plus 2 more at the end
-            puppet.container.scale.y = 1 + Math.sin((1 + puppet.movingAnim * 5) * Math.PI) / 80
+            puppet.container.scale.y = 1 + Math.sin((1 + puppet.movingAnim * 5) * Math.PI) / 40
             // Update y value so it doesn't leave the bottom of the screen while bouncing
             puppet.container.y = this.screen.clientHeight / this.puppetStage.scale.y
             // Linearly move across the slot, unless we're in the (.6 - 1) part of the animation
@@ -409,6 +409,10 @@ Puppet.prototype.setBabbling = function(babble) {
             this.deadbonesStartRotation = this.head.rotation
         }
     }
+}
+
+Puppet.prototype.jiggle = function() {
+    if (this.movingAnim === 0) this.movingAnim = 0.6
 }
 
 Puppet.prototype.addEmote = function(emote) {
