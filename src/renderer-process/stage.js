@@ -83,8 +83,13 @@ Stage.prototype.resize = function() {
         this.slotWidth = this.project.minSlotWidth
     } else this.puppetStage.scale.x = this.puppetStage.scale.y = 1
     for (var i = 0; i < this.puppets.length; i++) {
-        this.puppets[i].container.y = this.screen.clientHeight / this.puppetStage.scale.y
-        this.puppets[i].container.x = (this.puppets[i].position - 0.5) * this.slotWidth
+        var puppet = this.puppets[i]
+        if (puppet.position > this.project.numCharacters + 1 || puppet.target > this.project.numCharacters + 1) {
+            puppet.position = puppet.target = this.project.numCharacters + 1
+            puppet.movingAnim = 0
+        }
+        puppet.container.y = this.screen.clientHeight / this.puppetStage.scale.y
+        puppet.container.x = (puppet.position - 0.5) * this.slotWidth
     }
 }
 
