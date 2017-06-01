@@ -50,6 +50,10 @@ module.exports = exports = remote.getGlobal('project').project = {
 			}
 			this.oldAssets = JSON.stringify(this.assets)
 
+			for (var i = 0; i < this.project.characters.length; i++) {
+				fs.removeSync(path.join(this.assetsPath, '..', 'thumbnails', 'new-' + this.project.characters[i].id + '.png'))
+			}
+
 			settings.settings.openProject = filepath
 			settings.save()
             controller.init()
