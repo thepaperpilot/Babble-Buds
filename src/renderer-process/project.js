@@ -4,6 +4,7 @@ const dialog = remote.dialog
 const main = remote.require('./main')
 const settings = remote.require('./main-process/settings')
 const controller = require('./controller')
+const editor = require('./editor')
 
 const path = require('path')
 
@@ -79,11 +80,14 @@ module.exports = exports = remote.getGlobal('project').project = {
 		this.oldCharacters = 'null'
 		settings.settings.openProject = ""
 		settings.save()
+		editor.resetChanges()
 
 		main.redirect('welcome.html')
 	},
 	// Returns true if its okay to close the project
 	checkChanges: function() {
+		if (!editor.checkChanges())
+        	return false
 		var changes = this.oldProject !== JSON.stringify(this.project)
 		changes = changes || this.oldAssets !== JSON.stringify(this.assets)
 		changes = changes || this.oldCharacters !== JSON.stringify(this.characters)

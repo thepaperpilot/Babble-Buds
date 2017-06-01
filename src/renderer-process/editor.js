@@ -24,6 +24,7 @@ var asset // asset being moved (outside of pixi)
 var scale = 1 // scale of the editor view
 var puppet // puppet being edited
 var character // character being edited
+var oldcharacter // currently saved version of character
 var layer // layer being edited
 var clickableAssets = [] // assets in editor that are clickable
 var selected // selected asset inside of pixi
@@ -160,7 +161,7 @@ exports.init = function() {
     puppet = stage.addPuppet(character, 1)
     // I realize it's slightly redundant, but I want to update the editor panels
     //  while also adding the initial puppet so stage.setPuppet will work
-    exports.setPuppet(character)
+    exports.setPuppet(character, true)
 }
 
 exports.addAsset = function(tab, asset) {
@@ -259,15 +260,50 @@ exports.deleteAsset = function(tab, asset) {
             if (character.emotes[emotes[j]].mouth[k].tab === tab && character.emotes[emotes[j]].mouth[k].hash === asset)
                 character.emotes[emotes[j]].mouth.splice(k, 1)
     }
-    exports.setPuppet(character)
+    exports.setPuppet(character, true)
 }
 
-exports.setPuppet = function(newCharacter) {
+exports.resetChanges = function() {
+    character = null
+    oldCharacter = 'null'
+}
+
+// Returns true if its safe to change puppet
+exports.checkChanges = function() {
+    if (JSON.stringify(character) !== oldcharacter) {
+        var response = remote.dialog.showMessageBox({
+            "type": "question",
+            "buttons": ["Don't Save", "Cancel", "Save"],
+            "defaultId": 2,
+            "title": "Save Project?",
+            "message": "Do you want to save the changes to " + character.name + "?",
+            "detail": "If you don't save, your changes will be lost.",
+            "cancelId": 1
+        })
+
+        switch (response) {
+            default:
+                break
+            case 1:
+                return false
+            case 2:
+                savePuppet()
+                break
+        }
+    }
+    return true
+}
+
+exports.setPuppet = function(newCharacter, override) {
     selected = null
     if (selectedGui) stage.stage.removeChild(selectedGui)
     clickableAssets = []
 
+    if (!override && !exports.checkChanges())
+        return
+
     character = newCharacter
+    oldcharacter = JSON.stringify(character)
     puppet = stage.createPuppet(character)
     stage.setPuppet(1, puppet)
 
@@ -637,6 +673,7 @@ function savePuppet() {
     if (selectedGui) stage.stage.removeChild(selectedGui)
     stage.renderer.render(stage.stage)
     controller.saveCharacter(character, stage.renderer.view.toDataURL().replace(/^data:image\/\w+;base64,/, ""))
+    oldcharacter = JSON.stringify(character)
     status.log('Puppet saved!')
 }
 
@@ -853,7 +890,7 @@ function deleteCharacter() {
     controller.deleteCharacter(character)
     document.getElementById('editor-screen').style.display = ''
     document.getElementById('editor-settings-panel').style.display = 'none'
-    exports.setPuppet(project.characters[project.actor.id])
+    exports.setPuppet(project.characters[project.actor.id], true)
 }
 
 function addAsset() {
