@@ -24,7 +24,7 @@ a:focus {
 	outline: none;
 }
 
-input {
+input, .checkbox-label {
 	margin-bottom: 24px;
 	margin-top: 8px;
 }
@@ -35,7 +35,6 @@ input[type="text"], input[type="number"], input[type="search"], select {
 	border-bottom: solid 2px #969696;
 	color: #FFF;
 	font-size: 20px;
-	margin: 4px;
 	transition: border 0.3s;
 	width: calc( 100% - 8px );
 }
@@ -84,8 +83,70 @@ select option {
 	text-shadow: 0 1px 1px #666;
 }
 
-.greeting form {
+.greeting .tabs-content {
 	text-align: left;
+}
+
+.tabs {
+	display: flex;
+    flex-flow: row wrap;
+    margin-bottom: 8px;
+}
+
+.tabs .tab {
+    height: 0;
+    margin: 0;
+    padding: 0;
+	visibility: hidden;	
+    width: 0;
+}
+
+.tabs .tab-label {
+	cursor: pointer;
+    flex-grow: 1;
+    line-height: 48px;
+	text-transform: uppercase;
+}
+
+.tabs .tab:checked + .tab-label {
+	border-bottom: solid 2px #fff;
+}
+
+.tabs .tabs-content {
+	width: 100%;
+}
+
+.tabs .tabs-content > div {
+	opacity: 0;
+	padding: 1.5em 0;
+	position: absolute;
+	width: 100%;
+	z-index: -100;
+}
+
+#open-project:checked ~ .tabs-content #open-project-content,
+#new-project:checked ~ .tabs-content #new-project-content {
+	opacity: 1;
+	z-index: 100;
+}
+
+.recent-projects {
+	height: 160px;
+}
+
+.recent-project {
+	background-color: #242a33;
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: contain;
+	color: #fff;
+	cursor: pointer;
+	display: inline-block;
+    height: calc( 100% - 16px );
+	margin: 4px;
+	padding: 4px;
+	position: relative;
+	width: calc( 33% - 16px);
 }
 
 .container {

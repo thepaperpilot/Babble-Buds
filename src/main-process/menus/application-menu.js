@@ -10,7 +10,7 @@ const template = [
         label: 'Open Project',
         accelerator: 'CommandOrControl+O',
         click () {
-          util.openProject()
+          util.selectProject()
         }
       },
       {

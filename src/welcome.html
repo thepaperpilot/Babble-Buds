@@ -8,14 +8,29 @@
     <body>
         <div class="greeting">
             <span class="greeting-header">Hello!</span><br>
-            To begin, either <a id="open">open a project</a> or create a new one:<br><br>
-            <form>
-                Project Title:<br>
-                <input type="text" id="name" value="MyProject1">
-                Location:<br>
-                <input type="text" id="location" style="width: calc( 100% - 115px )"><button type='button' id="browse">Browse</button><br>
-                <button type='button' id="create">Create</button>
-            </form>
+            <div class="tabs">
+                <input id="open-project" type="radio" checked="checked" name="tab-group" class="tab"/>
+                <label for="open-project" class="tab-label">Open Project</label>
+                <input id="new-project" type="radio" name="tab-group" class="tab"/>
+                <label for="new-project" class="tab-label">New Project</label>
+                <div class="tabs-content">
+                    <div id="open-project-content">
+                        Recent Projects:<br>
+                        <div id="recent-projects" class="recent-projects"></div>
+                        <button id="open" style="margin: 8px auto; display: block;">Browse</button>
+                    </div>
+                    <div id="new-project-content">
+                        <form id="create">
+                            Project Title:<br>
+                            <input type="text" id="name" value="MyProject1">
+                            Location:<br>
+                            <input type="text" id="location" style="width: calc( 100% - 115px )"><button type='button' id="browse">Browse</button><br>
+                            <input type="checkbox" id="sample" class="checkbox" checked="checked"><label for="sample" class="checkbox-label">Include sample puppet</label><br>
+                            <button type='submit'>Create</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
     </body>
 

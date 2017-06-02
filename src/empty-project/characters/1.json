@@ -1,0 +1,16 @@
+{
+  "deadbonesStyle": false,
+  "body": [],
+  "head": [],
+  "hat": [],
+  "mouths": [],
+  "eyes": [],
+  "emotes": {
+    "default": {
+      "enabled": true,
+      "mouth": [],
+      "eyes": []
+    }
+  },
+  "props": []
+}

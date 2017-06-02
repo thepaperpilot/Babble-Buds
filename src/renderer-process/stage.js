@@ -38,22 +38,31 @@ function Stage(element, project, assets, assetsPath, callback) {
     this.renderer.autoResize = true;
 
     // Load Assets
+    var texturesToLoad = false
     for (var i = 0; i < project.assets.length; i++) {
         var tab = assets[project.assets[i].name]
         var keys = Object.keys(tab)
         for (var j = 0; j < keys.length; j++) {
-            if (!TextureCache[path.join(assetsPath, tab[keys[j]].location)])
+            if (!TextureCache[path.join(assetsPath, tab[keys[j]].location)]) {
                 loader.add(path.join(assetsPath, tab[keys[j]].location))
+                texturesToLoad = true
+            }
         }
     }
     var stage = this
     loader.onComplete.add(function() { 
         stage.resize()
         window.addEventListener("resize", stage.resize.bind(stage))
-        if (callback) callback()
+        if (callback) callback(stage)
         stage.gameLoop()
     })
     loader.load()
+    if (!texturesToLoad) {
+        stage.resize()
+        window.addEventListener("resize", stage.resize.bind(stage))
+        if (callback) callback(stage)
+        stage.gameLoop()
+    }
 }
 
 Stage.prototype.registerPuppetListener = function(event, callback) {
@@ -152,6 +161,11 @@ Stage.prototype.setPuppet = function(id, newPuppet) {
     this.puppetStage.removeChild(oldPuppet.container)
     this.puppetStage.addChild(newPuppet.container)
     this.resize()
+}
+
+Stage.prototype.getThumbnail = function() {
+    this.renderer.render(this.stage)
+    return this.renderer.view.toDataURL().replace(/^data:image\/\w+;base64,/, "")
 }
 
 Stage.prototype.gameLoop = function() {

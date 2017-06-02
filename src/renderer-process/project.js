@@ -69,6 +69,7 @@ module.exports = exports = remote.getGlobal('project').project = {
                 fs.renameSync(path.join(this.assetsPath, '..', 'thumbnails', 'new-' + this.project.characters[i].id + '.png'), 
                 	path.join(this.assetsPath, '..', 'thumbnails', this.project.characters[i].id + '.png'))
 		}
+		settings.addRecentProject(controller.getThumbnail())
 		this.oldProject = JSON.stringify(this.project)
 		this.oldAssets = JSON.stringify(this.assets)
 		this.oldCharacters = JSON.stringify(this.characters)

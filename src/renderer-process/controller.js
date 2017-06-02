@@ -422,7 +422,11 @@ exports.removePuppet = function(id) {
 	if (popout) popout.webContents.send('remove puppet', id)
 }
 
-function loadPuppets() {
+exports.getThumbnail = function() {
+	return stage.getThumbnail()
+}
+
+function loadPuppets(stage) {
 	status.log('Loading puppets...', true)
 
 	// Add Puppet

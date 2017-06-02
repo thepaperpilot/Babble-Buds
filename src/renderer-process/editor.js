@@ -671,8 +671,7 @@ function savePuppet() {
     status.log('Saving puppet...')
     selected = null
     if (selectedGui) stage.stage.removeChild(selectedGui)
-    stage.renderer.render(stage.stage)
-    controller.saveCharacter(character, stage.renderer.view.toDataURL().replace(/^data:image\/\w+;base64,/, ""))
+    controller.saveCharacter(character, stage.getThumbnail())
     oldcharacter = JSON.stringify(character)
     status.log('Puppet saved!')
 }

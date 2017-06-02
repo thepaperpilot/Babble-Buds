@@ -14,7 +14,7 @@ exports.selectDirectory = function(callback) {
 		}, callback)
 }
 
-exports.openProject = function() {
+exports.selectProject = function() {
 	dialog.showOpenDialog(BrowserWindow.getFocusedWindow(), {
         title: 'Open Project',
         defaultPath: path.join(app.getPath('home'), 'projects'),
@@ -27,8 +27,16 @@ exports.openProject = function() {
         ] 
       }, (filepaths) => {
         if (filepaths) {
-          global.project.filepath = filepaths[0]
-          main.redirect('application.html')
+          exports.openProject(filepaths[0])
         }
       })
+}
+
+exports.openProject = function(string) {
+  global.project.filepath = string
+  main.redirect('application.html')
+}
+
+exports.slugify = function(string) {
+    return string.replace(/[^\w\s-]/g, '').trim().toLowerCase().replace(/[-\s]+/g, '-')
 }
