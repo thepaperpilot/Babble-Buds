@@ -1,6 +1,6 @@
 {
   "name": "babble-buds",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "An open source version of puppet pals",
   "main": "main.js",
   "scripts": {
@@ -15,12 +15,12 @@
   "author": "thepaperpilot",
   "license": "CC0-1.0",
   "devDependencies": {
-    "electron-packager": "^8.1.0"
+    "electron-packager": "^8.7.1"
   },
   "dependencies": {
-    "electron": "~1.6.2",
-    "fs-extra": "~2.1.2",
-    "pixi.js": "~4.4.3",
+    "electron": "~1.6.10",
+    "fs-extra": "~3.0.1",
+    "pixi.js": "~4.5.3",
     "socket.io": "~1.7.3",
     "socket.io-stream": "~0.9.1"
   }

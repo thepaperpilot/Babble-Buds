@@ -24,7 +24,7 @@ function Stage(element, project, assets, assetsPath, callback) {
     this.stage = new Container()
     this.puppetStage = new Container()
     this.stage.addChild(this.puppetStage)
-    this.renderer = autoDetectRenderer(1, 1, {antialias: true, transparent: true})
+    this.renderer = autoDetectRenderer(1, 1, {transparent: true})
     this.screen = document.getElementById(element)
     this.screen.appendChild(this.renderer.view)
     
@@ -50,14 +50,16 @@ function Stage(element, project, assets, assetsPath, callback) {
         }
     }
     var stage = this
-    loader.onComplete.add(function() { 
-        stage.resize()
-        window.addEventListener("resize", stage.resize.bind(stage))
-        if (callback) callback(stage)
-        stage.gameLoop()
-    })
-    loader.load()
-    if (!texturesToLoad) {
+    if (texturesToLoad) {
+        loader.onComplete.add(function() { 
+            stage.resize()
+            window.addEventListener("resize", stage.resize.bind(stage))
+            if (callback) callback(stage)
+            stage.gameLoop()
+        })
+        loader.load()
+    } else {
+        loader.load()
         stage.resize()
         window.addEventListener("resize", stage.resize.bind(stage))
         if (callback) callback(stage)
