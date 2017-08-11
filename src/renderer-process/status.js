@@ -3,12 +3,19 @@ let lock
 let counts
 
 exports.init = function() {
+	let remote = require('electron').remote
 	status = document.getElementById('status')
 	status.addEventListener('click', () => {
-		require('electron').remote.webContents.getFocusedWebContents().toggleDevTools()
+		remote.webContents.getFocusedWebContents().toggleDevTools()
 	})
 	lock = false
 	counts = {}
+	exports.info("Babble Buds version: " + remote.app.getVersion())
+	exports.info("Other Versions: " + JSON.stringify(process.versions, null, 2))
+}
+
+exports.info = function(string) {
+	console.log(string)
 }
 
 exports.log = function(string, setLock) {
