@@ -454,15 +454,24 @@ function editorMousemove(e) {
             let dist = Math.hypot(Math.cos(rotation) * (e.data.global.x - selectedGui.startX), Math.sin(rotation) * (e.data.global.y - selectedGui.startY)) / scale
             selected.x = selected.asset.x + Math.cos(rotation) * dist
             selected.y = selected.asset.y + Math.sin(rotation) * dist
-            selectedGui.x = selected.x * scale + selectedGui.pivot.x
-            selectedGui.y = selected.y * scale + selectedGui.pivot.y
         } else {
             let position = e.data.getLocalPosition(selected.parent)
             selected.x = position.x - selected.start.x
             selected.y = position.y - selected.start.y
-            selectedGui.x = selected.x * scale + selectedGui.pivot.x
-            selectedGui.y = selected.y * scale + selectedGui.pivot.y
         }
+
+        // Round to nearest pixel, or 10 pixels
+        if (e.data.originalEvent.shiftKey) {
+            selected.x = Math.round(selected.x / 10) * 10
+            selected.y = Math.round(selected.y / 10) * 10
+        } else {
+            selected.x = Math.round(selected.x)
+            selected.y = Math.round(selected.y)
+        }
+
+        // Update selected GUI's position
+        selectedGui.x = selected.x * scale + selectedGui.pivot.x
+        selectedGui.y = selected.y * scale + selectedGui.pivot.y
     }
 }
 
@@ -597,8 +606,8 @@ function mouseUp(e) {
                 let newAsset = {
                     "tab": asset.tab,
                     "hash": asset.asset,
-                    "x": (e.clientX - rect.left - rect.width / 2) / scale,
-                    "y": (e.clientY - rect.bottom) / scale,
+                    "x": Math.round((e.clientX - rect.left - rect.width / 2) / scale),
+                    "y": Math.round((e.clientY - rect.bottom) / scale),
                     "rotation": 0,
                     "scaleX": 1,
                     "scaleY": 1
