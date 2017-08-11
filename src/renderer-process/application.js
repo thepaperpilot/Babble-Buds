@@ -4,6 +4,7 @@
 
 // Imports
 const electron = require('electron')
+const editor = require('./editor.js')
 const controller = require('./controller.js')
 const network = require('./network.js')
 const path = require('path')
@@ -173,6 +174,9 @@ function keyUp(e) {
 	let key = e.keyCode ? e.keyCode : e.which
 
 	if (e.target && (e.target.type === 'number' || e.target.type === 'text' || e.target.type === 'search'))
+		return
+
+	if (editor.keyDown(e))
 		return
 
 	if (key > 48 && key < 58) {

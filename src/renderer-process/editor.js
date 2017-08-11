@@ -344,6 +344,31 @@ exports.setPuppet = function(newCharacter, override) {
     document.getElementById('deadbonesstyle').checked = character.deadbonesStyle
 }
 
+exports.keyDown = function(e) {
+    let key = e.keyCode ? e.keyCode : e.which
+    if (selected) {
+        let value = e.shiftKey ? 10 : 1
+        if (key == 37) {
+            selected.x -= value
+            selectedGui.x = selected.x * scale + selectedGui.pivot.x
+            return true
+        } else if (key == 39) {
+            selected.x += value
+            selectedGui.x = selected.x * scale + selectedGui.pivot.x
+            return true
+        } else if (key == 38) {
+            selected.y -= value
+            selectedGui.y = selected.y * scale + selectedGui.pivot.y
+            return true
+        } else if (key == 40) {
+            selected.y += value
+            selectedGui.y = selected.y * scale + selectedGui.pivot.y
+            return true
+        }
+    }
+    return false
+}
+
 function drawBox(box) {
     box.lineStyle(4, 0x242a33)
     box.moveTo(stage.screen.clientWidth / 2 - selected.width / 2 * scale - 12, stage.screen.clientHeight + selected.height / 2 * scale + 12)
