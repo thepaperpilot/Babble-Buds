@@ -198,11 +198,11 @@ select option {
 }
 
 .s2 {
-	width: 20%;
+	width: 192px;
 }
 
 .s4 {
-	width: 40%;
+	width: calc(50% - 100px);
 }
 
 .s5 {
@@ -210,7 +210,7 @@ select option {
 }
 
 .s8 {
-	width: 80%;
+	width: calc(100% - 200px);
 }
 
 .v5 {
@@ -226,7 +226,6 @@ select option {
 .buttons {
 	border-right: solid 4px #2a323d;
 	margin-right: 8px;
-	width: calc( 20% - 8px);
 }
 
 .sidebuttons button {
