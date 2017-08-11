@@ -74,6 +74,23 @@ const template = [
         click (item, focusedWindow) {
           focusedWindow.webContents.send('delete')
         }
+      },
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Undo',
+        accelerator: 'CommandOrControl+Z',
+        click (item, focusedWindow) {
+          focusedWindow.webContents.send('undo')
+        }
+      },
+      {
+        label: 'Redo',
+        accelerator: 'CommandOrControl+Y',
+        click (item, focusedWindow) {
+          focusedWindow.webContents.send('redo')
+        }
       }
     ]
   }

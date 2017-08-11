@@ -29,6 +29,8 @@ let layer // layer being edited
 let clickableAssets = [] // assets in editor that are clickable
 let selected // selected asset inside of pixi
 let selectedGui // gui that appears around selected
+let history = [] // used for undoing stuff
+let reverseHistory = [] // used for redoing stuff
 
 exports.init = function() {
     project = remote.getGlobal('project').project
@@ -157,6 +159,8 @@ exports.init = function() {
     electron.ipcRenderer.on('copy', copy)
     electron.ipcRenderer.on('paste', paste)
     electron.ipcRenderer.on('delete', deleteKey)
+    electron.ipcRenderer.on('undo', undo)
+    electron.ipcRenderer.on('redo', redo)
 
     // Setup Puppet
     layer = 'body'
@@ -300,7 +304,7 @@ exports.checkChanges = function() {
     return true
 }
 
-exports.setPuppet = function(newCharacter, override) {
+exports.setPuppet = function(newCharacter, override, preserveHistory) {
     selected = null
     if (selectedGui) stage.stage.removeChild(selectedGui)
     clickableAssets = []
@@ -309,7 +313,7 @@ exports.setPuppet = function(newCharacter, override) {
         return
 
     character = newCharacter
-    oldcharacter = JSON.stringify(character)
+    if (!preserveHistory) oldcharacter = JSON.stringify(character)
     puppet = stage.createPuppet(character)
     stage.setPuppet(1, puppet)
 
@@ -354,21 +358,26 @@ exports.keyDown = function(e) {
     let key = e.keyCode ? e.keyCode : e.which
     if (selected) {
         let value = e.shiftKey ? 10 : 1
+        let handled = false
         if (key == 37) {
             selected.x -= value
             selectedGui.x = selected.x * scale + selectedGui.pivot.x
-            return true
+            handled = true
         } else if (key == 39) {
             selected.x += value
             selectedGui.x = selected.x * scale + selectedGui.pivot.x
-            return true
+            handled = true
         } else if (key == 38) {
             selected.y -= value
             selectedGui.y = selected.y * scale + selectedGui.pivot.y
-            return true
+            handled = true
         } else if (key == 40) {
             selected.y += value
             selectedGui.y = selected.y * scale + selectedGui.pivot.y
+            handled = true
+        }
+        if (handled) {
+            recordChange()
             return true
         }
     }
@@ -511,6 +520,7 @@ function editorMouseup() {
         selected.dragging = false
         selected.asset.x = selected.x
         selected.asset.y = selected.y
+        recordChange()
     }
 }
 
@@ -590,6 +600,7 @@ function resizeMouseup() {
     selected.asset.scaleY /= selectedGui.origHeight / selected.height
     selected.asset.x = selected.x
     selected.asset.y = selected.y
+    recordChange()
 }
 
 function rotateMousedown(e) {
@@ -613,18 +624,21 @@ function rotateMouseup() {
     stage.stage.off('mousemove', rotateMousemove)
     stage.stage.off('mouseup', rotateMouseup)
     selected.asset.rotation = selected.rotation
+    recordChange()
 }
 
 function flipVertically(e) {
     e.stopPropagation()
     selected.height *= -1
     selected.asset.scaleY *= -1
+    recordChange()
 }
 
 function flipHorizontally(e) {
     e.stopPropagation()
     selected.width *= -1
     selected.asset.scaleX *= -1
+    recordChange()
 }
 
 function mouseUp(e) {
@@ -657,6 +671,7 @@ function mouseUp(e) {
                     puppet[layer].addChild(stage.getAsset(newAsset, layer))
                     character[layer === 'headBase' ? 'head' : layer].push(newAsset)
                 }
+                recordChange()
             } 
             if (!e.shiftKey) {
                 window.removeEventListener('mousemove', moveAsset, true);
@@ -888,6 +903,7 @@ function layerContextMenu(e) {
         }
         e.target.className += " available"
     }
+    recordChange()
 }
 
 function mouthLayerClick(e) {
@@ -899,6 +915,7 @@ function mouthLayerClick(e) {
         character.mouths.push(emote)
         e.target.className += ' available'
     }
+    recordChange()
 }
 
 function eyesLayerClick(e) {
@@ -910,14 +927,17 @@ function eyesLayerClick(e) {
         character.eyes.push(emote)
         e.target.className += ' available'
     }
+    recordChange()
 }
 
 function nameChange(e) {
     character.name = e.target.value
+    recordChange()
 }
 
 function bobbleChange(e) {
     character.deadbonesStyle = e.target.checked
+    recordChange()
 }
 
 function deleteCharacter() {
@@ -1113,6 +1133,7 @@ function cut() {
         character[layer === 'headBase' ? 'head' : layer].splice(character[layer === 'headBase' ? 'head' : layer].indexOf(selected.asset), 1)
         selected = null
         stage.stage.removeChild(selectedGui)
+        recordChange()
     }
 }
 
@@ -1141,6 +1162,7 @@ function paste() {
         character[layer === 'headBase' ? 'head' : layer].push(newAsset)
     }
     setSelected(asset)
+    recordChange()
 }
 
 function deleteKey() {
@@ -1159,5 +1181,41 @@ function deleteKey() {
         }
         selected = null
         stage.stage.removeChild(selectedGui)
+        recordChange()
+    }
+}
+
+function recordChange() {
+    reverseHistory = []
+    let action = JSON.stringify(character)
+    history.push(action)
+    if (action === oldcharacter) {
+        document.getElementById("editor-save").classList.remove("highlight")
+    } else {
+        document.getElementById("editor-save").classList.add("highlight")
+    }
+}
+
+function undo() {
+    if (history.length === 0 && character === oldcharacter) return
+    reverseHistory.push(history.pop())
+    let action = history.length === 0 ? oldcharacter : history[history.length - 1]
+    exports.setPuppet(JSON.parse(action), true, true)
+    if (action === oldcharacter) {
+        document.getElementById("editor-save").classList.remove("highlight")
+    } else {
+        document.getElementById("editor-save").classList.add("highlight")
+    }
+}
+
+function redo() {
+    if (reverseHistory.length === 0) return
+    let action = reverseHistory.pop()
+    history.push(action)
+    exports.setPuppet(JSON.parse(action), true, true)
+    if (action === oldcharacter) {
+        document.getElementById("editor-save").classList.remove("highlight")
+    } else {
+        document.getElementById("editor-save").classList.add("highlight")
     }
 }

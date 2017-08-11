@@ -495,3 +495,7 @@ select option {
 	left: 10px;
 	color: white;
 }
+
+.highlight {
+	font-weight: bold;
+}
