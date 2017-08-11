@@ -30,7 +30,7 @@ exports.init = function() {
 		element.addEventListener('contextmenu', charContextMenu)
 		if (project.project.hotbar[i]) {
 			element.getElementsByClassName('desc')[0].innerHTML = project.characters[project.project.hotbar[i]].name
-			element.style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', project.project.hotbar[i] + '.png?random=' + new Date().getTime()) + ')'
+			element.style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', project.project.hotbar[i] + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
 		}
 	}
 	document.getElementById('char null').addEventListener('click', updateHotbar)
@@ -127,7 +127,7 @@ exports.updateCharacter = function(character, updateThumbnail) {
 		}
 		document.getElementById('char ' + index).getElementsByClassName('desc')[0].innerHTML = character.name
 		if (updateThumbnail)
-			document.getElementById('char ' + index).style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', 'new-' + character.id + '.png?random=' + new Date().getTime()) + ')'
+			document.getElementById('char ' + index).style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', 'new-' + character.id + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
 	}
 }
 
@@ -213,9 +213,9 @@ function charContextMenu(e) {
 	if (project.project.hotbar[i]) {
 		document.getElementById('char selected').getElementsByClassName('desc')[0].innerHTML = project.characters[project.project.hotbar[i]].name
 		if (fs.existsSync(path.join(project.assetsPath, '..', 'thumbnails', project.project.hotbar[i] + '.png')))
-			document.getElementById('char selected').style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', project.project.hotbar[i] + '.png?random=' + new Date().getTime()) + ')'
+			document.getElementById('char selected').style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', project.project.hotbar[i] + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
 		else
-			document.getElementById('char selected').style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', 'new-' + project.project.hotbar[i] + '.png?random=' + new Date().getTime()) + ')'
+			document.getElementById('char selected').style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', 'new-' + project.project.hotbar[i] + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
 	} else {
 		document.getElementById('char selected').getElementsByClassName('desc')[0].innerHTML = ''
 		document.getElementById('char selected').style.backgroundImage = ''
@@ -229,9 +229,9 @@ function charContextMenu(e) {
 		selector.id = project.characters[characters[j]].name.toLowerCase()
 		selector.className = "char"
 		if (fs.existsSync(path.join(project.assetsPath, '..', 'thumbnails', characters[j] + '.png')))
-			selector.style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', characters[j] + '.png?random=' + new Date().getTime()) + ')'
+			selector.style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', characters[j] + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
 		else
-			selector.style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', 'new-' + characters[j] + '.png?random=' + new Date().getTime()) + ')'
+			selector.style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', 'new-' + characters[j] + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
 		charList.appendChild(selector)
 		selector.innerHTML = '<div class="desc">' + project.characters[characters[j]].name + '</div>'
 		selector.i = i
