@@ -28,7 +28,7 @@ exports.host = function() {
 		stopNetworking()
 	}
 
-	status.log('Starting host...')
+	status.log('Starting host...', 2, 1)
 	document.getElementById('host').innerHTML = 'Close Server'
 	puppets = []
 
@@ -158,7 +158,7 @@ exports.host = function() {
 					controller.addAssetLocal(asset)
 					socket.broadcast.emit('add asset', asset)
 					if (status.decrement('Retrieving %x Asset%s')) {
-						status.log('Synced Assets!')
+						status.log('Synced Assets!', 3, 1)
 						addPuppetServer(socket)
 					}
 				})
@@ -172,7 +172,7 @@ exports.host = function() {
 		status.error('Server Error.', e)
 	})
 
-	status.log('Hosting successful!')
+	status.log('Hosting successful!', 1, 1)
 }
 
 exports.connect = function() {
@@ -184,7 +184,7 @@ exports.connect = function() {
 		stopNetworking()
 	}
 
-	status.log('Connecting to server...')
+	status.log('Connecting to server...', 2, 1)
 	document.getElementById('connect').innerHTML = 'Disconnect from Server'
 
 	// Connect to server
@@ -205,7 +205,7 @@ exports.connect = function() {
 		}
 	    socket.emit('add puppet', project.getPuppet())
 		controller.connect()
-		status.log('Connected to server!')
+		status.log('Connected to server!', 1, 1)
 	})
 
 	socket.on('disconnect', stopNetworking)
@@ -223,11 +223,11 @@ exports.connect = function() {
 	})
 
 	socket.on('reconnect', () => {
-		status.log('Reconnected.')
+		status.log('Reconnected.', 1, 1)
 	})
 
 	socket.on('reconnecting', () => {
-		status.log('Reconnecting...')
+		status.log('Reconnecting...', 1, 1)
 	})
 
 	socket.on('reconnect_error', (e) => {
@@ -315,7 +315,7 @@ exports.connect = function() {
 			stream.on('end', () => {
 				controller.addAssetLocal(asset)
 				if (status.decrement('Retrieving %x Asset%s')) {
-					status.log('Synced Assets!')
+					status.log('Synced Assets!', 3, 1)
 					addPuppetServer(socket)
 				}
 			})
@@ -342,7 +342,7 @@ function stopNetworking() {
 	numPuppets = 1
 	document.getElementById('host').innerHTML = 'Host Server'
 	document.getElementById('connect').innerHTML = 'Connect to Server'
-	status.log('Disconnected.')
+	status.log('Disconnected.', 2, 1)
 }
 
 function requestAsset(stream, asset) {

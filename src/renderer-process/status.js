@@ -1,5 +1,5 @@
 let status
-let lock
+let currPriority
 let counts
 
 exports.init = function() {
@@ -8,7 +8,7 @@ exports.init = function() {
 	status.addEventListener('click', () => {
 		remote.webContents.getFocusedWebContents().toggleDevTools()
 	})
-	lock = false
+	currPriority = 0
 	counts = {}
 	exports.info("Babble Buds version: " + remote.app.getVersion())
 	exports.info("Other Versions: " + JSON.stringify(process.versions, null, 2))
@@ -18,11 +18,18 @@ exports.info = function(string) {
 	console.log(string)
 }
 
-exports.log = function(string, setLock) {
-	if (setLock !== null) {
-		lock = setLock
-	} else if (lock) return
-	status.innerText = string
+// Priorities:
+// 0 - Nothing
+// 1 - Normal
+// 2 - Reactions (Like saving puppets)
+// 3 - Counters
+// 5 - WARN
+// 10 - ERR
+exports.log = function(string, priority, tolerance) {
+	if (priority >= currPriority) {
+		currPriority = tolerance
+		status.innerText = string
+	}
 	console.log(string)
 }
 
@@ -34,14 +41,14 @@ exports.error = function(string, error) {
 exports.increment = function(string) {
 	if (!counts[string]) counts[string] = 0
 	counts[string]++
-	exports.log(string.replace('%x', counts[string]).replace('%s', counts[string] === 1 ? '' : 's'))
+	exports.log(string.replace('%x', counts[string]).replace('%s', counts[string] === 1 ? '' : 's'), 3, 3)
 	return counts[string] === 0
 }
 
 exports.decrement = function(string) {
 	if (!counts[string]) counts[string] = 0
 	counts[string]--
-	exports.log(string.replace('%x', counts[string]).replace('%s', counts[string] === 1 ? '' : 's'))
+	exports.log(string.replace('%x', counts[string]).replace('%s', counts[string] === 1 ? '' : 's'), 3, 3)
 	return counts[string] === 0
 }
 

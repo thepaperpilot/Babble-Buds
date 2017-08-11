@@ -33,7 +33,7 @@ let selectedGui // gui that appears around selected
 exports.init = function() {
     project = remote.getGlobal('project').project
     // Create some basic objects
-    stage = new Stage('editor-screen', {'numCharacters': 1, 'puppetScale': 1, 'assets': project.project.assets}, project.assets, project.assetsPath)
+    stage = new Stage('editor-screen', {'numCharacters': 1, 'puppetScale': 1, 'assets': project.project.assets}, project.assets, project.assetsPath, null, status.log)
     stage.stage.interactive = true
     stage.stage.on('mousedown', editorMousedown)
     stage.stage.on('mousemove', editorMousemove)
@@ -51,7 +51,13 @@ exports.init = function() {
         if (selectedGui) this.stage.removeChild(selectedGui)
     }
     stage.getAsset = function(asset, layer) {
-        let sprite = new Sprite(TextureCache[path.join(this.assetsPath, this.assets[asset.tab][asset.hash].location)])
+        let sprite
+        if (this.assets[asset.tab] && this.assets[asset.tab][asset.hash]) {
+            sprite = new Sprite(TextureCache[path.join(this.assetsPath, this.assets[asset.tab][asset.hash].location)])
+        } else {
+            sprite = new Sprite()
+            if (this.log) this.log("Unable to load asset \"" + asset.tab + ":" + asset.hash + "\"", 5, 2)
+        }
         sprite.anchor.set(0.5)
         sprite.x = asset.x
         sprite.y = asset.y
@@ -122,7 +128,7 @@ exports.init = function() {
     document.getElementById('delete-character').addEventListener('click', deleteCharacter)
     document.getElementById('add-asset').addEventListener('click', addAsset)
     document.getElementById('new-asset-bundle').addEventListener('click', () => {
-        status.log('Not Yet Implemented!')
+        status.log('Not Yet Implemented!', 1, 1)
     })
     document.getElementById('edit-asset-list').addEventListener('click', editAssetList)
     document.getElementById('close-edit-asset-list').addEventListener('click', closeAssetListEditor)
@@ -702,12 +708,12 @@ function moveAsset(e) {
 }
 
 function savePuppet() {
-    status.log('Saving puppet...')
+    status.log('Saving puppet...', 2, 1)
     selected = null
     if (selectedGui) stage.stage.removeChild(selectedGui)
     controller.saveCharacter(character, stage.getThumbnail())
     oldcharacter = JSON.stringify(character)
-    status.log('Puppet saved!')
+    status.log('Puppet saved!', 1, 1)
 }
 
 function newPuppet() {
@@ -1015,12 +1021,12 @@ function importAssetList() {
                     let tab = filepaths[0].replace(/^.*[\\\/]/, '').replace(/\.[^.]+$/, '')
                     if (!project.assets[tab]) addAssetListToDom(tab)
                     for (let i = 0; i < listKeys.length; i++) {
-                        status.log('Importing ' + (listKeys.length - i) + ' assets...')
+                        status.log('Importing ' + (listKeys.length - i) + ' assets...', 3, 3)
                         if (project.assets[tab] && project.assets[tab][listKeys[i]]) continue
                         fs.copySync(path.join(filepaths[0], '..', list[listKeys[i]].location), path.join(project.assetsPath, tab, listKeys[i] + '.png'))
                         controller.addAsset({"tab": tab, "hash": listKeys[i], "name": list[listKeys[i]].name})
                     }
-                    status.log('Imported ' + listKeys.length + ' assets!')
+                    status.log('Imported ' + listKeys.length + ' assets!', 3, 1)
                 }
             })
     })

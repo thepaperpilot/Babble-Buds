@@ -20,11 +20,11 @@ let popout
 
 exports.init = function() {
 	status.init()
-	status.log('Loading project...')
+	status.log('Loading project...', 1, 1)
 	project = remote.getGlobal('project').project
 	application.init()
 	network.init()
-	stage = new Stage('screen', project.project, project.assets, project.assetsPath, loadPuppets)
+	stage = new Stage('screen', project.project, project.assets, project.assetsPath, loadPuppets, status.log)
 }
 
 exports.setPuppetLocal = function(index, shiftKey, ctrlKey) {
@@ -261,7 +261,7 @@ exports.moveAsset = function(tab, asset, newTab) {
 }
 
 exports.moveAssetLocal = function(tab, asset, newTab) {
-    status.log("Moving asset to " + newTab + " list...")
+    status.log("Moving asset to " + newTab + " list...", 2, 1)
 	editor.migrateAsset(tab, asset, newTab)
 	project.moveAsset(tab, asset, newTab)
 	stage.addAsset({"tab": newTab, "hash": asset, "name": project.assets[newTab][asset].name})
@@ -284,7 +284,7 @@ exports.moveAssetLocal = function(tab, asset, newTab) {
 	    }
 	    exports.saveCharacter(character)
     }
-    status.log("Moved asset!")
+    status.log("Moved asset!", 1, 1)
 }
 
 exports.deleteAsset = function(tab, asset) {
@@ -293,7 +293,7 @@ exports.deleteAsset = function(tab, asset) {
 }
 
 exports.deleteAssetLocal = function(tab, asset) {
-    status.log("Deleting asset...")
+    status.log("Deleting asset...", 2, 1)
 	editor.deleteAsset(tab, asset)
 	project.deleteAsset(tab, asset)
     let characters = Object.keys(project.characters)
@@ -315,7 +315,7 @@ exports.deleteAssetLocal = function(tab, asset) {
 	    }
 	    exports.saveCharacter(project.characters[characters[i]])
     }
-    status.log("Deleted asset!")
+    status.log("Deleted asset!", 1, 1)
 }
 
 exports.renameAssetList = function(tab, newTab) {
@@ -427,7 +427,7 @@ exports.getThumbnail = function() {
 }
 
 function loadPuppets(stage) {
-	status.log('Loading puppets...', true)
+	status.log('Loading puppets...', 2, 1)
 
 	// Add Puppet
 	puppet = stage.addPuppet(project.getPuppet(), 1)
@@ -449,5 +449,5 @@ function loadPuppets(stage) {
 	application.setPuppet(project.project.hotbar.indexOf(project.actor.id), puppet.emotes)
 	application.setEmote(puppet.emote)
 
-	status.log('Project Loaded!', false)
+	status.log('Project Loaded!', 1, 1)
 }

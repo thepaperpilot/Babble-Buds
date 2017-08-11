@@ -15,10 +15,11 @@ let Container = PIXI.Container,
 // Exports
 exports.Stage = Stage
 
-function Stage(element, project, assets, assetsPath, callback) {
+function Stage(element, project, assets, assetsPath, callback, log) {
     this.project = project
     this.assets = assets
     this.assetsPath = assetsPath
+    this.log = log
 
     // Create some basic objects
     this.stage = new Container()
@@ -281,7 +282,13 @@ Stage.prototype.gameLoop = function() {
 }
 
 Stage.prototype.getAsset = function(asset, layer) {
-    let sprite = new Sprite(TextureCache[path.join(this.assetsPath, this.assets[asset.tab][asset.hash].location)])
+    let sprite
+    if (this.assets[asset.tab] && this.assets[asset.tab][asset.hash]) {
+        sprite = new Sprite(TextureCache[path.join(this.assetsPath, this.assets[asset.tab][asset.hash].location)])
+    } else {
+        sprite = new Sprite()
+        if (this.log) this.log("Unable to load asset \"" + asset.tab + ":" + asset.hash + "\"", 5, 2)
+    }
     sprite.anchor.set(0.5)
     sprite.x = asset.x
     sprite.y = asset.y
