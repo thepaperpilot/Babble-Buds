@@ -6,7 +6,7 @@ const path = require('path')
 const MOVE_DURATION = 0.75 // in seconds
 
 // Aliases
-var Container = PIXI.Container,
+let Container = PIXI.Container,
     autoDetectRenderer = PIXI.autoDetectRenderer,
     loader = PIXI.loader,
     Sprite = PIXI.Sprite,
@@ -38,18 +38,18 @@ function Stage(element, project, assets, assetsPath, callback) {
     this.renderer.autoResize = true;
 
     // Load Assets
-    var texturesToLoad = false
-    for (var i = 0; i < project.assets.length; i++) {
-        var tab = assets[project.assets[i].name]
-        var keys = Object.keys(tab)
-        for (var j = 0; j < keys.length; j++) {
+    let texturesToLoad = false
+    for (let i = 0; i < project.assets.length; i++) {
+        let tab = assets[project.assets[i].name]
+        let keys = Object.keys(tab)
+        for (let j = 0; j < keys.length; j++) {
             if (!TextureCache[path.join(assetsPath, tab[keys[j]].location)]) {
                 loader.add(path.join(assetsPath, tab[keys[j]].location))
                 texturesToLoad = true
             }
         }
     }
-    var stage = this
+    let stage = this
     if (texturesToLoad) {
         loader.onComplete.add(function() { 
             stage.resize()
@@ -69,7 +69,7 @@ function Stage(element, project, assets, assetsPath, callback) {
 
 Stage.prototype.registerPuppetListener = function(event, callback) {
     this.listeners.push({"event": event, "callback": callback})
-    for (var i = 0; i < this.puppets.length; i++)
+    for (let i = 0; i < this.puppets.length; i++)
         this.puppets[i].container.on(event, callback)
 }
 
@@ -93,8 +93,8 @@ Stage.prototype.resize = function() {
         this.puppetStage.scale.x = this.puppetStage.scale.y = this.slotWidth / this.project.minSlotWidth
         this.slotWidth = this.project.minSlotWidth
     } else this.puppetStage.scale.x = this.puppetStage.scale.y = 1
-    for (var i = 0; i < this.puppets.length; i++) {
-        var puppet = this.puppets[i]
+    for (let i = 0; i < this.puppets.length; i++) {
+        let puppet = this.puppets[i]
         if (puppet.position > this.project.numCharacters + 1 || puppet.target > this.project.numCharacters + 1) {
             puppet.position = puppet.target = this.project.numCharacters + 1
             puppet.movingAnim = 0
@@ -109,10 +109,10 @@ Stage.prototype.createPuppet = function(obj) {
 }
 
 Stage.prototype.addPuppet = function(obj, id) {
-    var puppet = new Puppet(this, obj, id)
+    let puppet = new Puppet(this, obj, id)
     this.puppets.push(puppet)
     this.puppetStage.addChild(puppet.container)
-    for (var i = 0; i < this.listeners.length; i++)
+    for (let i = 0; i < this.listeners.length; i++)
         puppet.container.on(this.listeners[i].event, this.listeners[i].callback)
     puppet.container.y = this.screen.clientHeight / this.puppetStage.scale.y
     puppet.container.x = (puppet.position - 0.5) * this.slotWidth
@@ -120,8 +120,8 @@ Stage.prototype.addPuppet = function(obj, id) {
 }
 
 Stage.prototype.removePuppet = function(id) {
-    var puppet
-    for (var i = 0; i < this.puppets.length; i++)
+    let puppet
+    for (let i = 0; i < this.puppets.length; i++)
         if (this.puppets[i].id == id) {
             puppet = this.puppets[i]
             break
@@ -140,13 +140,13 @@ Stage.prototype.clearPuppets = function() {
 }
 
 Stage.prototype.getPuppet = function(id) {
-    for (var i = 0; i < this.puppets.length; i++)
+    for (let i = 0; i < this.puppets.length; i++)
         if (this.puppets[i].id == id)
             return this.puppets[i]
 }
 
 Stage.prototype.setPuppet = function(id, newPuppet) {
-    var oldPuppet = this.getPuppet(id)
+    let oldPuppet = this.getPuppet(id)
     newPuppet.changeEmote(oldPuppet.emote)
     newPuppet.id = oldPuppet.id
     newPuppet.position = oldPuppet.position
@@ -154,7 +154,7 @@ Stage.prototype.setPuppet = function(id, newPuppet) {
     newPuppet.facingLeft = oldPuppet.facingLeft
     newPuppet.container.scale.x = newPuppet.facingLeft ? -1 : 1
 
-    for (var i = 0; i < this.listeners.length; i++)
+    for (let i = 0; i < this.listeners.length; i++)
         newPuppet.container.on(this.listeners[i].event, this.listeners[i].callback)
     newPuppet.container.y = this.screen.clientHeight / this.puppetStage.scale.y
     newPuppet.container.x = (newPuppet.position - 0.5) * this.slotWidth
@@ -171,19 +171,19 @@ Stage.prototype.getThumbnail = function() {
 }
 
 Stage.prototype.gameLoop = function() {
-    var thisFrame = new Date()
-    var delta = thisFrame - this.lastFrame
+    let thisFrame = new Date()
+    let delta = thisFrame - this.lastFrame
     this.lastFrame = thisFrame
 
     requestAnimationFrame(this.gameLoop.bind(this))
-    for (var i = 0; i < this.puppets.length; i++) {
-        var puppet = this.puppets[i]
+    for (let i = 0; i < this.puppets.length; i++) {
+        let puppet = this.puppets[i]
         // Movement animations
         // I've tried to emulate what puppet pals does as closely as possible
         // But frankly it's difficult to tell
         if (puppet.target != puppet.position || puppet.movingAnim !== 0) {
             // Whether its going left or right
-            var direction = puppet.target > puppet.position ? 1 : -1
+            let direction = puppet.target > puppet.position ? 1 : -1
             // Update how far into the animation we are
             puppet.movingAnim += delta / (1000 * MOVE_DURATION)
 
@@ -226,10 +226,10 @@ Stage.prototype.gameLoop = function() {
             if (puppet.eyesAnim >= puppet.eyesDuration && puppet.eyes.length && (puppet.emote === 'default' || !puppet.emotes[puppet.emote])) {
                 if (puppet.emotes[puppet.emote]) puppet.emotes[puppet.emote].eyes.visible = false
                 puppet.emotes['default'].eyes.visible = false
-                for (var j = 0; j < puppet.eyes.length; j++) {
+                for (let j = 0; j < puppet.eyes.length; j++) {
                     if (puppet.emotes[puppet.eyes[j]]) puppet.emotes[puppet.eyes[j]].eyes.visible = false
                 }
-                var eyes = puppet.eyes[Math.floor(Math.random() * puppet.eyes.length)]
+                let eyes = puppet.eyes[Math.floor(Math.random() * puppet.eyes.length)]
                 puppet.emotes[puppet.emotes[eyes] ? eyes : 'default'].eyes.visible = true
                 puppet.eyesAnim = 0
                 puppet.eyesDuration = Math.random() * 2000 + 200
@@ -239,10 +239,10 @@ Stage.prototype.gameLoop = function() {
             if (puppet.mouthAnim >= puppet.mouthDuration && puppet.mouths.length) {
                 if (puppet.emotes[puppet.emote]) puppet.emotes[puppet.emote].mouth.visible = false
                 puppet.emotes['default'].mouth.visible = false
-                for (var j = 0; j < puppet.mouths.length; j++) {
+                for (let j = 0; j < puppet.mouths.length; j++) {
                     if (puppet.emotes[puppet.mouths[j]]) puppet.emotes[puppet.mouths[j]].mouth.visible = false
                 }
-                var mouth = puppet.mouths[Math.floor(Math.random() * puppet.mouths.length)]
+                let mouth = puppet.mouths[Math.floor(Math.random() * puppet.mouths.length)]
                 puppet.emotes[puppet.emotes[mouth] ? mouth : 'default'].mouth.visible = true
                 puppet.mouthAnim = 0
                 puppet.mouthDuration = Math.random() * 200 + 50
@@ -270,7 +270,7 @@ Stage.prototype.gameLoop = function() {
                     puppet.head.rotation = puppet.deadbonesTargetRotation
                 }
             } else {
-                var percent = (puppet.deadbonesAnim / puppet.deadbonesDuration) * (puppet.deadbonesAnim / puppet.deadbonesDuration)
+                let percent = (puppet.deadbonesAnim / puppet.deadbonesDuration) * (puppet.deadbonesAnim / puppet.deadbonesDuration)
                 puppet.head.y = puppet.deadbonesStartY + (puppet.deadbonesTargetY - puppet.deadbonesStartY) * percent
                 puppet.head.rotation = puppet.deadbonesStartRotation + (puppet.deadbonesTargetRotation - puppet.deadbonesStartRotation) * percent
             }
@@ -280,7 +280,7 @@ Stage.prototype.gameLoop = function() {
 }
 
 Stage.prototype.getAsset = function(asset, layer) {
-    var sprite = new Sprite(TextureCache[path.join(this.assetsPath, this.assets[asset.tab][asset.hash].location)])
+    let sprite = new Sprite(TextureCache[path.join(this.assetsPath, this.assets[asset.tab][asset.hash].location)])
     sprite.anchor.set(0.5)
     sprite.x = asset.x
     sprite.y = asset.y
@@ -293,7 +293,7 @@ Stage.prototype.getAsset = function(asset, layer) {
 }
 
 // Puppet Prototype
-var Puppet = function(stage, puppet, id) {
+let Puppet = function(stage, puppet, id) {
     // Init Variables
     this.babbling = false
     this.stage = stage
@@ -312,22 +312,22 @@ var Puppet = function(stage, puppet, id) {
 
     // Construct Puppet
     this.body = new Container()
-    for (var i = 0; i < puppet.body.length; i++) {
+    for (let i = 0; i < puppet.body.length; i++) {
         this.body.addChild(stage.getAsset(puppet.body[i], 'body'))
     }
     this.container.addChild(this.body)
 
     this.head = new Container()
     this.headBase = new Container()
-    for (var i = 0; i < puppet.head.length; i++) {
+    for (let i = 0; i < puppet.head.length; i++) {
         this.headBase.addChild(stage.getAsset(puppet.head[i], 'headBase'))
     }
     this.head.addChild(this.headBase)
     this.emotes = {}
     this.mouthsContainer = new Container()
     this.eyesContainer = new Container()
-    var emotes = Object.keys(puppet.emotes)
-    for (var i = 0; i < emotes.length; i++) {
+    let emotes = Object.keys(puppet.emotes)
+    for (let i = 0; i < emotes.length; i++) {
         if (!puppet.emotes[emotes[i]].enabled) continue
         this.emotes[emotes[i]] = {
             "mouth": new Container(),
@@ -335,17 +335,17 @@ var Puppet = function(stage, puppet, id) {
         }
         this.mouthsContainer.addChild(this.emotes[emotes[i]].mouth)
         this.eyesContainer.addChild(this.emotes[emotes[i]].eyes)
-        for (var j = 0; j < puppet.emotes[emotes[i]].mouth.length; j++) {
+        for (let j = 0; j < puppet.emotes[emotes[i]].mouth.length; j++) {
             this.emotes[emotes[i]].mouth.addChild(stage.getAsset(puppet.emotes[emotes[i]].mouth[j], emotes[i] + '-emote'))
         }
-        for (var j = 0; j < puppet.emotes[emotes[i]].eyes.length; j++) {
+        for (let j = 0; j < puppet.emotes[emotes[i]].eyes.length; j++) {
             this.emotes[emotes[i]].eyes.addChild(stage.getAsset(puppet.emotes[emotes[i]].eyes[j], emotes[i] + '-emote'))
         }
     }
     this.head.addChild(this.mouthsContainer)
     this.head.addChild(this.eyesContainer)
     this.hat = new Container()
-    for (var i = 0; i < puppet.hat.length; i++) {
+    for (let i = 0; i < puppet.hat.length; i++) {
         this.hat.addChild(stage.getAsset(puppet.hat[i], 'hat'))
     }
     this.head.addChild(this.hat)
@@ -355,7 +355,7 @@ var Puppet = function(stage, puppet, id) {
     this.container.addChild(this.head)
 
     this.props = new Container()
-    for (var i = 0; i < puppet.props.length; i++) {
+    for (let i = 0; i < puppet.props.length; i++) {
         this.props.addChild(stage.getAsset(puppet.props[i], 'props'))
     }
     this.container.addChild(this.props)
@@ -373,8 +373,8 @@ var Puppet = function(stage, puppet, id) {
 
 Puppet.prototype.changeEmote = function (emote) {
     this.emote = emote
-    var emotes = Object.keys(this.emotes)
-    for (var i = 0; i < emotes.length; i++) {
+    let emotes = Object.keys(this.emotes)
+    for (let i = 0; i < emotes.length; i++) {
         this.emotes[emotes[i]].mouth.visible = false
         this.emotes[emotes[i]].eyes.visible = false
     }

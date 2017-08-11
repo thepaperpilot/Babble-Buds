@@ -11,12 +11,12 @@ const path = require('path')
 const url = require('url')
 
 // Vars
-var project
-var stage
-var puppet
-var character
-var hotbar = []
-var popout
+let project
+let stage
+let puppet
+let character
+let hotbar = []
+let popout
 
 exports.init = function() {
 	status.init()
@@ -30,8 +30,8 @@ exports.init = function() {
 exports.setPuppetLocal = function(index, shiftKey, ctrlKey) {
 	if (!hotbar[index]) return
 
-	var newPuppet
-	var oldcharacter = character
+	let newPuppet
+	let oldcharacter = character
 	character = JSON.parse(JSON.stringify(project.characters[project.project.hotbar[index]]))
 
 	if (shiftKey && !ctrlKey) {
@@ -151,7 +151,7 @@ exports.setEmote = function(id, emote) {
 }
 
 exports.moveLeft = function(id) {
-	var puppet = stage.getPuppet(id)
+	let puppet = stage.getPuppet(id)
 
 	// Move Left
 	puppet.moveLeft()
@@ -163,7 +163,7 @@ exports.moveLeft = function(id) {
 }
 
 exports.moveRight = function(id) {
-	var puppet = stage.getPuppet(id)
+	let puppet = stage.getPuppet(id)
 
 	// Move Right
 	puppet.moveRight()
@@ -265,20 +265,20 @@ exports.moveAssetLocal = function(tab, asset, newTab) {
 	editor.migrateAsset(tab, asset, newTab)
 	project.moveAsset(tab, asset, newTab)
 	stage.addAsset({"tab": newTab, "hash": asset, "name": project.assets[newTab][asset].name})
-    var characters = Object.keys(project.characters)
-    for (var i = 0; i < characters.length; i++) {
-    	var character = project.characters[characters[i]]
-    	var topLevel = ["body", "head", "hat", "props"]
-    	for (var j = 0; j < topLevel.length; j++)
-	        for (var k = 0; k < character[topLevel[j]].length; k++)
+    let characters = Object.keys(project.characters)
+    for (let i = 0; i < characters.length; i++) {
+    	let character = project.characters[characters[i]]
+    	let topLevel = ["body", "head", "hat", "props"]
+    	for (let j = 0; j < topLevel.length; j++)
+	        for (let k = 0; k < character[topLevel[j]].length; k++)
 	        	if (character[topLevel[j]][k].tab === tab && character[topLevel[j]][k].hash === asset)
 	        		character[topLevel[j]][k].tab = newTab
-	    var emotes = Object.keys(character.emotes)
-	    for (var j = 0; j < emotes.length; j++) {
-	    	for (var k = 0; k < character.emotes[emotes[j]].eyes.length; k++)
+	    let emotes = Object.keys(character.emotes)
+	    for (let j = 0; j < emotes.length; j++) {
+	    	for (let k = 0; k < character.emotes[emotes[j]].eyes.length; k++)
 	    		if (character.emotes[emotes[j]].eyes[k].tab === tab && character.emotes[emotes[j]].eyes[k].hash === asset)
 	    			character.emotes[emotes[j]].eyes[k].tab = newTab
-	    	for (var k = 0; k < character.emotes[emotes[j]].mouth.length; k++)
+	    	for (let k = 0; k < character.emotes[emotes[j]].mouth.length; k++)
 	    		if (character.emotes[emotes[j]].mouth[k].tab === tab && character.emotes[emotes[j]].mouth[k].hash === asset)
 	    			character.emotes[emotes[j]].mouth[k].tab = newTab
 	    }
@@ -296,20 +296,20 @@ exports.deleteAssetLocal = function(tab, asset) {
     status.log("Deleting asset...")
 	editor.deleteAsset(tab, asset)
 	project.deleteAsset(tab, asset)
-    var characters = Object.keys(project.characters)
-    for (var i = 0; i < characters.length; i++) {
-    	var character = project.characters[characters[i]]
-    	var topLevel = ["body", "head", "hat", "props"]
-    	for (var j = 0; j < topLevel.length; j++)
-	        for (var k = 0; k < character[topLevel[j]].length; k++)
+    let characters = Object.keys(project.characters)
+    for (let i = 0; i < characters.length; i++) {
+    	let character = project.characters[characters[i]]
+    	let topLevel = ["body", "head", "hat", "props"]
+    	for (let j = 0; j < topLevel.length; j++)
+	        for (let k = 0; k < character[topLevel[j]].length; k++)
 	        	if (character[topLevel[j]][k].tab === tab && character[topLevel[j]][k].hash === asset)
 	        		character[topLevel[j]].splice(k, 1)
-	    var emotes = Object.keys(character.emotes)
-	    for (var j = 0; j < emotes.length; j++) {
-	    	for (var k = 0; k < character.emotes[emotes[j]].eyes.length; k++) 
+	    let emotes = Object.keys(character.emotes)
+	    for (let j = 0; j < emotes.length; j++) {
+	    	for (let k = 0; k < character.emotes[emotes[j]].eyes.length; k++) 
 	    		if (character.emotes[emotes[j]].eyes[k].tab === tab && character.emotes[emotes[j]].eyes[k].hash === asset)
                     character.emotes[emotes[j]].eyes.splice(k, 1)
-	    	for (var k = 0; k < character.emotes[emotes[j]].mouth.length; k++)
+	    	for (let k = 0; k < character.emotes[emotes[j]].mouth.length; k++)
 	    		if (character.emotes[emotes[j]].mouth[k].tab === tab && character.emotes[emotes[j]].mouth[k].hash === asset)
                     character.emotes[emotes[j]].mouth.splice(k, 1)
 	    }
@@ -326,20 +326,20 @@ exports.renameAssetList = function(tab, newTab) {
 exports.renameAssetListLocal = function(tab, newTab) {
 	editor.renameAssetList(tab, newTab)
 	project.renameAssetList(tab, newTab)
-    var characters = Object.keys(project.characters)
-    for (var i = 0; i < characters.length; i++) {
-    	var character = project.characters[characters[i]]
-    	var topLevel = ["body", "head", "hat", "props"]
-    	for (var j = 0; j < topLevel.length; j++)
-	        for (var k = 0; k < character[topLevel[j]].length; k++)
+    let characters = Object.keys(project.characters)
+    for (let i = 0; i < characters.length; i++) {
+    	let character = project.characters[characters[i]]
+    	let topLevel = ["body", "head", "hat", "props"]
+    	for (let j = 0; j < topLevel.length; j++)
+	        for (let k = 0; k < character[topLevel[j]].length; k++)
 	        	if (character[topLevel[j]][k].tab === tab)
 	        		character[topLevel[j]][k].tab = newTab
-	    var emotes = Object.keys(character.emotes)
-	    for (var j = 0; j < emotes.length; j++) {
-	    	for (var k = 0; k < character.emotes[emotes[j]].eyes.length; k++)
+	    let emotes = Object.keys(character.emotes)
+	    for (let j = 0; j < emotes.length; j++) {
+	    	for (let k = 0; k < character.emotes[emotes[j]].eyes.length; k++)
 	    		if (character.emotes[emotes[j]].eyes[k].tab === tab)
 	    			character.emotes[emotes[j]].eyes[k].tab = newTab
-	    	for (var k = 0; k < character.emotes[emotes[j]].mouth.length; k++)
+	    	for (let k = 0; k < character.emotes[emotes[j]].mouth.length; k++)
 	    		if (character.emotes[emotes[j]].mouth[k].tab === tab)
 	    			character.emotes[emotes[j]].mouth[k].tab = newTab
 	    }
@@ -353,8 +353,8 @@ exports.deleteAssetList = function(tab) {
 }
 
 exports.deleteAssetListLocal = function(tab) {
-	var keys = Object.keys(project.assets[tab])
-    for (var i = 0; i < keys.length; i++) {
+	let keys = Object.keys(project.assets[tab])
+    for (let i = 0; i < keys.length; i++) {
         exports.deleteAsset(tab, keys[i])
     }
     project.deleteAssetList(tab)
@@ -362,7 +362,7 @@ exports.deleteAssetListLocal = function(tab) {
 }
 
 exports.deleteCharacter = function(character) {
-	var index = project.project.hotbar.indexOf(character.id)
+	let index = project.project.hotbar.indexOf(character.id)
 	if (index > -1) {
 		hotbar[index] = null
 		project.project.hotbar[index] = parseInt('')
@@ -440,7 +440,7 @@ function loadPuppets(stage) {
 	})
 
 	// Create Hotbar Puppets
-	for (var i = 0; i < project.project.hotbar.length; i++) {
+	for (let i = 0; i < project.project.hotbar.length; i++) {
 		if (project.project.hotbar[i] !== '' && project.project.hotbar[i] > 0)
 			hotbar[i] = stage.createPuppet(project.characters[project.project.hotbar[i]])
 	}

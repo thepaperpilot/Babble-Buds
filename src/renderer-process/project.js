@@ -19,7 +19,7 @@ module.exports = exports = remote.getGlobal('project').project = {
 	readProject: function() {
 		if (!this.checkChanges()) return
 
-        var filepath = remote.getGlobal('project').filepath
+        let filepath = remote.getGlobal('project').filepath
 		fs.readJson(filepath, (err, proj) => {
 			if (err) {
 				main.redirect('welcome.html')
@@ -33,7 +33,7 @@ module.exports = exports = remote.getGlobal('project').project = {
 			this.charactersPath = path.join(filepath, '..', 'characters')
 			this.assetsPath = path.join(filepath, '..', 'assets')
 			this.numCharacters = 0
-			for (var i = 0; i < proj.characters.length; i++) {
+			for (let i = 0; i < proj.characters.length; i++) {
 				this.characters[proj.characters[i].id] = fs.readJsonSync(path.join(this.charactersPath, proj.characters[i].location))
 				this.characters[proj.characters[i].id].name = proj.characters[i].name
 				this.characters[proj.characters[i].id].id = proj.characters[i].id
@@ -45,12 +45,12 @@ module.exports = exports = remote.getGlobal('project').project = {
 			this.actor.position = proj.actor.position
 			this.actor.facingLeft = proj.actor.facingLeft
 			this.actor.emote = proj.actor.emote
-			for (var i = 0; i < proj.assets.length; i++) {
+			for (let i = 0; i < proj.assets.length; i++) {
 				this.assets[proj.assets[i].name] = fs.readJsonSync(path.join(this.assetsPath, proj.assets[i].location))
 			}
 			this.oldAssets = JSON.stringify(this.assets)
 
-			for (var i = 0; i < this.project.characters.length; i++) {
+			for (let i = 0; i < this.project.characters.length; i++) {
 				fs.removeSync(path.join(this.assetsPath, '..', 'thumbnails', 'new-' + this.project.characters[i].id + '.png'))
 			}
 
@@ -61,9 +61,9 @@ module.exports = exports = remote.getGlobal('project').project = {
 	},
 	saveProject: function() {
 		fs.writeJson(settings.settings.openProject, this.project)
-		for (var i = 0; i < this.project.assets.length; i++)
+		for (let i = 0; i < this.project.assets.length; i++)
 			fs.writeJson(path.join(settings.settings.openProject, '..', 'assets', this.project.assets[i].location), this.assets[this.project.assets[i].name])
-		for (var i = 0; i < this.project.characters.length; i++) {
+		for (let i = 0; i < this.project.characters.length; i++) {
 			fs.writeJson(path.join(settings.settings.openProject, '..', 'characters', this.project.characters[i].location), this.characters[this.project.characters[i].id])
 			if (fs.existsSync(path.join(this.assetsPath, '..', 'thumbnails', 'new-' + this.project.characters[i].id + '.png')))
                 fs.renameSync(path.join(this.assetsPath, '..', 'thumbnails', 'new-' + this.project.characters[i].id + '.png'), 
@@ -93,11 +93,11 @@ module.exports = exports = remote.getGlobal('project').project = {
 	checkChanges: function() {
 		if (!editor.checkChanges())
         	return false
-		var changes = this.oldProject !== JSON.stringify(this.project)
+		let changes = this.oldProject !== JSON.stringify(this.project)
 		changes = changes || this.oldAssets !== JSON.stringify(this.assets)
 		changes = changes || this.oldCharacters !== JSON.stringify(this.characters)
 		if (changes) {
-			var response = dialog.showMessageBox({
+			let response = dialog.showMessageBox({
 				"type": "question",
 				"buttons": ["Don't Save", "Cancel", "Save"],
 				"defaultId": 2,
@@ -145,7 +145,7 @@ module.exports = exports = remote.getGlobal('project').project = {
 	renameAssetList: function(tab, newTab) {
 		this.assets[newTab] = this.assets[tab]
 		delete this.assets[tab]
-		var list = this.project.assets.find((x) => x.name === tab)
+		let list = this.project.assets.find((x) => x.name === tab)
 		list.name = newTab
 		list.location = newTab + ".json"
 	},
@@ -157,8 +157,8 @@ module.exports = exports = remote.getGlobal('project').project = {
         this.project.assets.splice(this.project.assets.indexOf(this.project.assets.find((x) => x.name === tab)), 1)
     },
     saveCharacter: function(character) {
-        var char = null
-        for (var i = 0; i < this.project.characters.length; i++) {
+        let char = null
+        for (let i = 0; i < this.project.characters.length; i++) {
             if (this.project.characters[i].id == character.id) {
                 char = this.project.characters[i]
                 break
@@ -172,12 +172,12 @@ module.exports = exports = remote.getGlobal('project').project = {
     },
     duplicateCharacter: function(character) {
         this.numCharacters++
-        var char = JSON.parse(JSON.stringify(character))
+        let char = JSON.parse(JSON.stringify(character))
         char.id = this.numCharacters
         return JSON.stringify(char)
     },
     deleteCharacter: function(character) {
-        for (var i = 0; i < this.project.characters.length; i++) {
+        for (let i = 0; i < this.project.characters.length; i++) {
             if (this.project.characters[i].id == character.id) {
                 this.project.characters.splice(i, 1)
                 delete this.characters[character.id]
@@ -208,7 +208,7 @@ module.exports = exports = remote.getGlobal('project').project = {
         })
     },
     getPuppet: function() {
-        var puppet = JSON.parse(JSON.stringify(this.characters[this.actor.id]))
+        let puppet = JSON.parse(JSON.stringify(this.characters[this.actor.id]))
         puppet.position = this.actor.position
         puppet.emote = this.actor.emote
         puppet.facingLeft = this.actor.facingLeft

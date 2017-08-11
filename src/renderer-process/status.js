@@ -1,6 +1,6 @@
-var status
-var lock
-var counts
+let status
+let lock
+let counts
 
 exports.init = function() {
 	status = document.getElementById('status')

@@ -2,8 +2,8 @@ const electron = require('electron')
 const remote = electron.remote
 const Stage = require('./stage.js').Stage
 
-var stage
-var puppet
+let stage
+let puppet
 
 function loadPuppets() {
     // Add Puppet
@@ -20,13 +20,13 @@ function loadPuppets() {
 
 // Send inputs back to parent window
 window.onkeydown = function(e) {
-    var key = e.keyCode ? e.keyCode : e.which;
+    let key = e.keyCode ? e.keyCode : e.which;
 
     remote.getCurrentWindow().getParentWindow().webContents.send('keyDown', key)
 }
 
 window.onkeyup = function(e) {
-    var key = e.keyCode ? e.keyCode : e.which;
+    let key = e.keyCode ? e.keyCode : e.which;
 
     if (key == 27) { 
         remote.getCurrentWindow().close()
@@ -47,7 +47,7 @@ electron.ipcRenderer.on('setup', (event, project, mypuppet, id) => {
 })
 
 electron.ipcRenderer.on('init', (event, puppets) => {
-    for (var i = 0; i < puppets.length; i++)
+    for (let i = 0; i < puppets.length; i++)
         stage.addPuppet(puppets[i], puppets[i].charId)
 })
 

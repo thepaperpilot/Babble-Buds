@@ -9,7 +9,7 @@ const Stage = require('./stage.js').Stage
 const fs = require('fs-extra')
 
 // Aliases
-var Container = PIXI.Container,
+let Container = PIXI.Container,
     Sprite = PIXI.Sprite,
     TextureCache = PIXI.utils.TextureCache,
     Graphics = PIXI.Graphics
@@ -18,17 +18,17 @@ var Container = PIXI.Container,
 const ROUND_ROTATION = Math.PI / 4 // When rounding angles, this is the step size to use
 
 // Vars
-var project
-var stage // Stage instance
-var asset // asset being moved (outside of pixi)
-var scale = 1 // scale of the editor view
-var puppet // puppet being edited
-var character // character being edited
-var oldcharacter // currently saved version of character
-var layer // layer being edited
-var clickableAssets = [] // assets in editor that are clickable
-var selected // selected asset inside of pixi
-var selectedGui // gui that appears around selected
+let project
+let stage // Stage instance
+let asset // asset being moved (outside of pixi)
+let scale = 1 // scale of the editor view
+let puppet // puppet being edited
+let character // character being edited
+let oldcharacter // currently saved version of character
+let layer // layer being edited
+let clickableAssets = [] // assets in editor that are clickable
+let selected // selected asset inside of pixi
+let selectedGui // gui that appears around selected
 
 exports.init = function() {
     project = remote.getGlobal('project').project
@@ -51,7 +51,7 @@ exports.init = function() {
         if (selectedGui) this.stage.removeChild(selectedGui)
     }
     stage.getAsset = function(asset, layer) {
-        var sprite = new Sprite(TextureCache[path.join(this.assetsPath, this.assets[asset.tab][asset.hash].location)])
+        let sprite = new Sprite(TextureCache[path.join(this.assetsPath, this.assets[asset.tab][asset.hash].location)])
         sprite.anchor.set(0.5)
         sprite.x = asset.x
         sprite.y = asset.y
@@ -65,20 +65,20 @@ exports.init = function() {
     }
 
     // Make mousedown work on entire stage
-    var backdrop = new PIXI.Container();
+    let backdrop = new PIXI.Container();
     backdrop.interactive = true;
     backdrop.containsPoint = () => true;
     stage.stage.addChild(backdrop)
 
     // Update Editor
-    var tabs = document.getElementById('asset list')
-    var tabsList = document.getElementById('asset tabs')
-    var assetKeys = Object.keys(project.assets)
-    for (var i = 0; i < assetKeys.length; i++) {
-        var tab = project.assets[assetKeys[i]]
-        var keys = Object.keys(tab)
-        var tabElement = document.createElement('div')
-        var tabOption = document.createElement('option')
+    let tabs = document.getElementById('asset list')
+    let tabsList = document.getElementById('asset tabs')
+    let assetKeys = Object.keys(project.assets)
+    for (let i = 0; i < assetKeys.length; i++) {
+        let tab = project.assets[assetKeys[i]]
+        let keys = Object.keys(tab)
+        let tabElement = document.createElement('div')
+        let tabOption = document.createElement('option')
         tabOption.text = assetKeys[i]
         tabOption.id = "tab option " + assetKeys[i]
         tabsList.add(tabOption)
@@ -87,7 +87,7 @@ exports.init = function() {
         tabElement.style.height = '100%'
         tabElement.id = 'tab ' + assetKeys[i]
         tabElement.className = 'scroll'
-        for (var j = 0; j < keys.length; j++) {
+        for (let j = 0; j < keys.length; j++) {
             exports.addAsset(assetKeys[i], keys[j])
         }
     }
@@ -103,18 +103,18 @@ exports.init = function() {
     document.getElementById('char open search').addEventListener('keyup', updateCharSearch)
     document.getElementById('char open search').addEventListener('search', updateCharSearch)
     document.getElementById('editor-layers').addEventListener('click', toggleLayers)
-    var buttons = document.getElementById('editor-layers-panel').getElementsByTagName('button')
-    for (var i = 0; i < buttons.length; i++)
+    let buttons = document.getElementById('editor-layers-panel').getElementsByTagName('button')
+    for (let i = 0; i < buttons.length; i++)
         buttons[i].addEventListener('click', setLayer)
-    var emotes = document.getElementById('editor-layers-panel').getElementsByClassName('emote')
-    for (var i = 0; i < emotes.length; i++)
+    let emotes = document.getElementById('editor-layers-panel').getElementsByClassName('emote')
+    for (let i = 0; i < emotes.length; i++)
         emotes[i].addEventListener('contextmenu', layerContextMenu)
     document.getElementById('editor-babble').addEventListener('click', toggleBabble)
     emotes = document.getElementById('babble-mouths').getElementsByClassName('emote')
-    for (var i = 0; i < emotes.length; i++)
+    for (let i = 0; i < emotes.length; i++)
         emotes[i].addEventListener('click', mouthLayerClick)
     emotes = document.getElementById('babble-eyes').getElementsByClassName('emote')
-    for (var i = 0; i < emotes.length; i++)
+    for (let i = 0; i < emotes.length; i++)
         emotes[i].addEventListener('click', eyesLayerClick)
     document.getElementById('editor-settings').addEventListener('click', toggleSettings)
     document.getElementById('editor-name').addEventListener('change', nameChange)
@@ -131,8 +131,8 @@ exports.init = function() {
     document.getElementById('new-asset-list').addEventListener('click', newAssetList)
     document.getElementById('import-asset-list').addEventListener('click', importAssetList)
     document.getElementById('asset selected').addEventListener('click', selectAsset)
-    for (var i = 0; i < project.project.assets.length; i++) {
-        var tabOption = document.createElement('option')
+    for (let i = 0; i < project.project.assets.length; i++) {
+        let tabOption = document.createElement('option')
         tabOption.text = project.project.assets[i].name
         tabOption.id = 'asset-tab option ' + project.project.assets[i].name
         document.getElementById('asset-tab').add(tabOption)
@@ -165,13 +165,13 @@ exports.init = function() {
 }
 
 exports.addAsset = function(tab, asset) {
-    var assetElement = document.createElement('div')
+    let assetElement = document.createElement('div')
     if (!document.getElementById('tab ' + tab)) addAssetListToDom(tab)
     document.getElementById('tab ' + tab).appendChild(assetElement)
     assetElement.id = project.assets[tab][asset].name.toLowerCase()
     assetElement.className = "asset " + asset
     assetElement.innerHTML = '<div class="desc">' + project.assets[tab][asset].name + '</div>'
-    var assetDraggable = document.createElement('img')
+    let assetDraggable = document.createElement('img')
     assetElement.appendChild(assetDraggable)
     assetDraggable.tab = tab
     assetDraggable.asset = asset
@@ -189,17 +189,17 @@ exports.migrateAsset = function(tab, asset, newTab) {
         document.getElementById('delete-asset').tab = newTab
     }
     document.getElementById('tab ' + newTab).appendChild(document.getElementById('tab ' + tab).getElementsByClassName(asset)[0])
-    var topLevel = ["body", "head", "hat", "props"]
-    for (var j = 0; j < topLevel.length; j++)
-        for (var k = 0; k < character[topLevel[j]].length; k++)
+    let topLevel = ["body", "head", "hat", "props"]
+    for (let j = 0; j < topLevel.length; j++)
+        for (let k = 0; k < character[topLevel[j]].length; k++)
             if (character[topLevel[j]][k].tab === tab && character[topLevel[j]][k].hash === asset)
                 character[topLevel[j]][k].tab = newTab
-    var emotes = Object.keys(character.emotes)
-    for (var j = 0; j < emotes.length; j++) {
-        for (var k = 0; k < character.emotes[emotes[j]].eyes.length; k++)
+    let emotes = Object.keys(character.emotes)
+    for (let j = 0; j < emotes.length; j++) {
+        for (let k = 0; k < character.emotes[emotes[j]].eyes.length; k++)
             if (character.emotes[emotes[j]].eyes[k].tab === tab && character.emotes[emotes[j]].eyes[k].hash === asset)
                 character.emotes[emotes[j]].eyes[k].tab = newTab
-        for (var k = 0; k < character.emotes[emotes[j]].mouth.length; k++)
+        for (let k = 0; k < character.emotes[emotes[j]].mouth.length; k++)
             if (character.emotes[emotes[j]].mouth[k].tab === tab && character.emotes[emotes[j]].mouth[k].hash === asset)
                 character.emotes[emotes[j]].mouth[k].tab = newTab
     }
@@ -213,17 +213,17 @@ exports.renameAssetList = function(tab, newTab) {
     document.getElementById('asset-tab option ' + tab).id = 'asset-tab option ' + newTab
     document.getElementById('asset-list-name').tab = newTab
     document.getElementById('delete-asset-list').tab = newTab
-    var topLevel = ["body", "head", "hat", "props"]
-    for (var j = 0; j < topLevel.length; j++)
-        for (var k = 0; k < character[topLevel[j]].length; k++)
+    let topLevel = ["body", "head", "hat", "props"]
+    for (let j = 0; j < topLevel.length; j++)
+        for (let k = 0; k < character[topLevel[j]].length; k++)
             if (character[topLevel[j]][k].tab === tab)
                 character[topLevel[j]][k].tab = newTab
-    var emotes = Object.keys(character.emotes)
-    for (var j = 0; j < emotes.length; j++) {
-        for (var k = 0; k < character.emotes[emotes[j]].eyes.length; k++)
+    let emotes = Object.keys(character.emotes)
+    for (let j = 0; j < emotes.length; j++) {
+        for (let k = 0; k < character.emotes[emotes[j]].eyes.length; k++)
             if (character.emotes[emotes[j]].eyes[k].tab === tab)
                 character.emotes[emotes[j]].eyes[k].tab = newTab
-        for (var k = 0; k < character.emotes[emotes[j]].mouth.length; k++)
+        for (let k = 0; k < character.emotes[emotes[j]].mouth.length; k++)
             if (character.emotes[emotes[j]].mouth[k].tab === tab)
                 character.emotes[emotes[j]].mouth[k].tab = newTab
     }
@@ -233,7 +233,7 @@ exports.deleteAssetList = function(tab) {
     document.getElementById('asset list').removeChild(document.getElementById('tab ' + tab))
     document.getElementById('asset tabs').removeChild(document.getElementById('tab option ' + tab))
     document.getElementById('asset-tab').removeChild(document.getElementById('asset-tab option ' + tab))
-    var assetKeys = Object.keys(project.assets)
+    let assetKeys = Object.keys(project.assets)
     if (assetKeys[0])
         document.getElementById('tab ' + assetKeys[0]).style.display = ''
     document.getElementById('assets').style.display = ''
@@ -244,19 +244,19 @@ exports.deleteAsset = function(tab, asset) {
     if (document.getElementById('delete-asset').tab === tab && document.getElementById('delete-asset').asset === asset) {
         selectAsset()
     }
-    var element = document.getElementById('tab ' + tab).getElementsByClassName(asset)[0]
+    let element = document.getElementById('tab ' + tab).getElementsByClassName(asset)[0]
     element.parentNode.removeChild(element)
-    var topLevel = ["body", "head", "hat", "props"]
-    for (var j = 0; j < topLevel.length; j++)
-        for (var k = 0; k < character[topLevel[j]].length; k++)
+    let topLevel = ["body", "head", "hat", "props"]
+    for (let j = 0; j < topLevel.length; j++)
+        for (let k = 0; k < character[topLevel[j]].length; k++)
             if (character[topLevel[j]][k].tab === tab && character[topLevel[j]][k].hash === asset)
                 character[topLevel[j]].splice(k, 1)
-    var emotes = Object.keys(character.emotes)
-    for (var j = 0; j < emotes.length; j++) {
-        for (var k = 0; k < character.emotes[emotes[j]].eyes.length; k++) 
+    let emotes = Object.keys(character.emotes)
+    for (let j = 0; j < emotes.length; j++) {
+        for (let k = 0; k < character.emotes[emotes[j]].eyes.length; k++) 
             if (character.emotes[emotes[j]].eyes[k].tab === tab && character.emotes[emotes[j]].eyes[k].hash === asset)
                 character.emotes[emotes[j]].eyes.splice(k, 1)
-        for (var k = 0; k < character.emotes[emotes[j]].mouth.length; k++)
+        for (let k = 0; k < character.emotes[emotes[j]].mouth.length; k++)
             if (character.emotes[emotes[j]].mouth[k].tab === tab && character.emotes[emotes[j]].mouth[k].hash === asset)
                 character.emotes[emotes[j]].mouth.splice(k, 1)
     }
@@ -271,7 +271,7 @@ exports.resetChanges = function() {
 // Returns true if its safe to change puppet
 exports.checkChanges = function() {
     if (JSON.stringify(character) !== oldcharacter) {
-        var response = remote.dialog.showMessageBox({
+        let response = remote.dialog.showMessageBox({
             "type": "question",
             "buttons": ["Don't Save", "Cancel", "Save"],
             "defaultId": 2,
@@ -308,17 +308,17 @@ exports.setPuppet = function(newCharacter, override) {
     stage.setPuppet(1, puppet)
 
     // Update Editor Panels
-    var panel = document.getElementById('editor-layers-panel')
-    var selected = panel.getElementsByClassName("selected")
-    while (selected.length)
-        selected[0].classList.remove("selected")
-    var available = panel.getElementsByClassName("available")
+    let panel = document.getElementById('editor-layers-panel')
+    let selectedElements = panel.getElementsByClassName("selected")
+    while (selectedElements.length)
+        selectedElements[0].classList.remove("selected")
+    let available = panel.getElementsByClassName("available")
     while (available.length)
         available[0].classList.remove("available")
     document.getElementById(layer).className += " selected"
-    var emotes = panel.getElementsByClassName("emote")
-    for (var i = 0; i < emotes.length; i++) {
-        var emote = character.emotes[emotes[i].id.replace(/-emote/, '')]
+    let emotes = panel.getElementsByClassName("emote")
+    for (let i = 0; i < emotes.length; i++) {
+        let emote = character.emotes[emotes[i].id.replace(/-emote/, '')]
         if (emote && emote.enabled)
             emotes[i].className += " available"
     }
@@ -328,14 +328,14 @@ exports.setPuppet = function(newCharacter, override) {
     while (available.length)
         available[0].classList.remove("available")
     emotes = document.getElementById('babble-mouths').getElementsByClassName("emote")
-    for (var i = 0; i < emotes.length; i++) {
-        var emote = emotes[i].id.replace(/-mouth/, '')
+    for (let i = 0; i < emotes.length; i++) {
+        let emote = emotes[i].id.replace(/-mouth/, '')
         if (character.mouths.indexOf(emote) > -1)
             emotes[i].className += " available"
     }
     emotes = document.getElementById('babble-eyes').getElementsByClassName("emote")
-    for (var i = 0; i < emotes.length; i++) {
-        var emote = emotes[i].id.replace(/-eyes/, '')
+    for (let i = 0; i < emotes.length; i++) {
+        let emote = emotes[i].id.replace(/-eyes/, '')
         if (character.eyes.indexOf(emote) > -1)
             emotes[i].className += " available"
     }
@@ -359,13 +359,13 @@ function setSelected(asset) {
     selected = asset
     if (selectedGui) stage.stage.removeChild(selectedGui)
     selectedGui = new Container()
-    var box = new Graphics()
+    let box = new Graphics()
     drawBox(box)
     selectedGui.addChild(box)
     selectedGui.box = box
-    var corners = []
-    for (var i = 0; i < 4; i++) {
-        var graphics = new Graphics()
+    let corners = []
+    for (let i = 0; i < 4; i++) {
+        let graphics = new Graphics()
         graphics.lineStyle(2, 0x5464d4)
         graphics.beginFill(0x242a33)
         graphics.drawCircle(0, 0, 6)
@@ -378,7 +378,7 @@ function setSelected(asset) {
         corners[i].on('mousedown', resizeMousedown)
     }
     selectedGui.corners = corners
-    var rotate = new Sprite.fromImage(path.join('assets', 'icons', 'rotate.png'))
+    let rotate = new Sprite.fromImage(path.join('assets', 'icons', 'rotate.png'))
     rotate.pivot.x = rotate.pivot.y = 0.5
     rotate.width = rotate.height = 24
     rotate.interactive = true
@@ -387,7 +387,7 @@ function setSelected(asset) {
     rotate.y = corners[1].y - 24
     selectedGui.addChild(rotate)
     selectedGui.rotate = rotate
-    var flipVert = new Sprite.fromImage(path.join('assets', 'icons', 'flipVert.png'))
+    let flipVert = new Sprite.fromImage(path.join('assets', 'icons', 'flipVert.png'))
     flipVert.pivot.x = flipVert.pivot.y = 0.5
     flipVert.width = flipVert.height = 24
     flipVert.interactive = true
@@ -396,7 +396,7 @@ function setSelected(asset) {
     flipVert.y = corners[1].y
     selectedGui.addChild(flipVert)
     selectedGui.flipVert = flipVert
-    var flipHoriz = new Sprite.fromImage(path.join('assets', 'icons', 'flipHoriz.png'))
+    let flipHoriz = new Sprite.fromImage(path.join('assets', 'icons', 'flipHoriz.png'))
     flipHoriz.pivot.x = flipHoriz.pivot.y = 0.5
     flipHoriz.width = flipHoriz.height = 24
     flipHoriz.interactive = true
@@ -414,15 +414,15 @@ function setSelected(asset) {
 }
 
 function editorMousedown(e) {
-    var closest = null
-    var distance = -1
-    for(var i = 0; i < clickableAssets.length; i++){
-        var bounds = clickableAssets[i].getBounds();
-        var centerX = bounds.x + bounds.width/2;
-        var centerY = bounds.y + bounds.height/2;
-        var dx = centerX - e.data.global.x;
-        var dy = centerY - e.data.global.y;
-        var dist = dx*dx + dy*dy; //Distance is not squared as it's not needed.
+    let closest = null
+    let distance = -1
+    for(let i = 0; i < clickableAssets.length; i++){
+        let bounds = clickableAssets[i].getBounds();
+        let centerX = bounds.x + bounds.width/2;
+        let centerY = bounds.y + bounds.height/2;
+        let dx = centerX - e.data.global.x;
+        let dy = centerY - e.data.global.y;
+        let dist = dx*dx + dy*dy; //Distance is not squared as it's not needed.
         if((dist < distance || distance == -1) && clickableAssets[i].visible && clickableAssets[i].containsPoint(e.data.global) && clickableAssets[i].layer === layer) {
             if (layer.indexOf('-emote') > -1) {
                 if(document.getElementById('eyemouth').checked && character.emotes[layer.replace(/-emote/, '')].mouth.indexOf(clickableAssets[i].asset) > -1)
@@ -449,15 +449,15 @@ function editorMousedown(e) {
 function editorMousemove(e) {
     if (selected && selected.dragging) {
         if (e.data.originalEvent.ctrlKey) {
-            var rotation = Math.atan2(e.data.global.y - selectedGui.startY, e.data.global.x - selectedGui.startX)
+            let rotation = Math.atan2(e.data.global.y - selectedGui.startY, e.data.global.x - selectedGui.startX)
             rotation = Math.round(rotation / ROUND_ROTATION) * ROUND_ROTATION
-            var dist = Math.hypot(Math.cos(rotation) * (e.data.global.x - selectedGui.startX), Math.sin(rotation) * (e.data.global.y - selectedGui.startY)) / scale
+            let dist = Math.hypot(Math.cos(rotation) * (e.data.global.x - selectedGui.startX), Math.sin(rotation) * (e.data.global.y - selectedGui.startY)) / scale
             selected.x = selected.asset.x + Math.cos(rotation) * dist
             selected.y = selected.asset.y + Math.sin(rotation) * dist
             selectedGui.x = selected.x * scale + selectedGui.pivot.x
             selectedGui.y = selected.y * scale + selectedGui.pivot.y
         } else {
-            var position = e.data.getLocalPosition(selected.parent)
+            let position = e.data.getLocalPosition(selected.parent)
             selected.x = position.x - selected.start.x
             selected.y = position.y - selected.start.y
             selectedGui.x = selected.x * scale + selectedGui.pivot.x
@@ -482,7 +482,7 @@ function resizeMousedown(e) {
     selectedGui.origWidth = selected.width
     selectedGui.origHeight = selected.height
     selectedGui.i = e.currentTarget.i
-    var i = 1 - (selectedGui.i % 2) + 2 - 2 * Math.floor(selectedGui.i / 2)
+    let i = 1 - (selectedGui.i % 2) + 2 - 2 * Math.floor(selectedGui.i / 2)
     selectedGui.corner = {
         "x": selectedGui.corners[i].worldTransform.tx / scale - stage.screen.clientWidth / 2 / scale - (i % 2 == 1 ? 1 : -1) * Math.cos(selected.rotation - Math.PI / 4) * 17 - Math.sin(selected.rotation - Math.PI / 4) * 11,
         "y": selectedGui.corners[i].worldTransform.ty / scale - stage.screen.clientHeight / scale + (Math.floor(i / 2) == 1 ? 1 : -1) * Math.sin(selected.rotation - Math.PI / 4) * 17 + Math.cos(selected.rotation - Math.PI / 4) * 11
@@ -499,9 +499,9 @@ function resizeMousedown(e) {
 }
 
 function resizeMousemove(e) {
-    var dx, dy
-    var rotation = Math.atan2(e.data.global.y - selectedGui.startY, e.data.global.x - selectedGui.startX)
-    var dist = Math.hypot(e.data.global.x - selectedGui.startX, e.data.global.y - selectedGui.startY) / scale
+    let dx, dy
+    let rotation = Math.atan2(e.data.global.y - selectedGui.startY, e.data.global.x - selectedGui.startX)
+    let dist = Math.hypot(e.data.global.x - selectedGui.startX, e.data.global.y - selectedGui.startY) / scale
     if (e.data.originalEvent.ctrlKey && selectedGui.origHeight !== 0) {
         dy = (Math.floor(selectedGui.i / 2) == 1 ? 1 : -1) * Math.sin(rotation - selected.rotation) * dist
         dx = (Math.max(0, selectedGui.origHeight + dy) - selectedGui.origHeight) * selectedGui.origWidth / selectedGui.origHeight
@@ -526,7 +526,7 @@ function resizeMousemove(e) {
 
     selectedGui.box.clear()
     drawBox(selectedGui.box)
-    for (var i = 0; i < selectedGui.corners.length; i++) {
+    for (let i = 0; i < selectedGui.corners.length; i++) {
         selectedGui.corners[i].x = stage.screen.clientWidth / 2 / scale - selected.width / 2 - 20 + (24 + selected.width) * (i % 2)
         selectedGui.corners[i].y = stage.screen.clientHeight / scale - selected.height / 2 - 20 + (24 + selected.height) * Math.floor(i / 2)
     }
@@ -561,7 +561,7 @@ function rotateMousedown(e) {
 }
 
 function rotateMousemove(e) {
-    var rotation = selectedGui.startRotation - Math.atan2((stage.screen.clientHeight - e.data.global.y) / scale + selected.asset.y, (e.data.global.x - stage.screen.clientWidth / 2) / scale - selected.asset.x)
+    let rotation = selectedGui.startRotation - Math.atan2((stage.screen.clientHeight - e.data.global.y) / scale + selected.asset.y, (e.data.global.x - stage.screen.clientWidth / 2) / scale - selected.asset.x)
     if (e.data.originalEvent.ctrlKey)
         rotation = Math.round(rotation / ROUND_ROTATION) * ROUND_ROTATION
     selected.rotation = rotation
@@ -590,11 +590,11 @@ function flipHorizontally(e) {
 function mouseUp(e) {
     if (asset) {
         if (asset.dragging || asset.clicked) {
-            var rect = document.getElementById('editor-screen').getBoundingClientRect()
+            let rect = document.getElementById('editor-screen').getBoundingClientRect()
             if (rect.left < e.clientX && rect.right > e.clientX && rect.top < e.clientY && rect.bottom > e.clientY) {
                 selected = null
                 if (selectedGui) stage.stage.removeChild(selectedGui)
-                var newAsset = {
+                let newAsset = {
                     "tab": asset.tab,
                     "hash": asset.asset,
                     "x": (e.clientX - rect.left - rect.width / 2) / scale,
@@ -710,15 +710,15 @@ function openPuppet(e) {
 }
 
 function updateCharSearch(e) {
-    var list = document.getElementById('char open list')
+    let list = document.getElementById('char open list')
     if (e.target.value === '') {
-        for (var i = 0; i < list.children.length; i++)
+        for (let i = 0; i < list.children.length; i++)
             list.children[i].style.display = 'inline-block'
     } else {
-        for (var i = 0; i < list.children.length; i++)
+        for (let i = 0; i < list.children.length; i++)
             list.children[i].style.display = 'none'
-        var chars = list.querySelectorAll("[id*='" + e.target.value.toLowerCase() + "']")
-        for (var i = 0; i < chars.length; i++) {
+        let chars = list.querySelectorAll("[id*='" + e.target.value.toLowerCase() + "']")
+        for (let i = 0; i < chars.length; i++) {
             chars[i].style.display = 'inline-block'
         }
     }
@@ -728,15 +728,15 @@ function openPuppetPanel() {
     document.getElementById('editor-layers-panel').style.display = 'none'
     document.getElementById('editor-babble-panel').style.display = 'none'
     document.getElementById('editor-settings-panel').style.display = 'none'
-    var panel = document.getElementById('editor-open-panel')
+    let panel = document.getElementById('editor-open-panel')
     if (panel.style.display === 'none') {
         document.getElementById('editor-screen').style.display = 'none'
         panel.style.display = ''
-        var charList = document.getElementById('char open list')
+        let charList = document.getElementById('char open list')
         charList.innerHTML = ''
-        var characters = Object.keys(project.characters)
-        for (var j = 0; j < characters.length; j++) {
-            var selector = document.createElement('div')
+        let characters = Object.keys(project.characters)
+        for (let j = 0; j < characters.length; j++) {
+            let selector = document.createElement('div')
             selector.id = project.characters[characters[j]].name.toLowerCase()
             selector.className = "char"
             if (fs.existsSync(path.join(project.assetsPath, '..', 'thumbnails', 'new-' + characters[j] + '.png')))
@@ -758,7 +758,7 @@ function toggleLayers() {
     document.getElementById('editor-open-panel').style.display = 'none'
     document.getElementById('editor-babble-panel').style.display = 'none'
     document.getElementById('editor-settings-panel').style.display = 'none'
-    var panel = document.getElementById('editor-layers-panel')
+    let panel = document.getElementById('editor-layers-panel')
     if (panel.style.display === 'none') {
         document.getElementById('editor-screen').style.display = 'none'
         panel.style.display = ''
@@ -772,7 +772,7 @@ function toggleBabble() {
     document.getElementById('editor-open-panel').style.display = 'none'
     document.getElementById('editor-layers-panel').style.display = 'none'
     document.getElementById('editor-settings-panel').style.display = 'none'
-    var panel = document.getElementById('editor-babble-panel')
+    let panel = document.getElementById('editor-babble-panel')
     if (panel.style.display === 'none') {
         document.getElementById('editor-screen').style.display = 'none'
         panel.style.display = ''
@@ -786,7 +786,7 @@ function toggleSettings() {
     document.getElementById('editor-open-panel').style.display = 'none'
     document.getElementById('editor-layers-panel').style.display = 'none'
     document.getElementById('editor-babble-panel').style.display = 'none'
-    var panel = document.getElementById('editor-settings-panel')
+    let panel = document.getElementById('editor-settings-panel')
     if (panel.style.display === 'none') {
         document.getElementById('editor-screen').style.display = 'none'
         panel.style.display = ''
@@ -801,7 +801,7 @@ function setLayer(e) {
     document.getElementById('editor-layers-panel').style.display = 'none'
     layer = e.target.id
     if (layer.indexOf('-emote') > -1) {
-    var emote = layer.replace(/-emote/, '')
+    let emote = layer.replace(/-emote/, '')
         if (!(character.emotes[emote] && character.emotes[emote].enabled && emote !== 'default') && !character.emotes[emote]) {
             character.emotes[emote] = {
                 "enabled": false,
@@ -817,7 +817,7 @@ function setLayer(e) {
         }
         puppet.changeEmote(emote)
     }
-    var selected = document.getElementById('editor-layers-panel').getElementsByClassName("selected")
+    let selected = document.getElementById('editor-layers-panel').getElementsByClassName("selected")
     while (selected.length)
         selected[0].classList.remove("selected")
     document.getElementById(layer).className += " selected"
@@ -826,7 +826,7 @@ function setLayer(e) {
 }
 
 function layerContextMenu(e) {
-    var emote = e.target.id.replace(/-emote/, '')
+    let emote = e.target.id.replace(/-emote/, '')
     if (character.emotes[emote] && character.emotes[emote].enabled && emote !== 'default') {
         character.emotes[emote].enabled = false
         e.target.classList.remove('available')
@@ -851,7 +851,7 @@ function layerContextMenu(e) {
 }
 
 function mouthLayerClick(e) {
-    var emote = e.target.id.replace(/-mouth/, '')
+    let emote = e.target.id.replace(/-mouth/, '')
     if (character.mouths.indexOf(emote) > -1) {
         character.mouths.splice(character.mouths.indexOf(emote), 1)
         e.target.classList.remove('available')
@@ -862,7 +862,7 @@ function mouthLayerClick(e) {
 }
 
 function eyesLayerClick(e) {
-    var emote = e.target.id.replace(/-eyes/, '')
+    let emote = e.target.id.replace(/-eyes/, '')
     if (character.eyes.indexOf(emote) > -1) {
         character.eyes.splice(character.eyes.indexOf(emote), 1)
         e.target.classList.remove('available')
@@ -904,18 +904,18 @@ function addAsset() {
         ] 
     }, (filepaths) => {
         if (!filepaths) return
-        for (var i = 0; i < filepaths.length; i++) {
-            var file = fs.readFileSync(filepaths[i])
-            var name = filepaths[i].replace(/^.*[\\\/]/, '').replace(/.png/, '')
-            var fileString = file.toString('base64')
-            var hash = 0, char, j, l
+        for (let i = 0; i < filepaths.length; i++) {
+            let file = fs.readFileSync(filepaths[i])
+            let name = filepaths[i].replace(/^.*[\\\/]/, '').replace(/.png/, '')
+            let fileString = file.toString('base64')
+            let hash = 0, char, j, l
             for (j = 0, l = fileString.length; j < l; j++) {
                 char  = fileString.charCodeAt(j)
                 hash  = ((hash<<5)-hash)+char
                 hash |= 0
             }
             hash = "" + hash
-            var tab = document.getElementById('asset tabs').value
+            let tab = document.getElementById('asset tabs').value
             fs.ensureDirSync(path.join(project.assetsPath, tab))
             fs.writeFileSync(path.join(project.assetsPath, tab, hash + '.png'), file)
             controller.addAsset({"tab": tab, "hash": hash, "name": name})
@@ -947,7 +947,7 @@ function deleteAssetList(e) {
 
 function newAssetList() {
     // Calculate name for new asset list
-    var name = "New Asset List", i = 0
+    let name = "New Asset List", i = 0
     while (project.assets[name])
         name = "New Asset List (" + (++i) + ")"
     // Create list
@@ -956,8 +956,8 @@ function newAssetList() {
     addAssetListToDom(name)
     // Select new list
     document.getElementById('asset tabs').value = name
-    var assetKeys = Object.keys(project.assets)
-    for (var i = 0; i < assetKeys.length; i++)
+    let assetKeys = Object.keys(project.assets)
+    for (let i = 0; i < assetKeys.length; i++)
         document.getElementById('tab ' + assetKeys[i]).style.display = 'none'
     document.getElementById('tab ' + name).style.display = ''
 }
@@ -977,10 +977,10 @@ function importAssetList() {
             fs.readJson(filepaths[0], (err, list) => {
                 if (err) console.log(err)
                 else {
-                    var listKeys = Object.keys(list)
-                    var tab = filepaths[0].replace(/^.*[\\\/]/, '').replace(/\.[^.]+$/, '')
+                    let listKeys = Object.keys(list)
+                    let tab = filepaths[0].replace(/^.*[\\\/]/, '').replace(/\.[^.]+$/, '')
                     if (!project.assets[tab]) addAssetListToDom(tab)
-                    for (var i = 0; i < listKeys.length; i++) {
+                    for (let i = 0; i < listKeys.length; i++) {
                         status.log('Importing ' + (listKeys.length - i) + ' assets...')
                         if (project.assets[tab] && project.assets[tab][listKeys[i]]) continue
                         fs.copySync(path.join(filepaths[0], '..', list[listKeys[i]].location), path.join(project.assetsPath, tab, listKeys[i] + '.png'))
@@ -993,13 +993,13 @@ function importAssetList() {
 }
 
 function addAssetListToDom(name) {
-    var tabElement = document.createElement('div')
+    let tabElement = document.createElement('div')
     tabElement.style.height = '100%'
     tabElement.id = 'tab ' + name
     tabElement.style.display = 'none'
     tabElement.className = 'scroll'
     document.getElementById('asset list').appendChild(tabElement)
-    var tabOption = document.createElement('option')
+    let tabOption = document.createElement('option')
     tabOption.text = name
     tabOption.id = "asset-tab option " + name
     document.getElementById('asset-tab').add(tabOption)
@@ -1022,7 +1022,7 @@ function migrateAsset(e) {
 function renameAsset(e) {
     project.renameAsset(e.target.tab, e.target.asset, e.target.value)
     document.getElementById('asset selected').getElementsByClassName('desc')[0].innerHTML = e.target.value
-    var list = document.getElementById('tab ' + e.target.tab)
+    let list = document.getElementById('tab ' + e.target.tab)
     list.getElementsByClassName(e.target.asset)[0].getElementsByClassName('desc')[0].innerHTML = e.target.value
     list.getElementsByClassName(e.target.asset)[0].id = e.target.value.toLowerCase()
 }
@@ -1032,24 +1032,24 @@ function deleteAsset(e) {
 }
 
 function assetTabs(e) {
-    var assetKeys = Object.keys(project.assets)
-    for (var i = 0; i < assetKeys.length; i++)
+    let assetKeys = Object.keys(project.assets)
+    for (let i = 0; i < assetKeys.length; i++)
         document.getElementById('tab ' + assetKeys[i]).style.display = 'none'
     document.getElementById('tab ' + e.target.value).style.display = ''
 }
 
 function updateAssetSearch(e) {
-    var assetKeys = Object.keys(project.assets)
-    for (var i = 0; i < assetKeys.length; i++) {
-        var list = document.getElementById('tab ' + assetKeys[i])
+    let assetKeys = Object.keys(project.assets)
+    for (let i = 0; i < assetKeys.length; i++) {
+        let list = document.getElementById('tab ' + assetKeys[i])
         if (e.target.value === '') {
-            for (var j = 0; j < list.children.length; j++)
+            for (let j = 0; j < list.children.length; j++)
                 list.children[j].style.display = ''
         } else {
-            for (var j = 0; j < list.children.length; j++)
+            for (let j = 0; j < list.children.length; j++)
                 list.children[j].style.display = 'none'
-            var assetsElements = list.querySelectorAll("[id*='" + e.target.value.toLowerCase() + "']")
-            for (var j = 0; j < assetsElements.length; j++) {
+            let assetsElements = list.querySelectorAll("[id*='" + e.target.value.toLowerCase() + "']")
+            for (let j = 0; j < assetsElements.length; j++) {
                 assetsElements[j].style.display = ''
             }
         }
@@ -1081,13 +1081,13 @@ function copy() {
 }
 
 function paste() {
-    var newAsset
+    let newAsset
     try {
         newAsset = JSON.parse(electron.clipboard.readText())
     } catch (e) {
         return
     }
-    var asset = stage.getAsset(newAsset, layer)
+    let asset = stage.getAsset(newAsset, layer)
     if (layer.indexOf('-emote') > -1) {
         if (document.getElementById('eyemouth').checked) {
             puppet.emotes[layer.replace(/-emote/, '')].eyes.addChild(asset)

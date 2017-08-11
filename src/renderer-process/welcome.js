@@ -25,11 +25,11 @@ document.getElementById('create').addEventListener('submit', function(e) {
 	e.preventDefault()
 
 	// Find paths
-	var project = document.getElementById('sample').checked ? 'sample-project' : 'empty-project'
-	var src = path.join(path.dirname(require.main.filename), project)
-	var location = document.getElementById('location').value
-	var name = document.getElementById('name').value
-	var dest = path.join(location, name)
+	let project = document.getElementById('sample').checked ? 'sample-project' : 'empty-project'
+	let src = path.join(path.dirname(require.main.filename), project)
+	let location = document.getElementById('location').value
+	let name = document.getElementById('name').value
+	let dest = path.join(location, name)
 
 	// Check folder is empty, otherwise stop and alert user
 	fs.ensureDirSync(dest, err => {
@@ -48,11 +48,11 @@ document.getElementById('create').addEventListener('submit', function(e) {
 	remote.require('./main').setFilepath(path.join(dest, name + '.babble'))
 	remote.require('./main').redirect('application.html')
 })
-var recentProjectsElement = document.getElementById('recent-projects')
-var recentProjects = settings.settings.recentProjects
-for (var i = 0; i < recentProjects.length; i++) {
-	var filename = util.slugify(recentProjects[i])
-	var selector = document.createElement('div')
+let recentProjectsElement = document.getElementById('recent-projects')
+let recentProjects = settings.settings.recentProjects
+for (let i = 0; i < recentProjects.length; i++) {
+	let filename = util.slugify(recentProjects[i])
+	let selector = document.createElement('div')
     selector.id = recentProjects[i]
     selector.className = "recent-project"
     selector.style.backgroundImage = 'url(' +  path.join(app.getPath('userData'), filename + '.png').replace(/\\/g, '/') + ')'

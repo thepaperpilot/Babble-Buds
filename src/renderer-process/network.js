@@ -9,11 +9,11 @@ const fs = require('fs-extra')
 const path = require('path')
 
 // Vars
-var project
-var server
-var puppets = []
-var numPuppets = 1
-var puppetsToAdd = []
+let project
+let server
+let puppets = []
+let numPuppets = 1
+let puppetsToAdd = []
 
 exports.init = function() {
 	project = require('electron').remote.getGlobal('project').project
@@ -33,7 +33,7 @@ exports.host = function() {
 	puppets = []
 
 	// Create server & socket
-	var serv = http.createServer(function(req, res) {
+	let serv = http.createServer(function(req, res) {
 		// Send HTML headers and message
 		res.writeHead(404, {'Content-Type': 'text/html'})
 		res.end('<h1>404</h1>')
@@ -45,11 +45,11 @@ exports.host = function() {
 	// Add a connect listener
 	server.sockets.on('connection', function(socket) {
 		// Send list of assets
-		var tabs = Object.keys(project.assets)
-		for (var i = 0; i < tabs.length; i++) {
-			var assetKeys = Object.keys(project.assets[tabs[i]])
-			for (var j = 0; j < assetKeys.length; j++) {
-				var asset = project.assets[tabs[i]][assetKeys[j]]
+		let tabs = Object.keys(project.assets)
+		for (let i = 0; i < tabs.length; i++) {
+			let assetKeys = Object.keys(project.assets[tabs[i]])
+			for (let j = 0; j < assetKeys.length; j++) {
+				let asset = project.assets[tabs[i]][assetKeys[j]]
 				socket.emit('add asset', {"tab": tabs[i], "hash": assetKeys[j], "name": asset.name})
 			}
 		}
@@ -57,10 +57,10 @@ exports.host = function() {
 		// Add Application Listeners
 		socket.on('add puppet', (puppet) => {
 			socket.emit('set slots', project.project.numCharacters)
-			var ourPuppet = project.getPuppet()
+			let ourPuppet = project.getPuppet()
 			ourPuppet.charId = 1
 			socket.emit('add puppet', ourPuppet)
-			for (var i = 0; i < puppets.length; i++) {
+			for (let i = 0; i < puppets.length; i++) {
 				socket.emit('add puppet', puppets[i])
 			}
 			puppetsToAdd.push(puppet)
@@ -69,7 +69,7 @@ exports.host = function() {
 		socket.on('set puppet', (id, puppet) => {
 			controller.setPuppet(id, puppet)
 			socket.broadcast.emit('set puppet', id, puppet)
-			for (var i = 0; i < puppets.length; i++) {
+			for (let i = 0; i < puppets.length; i++) {
 				if (puppets[i].charId == id) {
 					puppet.socket = puppets[i].socket
 					puppet.charId = puppets[i].charId
@@ -81,7 +81,7 @@ exports.host = function() {
 		socket.on('set emote', (id, emote) => {
 			controller.setEmote(id, emote)
 			socket.broadcast.emit('set emote', id, emote)
-			for (var i = 0; i < puppets.length; i++) {
+			for (let i = 0; i < puppets.length; i++) {
 				if (puppets[i].charId == id) {
 					puppets[i].emote = emote
 					break
@@ -89,9 +89,9 @@ exports.host = function() {
 			}
 		})
 		socket.on('move left', (id) => {
-			var puppet = controller.moveLeft(id)
+			let puppet = controller.moveLeft(id)
 			socket.broadcast.emit('move left', id)
-			for (var i = 0; i < puppets.length; i++) {
+			for (let i = 0; i < puppets.length; i++) {
 				if (puppets[i].charId == id) {
 					puppets[i].position = puppet.target
 					puppets[i].facingLeft = puppet.facingLeft
@@ -101,8 +101,8 @@ exports.host = function() {
 		})
 		socket.on('move right', (id) => {
 			controller.moveRight(id)
-			var puppet = socket.broadcast.emit('move right', id)
-			for (var i = 0; i < puppets.length; i++) {
+			let puppet = socket.broadcast.emit('move right', id)
+			for (let i = 0; i < puppets.length; i++) {
 				if (puppets[i].charId == id) {
 					puppets[i].position = puppet.target
 					puppets[i].facingLeft = puppet.facingLeft
@@ -138,7 +138,7 @@ exports.host = function() {
 		})
 
 		socket.on('disconnect', () => {
-			for (var i = 0; i < puppets.length; i++) {
+			for (let i = 0; i < puppets.length; i++) {
 				if (puppets[i].socket === socket.id) {
 					server.emit('remove puppet', puppets[i].charId)
 					controller.removePuppet(puppets[i].charId)
@@ -151,7 +151,7 @@ exports.host = function() {
 		socket.on('add asset', (asset) => {
 			if (!(project.assets[asset.tab] && project.assets[asset.tab][asset.hash])) {
 				status.increment('Retrieving %x Asset%s')
-				var stream = ss.createStream()
+				let stream = ss.createStream()
 				fs.ensureDirSync(path.join(project.assetsPath, asset.tab))
 				ss(socket).emit('request asset', stream, asset)
 				stream.on('end', () => {
@@ -188,18 +188,18 @@ exports.connect = function() {
 	document.getElementById('connect').innerHTML = 'Disconnect from Server'
 
 	// Connect to server
-	var socket = ioClient.connect('http://' + project.project.ip + ':' + project.project.port, {reconnect: true, transports: ['websocket', 'xhr-polling']})
+	let socket = ioClient.connect('http://' + project.project.ip + ':' + project.project.port, {reconnect: true, transports: ['websocket', 'xhr-polling']})
 	server = socket
 
 	// Add a connect listener
 	socket.on('connect', function() {
 		puppets = []
 		// Send list of assets
-		var tabs = Object.keys(project.assets)
-		for (var i = 0; i < tabs.length; i++) {
-			var assetKeys = Object.keys(project.assets[tabs[i]])
-			for (var j = 0; j < assetKeys.length; j++) {
-				var asset = project.assets[tabs[i]][assetKeys[j]]
+		let tabs = Object.keys(project.assets)
+		for (let i = 0; i < tabs.length; i++) {
+			let assetKeys = Object.keys(project.assets[tabs[i]])
+			for (let j = 0; j < assetKeys.length; j++) {
+				let asset = project.assets[tabs[i]][assetKeys[j]]
 				socket.emit('add asset', {"tab": tabs[i], "hash": assetKeys[j], "name": asset.name})
 			}
 		}
@@ -249,7 +249,7 @@ exports.connect = function() {
 	})
 	socket.on('set puppet', (id, puppet) => {
 		controller.setPuppet(id, puppet)
-		for (var i = 0; i < puppets.length; i++) {
+		for (let i = 0; i < puppets.length; i++) {
 			if (puppets[i].charId == id) {
 				puppet.socket = puppets[i].socket
 				puppet.id = puppets[i].id
@@ -260,7 +260,7 @@ exports.connect = function() {
 	})
 	socket.on('set emote', (id, emote) => {
 		controller.setEmote(id, emote)
-		for (var i = 0; i < puppets.length; i++) {
+		for (let i = 0; i < puppets.length; i++) {
 			if (puppets[i].charId == id) {
 				puppets[i].emote = emote
 				break
@@ -268,8 +268,8 @@ exports.connect = function() {
 		}
 	})
 	socket.on('move left', (id) => {
-		var puppet = controller.moveLeft(id)
-		for (var i = 0; i < puppets.length; i++) {
+		let puppet = controller.moveLeft(id)
+		for (let i = 0; i < puppets.length; i++) {
 			if (puppets[i].charId == id) {
 				puppets[i].position = puppet.target
 				puppets[i].facingLeft = puppet.facingLeft
@@ -278,8 +278,8 @@ exports.connect = function() {
 		}
 	})
 	socket.on('move right', (id) => {
-		var puppet = controller.moveRight(id)
-		for (var i = 0; i < puppets.length; i++) {
+		let puppet = controller.moveRight(id)
+		for (let i = 0; i < puppets.length; i++) {
 			if (puppets[i].charId == id) {
 				puppets[i].position = puppet.target
 				puppets[i].facingLeft = puppet.facingLeft
@@ -292,7 +292,7 @@ exports.connect = function() {
 	socket.on('jiggle', controller.jiggle)
 	socket.on('remove puppet', (id) => {
 		controller.removePuppet(id)
-		for (var i = 0; i < puppets.length; i++) {
+		for (let i = 0; i < puppets.length; i++) {
 			if (puppets[i].charId == id) {
 				puppets.splice(i, 1)
 				break
@@ -309,7 +309,7 @@ exports.connect = function() {
 	socket.on('add asset', (asset) => {
 		if (!(project.assets[asset.tab] && project.assets[asset.tab][asset.hash])) {
 			status.increment('Retrieving %x Asset%s')
-			var stream = ss.createStream()
+			let stream = ss.createStream()
 			fs.ensureDirSync(path.join(project.assetsPath, asset.tab))
 			ss(socket).emit('request asset', stream, asset)
 			stream.on('end', () => {

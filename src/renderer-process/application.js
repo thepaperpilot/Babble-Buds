@@ -9,10 +9,10 @@ const network = require('./network.js')
 const path = require('path')
 const fs = require('fs-extra')
 
-var project
+let project
 
 // Constants
-var emotes = ['default', 'happy', 'wink', 'kiss', 'angry', 'sad', 'ponder', 'gasp', 'veryangry', 'verysad', 'confused', 'ooo']
+let emotes = ['default', 'happy', 'wink', 'kiss', 'angry', 'sad', 'ponder', 'gasp', 'veryangry', 'verysad', 'confused', 'ooo']
 
 exports.init = function() {
 	project = electron.remote.getGlobal('project').project
@@ -23,8 +23,8 @@ exports.init = function() {
 	window.onbeforeunload = beforeUnload
 
 	// DOM listeners
-	for (var i = 0; i < 9; i++) {
-		var element = document.getElementById('char ' + i)
+	for (let i = 0; i < 9; i++) {
+		let element = document.getElementById('char ' + i)
 		element.i = i
 		element.addEventListener('click', charClick)
 		element.addEventListener('contextmenu', charContextMenu)
@@ -39,8 +39,8 @@ exports.init = function() {
 	document.getElementById('char search').addEventListener('search', updateCharSearch)
 	document.getElementById('char selected').addEventListener('click', charSelectedClick)
 	document.getElementById('greenscreen').addEventListener('click', toggleGreenScreen)
-	for (var i = 0; i < emotes.length; i++) {
-		var element = document.getElementById(emotes[i])
+	for (let i = 0; i < emotes.length; i++) {
+		let element = document.getElementById(emotes[i])
 		element.emote = emotes[i]
 		element.addEventListener('click', emoteClick)
 	}
@@ -88,16 +88,16 @@ exports.init = function() {
 // Specifically, tint the character in the hotbar,
 //  and tint available emotes for this puppet
 exports.setPuppet = function(i, emotes) {
-	var available = document.getElementById('emotes').getElementsByClassName("available")
+	let available = document.getElementById('emotes').getElementsByClassName("available")
 	while (available.length)
 		available[0].classList.remove("available")
 
-	var selected = document.getElementsByClassName("char selected")
+	let selected = document.getElementsByClassName("char selected")
 	while (selected.length)
 		selected[0].classList.remove("selected")
 
-	var emoteKeys = Object.keys(emotes)
-	for (var j = 0; j < emoteKeys.length; j++)
+	let emoteKeys = Object.keys(emotes)
+	for (let j = 0; j < emoteKeys.length; j++)
 		document.getElementById(emoteKeys[j]).className += " available"
 
 	document.getElementById('char ' + i).className += " selected"
@@ -105,7 +105,7 @@ exports.setPuppet = function(i, emotes) {
 
 // Change which emote is highlighted in the UI
 exports.setEmote = function(emote) {
-	var selected = document.getElementsByClassName("emote selected")
+	let selected = document.getElementsByClassName("emote selected")
 	while (selected.length)
 		selected[0].classList.remove("selected")
 
@@ -119,7 +119,7 @@ exports.setBabble = function(babbling) {
 
 // Update the hotbar button for a character
 exports.updateCharacter = function(character, updateThumbnail) {
-	var index = project.project.hotbar.indexOf(character.id)
+	let index = project.project.hotbar.indexOf(character.id)
 	if (index > -1) {
 		controller.updateCharacter(index, character)
 		if (('' + document.getElementById('char ' + index).className).indexOf('selected') > -1) {
@@ -158,7 +158,7 @@ exports.closePopout = function() {
 }
 
 function keyDown(e) {
-	var key = e.keyCode ? e.keyCode : e.which
+	let key = e.keyCode ? e.keyCode : e.which
 
 	if (e.target && (e.target.type === 'number' || e.target.type === 'text' || e.target.type === 'search'))
 		return
@@ -170,7 +170,7 @@ function keyDown(e) {
 }
 
 function keyUp(e) {
-	var key = e.keyCode ? e.keyCode : e.which
+	let key = e.keyCode ? e.keyCode : e.which
 
 	if (e.target && (e.target.type === 'number' || e.target.type === 'text' || e.target.type === 'search'))
 		return
@@ -207,7 +207,7 @@ function charClick(e) {
 }
 
 function charContextMenu(e) {
-	var i = e.target.i
+	let i = e.target.i
 	document.getElementById('chars').style.display = 'none'
 	document.getElementById('charselect').style.display = 'block'
 	if (project.project.hotbar[i]) {
@@ -221,11 +221,11 @@ function charContextMenu(e) {
 		document.getElementById('char selected').style.backgroundImage = ''
 	}
 	document.getElementById('char null').i = i
-	var charList = document.getElementById('char list')
+	let charList = document.getElementById('char list')
 	charList.innerHTML = ''
-	var characters = Object.keys(project.characters)
-	for (var j = 0; j < characters.length; j++) {
-		var selector = document.createElement('div')
+	let characters = Object.keys(project.characters)
+	for (let j = 0; j < characters.length; j++) {
+		let selector = document.createElement('div')
 		selector.id = project.characters[characters[j]].name.toLowerCase()
 		selector.className = "char"
 		if (fs.existsSync(path.join(project.assetsPath, '..', 'thumbnails', characters[j] + '.png')))
@@ -245,8 +245,8 @@ function charContextMenu(e) {
 }
 
 function updateHotbar(e) {
-	var i = e.target.i
-	var puppet = e.target.puppet
+	let i = e.target.i
+	let puppet = e.target.puppet
 	document.getElementById('chars').style.display = 'block'
 	document.getElementById('charselect').style.display = 'none'
 	if (('' + document.getElementById('char ' + i).className).indexOf('selected') > -1 && puppet === '') {
@@ -269,15 +269,15 @@ function updateHotbar(e) {
 }
 
 function updateCharSearch(e) {
-	var list = document.getElementById('char list')
+	let list = document.getElementById('char list')
 	if (e.target.value === '') {
-		for (var i = 0; i < list.children.length; i++)
+		for (let i = 0; i < list.children.length; i++)
 			list.children[i].style.display = 'inline-block'
 	} else {
-		for (var i = 0; i < list.children.length; i++)
+		for (let i = 0; i < list.children.length; i++)
 			list.children[i].style.display = 'none'
-		var chars = list.querySelectorAll("[id*='" + e.target.value.toLowerCase() + "']")
-		for (var i = 0; i < chars.length; i++) {
+		let chars = list.querySelectorAll("[id*='" + e.target.value.toLowerCase() + "']")
+		for (let i = 0; i < chars.length; i++) {
 			chars[i].style.display = 'inline-block'
 		}
 	}
@@ -289,7 +289,7 @@ function charSelectedClick() {
 }
 
 function toggleGreenScreen() {
-	var style = document.getElementById('screen').style
+	let style = document.getElementById('screen').style
 	if (style.backgroundColor === '')
 		style.backgroundColor = project.project.greenScreen
 	else 
