@@ -1,6 +1,6 @@
 {
   "numCharacters": 5,
-  "minSlotWidth": 250,
+  "puppetScale": 1,
   "greenScreen": "#00FF00",
   "transparent": false,
   "ip": "localhost",

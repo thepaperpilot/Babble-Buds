@@ -89,9 +89,9 @@ Stage.prototype.reattach = function(element) {
 Stage.prototype.resize = function() {
     this.renderer.resize(this.screen.clientWidth, this.screen.clientHeight)
     this.slotWidth = this.screen.clientWidth / this.project.numCharacters
-    if (this.slotWidth < this.project.minSlotWidth) {
-        this.puppetStage.scale.x = this.puppetStage.scale.y = this.slotWidth / this.project.minSlotWidth
-        this.slotWidth = this.project.minSlotWidth
+    if (this.slotWidth < 400) {
+        this.puppetStage.scale.x = this.puppetStage.scale.y = this.slotWidth / 400
+        this.slotWidth = 400
     } else this.puppetStage.scale.x = this.puppetStage.scale.y = 1
     for (let i = 0; i < this.puppets.length; i++) {
         let puppet = this.puppets[i]
@@ -99,6 +99,7 @@ Stage.prototype.resize = function() {
             puppet.position = puppet.target = this.project.numCharacters + 1
             puppet.movingAnim = 0
         }
+        puppet.container.scale.x = puppet.container.scale.y = (this.project.puppetScale || 1)
         puppet.container.y = this.screen.clientHeight / this.puppetStage.scale.y
         puppet.container.x = (puppet.position - 0.5) * this.slotWidth
     }

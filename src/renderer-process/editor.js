@@ -33,7 +33,7 @@ let selectedGui // gui that appears around selected
 exports.init = function() {
     project = remote.getGlobal('project').project
     // Create some basic objects
-    stage = new Stage('editor-screen', {'numCharacters': 1, 'minSlotWidth': 0, 'assets': project.project.assets}, project.assets, project.assetsPath)
+    stage = new Stage('editor-screen', {'numCharacters': 1, 'puppetScale': 1, 'assets': project.project.assets}, project.assets, project.assetsPath)
     stage.stage.interactive = true
     stage.stage.on('mousedown', editorMousedown)
     stage.stage.on('mousemove', editorMousemove)

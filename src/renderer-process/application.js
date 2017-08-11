@@ -51,7 +51,7 @@ exports.init = function() {
 	document.getElementById('settings').addEventListener('click', toggleSettings)
 	document.getElementById('colorpicker').addEventListener('change', colorpickerChange)
 	document.getElementById('transparent').addEventListener('click', toggleTransparent)
-	document.getElementById('minslotwidth').addEventListener('change', minslotwidthChange)
+	document.getElementById('puppetscale').addEventListener('change', puppetscaleChange)
 	document.getElementById('numslots').addEventListener('change', numslotsChange)
 	document.getElementById('ip').addEventListener('change', ipChange)
 	document.getElementById('port').addEventListener('change', portChange)
@@ -79,7 +79,7 @@ exports.init = function() {
 	// Load settings values
 	document.getElementById('colorpicker').value = project.project.greenScreen
 	document.getElementById('transparent').checked = project.project.transparent
-	document.getElementById('minslotwidth').value = project.project.minSlotWidth
+	document.getElementById('puppetscale').value = project.project.puppetScale
 	document.getElementById('numslots').value = project.project.numCharacters
 	document.getElementById('ip').value = project.project.ip
 	document.getElementById('port').value = project.project.port
@@ -327,8 +327,8 @@ function toggleTransparent(e) {
 	project.project.transparent = e.target.checked
 }
 
-function minslotwidthChange(e) {
-	project.project.minSlotwidth = parseInt(e.target.value)
+function puppetscaleChange(e) {
+	project.project.puppetScale = parseFloat(e.target.value)
 	controller.resize()
 }
 
