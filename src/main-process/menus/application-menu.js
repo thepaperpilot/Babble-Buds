@@ -1,4 +1,5 @@
-const {BrowserWindow, Menu, app, dialog} = require('electron')
+const {BrowserWindow, Menu, app, dialog, shell} = require('electron')
+const settings = require('../settings')
 const util = require('../util')
 
 // Create menu
@@ -90,6 +91,18 @@ const template = [
         accelerator: 'CommandOrControl+Y',
         click (item, focusedWindow) {
           focusedWindow.webContents.send('redo')
+        }
+      }
+    ]
+  },
+  {
+    label: 'Project',
+    submenu: [
+      {
+        label: 'Open Project Folder',
+        accelerator: 'F10',
+        click (item, focusedWindow) {
+          shell.showItemInFolder(settings.settings.openProject)
         }
       }
     ]
