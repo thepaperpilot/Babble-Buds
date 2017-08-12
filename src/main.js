@@ -1,4 +1,5 @@
 const {app, BrowserWindow} = require('electron')
+const windowStateKeeper = require('electron-window-state');
 const settings = require('./main-process/settings')
 
 const path = require('path')
@@ -14,10 +15,23 @@ function createWindow () {
   // Load application settings
   settings.load()
 
-  // Create the browser window.
-  mainWindow = new BrowserWindow({width: 1280, height: 720, backgroundColor: '#2a323d', minWidth: 1280, minHeight: 720, icon: path.join(__dirname, 'assets', 'icons', 'icon.ico')})
+  // Load window state
+  let mainWindowState = windowStateKeeper({
+    defaultWidth: 1280,
+    defaultHeight: 720
+  })
 
-  mainWindow.openDevTools()
+  // Create the browser window.
+  mainWindow = new BrowserWindow({
+    'x': mainWindowState.x,
+    'y': mainWindowState.y,
+    'width': mainWindowState.width,
+    'height': mainWindowState.height,
+    backgroundColor: '#2a323d', 
+    icon: path.join(__dirname, 'assets', 'icons', 'icon.ico')
+  })
+
+  mainWindowState.manage(mainWindow);
 
   // and load the index.html of the app.
   mainWindow.loadURL(url.format({
