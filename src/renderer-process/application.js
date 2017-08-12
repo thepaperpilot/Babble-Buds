@@ -50,7 +50,7 @@ exports.init = function() {
 	document.getElementById('popout').addEventListener('click', controller.togglePopout)
 	document.getElementById('settings').addEventListener('click', toggleSettings)
 	document.getElementById('colorpicker').addEventListener('change', colorpickerChange)
-	document.getElementById('transparent').addEventListener('click', toggleTransparent)
+	document.getElementById('alwaysontop').addEventListener('click', toggleAlwaysOnTop)
 	document.getElementById('puppetscale').addEventListener('change', puppetscaleChange)
 	document.getElementById('numslots').addEventListener('change', numslotsChange)
 	document.getElementById('ip').addEventListener('change', ipChange)
@@ -81,7 +81,7 @@ exports.init = function() {
 
 	// Load settings values
 	document.getElementById('colorpicker').value = project.project.greenScreen
-	document.getElementById('transparent').checked = project.project.transparent
+	document.getElementById('alwaysontop').checked = project.project.alwaysOnTop
 	document.getElementById('puppetscale').value = project.project.puppetScale
 	document.getElementById('numslots').value = project.project.numCharacters
 	document.getElementById('ip').value = project.project.ip
@@ -322,8 +322,8 @@ function colorpickerChange(e) {
 		document.getElementById('screen').style.backgroundColor = project.project.greenScreen
 }
 
-function toggleTransparent(e) {
-	project.project.transparent = e.target.checked
+function toggleAlwaysOnTop(e) {
+	project.project.alwaysOnTop = e.target.checked
 }
 
 function puppetscaleChange(e) {

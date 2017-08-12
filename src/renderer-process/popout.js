@@ -94,4 +94,8 @@ electron.ipcRenderer.on('add asset', (event, asset) => {
     stage.addAsset(asset)
 })
 
+electron.ipcRenderer.on('togglePopout', () => {
+    remote.getCurrentWindow().getParentWindow().webContents.send('togglePopout')
+})
+
 remote.getCurrentWindow().getParentWindow().webContents.send('loaded')

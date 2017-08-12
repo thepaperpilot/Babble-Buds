@@ -2,7 +2,7 @@
   "numCharacters": 5,
   "puppetScale": 1,
   "greenScreen": "#00FF00",
-  "transparent": false,
+  "alwaysOnTop": false,
   "ip": "localhost",
   "port": 8080,
   "characters": [

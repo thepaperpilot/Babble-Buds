@@ -439,10 +439,7 @@ function popIn() {
 }
 
 function popOut() {
-	if (project.project.transparent)
-		popout = new BrowserWindow({frame: false, parent: remote.getCurrentWindow(), icon: path.join(__dirname, 'assets', 'icons', 'icon.ico'), transparent: true})
-	else
-		popout = new BrowserWindow({frame: false, parent: remote.getCurrentWindow(), icon: path.join(__dirname, 'assets', 'icons', 'icon.ico'), backgroundColor: project.project.greenScreen})
+	popout = new BrowserWindow({frame: false, parent: remote.getCurrentWindow(), icon: path.join(__dirname, 'assets', 'icons', 'icon.ico'), backgroundColor: project.project.greenScreen, alwaysOnTop: project.project.alwaysOnTop})
 	// popout.setIgnoreMouseEvents(true)
 	popout.on('close', () => {
 		application.closePopout()
