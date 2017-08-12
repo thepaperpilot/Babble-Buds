@@ -275,12 +275,12 @@ exports.deleteAsset = function(tab, asset) {
 
 exports.resetChanges = function() {
     character = null
-    oldCharacter = 'null'
+    oldcharacter = 'null'
 }
 
 // Returns true if its safe to change puppet
 exports.checkChanges = function() {
-    if (JSON.stringify(character) !== oldcharacter) {
+    if (character && JSON.stringify(character) !== oldcharacter) {
         let response = remote.dialog.showMessageBox({
             "type": "question",
             "buttons": ["Don't Save", "Cancel", "Save"],
