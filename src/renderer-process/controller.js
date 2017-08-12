@@ -1,5 +1,6 @@
 // Imports
 const remote = require('electron').remote
+const windowStateKeeper = require('electron-window-state')
 const BrowserWindow = remote.BrowserWindow
 const application = require('./application.js')
 const editor = require('./editor.js')
@@ -17,6 +18,7 @@ let puppet
 let character
 let hotbar = []
 let popout
+let popoutWindowState
 
 exports.init = function() {
 	status.init()
@@ -25,6 +27,11 @@ exports.init = function() {
 	application.init()
 	network.init()
 	stage = new Stage('screen', project.project, project.assets, project.assetsPath, loadPuppets, status.log)
+	popoutWindowState = windowStateKeeper({
+		file: "popout-window.json",
+	    defaultWidth: 800,
+	    defaultHeight: 600
+	})
 }
 
 exports.setPuppetLocal = function(index, shiftKey, ctrlKey) {
@@ -439,7 +446,18 @@ function popIn() {
 }
 
 function popOut() {
-	popout = new BrowserWindow({frame: false, parent: remote.getCurrentWindow(), icon: path.join(__dirname, 'assets', 'icons', 'icon.ico'), backgroundColor: project.project.greenScreen, alwaysOnTop: project.project.alwaysOnTop})
+	popout = new BrowserWindow({
+	    x: popoutWindowState.x,
+	    y: popoutWindowState.y,
+	    width: popoutWindowState.width,
+	    height: popoutWindowState.height,
+		frame: false, 
+		parent: remote.getCurrentWindow(), 
+		icon: path.join(__dirname, 'assets', 'icons', 'icon.ico'), 
+		backgroundColor: project.project.greenScreen, 
+		alwaysOnTop: project.project.alwaysOnTop
+	})
+	popoutWindowState.manage(popout)
 	// popout.setIgnoreMouseEvents(true)
 	popout.on('close', () => {
 		application.closePopout()

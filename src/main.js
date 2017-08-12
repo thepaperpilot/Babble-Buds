@@ -1,5 +1,5 @@
 const {app, BrowserWindow} = require('electron')
-const windowStateKeeper = require('electron-window-state');
+const windowStateKeeper = require('electron-window-state')
 const settings = require('./main-process/settings')
 
 const path = require('path')
