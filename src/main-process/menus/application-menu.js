@@ -96,6 +96,18 @@ const template = [
     ]
   },
   {
+    label: 'View',
+    submenu: [
+      {
+        label: 'Toggle Popout',
+        accelerator: 'CommandOrControl+P',
+        click (item, focusedWindow) {
+          focusedWindow.webContents.send('togglePopout')
+        }
+      }
+    ]
+  },
+  {
     label: 'Project',
     submenu: [
       {
@@ -111,3 +123,17 @@ const template = [
 
 const menu = Menu.buildFromTemplate(template)
 Menu.setApplicationMenu(menu)
+
+exports.updateMenu = function() {
+  let enabled = settings.settings.openProject !== ""
+  menu.items[0].submenu.items[1].enabled = enabled
+  menu.items[0].submenu.items[2].enabled = enabled
+  for (let i = 2; i <= 3; i++) {
+    for (let j = 0; j < menu.items[i].submenu.items.length; j++) {
+      menu.items[i].submenu.items[j].enabled = enabled
+    }
+  }
+  // Y u no work?
+  // menu.items[2].enabled = enabled
+  // menu.items[3].enabled = enabled
+}

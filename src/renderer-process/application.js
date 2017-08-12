@@ -47,7 +47,7 @@ exports.init = function() {
 	}
 	document.getElementById('babble').addEventListener('mousedown', controller.startBabblingLocal)
 	document.getElementById('babble').addEventListener('mouseup', controller.stopBabblingLocal)
-	document.getElementById('popout').addEventListener('click', controller.popOut)
+	document.getElementById('popout').addEventListener('click', controller.togglePopout)
 	document.getElementById('settings').addEventListener('click', toggleSettings)
 	document.getElementById('colorpicker').addEventListener('change', colorpickerChange)
 	document.getElementById('transparent').addEventListener('click', toggleTransparent)
@@ -73,6 +73,9 @@ exports.init = function() {
 	})
 	electron.ipcRenderer.on('close', () => {
 		project.closeProject()
+	})
+	electron.ipcRenderer.on('togglePopout', () => {
+		controller.togglePopout()
 	})
 	electron.ipcRenderer.on('loaded', controller.setupPopout)
 
@@ -141,9 +144,7 @@ exports.deleteCharacter = function(index) {
 // Pop the stage out
 exports.openPopout = function() {
 	document.getElementById('popout').innerHTML ='Pop In Stage'
-	document.getElementById('popout').removeEventListener('click', controller.popOut)
-	document.getElementById('popout').addEventListener('click', controller.popIn)
-	document.getElementById('screen').addEventListener('click', controller.popIn)
+	document.getElementById('screen').addEventListener('click', controller.togglePopout)
 	document.getElementById('screen').className = 'container main button'
 	document.getElementById('screen').innerHTML = '<div style="position: relative;top: 50%;transform: translateY(-50%);text-align:center;background-color:#242a33;">Click to Pop Stage Back In</div>'
 }
@@ -151,9 +152,7 @@ exports.openPopout = function() {
 // Reattach stage
 exports.closePopout = function() {
 	document.getElementById('popout').innerHTML = 'Pop Out Stage'
-	document.getElementById('popout').addEventListener('click', controller.popOut)
-	document.getElementById('popout').removeEventListener('click', controller.popIn)
-	document.getElementById('screen').removeEventListener('click', controller.popIn)
+	document.getElementById('screen').removeEventListener('click', controller.togglePopout)
 	document.getElementById('screen').className = 'container main'
 	document.getElementById('screen').innerHTML = ''
 }

@@ -31,7 +31,7 @@ function createWindow () {
     icon: path.join(__dirname, 'assets', 'icons', 'icon.ico')
   })
 
-  mainWindowState.manage(mainWindow);
+  mainWindowState.manage(mainWindow)
 
   // and load the index.html of the app.
   mainWindow.loadURL(url.format({

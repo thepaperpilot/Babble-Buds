@@ -198,27 +198,9 @@ exports.jiggle = function(id) {
 	if (popout) popout.webContents.send('jiggle', id)
 }
 
-exports.popIn = function() {
-	popout.close()
-}
-
-exports.popOut = function() {
-	if (project.project.transparent)
-		popout = new BrowserWindow({frame: false, parent: remote.getCurrentWindow(), icon: path.join(__dirname, 'assets', 'icons', 'icon.ico'), transparent: true})
-	else
-		popout = new BrowserWindow({frame: false, parent: remote.getCurrentWindow(), icon: path.join(__dirname, 'assets', 'icons', 'icon.ico'), backgroundColor: project.project.greenScreen})
-	// popout.setIgnoreMouseEvents(true)
-	popout.on('close', () => {
-		application.closePopout()
-		stage.reattach('screen')
-		popout = null
-	})
-	popout.loadURL(url.format({
-		pathname: path.join(__dirname, '../popout.html'),
-		protocol: 'file:',
-		slashes: true
-	  }))
-	application.openPopout()
+exports.togglePopout = function() {
+	if (popout) popIn()
+	else popOut()
 }
 
 exports.emitPopout = function(...args) {
@@ -450,4 +432,27 @@ function loadPuppets(stage) {
 	application.setEmote(puppet.emote)
 
 	status.log('Project Loaded!', 1, 1)
+}
+
+function popIn() {
+	popout.close()
+}
+
+function popOut() {
+	if (project.project.transparent)
+		popout = new BrowserWindow({frame: false, parent: remote.getCurrentWindow(), icon: path.join(__dirname, 'assets', 'icons', 'icon.ico'), transparent: true})
+	else
+		popout = new BrowserWindow({frame: false, parent: remote.getCurrentWindow(), icon: path.join(__dirname, 'assets', 'icons', 'icon.ico'), backgroundColor: project.project.greenScreen})
+	// popout.setIgnoreMouseEvents(true)
+	popout.on('close', () => {
+		application.closePopout()
+		stage.reattach('screen')
+		popout = null
+	})
+	popout.loadURL(url.format({
+		pathname: path.join(__dirname, '../popout.html'),
+		protocol: 'file:',
+		slashes: true
+	  }))
+	application.openPopout()
 }

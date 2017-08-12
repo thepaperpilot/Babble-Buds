@@ -3,6 +3,7 @@ const remote = require('electron').remote
 const dialog = remote.dialog
 const main = remote.require('./main')
 const settings = remote.require('./main-process/settings')
+const menu = remote.require('./main-process/menus/application-menu')
 const controller = require('./controller')
 const editor = require('./editor')
 
@@ -57,6 +58,7 @@ module.exports = exports = remote.getGlobal('project').project = {
 			settings.settings.openProject = filepath
 			settings.save()
             controller.init()
+			menu.updateMenu()
 		})
 	},
 	saveProject: function() {
@@ -86,6 +88,7 @@ module.exports = exports = remote.getGlobal('project').project = {
 		settings.settings.openProject = ""
 		settings.save()
 		editor.resetChanges()
+		menu.updateMenu()
 
 		main.redirect('welcome.html')
 	},
