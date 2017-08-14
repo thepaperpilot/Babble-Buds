@@ -181,6 +181,19 @@
                 <button id="delete-asset-list">Delete Asset List</button>
             </div>
         </div>
+        <div id="instructions" style="display: none;">
+            <iframe src="./instructions.html" style="width: 100%; height: 500px;" frameborder=0></iframe>
+        </div>
+        <div id="about" style="display: none;">
+            <h1>Babble Buds</h1>
+            <strong><script>document.write(require('electron').remote.app.getVersion())</script></strong><br/>
+            <p>Babble buds is a free, open source puppet show software. It is heavily based on the non-public software called "Puppet Pals", used in URealms Live. The software is written using electron and PIXI.js.</p>
+        </div>
+        <div class="modal">
+            <div class="modal-inner">
+                <div class="modal-content"></div>
+            </div>
+        </div>
     </body>
 
     <script>

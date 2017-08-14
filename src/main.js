@@ -33,6 +33,8 @@ function createWindow () {
 
   mainWindowState.manage(mainWindow)
 
+  mainWindow.openDevTools()
+
   // and load the index.html of the app.
   mainWindow.loadURL(url.format({
     pathname: path.join(__dirname, settings.settings.openProject ? 'application.html' : 'welcome.html'),

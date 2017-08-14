@@ -1,0 +1,277 @@
+html {
+    background-color: #2a323d;
+    font-family: sans-serif;
+    font-size: 20px;
+    height: calc( 100% - 10px );
+    user-select: none;
+}
+
+body {
+    background: transparent;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+a {
+	color: #5464d4;
+	cursor: pointer;
+	text-decoration: none;
+}
+
+a:focus {
+	color: #a3c9ef;
+	outline: none;
+}
+
+input, .checkbox-label {
+	margin-bottom: 24px;
+	margin-top: 8px;
+}
+
+input[type="text"], input[type="number"], input[type="search"], select {
+	background: none;
+	border: none;
+	border-bottom: solid 2px #969696;
+	color: #FFF;
+	font-size: 20px;
+	transition: border 0.3s;
+	width: calc( 100% - 8px );
+}
+
+input[type="text"]:focus, input[type="number"]:focus, input[type="search"]:focus, select:focus {
+	border-bottom: solid 2px #c9c9c9;
+	outline: none;
+}
+
+button {
+	background: none;
+	border: none;
+	color: #5464d4;
+	cursor: pointer;
+	font-size: 20px;
+	margin: 10px;
+	text-shadow: 0 1px 1px #222;
+}
+
+button:focus {
+	color: #a3c9ef;
+	outline: none;
+}
+
+.desc{
+    background-color: #000;
+    bottom: 0;
+    color: #fff;
+    font-size: 16px;
+    left: 0;
+    opacity: 0.5;
+    overflow: hidden;
+    pointer-events: none;
+    position: absolute;
+    text-align: center;
+    width: 100%;
+}
+
+.greeting {
+	color: #54647a;
+    height: 400px;
+    left: 50%;
+    margin-left: -25%;
+    margin-top: -200px;
+    position: absolute;
+	text-align: center;
+	text-shadow: 0 1px 1px #222;
+    top: 50%;
+    width: 50%;
+}
+
+.greeting-header {
+	color: #15191f;
+	font-size: 90px;
+	margin-bottom: 30px;
+	text-shadow: 0 1px 1px #666;
+}
+
+.greeting .tabs-content {
+	text-align: left;
+}
+
+.tabs {
+	display: flex;
+    flex-flow: row wrap;
+    margin-bottom: 8px;
+}
+
+.tabs .tab {
+    height: 0;
+    margin: 0;
+    padding: 0;
+	visibility: hidden;	
+    width: 0;
+}
+
+.tabs .tab-label {
+	cursor: pointer;
+    flex-grow: 1;
+    line-height: 48px;
+	text-transform: uppercase;
+}
+
+.tabs .tab:checked + .tab-label {
+	border-bottom: solid 2px #fff;
+}
+
+.tabs .tabs-content {
+	width: 100%;
+}
+
+.tabs .tabs-content > div {
+	opacity: 0;
+	padding: 1.5em 0;
+	position: absolute;
+	width: 100%;
+	z-index: -100;
+}
+
+#open-project:checked ~ .tabs-content #open-project-content,
+#new-project:checked ~ .tabs-content #new-project-content {
+	opacity: 1;
+	z-index: 10;
+}
+
+.recent-projects {
+	height: 160px;
+}
+
+.recent-project {
+	background-color: #242a33;
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: contain;
+	color: #fff;
+	cursor: pointer;
+	display: inline-block;
+    height: calc( 100% - 16px );
+	margin: 4px;
+	padding: 4px;
+	position: relative;
+	width: calc( 33% - 16px);
+}
+
+.version {
+	position: absolute;
+	bottom: 10px;
+	left: 10px;
+	color: white;
+}
+
+.checkbox {
+    opacity: 0;
+    position: absolute;
+}
+
+.checkbox, .checkbox-label {
+    cursor: pointer;
+    display: inline-block;
+    margin: 5px;
+    vertical-align: middle;
+}
+
+.checkbox-label {
+    color: #5464d4;
+    font-family: sans-serif;
+    line-height: 28px;
+    position: relative;
+}
+
+.checkbox + .checkbox-label:before {
+    background: #242a33;
+    border: 4px solid #333c4a;
+    content: '';
+    display: inline-block;
+    height: 20px;
+    margin-right: 10px;
+    padding: 2px;
+    text-align: center;
+    vertical-align: middle;
+    width: 20px;
+}
+
+.checkbox:checked + .checkbox-label:before {
+    background: #333c4a;
+    box-shadow: inset 0 0 0 4px #242a33;
+}
+
+
+.checkbox:focus + .checkbox-label, .checkbox:active + .checkbox-label {
+	color: #a3c9ef;
+	outline: none;
+}
+
+.modal {
+  display: none;
+}
+
+.vanilla-modal .modal {
+  display: block;
+  position: fixed;
+  content: "";
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.2s, z-index 0s 0.2s;
+  text-align: center;
+  overflow: hidden;
+  overflow-y: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+}
+
+.vanilla-modal .modal > * {
+  display: inline-block;
+  white-space: normal;
+  vertical-align: middle;
+  text-align: left;
+}
+
+.vanilla-modal .modal:before {
+  display: inline-block;
+  overflow: hidden;
+  width: 0;
+  height: 100%;
+  vertical-align: middle;
+  content: "";
+}
+
+.vanilla-modal.modal-visible .modal {
+  z-index: 99;
+  opacity: 1;
+  transition: opacity 0.2s;
+}
+
+.modal-inner {
+  width: 90%;
+  padding: 10px;
+  background-color: #2a323d;
+  position: relative;
+  overflow: hidden;
+  max-width: 90%;
+  max-height: 90%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  z-index: -1;
+  opacity: 0;
+  transform: scale(0);
+  transition: opacity 0.2s, transform 0.2s, z-index 0s 0.2s;
+}
+.modal-visible .modal-inner {
+  z-index: 100;
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 0.2s, transform 0.2s;
+}

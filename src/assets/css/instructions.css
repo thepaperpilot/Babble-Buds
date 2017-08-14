@@ -1,0 +1,64 @@
+html {
+    background-color: #2a323d;
+    font-family: sans-serif;
+    font-size: 20px;
+    height: calc( 100% - 10px );
+}
+
+body {
+    background: transparent;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.tabs {
+	display: flex;
+    flex-flow: row wrap;
+    margin-bottom: 8px;
+}
+
+.tabs label {
+    text-align: center;
+}
+
+.tabs .tab {
+    height: 0;
+    margin: 0;
+    padding: 0;
+	visibility: hidden;	
+    width: 0;
+}
+
+.tabs .tab-label {
+	cursor: pointer;
+    flex-grow: 1;
+    line-height: 48px;
+	text-transform: uppercase;
+}
+
+.tabs .tab:checked + .tab-label {
+	border-bottom: solid 2px #fff;
+}
+
+.tabs .tabs-content {
+	width: 100%;
+}
+
+.tabs .tabs-content > div {
+	display: none;
+	padding: 1.5em 0;
+	position: absolute;
+	width: 100%;
+	z-index: -100;
+}
+
+#puppet:checked ~ .tabs-content #puppet-content,
+#editor:checked ~ .tabs-content #editor-content,
+#layers:checked ~ .tabs-content #layers-content,
+#assets:checked ~ .tabs-content #assets-content,
+#project:checked ~ .tabs-content #project-content,
+#debugging:checked ~ .tabs-content #debugging-content {
+	display: block;
+	z-index: 100;
+}

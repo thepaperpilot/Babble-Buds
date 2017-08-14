@@ -118,6 +118,48 @@ const template = [
         }
       }
     ]
+  },
+  {
+    label: 'Help',
+    submenu: [
+      {
+        label: 'Instructions',
+        accelerator: 'CommandOrControl+H',
+        click (item, focusedWindow) {
+          focusedWindow.webContents.send('toggleInstructions')
+        }
+      },
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Github Page',
+        click (item, focusedWindow) {
+          shell.openExternal("https://github.com/thepaperpilot/Babble-Buds")
+        }
+      },
+      {
+        label: 'URealms Forums Page',
+        click (item, focusedWindow) {
+          shell.openExternal("https://forums.urealms.com/discussion/272/alpha-babble-buds-a-virtual-puppet-show-software/p1")
+        }
+      },
+      {
+        label: 'Changelog',
+        click (item, focusedWindow) {
+          shell.openExternal("https://github.com/thepaperpilot/Babble-Buds/releases")
+        }
+      },
+      {
+        type: 'separator'
+      },
+      {
+        label: 'About Babble Buds',
+        click (item, focusedWindow) {
+          focusedWindow.webContents.send('toggleAbout')
+        }
+      }
+    ]
   }
 ]
 

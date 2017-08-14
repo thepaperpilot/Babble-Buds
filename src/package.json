@@ -23,6 +23,7 @@
     "fs-extra": "~3.0.1",
     "pixi.js": "~4.5.3",
     "socket.io": "~1.7.3",
-    "socket.io-stream": "~0.9.1"
+    "socket.io-stream": "~0.9.1",
+    "vanilla-modal": "1.6.2"
   }
 }

@@ -4,6 +4,7 @@
 
 // Imports
 const electron = require('electron')
+const modal = new (require('vanilla-modal').default)()
 const editor = require('./editor.js')
 const controller = require('./controller.js')
 const network = require('./network.js')
@@ -76,6 +77,18 @@ exports.init = function() {
 	})
 	electron.ipcRenderer.on('togglePopout', () => {
 		controller.togglePopout()
+	})
+	electron.ipcRenderer.on('toggleInstructions', () => {
+		if (modal.isOpen)
+			modal.close()
+		else
+			modal.open("#instructions")
+	})
+	electron.ipcRenderer.on('toggleAbout', () => {
+		if (modal.isOpen)
+			modal.close()
+		else
+			modal.open("#about")
 	})
 	electron.ipcRenderer.on('loaded', controller.setupPopout)
 

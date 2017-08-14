@@ -3,6 +3,7 @@
 // All of the Node.js APIs are available in this process.
 
 const path = require('path')
+const modal = new (require('vanilla-modal').default)()
 const remote = require('electron').remote
 const app = remote.app
 const dialog = remote.dialog
@@ -65,3 +66,16 @@ for (let i = 0; i < recentProjects.length; i++) {
 function openProject() {
     util.openProject(this.id)
 }
+
+require('electron').ipcRenderer.on('toggleInstructions', () => {
+	if (modal.isOpen)
+		modal.close()
+	else
+		modal.open("#instructions")
+})
+require('electron').ipcRenderer.on('toggleAbout', () => {
+	if (modal.isOpen)
+		modal.close()
+	else
+		modal.open("#about")
+})
