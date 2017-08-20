@@ -1,5 +1,6 @@
 html {
     background-color: #2a323d;
+    color: #fff;
     font-family: sans-serif;
     font-size: 20px;
     height: calc( 100% - 10px );
@@ -20,6 +21,7 @@ body {
 
 .tabs label {
     text-align: center;
+    color: #54647a;
 }
 
 .tabs .tab {
