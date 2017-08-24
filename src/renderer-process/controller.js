@@ -254,25 +254,9 @@ exports.moveAssetLocal = function(tab, asset, newTab) {
 	editor.migrateAsset(tab, asset, newTab)
 	project.moveAsset(tab, asset, newTab)
 	stage.addAsset({"tab": newTab, "hash": asset, "name": project.assets[newTab][asset].name})
-    let characters = Object.keys(project.characters)
-    for (let i = 0; i < characters.length; i++) {
-    	let character = project.characters[characters[i]]
-    	let topLevel = ["body", "head", "hat", "props"]
-    	for (let j = 0; j < topLevel.length; j++)
-	        for (let k = 0; k < character[topLevel[j]].length; k++)
-	        	if (character[topLevel[j]][k].tab === tab && character[topLevel[j]][k].hash === asset)
-	        		character[topLevel[j]][k].tab = newTab
-	    let emotes = Object.keys(character.emotes)
-	    for (let j = 0; j < emotes.length; j++) {
-	    	for (let k = 0; k < character.emotes[emotes[j]].eyes.length; k++)
-	    		if (character.emotes[emotes[j]].eyes[k].tab === tab && character.emotes[emotes[j]].eyes[k].hash === asset)
-	    			character.emotes[emotes[j]].eyes[k].tab = newTab
-	    	for (let k = 0; k < character.emotes[emotes[j]].mouth.length; k++)
-	    		if (character.emotes[emotes[j]].mouth[k].tab === tab && character.emotes[emotes[j]].mouth[k].hash === asset)
-	    			character.emotes[emotes[j]].mouth[k].tab = newTab
-	    }
-	    exports.saveCharacter(character)
-    }
+	applyToAsset(tab, asset, (asset) => {
+		asset.tab = newTab
+	})
     status.log("Moved asset!", 1, 1)
 }
 
@@ -285,25 +269,10 @@ exports.deleteAssetLocal = function(tab, asset) {
     status.log("Deleting asset...", 2, 1)
 	editor.deleteAsset(tab, asset)
 	project.deleteAsset(tab, asset)
-    let characters = Object.keys(project.characters)
-    for (let i = 0; i < characters.length; i++) {
-    	let character = project.characters[characters[i]]
-    	let topLevel = ["body", "head", "hat", "props"]
-    	for (let j = 0; j < topLevel.length; j++)
-	        for (let k = 0; k < character[topLevel[j]].length; k++)
-	        	if (character[topLevel[j]][k].tab === tab && character[topLevel[j]][k].hash === asset)
-	        		character[topLevel[j]].splice(k, 1)
-	    let emotes = Object.keys(character.emotes)
-	    for (let j = 0; j < emotes.length; j++) {
-	    	for (let k = 0; k < character.emotes[emotes[j]].eyes.length; k++) 
-	    		if (character.emotes[emotes[j]].eyes[k].tab === tab && character.emotes[emotes[j]].eyes[k].hash === asset)
-                    character.emotes[emotes[j]].eyes.splice(k, 1)
-	    	for (let k = 0; k < character.emotes[emotes[j]].mouth.length; k++)
-	    		if (character.emotes[emotes[j]].mouth[k].tab === tab && character.emotes[emotes[j]].mouth[k].hash === asset)
-                    character.emotes[emotes[j]].mouth.splice(k, 1)
-	    }
-	    exports.saveCharacter(project.characters[characters[i]])
-    }
+
+	applyToAsset(tab, asset, (asset, array, index) => {
+		array.splice(index, 1)
+	})
     status.log("Deleted asset!", 1, 1)
 }
 
@@ -315,25 +284,22 @@ exports.renameAssetList = function(tab, newTab) {
 exports.renameAssetListLocal = function(tab, newTab) {
 	editor.renameAssetList(tab, newTab)
 	project.renameAssetList(tab, newTab)
-    let characters = Object.keys(project.characters)
-    for (let i = 0; i < characters.length; i++) {
-    	let character = project.characters[characters[i]]
-    	let topLevel = ["body", "head", "hat", "props"]
-    	for (let j = 0; j < topLevel.length; j++)
-	        for (let k = 0; k < character[topLevel[j]].length; k++)
-	        	if (character[topLevel[j]][k].tab === tab)
-	        		character[topLevel[j]][k].tab = newTab
-	    let emotes = Object.keys(character.emotes)
-	    for (let j = 0; j < emotes.length; j++) {
-	    	for (let k = 0; k < character.emotes[emotes[j]].eyes.length; k++)
-	    		if (character.emotes[emotes[j]].eyes[k].tab === tab)
-	    			character.emotes[emotes[j]].eyes[k].tab = newTab
-	    	for (let k = 0; k < character.emotes[emotes[j]].mouth.length; k++)
-	    		if (character.emotes[emotes[j]].mouth[k].tab === tab)
-	    			character.emotes[emotes[j]].mouth[k].tab = newTab
-	    }
-	    exports.saveCharacter(project.characters[characters[i]])
-    }
+
+	applyToAsset(tab, null, (asset) => {
+		asset.tab = newTab
+	})
+}
+
+exports.updateAsset = function(tab, asset, x, y) {
+	let callback = function(asset) {
+		asset.x += x
+		asset.y += y
+	}
+	applyToAsset(tab, asset, callback)
+}
+
+exports.reloadAssets = function() {
+	stage.reloadAssets(() => {editor.reloadAssets(); project.saveProject();})
 }
 
 exports.deleteAssetList = function(tab) {
@@ -367,10 +333,8 @@ exports.saveCharacter = function(character, thumbnail) {
     project.saveCharacter(character)
 	if (thumbnail) {
 		fs.ensureDirSync(path.join(project.assetsPath, '..', 'thumbnails'))
-		fs.writeFile(path.join(project.assetsPath, '..', 'thumbnails', 'new-' + character.id + '.png'), new Buffer(thumbnail, 'base64'), (err) => {
-	        if (err) console.log(err)
-	        application.updateCharacter(character, true)
-	    })
+		fs.writeFileSync(path.join(project.assetsPath, '..', 'thumbnails', 'new-' + character.id + '.png'), new Buffer(thumbnail, 'base64'))
+	    application.updateCharacter(character, true)
 	} else {
 		application.updateCharacter(character)
 	}    
@@ -470,4 +434,29 @@ function popOut() {
 		slashes: true
 	  }))
 	application.openPopout()
+}
+
+function applyToAsset(tab, asset, callback) {
+    let characters = Object.keys(project.characters)
+    for (let i = 0; i < characters.length; i++) {
+    	let character = project.characters[characters[i]]
+    	let topLevel = ["body", "head", "hat", "props"]
+
+    	for (let j = 0; j < topLevel.length; j++)
+	        for (let k = 0; k < character[topLevel[j]].length; k++)
+	        	if (character[topLevel[j]][k].tab === tab && (asset === null || character[topLevel[j]][k].hash === asset))
+	        		callback(character[topLevel[j]][k], character[topLevel[j]], k)
+
+	    let emotes = Object.keys(character.emotes)
+	    for (let j = 0; j < emotes.length; j++) {
+	    	for (let k = 0; k < character.emotes[emotes[j]].eyes.length; k++)
+	    		if (character.emotes[emotes[j]].eyes[k].tab === tab && (asset === null || character.emotes[emotes[j]].eyes[k].hash === asset))
+	    			callback(character.emotes[emotes[j]].eyes[k], character.emotes[emotes[j]].eyes, k)
+	    	for (let k = 0; k < character.emotes[emotes[j]].mouth.length; k++)
+	    		if (character.emotes[emotes[j]].mouth[k].tab === tab && (asset === null || character.emotes[emotes[j]].mouth[k].hash === asset))
+	    			callback(character.emotes[emotes[j]].mouth[k], character.emotes[emotes[j]].mouth, k)
+	    }
+
+	    exports.saveCharacter(character)
+    }
 }

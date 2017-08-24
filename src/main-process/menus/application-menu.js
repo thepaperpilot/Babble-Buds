@@ -116,6 +116,14 @@ const template = [
         click (item, focusedWindow) {
           shell.showItemInFolder(settings.settings.openProject)
         }
+      },
+      {
+        label: 'Reload Assets',
+        click (item, focusedWindow) {
+          // Note: This won't update assets on connected clients
+          // How can I ensure users are aware of that?
+          focusedWindow.webContents.send('reload')
+        }
       }
     ]
   },

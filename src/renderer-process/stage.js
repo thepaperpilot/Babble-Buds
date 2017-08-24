@@ -52,7 +52,7 @@ function Stage(element, project, assets, assetsPath, callback, log) {
     }
     let stage = this
     if (texturesToLoad) {
-        loader.onComplete.add(function() { 
+        loader.onComplete.once(function() { 
             stage.resize()
             window.addEventListener("resize", stage.resize.bind(stage))
             if (callback) callback(stage)
@@ -79,6 +79,46 @@ Stage.prototype.addAsset = function(asset) {
         this.assets[asset.tab] = {}
     this.assets[asset.tab][asset.hash] = {"name": asset.name, "location": path.join(asset.tab, asset.hash + '.png')}
     TextureCache[path.join(this.assetsPath, this.assets[asset.tab][asset.hash].location)] = PIXI.Texture.fromImage(path.join(this.assetsPath, this.assets[asset.tab][asset.hash].location))
+}
+
+Stage.prototype.reloadAssets = function(callback) {
+    let assets = Object.keys(TextureCache)
+    for (let i = 0; i < assets.length; i++) {
+        TextureCache[assets[i]].destroy(true)
+    }
+
+    // Load Assets
+    for (let i = 0; i < this.project.assets.length; i++) {
+        let tab = this.assets[this.project.assets[i].name]
+        let keys = Object.keys(tab)
+        for (let j = 0; j < keys.length; j++) {
+            if (!TextureCache[path.join(this.assetsPath, tab[keys[j]].location)]) {
+                TextureCache[path.join(this.assetsPath, tab[keys[j]].location)] = PIXI.Texture.fromImage(path.join(this.assetsPath, tab[keys[j]].location))
+            }
+        }
+    }
+    let stage = this
+    let onLoad = () => {
+        let done = true
+        let assets = Object.keys(PIXI.utils.BaseTextureCache)
+        for (let i = 0; i < assets.length; i++)
+            if (PIXI.utils.BaseTextureCache[assets[i]].isLoading)
+                done = false
+        if (done) {
+            callback(stage)
+            PIXI.ticker.shared.remove(onLoad)
+        }
+    }
+
+    this.reloadPuppets()
+    if (callback) {
+        PIXI.ticker.shared.add(onLoad)
+    }
+}
+
+Stage.prototype.reloadPuppets = function() {
+    for (let i = 0; i < this.puppets.length; i++)
+        this.setPuppet(this.puppets[i].id, this.createPuppet(this.puppets[i].container.puppet))
 }
 
 Stage.prototype.reattach = function(element) {
@@ -452,4 +492,24 @@ Puppet.prototype.addEmote = function(emote) {
     }
     this.mouthsContainer.addChild(this.emotes[emote].mouth)
     this.eyesContainer.addChild(this.emotes[emote].eyes)
+}
+
+Puppet.prototype.applyToAsset = function(asset, callback) {
+    let character = this.container.puppet
+    let topLevel = ["body", "head", "hat", "props"]
+
+    for (let j = 0; j < topLevel.length; j++)
+        for (let k = 0; k < character[topLevel[j]].length; k++)
+            if (character[topLevel[j]][k].tab === asset.tab && character[topLevel[j]][k].hash === asset.hash)
+                callback(character[topLevel[j]][k])
+            
+    let emotes = Object.keys(character.emotes)
+    for (let j = 0; j < emotes.length; j++) {
+        for (let k = 0; k < character.emotes[emotes[j]].eyes.length; k++)
+            if (character.emotes[emotes[j]].eyes[k].tab === asset.tab && character.emotes[emotes[j]].eyes[k].hash === asset.hash)
+                callback(character.emotes[emotes[j]].eyes[k])
+        for (let k = 0; k < character.emotes[emotes[j]].mouth.length; k++)
+            if (character.emotes[emotes[j]].mouth[k].tab === asset.tab && character.emotes[emotes[j]].mouth[k].hash === asset.hash)
+                callback(character.emotes[emotes[j]].mouth[k])
+    }
 }

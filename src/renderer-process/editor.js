@@ -215,6 +215,38 @@ exports.migrateAsset = function(tab, asset, newTab) {
     }
 }
 
+exports.reloadAssets = function() {
+    // Update Assets
+    let tabs = document.getElementById('asset list')
+    let tabsList = document.getElementById('asset tabs')
+    tabs.innerHTML = ''
+    tabsList.innerHTML = ''
+    let assetKeys = Object.keys(project.assets)
+    for (let i = 0; i < assetKeys.length; i++) {
+        let tab = project.assets[assetKeys[i]]
+        let keys = Object.keys(tab)
+        let tabElement = document.createElement('div')
+        let tabOption = document.createElement('option')
+        tabOption.text = assetKeys[i]
+        tabOption.id = "tab option " + assetKeys[i]
+        tabsList.add(tabOption)
+        tabs.appendChild(tabElement)
+        tabElement.style.display = 'none'
+        tabElement.style.height = '100%'
+        tabElement.id = 'tab ' + assetKeys[i]
+        tabElement.className = 'scroll'
+        for (let j = 0; j < keys.length; j++) {
+            exports.addAsset(assetKeys[i], keys[j])
+        }
+    }
+    if (assetKeys[0])
+        document.getElementById('tab ' + assetKeys[0]).style.display = ''
+
+    // Update Puppet
+    exports.setPuppet(JSON.parse(JSON.stringify(project.characters[character.id])), true)
+    savePuppet()
+}
+
 exports.renameAssetList = function(tab, newTab) {
     document.getElementById('tab ' + tab).id = 'tab ' + newTab
     document.getElementById('tab option ' + tab).text = newTab

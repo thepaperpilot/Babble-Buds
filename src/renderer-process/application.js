@@ -79,16 +79,13 @@ exports.init = function() {
 		controller.togglePopout()
 	})
 	electron.ipcRenderer.on('toggleInstructions', () => {
-		if (modal.isOpen)
-			modal.close()
-		else
-			modal.open("#instructions")
+		toggleModal("#instructions")
 	})
 	electron.ipcRenderer.on('toggleAbout', () => {
-		if (modal.isOpen)
-			modal.close()
-		else
-			modal.open("#about")
+		toggleModal("#about")
+	})
+	electron.ipcRenderer.on('reload', () => {
+		controller.reloadAssets()
 	})
 	electron.ipcRenderer.on('loaded', controller.setupPopout)
 
@@ -357,3 +354,11 @@ function ipChange(e) {
 function portChange(e) {
 	project.project.port = parseInt(e.target.value)
 }
+
+function toggleModal(string) {
+	if (modal.isOpen)
+		modal.close()
+	else
+		modal.open(string)
+}
+
