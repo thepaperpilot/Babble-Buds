@@ -26,15 +26,16 @@ exports.info = function(string) {
 // 5 - WARN
 // 10 - ERR
 exports.log = function(string, priority, tolerance) {
+	status.innerText += (status.innerText === "" ? "" : "\n") + string
 	if (priority >= currPriority) {
 		currPriority = tolerance
-		status.innerText = string
+		status.scrollTop = status.scrollHeight
 	}
 	console.log(string)
 }
 
 exports.error = function(string, error) {
-	status.innerText = string
+	exports.log(string, 10, 2)
 	console.error(error)
 }
 
