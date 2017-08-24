@@ -6,7 +6,7 @@
         <title>Instructions</title>
     </head>
     <body>
-        <div class="tabs">
+        <div class="tabs" id="tabs">
             <input id="puppet" type="radio" checked="checked" name="tab-group" class="tab"/>
             <label for="puppet" class="tab-label">Controlling Your Puppet</label>
             <input id="editor" type="radio" name="tab-group" class="tab"/>
@@ -102,5 +102,15 @@
                 </div>
             </div>
         </div>
+        <script>
+            function scrollHorizontally(e) {
+                if (e.target !== document.getElementById('tabs') && e.target.className !== 'tab-label') return
+                e = window.event || e
+                var delta = Math.max(-1, Math.min(1, e.wheelDelta))
+                document.getElementById('tabs').scrollLeft -= (delta*40)
+                e.preventDefault()
+            }
+            document.getElementById('tabs').addEventListener('mousewheel', scrollHorizontally)
+        </script>
     </body>
 </html>
