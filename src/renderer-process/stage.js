@@ -15,11 +15,11 @@ let Container = PIXI.Container,
 // Exports
 exports.Stage = Stage
 
-function Stage(element, project, assets, assetsPath, callback, log) {
+function Stage(element, project, assets, assetsPath, callback, status) {
     this.project = project
     this.assets = assets
     this.assetsPath = assetsPath
-    this.log = log
+    this.status = status
 
     // Create some basic objects
     this.stage = new Container()
@@ -209,7 +209,11 @@ Stage.prototype.setPuppet = function(id, newPuppet) {
 
 Stage.prototype.getThumbnail = function() {
     this.renderer.render(this.stage)
-    return this.renderer.view.toDataURL().replace(/^data:image\/\w+;base64,/, "")
+    try {
+        return require('./../lib/trim_canvas').trimCanvas(this.renderer.plugins.extract.canvas(this.stage)).canvas.toDataURL().replace(/^data:image\/\w+;base64,/, "")
+    } catch(e) {
+        this.status.error("Failed to generate thumbnail", e)
+    }
 }
 
 Stage.prototype.gameLoop = function() {
@@ -327,7 +331,7 @@ Stage.prototype.getAsset = function(asset, layer) {
         sprite = new Sprite(TextureCache[path.join(this.assetsPath, this.assets[asset.tab][asset.hash].location)])
     } else {
         sprite = new Sprite()
-        if (this.log) this.log("Unable to load asset \"" + asset.tab + ":" + asset.hash + "\"", 5, 2)
+        if (this.status) this.status.log("Unable to load asset \"" + asset.tab + ":" + asset.hash + "\"", 5, 2)
     }
     sprite.anchor.set(0.5)
     sprite.x = asset.x

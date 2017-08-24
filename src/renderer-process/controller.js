@@ -26,7 +26,7 @@ exports.init = function() {
 	project = remote.getGlobal('project').project
 	application.init()
 	network.init()
-	stage = new Stage('screen', project.project, project.assets, project.assetsPath, loadPuppets, status.log)
+	stage = new Stage('screen', project.project, project.assets, project.assetsPath, loadPuppets, status)
 	popoutWindowState = windowStateKeeper({
 		file: "popout-window.json",
 	    defaultWidth: 800,

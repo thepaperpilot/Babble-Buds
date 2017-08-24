@@ -41,7 +41,7 @@ module.exports = exports = {
 		while (this.settings.recentProjects.length > 3)
 			this.settings.recentProjects.splice(3, 1)
 		var filename = util.slugify(this.settings.openProject)
-		fs.writeFile(path.join(app.getPath('userData'), filename + '.png'), new Buffer(thumbnail, 'base64'), (err) => {
+		if (thumbnail) fs.writeFile(path.join(app.getPath('userData'), filename + '.png'), new Buffer(thumbnail, 'base64'), (err) => {
 	        if (err) console.log(err)
 	    })
 	}

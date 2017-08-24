@@ -35,7 +35,7 @@ let reverseHistory = [] // used for redoing stuff
 exports.init = function() {
     project = remote.getGlobal('project').project
     // Create some basic objects
-    stage = new Stage('editor-screen', {'numCharacters': 1, 'puppetScale': 1, 'assets': project.project.assets}, project.assets, project.assetsPath, null, status.log)
+    stage = new Stage('editor-screen', {'numCharacters': 1, 'puppetScale': 1, 'assets': project.project.assets}, project.assets, project.assetsPath, null, status)
     stage.stage.interactive = true
     stage.stage.on('mousedown', editorMousedown)
     stage.stage.on('mousemove', editorMousemove)
