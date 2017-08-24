@@ -1,16 +1,16 @@
 html {
-    background-color: #2a323d;
-    font-family: sans-serif;
-    font-size: 20px;
-    height: calc( 100% - 10px );
-    user-select: none;
+	background-color: #2a323d;
+	font-family: sans-serif;
+	font-size: 20px;
+	height: calc( 100% - 10px );
+	user-select: none;
 }
 
 body {
-    background: transparent;
-    height: 100%;
-    margin: 0;
-    padding: 0;
+	background: transparent;
+	height: 100%;
+	margin: 0;
+	padding: 0;
 }
 
 a {
@@ -92,6 +92,7 @@ select option {
 	height: 250px;
 	margin-bottom: 0;
 	width: calc( 100% - 470px );
+	min-width: 234px;
 }
 
 .side {
@@ -135,6 +136,11 @@ select option {
 	height: 20px;
 	text-align: center;
 	width: calc( 100% - 470px );
+	overflow-y: overlay;
+}
+
+.status::-webkit-scrollbar {
+	display: none;
 }
 
 .buttons {
@@ -148,7 +154,7 @@ select option {
 }
 
 .b5 button {
-    padding: 0;
+	padding: 0;
 	width: unset;
 }
 
@@ -172,8 +178,7 @@ select option {
 	color: #fff;
 	cursor: pointer;
 	display: inline-block;
-	margin: 4px;
-	padding: 4px;
+	margin-bottom: 6px;
 }
 
 .emote:focus, .babble:focus {
@@ -184,23 +189,23 @@ select option {
 	background-position: center;
 	background-repeat: no-repeat;
 	background-size: contain;
-	height: calc( 33% - 14px );
+	height: calc( 33% - 3px );
 	position: relative;
-	width: calc( 33% - 20px );
+	width: calc( 33% - 6px );
 }
 
 .emote {
 	background-color: #2a323d;
-    box-shadow: 0 313px rgba(256, 0, 0, 0.2) inset;
-	height: calc( 25% - 15px );
+	box-shadow: 0 313px rgba(256, 0, 0, 0.2) inset;
+	height: calc( 25% - 4px );
 	position: relative;
-	width: calc( 25% - 21px );
+	width: calc( 25% - 4.2px );
 }
 
 .babble {
-	height: calc( 25% - 15px );
+	height: calc( 25% - 4px );
 	position: relative;
-	width: calc( 100% - 16px );
+	width: 100%;
 }
 
 .asset {
@@ -228,8 +233,9 @@ select option {
 
 .charselector .char {
 	height: 50px;
-	max-width: 150px;
 	min-width: 75px;
+  margin-bottom: 0;
+  margin-right: 6px;
 }
 
 .editorpanel {
@@ -247,22 +253,32 @@ select option {
 }
 
 .editorpanel .emote, .editorpanel .babble {
-    height: 9%;
-    min-height: 28px;
+	height: 9%;
+	min-height: 28px;
 }
 
 .editorpanel .emote {
-	width: calc( 25% - 13px );
+	width: calc( 25% - 10px );
+	margin: 4px 1px;
 }
 
 .editorpanel .babble {
-	width: calc( 100% - 8px );
+	width: calc( 100% - 20px );
+	margin: 4px 10px;
 }
 
 .editorpanel .emotes {
-    margin: 4px;
-    outline: #2a323d solid 4px;    
-    padding-left: 3px;
+	margin: 4px 4px 4px 13px;
+	outline: #2a323d solid 4px;
+	width: 361.5px;
+	padding: 4px 0 4px 13px;
+}
+
+.editorpanel .babble-emotes {
+	margin: 6px 4px 6px 13px;
+	outline: #2a323d solid 4px;
+	width: 361.5px;
+	padding: 6px 0 6px 0px;
 }
 
 .small {
@@ -270,7 +286,7 @@ select option {
 }
 
 .available {
-	box-shadow: none;
+	box-shadow: none !important;
 }
 
 .disabled {
@@ -286,54 +302,60 @@ select option {
 }
 
 .desc{
-    background-color: #000;
-    bottom: 0;
-    color: #fff;
-    font-size: 16px;
-    left: 0;
-    opacity: 0.5;
-    overflow: hidden;
-    pointer-events: none;
-    position: absolute;
-    text-align: center;
-    width: 100%;
+	background-color: #000;
+	bottom: 0;
+	color: #fff;
+	font-size: 16px;
+	left: 0;
+	opacity: 0.5;
+	overflow: hidden;
+	pointer-events: none;
+	position: absolute;
+	text-align: center;
+	width: 100%;
+}
+
+.hotkey {
+	left: 4px;
+	top: 4px;
+	position: relative;
 }
 
 .checkbox {
-    opacity: 0;
-    position: absolute;
+	opacity: 0;
+	position: absolute;
 }
 
 .checkbox, .checkbox-label {
-    cursor: pointer;
-    display: inline-block;
-    margin: 5px;
-    vertical-align: middle;
+	cursor: pointer;
+	display: inline-block;
+	margin: 5px;
+	vertical-align: middle;
 }
 
 .checkbox-label {
-    color: #5464d4;
-    font-family: sans-serif;
-    line-height: 28px;
-    position: relative;
+	color: #5464d4;
+	font-family: sans-serif;
+	line-height: 28px;
+	position: relative;
 }
 
 .checkbox + .checkbox-label:before {
-    background: #242a33;
-    border: 4px solid #333c4a;
-    content: '';
-    display: inline-block;
-    height: 20px;
-    margin-right: 10px;
-    padding: 2px;
-    text-align: center;
-    vertical-align: middle;
-    width: 20px;
+	background: #242a33;
+	border: 4px solid #333c4a;
+	content: '';
+	display: inline-block;
+	height: 20px;
+	margin-right: 10px;
+	padding: 2px;
+	text-align: center;
+	vertical-align: middle;
+	width: 20px;
 }
 
 .checkbox:checked + .checkbox-label:before {
-    background: #333c4a;
-    box-shadow: inset 0 0 0 4px #242a33;
+	background: #333c4a;
+	box-shadow: inset 0 0 0 4px #242a33;
 }
 
 
@@ -343,64 +365,64 @@ select option {
 }
 
 .flipswitch {
-  bottom: 8px;
-  margin: 12px auto 0;
-  position: relative;
-  width: 120px;
+	bottom: 8px;
+	margin: 16px auto 0;
+	position: relative;
+	width: 120px;
 }
 .flipswitch input[type=checkbox] {
-  display: none;
+	display: none;
 }
 .flipswitch-label {
-  border: 4px solid #333c4a;
-  cursor: pointer;
-  display: block;
-  overflow: hidden;
+	border: 4px solid #333c4a;
+	cursor: pointer;
+	display: block;
+	overflow: hidden;
 }
 .flipswitch-inner {
-  margin-left: -100%;
-  transition: margin 0.3s ease-in 0s;
-  width: 200%;
+	margin-left: -100%;
+	transition: margin 0.3s ease-in 0s;
+	width: 200%;
 }
 .flipswitch-inner:before, .flipswitch-inner:after {
-  box-sizing: border-box;
-  color: white;
-  float: left;
-  font-family: Trebuchet, Arial, sans-serif;
-  font-size: 18px;
-  font-weight: bold;
-  height: 24px;
-  line-height: 24px;
-  padding: 0;
-  width: 50%;
+	box-sizing: border-box;
+	color: white;
+	float: left;
+	font-family: Trebuchet, Arial, sans-serif;
+	font-size: 18px;
+	font-weight: bold;
+	height: 24px;
+	line-height: 24px;
+	padding: 0;
+	width: 50%;
 }
 .flipswitch-inner:before {
-  color: #5464d4;
-  content: "eyes";
-  padding-left: 12px;
+	color: #5464d4;
+	content: "eyes";
+	padding-left: 12px;
 }
 .flipswitch-inner:after {
-  color: #5464d4;
-  content: "mouth";
-  padding-right: 12px;
-  text-align: right;
+	color: #5464d4;
+	content: "mouth";
+	padding-right: 12px;
+	text-align: right;
 }
 .flipswitch-switch {
-  background: #242a33;
-  border: 4px solid #333c4a;
-  bottom: 0;
-  margin: -3.5px;
-  position: absolute;
-  right: 93px;
-  top: 0;
-  transition: all 0.3s ease-in 0s;
-  width: 31px;
+	background: #242a33;
+	border: 4px solid #333c4a;
+	bottom: 0;
+	margin: -3.5px;
+	position: absolute;
+	right: 93px;
+	top: 0;
+	transition: all 0.3s ease-in 0s;
+	width: 31px;
 }
 .flipswitch-cb:checked + .flipswitch-label .flipswitch-inner {
-  margin-left: 0;
+	margin-left: 0;
 }
 .flipswitch-cb:checked + .flipswitch-label .flipswitch-switch {
-  right: 0;
+	right: 0;
 }
 
 .highlight {
@@ -472,4 +494,32 @@ select option {
   opacity: 1;
   transform: scale(1);
   transition: opacity 0.2s, transform 0.2s;
+}
+
+.dropdown:hover .dropdown-content {
+	display: block;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #2a323d;
+    min-width: 240px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+
+.dropdown-content a {
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown-content a:hover {
+	background-color: #333c4a;
 }
