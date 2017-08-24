@@ -118,6 +118,12 @@ const template = [
         }
       },
       {
+        label: 'Autocrop Assets',
+        click (item, focusedWindow) {
+          focusedWindow.webContents.send('autocrop')
+        }
+      },
+      {
         label: 'Reload Assets',
         click (item, focusedWindow) {
           // Note: This won't update assets on connected clients

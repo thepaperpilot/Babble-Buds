@@ -58,6 +58,7 @@ exports.init = function() {
 	document.getElementById('port').addEventListener('change', portChange)
 	document.getElementById('host').addEventListener('click', network.host)
 	document.getElementById('connect').addEventListener('click', network.connect)
+	document.getElementById('autocrop-btn').addEventListener('click', startAutocrop)
 
 	// Handle input events from popout
 	electron.ipcRenderer.on('keyDown', (event, key) => {
@@ -83,6 +84,9 @@ exports.init = function() {
 	})
 	electron.ipcRenderer.on('toggleAbout', () => {
 		toggleModal("#about")
+	})
+	electron.ipcRenderer.on('autocrop', () => {
+		openAutocrop()
 	})
 	electron.ipcRenderer.on('reload', () => {
 		controller.reloadAssets()
@@ -362,3 +366,73 @@ function toggleModal(string) {
 		modal.open(string)
 }
 
+function openAutocrop() {
+	toggleModal("#autocrop")
+	document.getElementById('autocrop-desc').style.display = 'block'
+	document.getElementById('autocrop-btn').style.display = 'block'
+	document.getElementById('autocrop-assets').innerHTML = ''
+	document.getElementById('autocrop-progress').innerHTML = ''
+}
+
+function startAutocrop() {
+	// Remove the description and set up progress display
+	document.getElementById('autocrop-desc').style.display = 'none'
+	document.getElementById('autocrop-btn').style.display = 'none'
+	let assetsList = document.getElementById('autocrop-assets')
+	let assets = []
+	let tabs = Object.keys(project.assets)
+	for (let i = 0; i < tabs.length; i++) {
+		let hashes = Object.keys(project.assets[tabs[i]])
+		for (let j = 0; j < hashes.length; j++) {
+			assets.push({
+				name: project.assets[tabs[i]][hashes[j]].name,
+				location: project.assets[tabs[i]][hashes[j]].location,
+				tab: tabs[i],
+				hash: hashes[j]
+			})
+			let asset = document.createElement('div')
+			asset.id = 'autocrop-' + tabs[i] + '-' + hashes[j]
+			asset.className = "asset"
+			asset.style.backgroundImage = 'url(' + path.join(project.assetsPath, project.assets[tabs[i]][hashes[j]].location + '?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
+			asset.innerHTML = '<div class="desc">' + project.assets[tabs[i]][hashes[j]].name + '</div>'
+			assetsList.appendChild(asset)
+		}
+	}
+	document.getElementById('autocrop-progress').innerHTML = 'Autocropping asset 0 of ' + assets.length
+
+
+	// I tried to do this with web workers but since they can't use the DOM it didn't work (needed for using canvases)
+	let trimmer = require('./../lib/trim_canvas')
+	let errors = 0
+	for (let i = 0; i < assets.length; i++) {
+		document.getElementById('autocrop-' + assets[i].tab + '-' + assets[i].hash).className = "asset available selected"
+		document.getElementById('autocrop-progress').innerHTML = 'Autocropping asset ' + (i + 1) + ' of ' + assets.length
+	    let canvas = document.createElement('canvas')
+	    let ctx = canvas.getContext("2d")
+	    let image = document.createElement('img')
+	    image.src = path.join(project.assetsPath, assets[i].location)
+	    canvas.width = image.width
+	    canvas.height = image.height
+		ctx.drawImage(image, 0, 0)
+	    canvas.style.display = 'none'
+	    document.body.appendChild(canvas)
+		try {
+			let data = trimmer.trimCanvas(canvas)
+			let newAsset = data.canvas.toDataURL().replace(/^data:image\/\w+;base64,/, "")
+			document.getElementById('autocrop-' + assets[i].tab + '-' + assets[i].hash).className = "asset available"
+			fs.writeFileSync(path.join(project.assetsPath, assets[i].location), new Buffer(newAsset, 'base64'))
+			document.getElementById('autocrop-' + assets[i].tab + '-' + assets[i].hash).style.backgroundImage = 'url(' + path.join(project.assetsPath, assets[i].location + '?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
+			// Move assets to compensate for cropping
+			controller.updateAsset(assets[i].tab, assets[i].hash, data.x, data.y)
+		} catch (e) {
+			// Failed to crop asset, probably because the image has no non-transparent pixels
+			console.error(e)
+			document.getElementById('autocrop-' + assets[i].tab + '-' + assets[i].hash).className = "asset"
+			errors++
+		}
+		canvas.remove()
+	}
+	document.getElementById('autocrop-progress').innerHTML = (errors === 0 ? 'Finished autocropping' : 'Finished with ' + errors + ' failed assets')
+	// Reload everything
+	controller.reloadAssets()
+}

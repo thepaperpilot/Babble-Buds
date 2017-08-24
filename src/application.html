@@ -195,6 +195,15 @@
             <strong style="color: #54647a;"><script>document.write(require('electron').remote.app.getVersion())</script></strong><br/>
             <p style="color: #fff;">Babble buds is a free, open source puppet show software. It is heavily based on the non-public software called "Puppet Pals", used in URealms Live. The software is written using electron and PIXI.js.</p>
         </div>
+        <div id="autocrop" style="display: none;">
+            <div id="autocrop-desc" style="color: #fff">
+            <p>This operation will take every asset in the project and remove any parts from the edges that are totally transparent. This will make the asset potentially smaller, and will have a smaller frame around it in the puppet editor, but will NOT cut out any pixels that are not completely transparent. The main purpose of this is to fix an issue where heads will bobble anchored around the bottom of the puppet instead of the bottom of the head. </p>
+            <p>The program may not be able to respond while running the script. It may take a short while to complete, depending on how many assets there are to process. </p>
+            <span style="font-weight: bold;">This process is not reversible. Unsaved changes made in the puppet editor will be discarded. The project will be automatically saved once the operation is completed.</span></div>
+            <button id="autocrop-btn" class="fillbutton" style="margin-top: 10px;">Begin Autocropping</button>
+            <div id="autocrop-assets" class="autocrop-assets"></div>
+            <div id="autocrop-progress" class="fillbutton" style="margin-top: 10px; text-align: center; color: #fff"></div>
+        </div>
         <div class="modal">
             <div class="modal-inner">
                 <div class="modal-content"></div>
