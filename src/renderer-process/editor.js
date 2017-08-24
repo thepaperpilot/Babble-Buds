@@ -345,7 +345,11 @@ exports.setPuppet = function(newCharacter, override, preserveHistory) {
         return
 
     character = newCharacter
-    if (!preserveHistory) oldcharacter = JSON.stringify(character)
+    if (!preserveHistory) {
+        oldcharacter = JSON.stringify(character)
+        history = reverseHistory = []
+        document.getElementById("editor-save").classList.remove("highlight")
+    }
     puppet = stage.createPuppet(character)
     stage.setPuppet(1, puppet)
 
@@ -758,8 +762,9 @@ function savePuppet() {
     status.log('Saving puppet...', 2, 1)
     selected = null
     if (selectedGui) stage.stage.removeChild(selectedGui)
-    controller.saveCharacter(character, stage.getThumbnail())
     oldcharacter = JSON.stringify(character)
+    controller.saveCharacter(JSON.parse(oldcharacter), stage.getThumbnail())
+    document.getElementById("editor-save").classList.remove("highlight")
     status.log('Puppet saved!', 1, 1)
 }
 
@@ -1229,7 +1234,7 @@ function recordChange() {
 }
 
 function undo() {
-    if (history.length === 0 && character === oldcharacter) return
+    if (history.length === 0 && JSON.stringify(character) === oldcharacter) return
     reverseHistory.push(history.pop())
     let action = history.length === 0 ? oldcharacter : history[history.length - 1]
     exports.setPuppet(JSON.parse(action), true, true)
