@@ -320,6 +320,7 @@ select option {
 	left: 4px;
 	top: 4px;
 	position: relative;
+	pointer-events: none;
 }
 
 .checkbox {

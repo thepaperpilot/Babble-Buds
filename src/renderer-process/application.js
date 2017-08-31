@@ -228,13 +228,11 @@ function charContextMenu(e) {
 	document.getElementById('chars').style.display = 'none'
 	document.getElementById('charselect').style.display = 'block'
 	if (project.project.hotbar[i]) {
-		document.getElementById('char selected').getElementsByClassName('desc')[0].innerHTML = project.characters[project.project.hotbar[i]].name
 		if (fs.existsSync(path.join(project.assetsPath, '..', 'thumbnails', project.project.hotbar[i] + '.png')))
 			document.getElementById('char selected').style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', project.project.hotbar[i] + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
 		else
 			document.getElementById('char selected').style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', 'new-' + project.project.hotbar[i] + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
 	} else {
-		document.getElementById('char selected').getElementsByClassName('desc')[0].innerHTML = ''
 		document.getElementById('char selected').style.backgroundImage = ''
 	}
 	document.getElementById('char null').i = i
