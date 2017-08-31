@@ -5,7 +5,7 @@ const PIXI = require('pixi.js')
 const path = require('path')
 const controller = require('./controller.js')
 const status = require('./status.js')
-const Stage = require('./stage.js').Stage
+const babble = require('babble.js')
 const fs = require('fs-extra')
 
 // Aliases
@@ -35,7 +35,7 @@ let reverseHistory = [] // used for redoing stuff
 exports.init = function() {
     project = remote.getGlobal('project').project
     // Create some basic objects
-    stage = new Stage('editor-screen', {'numCharacters': 1, 'puppetScale': 1, 'assets': project.project.assets}, project.assets, project.assetsPath, null, status)
+    stage = new babble.Stage('editor-screen', {'numCharacters': 1, 'puppetScale': 1, 'assets': project.project.assets}, project.assets, project.assetsPath, null, status)
     stage.stage.interactive = true
     stage.stage.on('mousedown', editorMousedown)
     stage.stage.on('mousemove', editorMousemove)

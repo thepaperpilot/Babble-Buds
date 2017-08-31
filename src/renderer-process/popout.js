@@ -1,6 +1,6 @@
 const electron = require('electron')
 const remote = electron.remote
-const Stage = require('./stage.js').Stage
+const babble = require('babble.js')
 
 let stage
 let puppet
@@ -43,7 +43,7 @@ electron.ipcRenderer.on('resize', () => {
 electron.ipcRenderer.on('setup', (event, project, mypuppet, id) => {
     puppet = mypuppet
     puppet.id = id
-    stage = new Stage('screen', project.project, project.assets, project.assetsPath, loadPuppets)
+    stage = new babble.Stage('screen', project.project, project.assets, project.assetsPath, loadPuppets)
 })
 
 electron.ipcRenderer.on('init', (event, puppets) => {

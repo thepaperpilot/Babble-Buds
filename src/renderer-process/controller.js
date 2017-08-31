@@ -6,7 +6,7 @@ const application = require('./application.js')
 const editor = require('./editor.js')
 const network = require('./network.js')
 const status = require('./status.js')
-const Stage = require('./stage.js').Stage
+const babble = require('babble.js')
 const fs = require('fs-extra')
 const path = require('path')
 const url = require('url')
@@ -26,7 +26,7 @@ exports.init = function() {
 	project = remote.getGlobal('project').project
 	application.init()
 	network.init()
-	stage = new Stage('screen', project.project, project.assets, project.assetsPath, loadPuppets, status)
+	stage = new babble.Stage('screen', project.project, project.assets, project.assetsPath, loadPuppets, status)
 	popoutWindowState = windowStateKeeper({
 		file: "popout-window.json",
 	    defaultWidth: 800,

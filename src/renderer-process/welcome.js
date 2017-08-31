@@ -11,8 +11,6 @@ const util = remote.require('./main-process/util')
 const settings = remote.require('./main-process/settings')
 const fs = require('fs-extra')
 
-console.log(require('electron').remote.app.getVersion())
-
 document.getElementById('location').value = path.join(app.getPath('home'), 'projects')
 document.getElementById('open').addEventListener('click', function() {
 	util.selectProject()
