@@ -396,19 +396,19 @@ exports.keyDown = function(e) {
     if (selected) {
         let value = e.shiftKey ? 10 : 1
         let handled = false
-        if (key == 37) {
+        if (key == 37 || key == 65) {
             selected.x -= value
             selectedGui.x = selected.x * scale + selectedGui.pivot.x
             handled = true
-        } else if (key == 39) {
+        } else if (key == 39 || key == 68) {
             selected.x += value
             selectedGui.x = selected.x * scale + selectedGui.pivot.x
             handled = true
-        } else if (key == 38) {
+        } else if (key == 38 || key == 87) {
             selected.y -= value
             selectedGui.y = selected.y * scale + selectedGui.pivot.y
             handled = true
-        } else if (key == 40) {
+        } else if (key == 40 || key == 83) {
             selected.y += value
             selectedGui.y = selected.y * scale + selectedGui.pivot.y
             handled = true
