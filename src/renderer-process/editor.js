@@ -36,6 +36,7 @@ exports.init = function() {
     project = remote.getGlobal('project').project
     // Create some basic objects
     stage = new babble.Stage('editor-screen', {'numCharacters': 1, 'puppetScale': 1, 'assets': project.project.assets}, project.assets, project.assetsPath, null, status)
+    window.addEventListener("resize", () => {stage.resize()})
     stage.stage.interactive = true
     stage.stage.on('mousedown', editorMousedown)
     stage.stage.on('mousemove', editorMousemove)

@@ -72,12 +72,6 @@ select option {
 	padding: 10px;
 }
 
-.main {
-	height: calc( 100% - 340px );
-	padding: 0;
-	width: calc( 100% - 450px );
-}
-
 .editormain {
 	background-color: #2a323d;
 	height: calc( 100% - 90px );
@@ -87,6 +81,12 @@ select option {
 .editormain button {
 	position: absolute;
 	z-index: 1;
+}
+
+.main {
+	height: calc( 100% - 340px );
+	padding: 0;
+	width: calc( 100% - 450px );
 }
 
 .bottom {
