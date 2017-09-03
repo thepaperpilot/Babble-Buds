@@ -316,7 +316,7 @@ exports.connect = function() {
 				controller.addAssetLocal(asset)
 				if (status.decrement('Retrieving %x Asset%s')) {
 					status.log('Synced Assets!', 3, 1)
-					addPuppetServer(socket)
+					addPuppetClient()
 				}
 			})
 			stream.pipe(fs.createWriteStream(path.join(project.assetsPath, asset.tab, asset.hash + '.png')))
