@@ -274,9 +274,9 @@ function updateHotbar(e) {
 	if (project.project.hotbar[i] && project.project.hotbar[i] !== 0) {
 		document.getElementById('char ' + i).getElementsByClassName('desc')[0].innerHTML = project.characters[puppet].name
 		if (fs.existsSync(path.join(project.assetsPath, '..', 'thumbnails', puppet + '.png')))
-			document.getElementById('char ' + i).style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', puppet + '.png?random=' + new Date().getTime()) + ')'
+			document.getElementById('char ' + i).style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', puppet + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
 		else
-			document.getElementById('char ' + i).style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', 'new-' + puppet + '.png?random=' + new Date().getTime()) + ')'
+			document.getElementById('char ' + i).style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', 'new-' + puppet + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
 	} else {
 		document.getElementById('char ' + i).getElementsByClassName('desc')[0].innerHTML = ''
 		document.getElementById('char ' + i).style.backgroundImage = ''
