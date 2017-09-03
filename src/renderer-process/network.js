@@ -44,6 +44,10 @@ exports.host = function() {
 
 	// Add a connect listener
 	server.sockets.on('connection', function(socket) {
+		// Send project settings
+		socket.emit('set scale', project.project.puppetScale)
+		socket.emit('set slots', project.project.numCharacters)
+
 		// Send list of assets
 		let tabs = Object.keys(project.assets)
 		for (let i = 0; i < tabs.length; i++) {
@@ -121,6 +125,12 @@ exports.host = function() {
 		socket.on('jiggle', (id) => {
 			controller.jiggle(id)
 			socket.broadcast.emit('jiggle', id)
+		})
+		socket.on('set scale', (scale) => {
+			project.project.puppetScale = scale
+			document.getElementById('puppetscale').value = scale
+			controller.resize()
+			socket.broadcast.emit('set scale', scale)
 		})
 		socket.on('set slots', (slots) => {
 			project.project.numCharacters = slots
@@ -299,6 +309,11 @@ exports.connect = function() {
 			}
 		}
 	})
+	socket.on('set scale', (scale) => {
+		project.project.puppetScale = scale
+		document.getElementById('puppetscale').value = scale
+		controller.resize()
+	})
 	socket.on('set slots', (slots) => {
 		project.project.numCharacters = slots
 		document.getElementById('numslots').value = slots
@@ -316,7 +331,7 @@ exports.connect = function() {
 				controller.addAssetLocal(asset)
 				if (status.decrement('Retrieving %x Asset%s')) {
 					status.log('Synced Assets!', 3, 1)
-					addPuppetServer(socket)
+					addPuppetClient()
 				}
 			})
 			stream.pipe(fs.createWriteStream(path.join(project.assetsPath, asset.tab, asset.hash + '.png')))

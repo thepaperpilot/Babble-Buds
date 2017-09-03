@@ -9,7 +9,7 @@ const editor = require('./editor')
 
 const path = require('path')
 
-module.exports = exports = remote.getGlobal('project').project = {
+module.exports = {
     // project: {},
     // characters: {},
     // assets: {},
@@ -27,6 +27,7 @@ module.exports = exports = remote.getGlobal('project').project = {
 				return
 			}
 
+			remote.getGlobal('project').project = this
 			this.project = proj
 			this.oldProject = JSON.stringify(proj)
 			this.characters = {}
