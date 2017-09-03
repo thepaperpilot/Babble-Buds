@@ -341,6 +341,7 @@ function toggleAlwaysOnTop(e) {
 function puppetscaleChange(e) {
 	project.project.puppetScale = parseFloat(e.target.value)
 	controller.resize()
+	network.emit('set scale', project.project.puppetScale)
 }
 
 function numslotsChange(e) {
