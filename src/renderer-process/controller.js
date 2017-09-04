@@ -6,6 +6,7 @@ const application = require('./application.js')
 const editor = require('./editor.js')
 const network = require('./network.js')
 const status = require('./status.js')
+const settings = remote.require('./main-process/settings')
 const babble = require('babble.js')
 const fs = require('fs-extra')
 const path = require('path')
@@ -222,6 +223,7 @@ exports.setupPopout = function() {
 
 exports.resize = function() {
 	stage.resize()
+	editor.resize()
 	exports.emitPopout('resize')
 }
 
@@ -403,6 +405,9 @@ function loadPuppets(stage) {
 	// Update editor
 	application.setPuppet(project.project.hotbar.indexOf(project.actor.id), puppet.emotes)
 	application.setEmote(puppet.emote)
+
+	// Set view
+	application.setView(settings.settings.view || 'hybrid')
 
 	status.log('Project Loaded!', 1, 1)
 }

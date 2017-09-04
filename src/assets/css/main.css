@@ -83,6 +83,10 @@ select option {
 	z-index: 1;
 }
 
+body > .editormain {
+	height: calc( 100% - 490px );
+}
+
 .main {
 	height: calc( 100% - 340px );
 	padding: 0;

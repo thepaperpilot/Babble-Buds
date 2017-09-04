@@ -8,8 +8,8 @@
     <body>
         <div id="screen" class="container main"></div>
         <div id="status" class="container status"></div>
-        <div class="container bottom">
-            <div class="buttons s2 scroll">
+        <div id="bottom" class="container bottom">
+            <div id="project-buttons" class="buttons s2">
                 <input type="checkbox" id="greenscreen" class="checkbox"><label for="greenscreen" class="checkbox-label">Green Screen</label>
                 <button id="settings">Project Settings</button>
                 <button id="popout">Pop Out Stage</button>
@@ -66,9 +66,19 @@
                 </div>
             </div>
         </div>
-        <div class="container side">
+        <div id="editor-bottom" class="container bottom" style="display: none;height: 400px;">
+            <div id="project-buttons" class="buttons s2">
+                <button id="editor-view-save">Save</button>
+                <button id="editor-open-settings">Open/Settings</button>
+                <button id="editor-layer-babble">Layers/Babble</button>
+                <button id="editor-view-new">New</button>
+                <button id="editor-view-duplicate">Duplicate</button>
+                <button id="editor-view-import">Import</button>
+            </div>
+        </div>
+        <div id="side" class="container side">
             <div id="editor" class="v5 vbar">
-                <div class="sidebuttons b5">
+                <div id="puppet-buttons" class="sidebuttons b5">
                     <button id="editor-open">Open</button>
                     <button id="editor-save">Save</button>
                     <button id="editor-new">New</button>
@@ -85,7 +95,7 @@
                 <div id="editor-layers-panel" class="editorpanel scroll" style="display: none">
                     <button id="props" class="babble">Props</button>
                     <button id="hat" class="babble">Hat</button>
-                    <div class="emotes">
+                    <div id="babble-emotes" class="emotes">
                         <button id="default-emote" class="emote available">default</button>
                         <button id="happy-emote" class="emote">happy</button>
                         <button id="wink-emote" class="emote">wink</button>
@@ -145,10 +155,10 @@
                 <div id="editor-settings-panel" class="editorpanel scroll" style="display: none">
                     <p style="margin: 0 0 8px; padding-top: 16px;">Puppet Name:</p>
                     <input type="text" id="editor-name" value="New Puppet" style="width: calc(100% - 16px)"><br>
-                    <input type="checkbox" id="deadbonesstyle" class="checkbox"><label for="deadbonesstyle" class="checkbox-label">Bobble head while talking</label>
+                    <input type="checkbox" id="deadbonesstyle" class="checkbox"><label for="deadbonesstyle" class="checkbox-label">Bobble head while talking</label><br/>
                     <button id="delete-character">Delete Character</button>
                 </div>
-                <div class="sidebuttons b3">
+                <div id="puppet-panels" class="sidebuttons b3">
                     <button id="editor-layers">Layers</button>
                     <button id="editor-babble">Babble</button>
                     <button id="editor-settings">Settings</button>

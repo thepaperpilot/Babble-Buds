@@ -10,7 +10,8 @@ const filepath = path.join(app.getPath('userData'), 'settings.json')
 module.exports = exports = {
 	settings: {
 		openProject: "",
-		recentProjects: []
+		recentProjects: [],
+		view: "hybrid"
 	},
 	save: function() {
 		fs.writeJson(filepath, this.settings)
@@ -44,5 +45,9 @@ module.exports = exports = {
 		if (thumbnail) fs.writeFile(path.join(app.getPath('userData'), filename + '.png'), new Buffer(thumbnail, 'base64'), (err) => {
 	        if (err) console.log(err)
 	    })
+	},
+	setView: function(view) {
+		this.settings.view = view;
+		this.save()
 	}
 }

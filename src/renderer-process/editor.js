@@ -4,6 +4,7 @@ const remote = electron.remote
 const PIXI = require('pixi.js')
 const path = require('path')
 const controller = require('./controller.js')
+const settings = remote.require('./main-process/settings')
 const status = require('./status.js')
 const babble = require('babble.js')
 const fs = require('fs-extra')
@@ -105,12 +106,18 @@ exports.init = function() {
 
     // DOM listeners
     document.getElementById('editor-save').addEventListener('click', savePuppet)
+    document.getElementById('editor-view-save').addEventListener('click', savePuppet)
     document.getElementById('editor-new').addEventListener('click', newPuppet)
+    document.getElementById('editor-view-new').addEventListener('click', newPuppet)
     document.getElementById('editor-duplicate').addEventListener('click', dupePuppet)
+    document.getElementById('editor-view-duplicate').addEventListener('click', dupePuppet)
     document.getElementById('editor-import').addEventListener('click', importPuppet)
+    document.getElementById('editor-view-import').addEventListener('click', importPuppet)
     document.getElementById('editor-open').addEventListener('click', openPuppetPanel)
+    document.getElementById('editor-open-settings').addEventListener('click', openPuppetSettingsPanel)
     document.getElementById('char open search').addEventListener('keyup', updateCharSearch)
     document.getElementById('char open search').addEventListener('search', updateCharSearch)
+    document.getElementById('editor-layer-babble').addEventListener('click', openLayersBabblePanel)
     document.getElementById('editor-layers').addEventListener('click', toggleLayers)
     let buttons = document.getElementById('editor-layers-panel').getElementsByTagName('button')
     for (let i = 0; i < buttons.length; i++)
@@ -309,6 +316,10 @@ exports.deleteAsset = function(tab, asset) {
 exports.resetChanges = function() {
     character = null
     oldcharacter = 'null'
+}
+
+exports.resize = function() {
+    stage.resize()
 }
 
 // Returns true if its safe to change puppet
@@ -798,7 +809,7 @@ function importPuppet() {
 
 function openPuppet(e) {
     document.getElementById('editor-screen').style.display = ''
-    document.getElementById('editor-open-panel').style.display = 'none'
+    if (settings.settings.view !== 'editor') document.getElementById('editor-open-panel').style.display = 'none'
     exports.setPuppet(JSON.parse(JSON.stringify(project.characters[e.target.charid])))
 }
 
@@ -823,7 +834,7 @@ function openPuppetPanel() {
     document.getElementById('editor-settings-panel').style.display = 'none'
     let panel = document.getElementById('editor-open-panel')
     if (panel.style.display === 'none') {
-        document.getElementById('editor-screen').style.display = 'none'
+        if (settings.settings.view !== 'editor') document.getElementById('editor-screen').style.display = 'none'
         panel.style.display = ''
         let charList = document.getElementById('char open list')
         charList.innerHTML = ''
@@ -845,6 +856,39 @@ function openPuppetPanel() {
         document.getElementById('editor-screen').style.display = ''
         panel.style.display = 'none'
     }
+}
+
+function openPuppetSettingsPanel() {
+    document.getElementById('editor-layers-panel').style.display = 'none'
+    document.getElementById('editor-babble-panel').style.display = 'none'
+    let panel = document.getElementById('editor-open-panel')
+    if (panel.style.display === 'none') {
+        panel.style.display = ''
+        document.getElementById('editor-settings-panel').style.display = ''
+        let charList = document.getElementById('char open list')
+        charList.innerHTML = ''
+        let characters = Object.keys(project.characters)
+        for (let j = 0; j < characters.length; j++) {
+            let selector = document.createElement('div')
+            selector.id = project.characters[characters[j]].name.toLowerCase()
+            selector.className = "char"
+            if (fs.existsSync(path.join(project.assetsPath, '..', 'thumbnails', 'new-' + characters[j] + '.png')))
+                selector.style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', 'new-' + characters[j] + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
+            else
+                selector.style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', characters[j] + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
+            charList.appendChild(selector)
+            selector.innerHTML = '<div class="desc">' + project.characters[characters[j]].name + '</div>'
+            selector.charid = characters[j]
+            selector.addEventListener('click', openPuppet)
+        }
+    }
+}
+
+function openLayersBabblePanel() {
+    document.getElementById('editor-open-panel').style.display = 'none'
+    document.getElementById('editor-settings-panel').style.display = 'none'
+    document.getElementById('editor-layers-panel').style.display = ''
+    document.getElementById('editor-babble-panel').style.display = ''
 }
 
 function toggleLayers() {
@@ -891,7 +935,7 @@ function toggleSettings() {
 
 function setLayer(e) {
     document.getElementById('editor-screen').style.display = ''
-    document.getElementById('editor-layers-panel').style.display = 'none'
+    if (settings.settings.view !== 'editor') document.getElementById('editor-layers-panel').style.display = 'none'
     layer = e.target.id
     if (layer.indexOf('-emote') > -1) {
     let emote = layer.replace(/-emote/, '')

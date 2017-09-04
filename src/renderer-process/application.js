@@ -8,10 +8,12 @@ const modal = new (require('vanilla-modal').default)()
 const editor = require('./editor.js')
 const controller = require('./controller.js')
 const network = require('./network.js')
+const settings = electron.remote.require('./main-process/settings')
 const path = require('path')
 const fs = require('fs-extra')
 
 let project
+let view
 
 // Constants
 let emotes = ['default', 'happy', 'wink', 'kiss', 'angry', 'sad', 'ponder', 'gasp', 'veryangry', 'verysad', 'confused', 'ooo']
@@ -75,6 +77,9 @@ exports.init = function() {
 	})
 	electron.ipcRenderer.on('close', () => {
 		project.closeProject()
+	})
+	electron.ipcRenderer.on('view', (event, newView) => {
+		exports.setView(newView)
 	})
 	electron.ipcRenderer.on('togglePopout', () => {
 		controller.togglePopout()
@@ -169,6 +174,20 @@ exports.closePopout = function() {
 	document.getElementById('screen').removeEventListener('click', controller.togglePopout)
 	document.getElementById('screen').className = 'container main'
 	document.getElementById('screen').innerHTML = ''
+}
+
+exports.setView = function(newView) {
+	if (view === 'stage')
+		removeStageView()
+	else if (view === 'editor')
+		removeEditorView()
+	if (newView === 'stage')
+		addStageView()
+	else if (newView === 'editor')
+		addEditorView()
+	view = newView
+	settings.setView(view)
+	controller.resize()
 }
 
 function keyDown(e) {
@@ -356,6 +375,82 @@ function ipChange(e) {
 
 function portChange(e) {
 	project.project.port = parseInt(e.target.value)
+}
+
+function removeStageView() {
+	document.getElementById('screen').style.width = ''
+	document.getElementById('status').style.width = ''
+	document.getElementById('bottom').style.width = ''
+	document.getElementById('side').style.display = ''
+}
+
+function removeEditorView() {
+	document.getElementById('screen').style.display = ''
+	document.getElementById('editor').insertBefore(document.getElementById('editor-screen'), document.getElementById('puppet-panels'))
+	document.getElementById('editor-screen').className = 'editormain'
+    document.getElementById('editor-open-panel').style.display = 'none'
+    document.getElementById('editor-settings-panel').style.display = 'none'
+    document.getElementById('editor-layers-panel').style.display = 'none'
+    document.getElementById('editor-babble-panel').style.display = 'none'
+	document.getElementById('editor').style.display = ''
+	document.getElementById('bottom').style.display = ''
+	document.getElementById('editor-bottom').style.display = 'none'
+	document.getElementById('assets').style.height = ''
+
+	// Bottom Panel Stuff
+	document.getElementById('editor-open-panel').className = 'charselector editorpanel'
+	document.getElementById('editor-open-panel').style.height = ''
+	document.getElementById('editor-layers-panel').className = 'scroll editorpanel'
+	document.getElementById('editor-layers-panel').style.height = ''
+	document.getElementById('editor-babble-panel').className = 'scroll editorpanel'
+	document.getElementById('editor-babble-panel').style.height = ''
+	document.getElementById('editor-settings-panel').className = 'scroll editorpanel'
+	document.getElementById('editor-settings-panel').style.height = ''
+	document.getElementById('babble-emotes').style.margin = ''
+	document.getElementById('babble-mouths').style.margin = ''
+	document.getElementById('babble-eyes').style.margin = ''
+	document.getElementById('editor').insertBefore(document.getElementById('editor-open-panel'), document.getElementById('puppet-panels'))
+	document.getElementById('editor').insertBefore(document.getElementById('editor-layers-panel'), document.getElementById('puppet-panels'))
+	document.getElementById('editor').insertBefore(document.getElementById('editor-babble-panel'), document.getElementById('puppet-panels'))
+	document.getElementById('editor').insertBefore(document.getElementById('editor-settings-panel'), document.getElementById('puppet-panels'))
+}
+
+function addStageView() {
+	document.getElementById('screen').style.width = 'unset'
+	document.getElementById('status').style.width = 'unset'
+	document.getElementById('bottom').style.width = 'unset'
+	document.getElementById('side').style.display = 'none'
+}
+
+function addEditorView() {
+	document.getElementById('screen').style.display = 'none'
+	document.body.prepend(document.getElementById('editor-screen'))
+	document.getElementById('editor-screen').className = 'editormain container main'
+    document.getElementById('editor-open-panel').style.display = 'none'
+    document.getElementById('editor-settings-panel').style.display = 'none'
+    document.getElementById('editor-layers-panel').style.display = ''
+    document.getElementById('editor-babble-panel').style.display = ''
+	document.getElementById('editor').style.display = 'none'
+	document.getElementById('bottom').style.display = 'none'
+	document.getElementById('editor-bottom').style.display = ''
+	document.getElementById('assets').style.height = '100%'
+
+	// Bottom Panel Stuff
+	document.getElementById('editor-open-panel').className = 'charselector s4 editorpanel'
+	document.getElementById('editor-open-panel').style.height = 'calc(100% - 10px )'
+	document.getElementById('editor-layers-panel').className = 'scroll s4 editorpanel'
+	document.getElementById('editor-layers-panel').style.height = 'calc(100% - 10px )'
+	document.getElementById('editor-babble-panel').className = 'scroll s4 editorpanel'
+	document.getElementById('editor-babble-panel').style.height = 'calc(100% - 10px )'
+	document.getElementById('editor-settings-panel').className = 'scroll s4 editorpanel'
+	document.getElementById('editor-settings-panel').style.height = 'calc(100% - 10px )'
+	document.getElementById('babble-emotes').style.margin = '4px auto'
+	document.getElementById('babble-mouths').style.margin = 'auto'
+	document.getElementById('babble-eyes').style.margin = 'auto'
+	document.getElementById('editor-bottom').append(document.getElementById('editor-open-panel'))
+	document.getElementById('editor-bottom').append(document.getElementById('editor-layers-panel'))
+	document.getElementById('editor-bottom').append(document.getElementById('editor-babble-panel'))
+	document.getElementById('editor-bottom').append(document.getElementById('editor-settings-panel'))
 }
 
 function toggleModal(string) {

@@ -99,6 +99,33 @@ const template = [
     label: 'View',
     submenu: [
       {
+        label: 'Stage View',
+        type: 'radio',
+        click (item, focusedWindow) {
+          focusedWindow.webContents.send('view', 'stage')
+          settings.save()
+        }
+      },
+      {
+        label: 'Editor View',
+        type: 'radio',
+        click (item, focusedWindow) {
+          focusedWindow.webContents.send('view', 'editor')
+          settings.save()
+        }
+      },
+      {
+        label: 'Hybrid View',
+        type: 'radio',
+        click (item, focusedWindow) {
+          focusedWindow.webContents.send('view', 'hybrid')
+          settings.save()
+        }
+      },
+      {
+        type: 'separator'
+      },
+      {
         label: 'Toggle Popout',
         accelerator: 'CommandOrControl+P',
         click (item, focusedWindow) {
@@ -192,4 +219,11 @@ exports.updateMenu = function() {
   // Y u no work?
   // menu.items[2].enabled = enabled
   // menu.items[3].enabled = enabled
+  if (settings.settings.view === 'stage') {
+    menu.items[2].submenu.items[0].checked = true
+  } else if (settings.settings.view === 'editor') {
+    menu.items[2].submenu.items[1].checked = true
+  } else {
+    menu.items[2].submenu.items[2].checked = true
+  }
 }
