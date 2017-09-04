@@ -229,7 +229,7 @@ function keyUp(e) {
 
 	if (key > 48 && key < 58) {
 		if (project.project.hotbar.length > key - 49) {
-			controller.setPuppetLocal(key - 49)
+			controller.setPuppetLocal(key - 49, e.shiftKey, e.ctrlKey)
 		}
 	} else if (key == 85) controller.setEmoteLocal('default')
 	else if (key == 73) controller.setEmoteLocal('happy')
