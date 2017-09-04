@@ -194,15 +194,18 @@ body > .editormain {
 	background-position: center;
 	background-repeat: no-repeat;
 	background-size: contain;
-	height: calc( 33% - 3px );
+	height: calc( 33% - 8px );
 	position: relative;
 	width: calc( 33% - 6px );
 }
 
 .emote {
 	background-color: #2a323d;
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: contain;
 	box-shadow: 0 313px rgba(256, 0, 0, 0.2) inset;
-	height: calc( 25% - 4px );
+	height: calc( 25% - 11px );
 	position: relative;
 	width: calc( 25% - 4.2px );
 }
@@ -320,11 +323,21 @@ body > .editormain {
 	width: 100%;
 }
 
+.emote .desc {
+	top: 0;
+	bottom: unset;
+}
+
 .hotkey {
 	left: 4px;
 	top: 4px;
-	position: relative;
+	position: absolute;
 	pointer-events: none;
+}
+
+.emote .hotkey {
+	bottom: 4px;
+	top: unset;
 }
 
 .checkbox {

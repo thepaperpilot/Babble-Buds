@@ -110,7 +110,7 @@ exports.init = function() {
 // Update UI when user selects a new puppet
 // Specifically, tint the character in the hotbar,
 //  and tint available emotes for this puppet
-exports.setPuppet = function(i, emotes) {
+exports.setPuppet = function(i, enabledEmotes) {
 	let available = document.getElementById('emotes').getElementsByClassName("available")
 	while (available.length)
 		available[0].classList.remove("available")
@@ -119,9 +119,19 @@ exports.setPuppet = function(i, emotes) {
 	while (selected.length)
 		selected[0].classList.remove("selected")
 
-	let emoteKeys = Object.keys(emotes)
+	let emoteKeys = Object.keys(enabledEmotes)
 	for (let j = 0; j < emoteKeys.length; j++)
 		document.getElementById(emoteKeys[j]).className += " available"
+
+	let character = JSON.parse(JSON.stringify(project.characters[project.project.hotbar[i]]))
+	for (let i = 0; i < emotes.length; i++) {
+		if (character.emotes[emotes[i]] && character.emotes[emotes[i]].enabled) {
+			if (fs.existsSync(path.join(project.assetsPath, '..', 'thumbnails', "new-" + character.id, emotes[i] + '.png')))
+				document.getElementById(emotes[i]).style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', "new-" + character.id, emotes[i] + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
+			else
+				document.getElementById(emotes[i]).style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', "" + character.id, emotes[i] + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
+		} else document.getElementById(emotes[i]).style.backgroundImage = ''
+	}
 
 	document.getElementById('char ' + i).className += " selected"
 }
@@ -147,10 +157,16 @@ exports.updateCharacter = function(character, updateThumbnail) {
 		controller.updateCharacter(index, character)
 		if (('' + document.getElementById('char ' + index).className).indexOf('selected') > -1) {
 			controller.setPuppetLocal(index)
+			if (updateThumbnail)
+				for (let i = 0; i < emotes.length; i++) {
+					if (character.emotes[emotes[i]] && character.emotes[emotes[i]].enabled)
+						document.getElementById(emotes[i]).style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', 'new-' + character.id, emotes[i] + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
+				}
 		}
 		document.getElementById('char ' + index).getElementsByClassName('desc')[0].innerHTML = character.name
-		if (updateThumbnail)
+		if (updateThumbnail) {
 			document.getElementById('char ' + index).style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', 'new-' + character.id + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
+		}
 	}
 }
 

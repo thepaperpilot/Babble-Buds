@@ -337,11 +337,18 @@ exports.updateCharacter = function(index, character) {
 	hotbar[index] = stage.createPuppet(character)
 }
 
-exports.saveCharacter = function(character, thumbnail) {
+exports.saveCharacter = function(character, thumbnail, emoteThumbnails) {
     project.saveCharacter(character)
 	if (thumbnail) {
 		fs.ensureDirSync(path.join(project.assetsPath, '..', 'thumbnails'))
 		fs.writeFileSync(path.join(project.assetsPath, '..', 'thumbnails', 'new-' + character.id + '.png'), new Buffer(thumbnail, 'base64'))
+		if (emoteThumbnails) {
+			fs.ensureDirSync(path.join(project.assetsPath, '..', 'thumbnails', 'new-' + character.id))
+			let emotes = Object.keys(emoteThumbnails)
+			for (let i = 0; i < emotes.length; i++) {
+				fs.writeFileSync(path.join(project.assetsPath, '..', 'thumbnails', 'new-' + character.id, emotes[i] + '.png'), new Buffer(emoteThumbnails[emotes[i]], 'base64'))
+			}
+		}
 	    application.updateCharacter(character, true)
 	} else {
 		application.updateCharacter(character)

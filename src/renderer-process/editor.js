@@ -776,7 +776,26 @@ function savePuppet() {
     selected = null
     if (selectedGui) stage.stage.removeChild(selectedGui)
     oldcharacter = JSON.stringify(character)
-    controller.saveCharacter(JSON.parse(oldcharacter), stage.getThumbnail())
+
+    // Get thumbnails for the different emotes
+    let emoteThumbnails = {}
+    let emote = puppet.emote
+    let emotes = Object.keys(puppet.emotes)
+    // Disable all layers except the head and emotes
+    puppet.body.visible = false
+    puppet.hat.visible = false
+    puppet.props.visible = false
+    for (let i = 0; i < emotes.length; i++) {
+        puppet.changeEmote(emotes[i])
+        emoteThumbnails[emotes[i]] = stage.getThumbnail()
+    }
+    puppet.changeEmote(emote)
+    puppet.body.visible = true
+    puppet.hat.visible = true
+    puppet.props.visible = true
+
+    // Save character
+    controller.saveCharacter(JSON.parse(oldcharacter), stage.getThumbnail(), emoteThumbnails)
     document.getElementById("editor-save").classList.remove("highlight")
     status.log('Puppet saved!', 1, 1)
 }

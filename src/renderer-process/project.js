@@ -54,6 +54,7 @@ module.exports = {
 
 			for (let i = 0; i < this.project.characters.length; i++) {
 				fs.removeSync(path.join(this.assetsPath, '..', 'thumbnails', 'new-' + this.project.characters[i].id + '.png'))
+				fs.removeSync(path.join(this.assetsPath, '..', 'thumbnails', 'new-' + this.project.characters[i].id))
 			}
 
 			settings.settings.openProject = filepath
@@ -71,6 +72,12 @@ module.exports = {
 			if (fs.existsSync(path.join(this.assetsPath, '..', 'thumbnails', 'new-' + this.project.characters[i].id + '.png')))
                 fs.renameSync(path.join(this.assetsPath, '..', 'thumbnails', 'new-' + this.project.characters[i].id + '.png'), 
                 	path.join(this.assetsPath, '..', 'thumbnails', this.project.characters[i].id + '.png'))
+            if (fs.existsSync(path.join(this.assetsPath, '..', 'thumbnails', 'new-' + this.project.characters[i].id))) {
+            	if (fs.existsSync(path.join(this.assetsPath, '..', 'thumbnails', '' + this.project.characters[i].id)))
+            		fs.removeSync(path.join(this.assetsPath, '..', 'thumbnails', '' + this.project.characters[i].id))
+                fs.renameSync(path.join(this.assetsPath, '..', 'thumbnails', 'new-' + this.project.characters[i].id), 
+                	path.join(this.assetsPath, '..', 'thumbnails', "" + this.project.characters[i].id))
+            }
 		}
 		settings.addRecentProject(controller.getThumbnail())
 		this.oldProject = JSON.stringify(this.project)
