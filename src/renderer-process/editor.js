@@ -161,6 +161,7 @@ exports.init = function() {
     document.getElementById('asset search').addEventListener('search', updateAssetSearch)
     document.getElementById('zoom in').addEventListener('click', zoomIn)
     document.getElementById('zoom out').addEventListener('click', zoomOut)
+    document.body.addEventListener('click', deselect)
 
     // Receive messages from application menu
     electron.ipcRenderer.on('cut', cut)
@@ -1299,5 +1300,12 @@ function redo() {
         document.getElementById("editor-save").classList.remove("highlight")
     } else {
         document.getElementById("editor-save").classList.add("highlight")
+    }
+}
+
+function deselect(e) {
+    if (e.target != stage.renderer.view && selected) {
+        selected = null
+        stage.stage.removeChild(selectedGui)
     }
 }
