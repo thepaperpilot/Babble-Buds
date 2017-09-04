@@ -41,7 +41,6 @@ exports.init = function() {
     stage.stage.interactive = true
     stage.stage.on('mousedown', editorMousedown)
     stage.stage.on('mousemove', editorMousemove)
-    stage.stage.on('mouseup', editorMouseup)
     window.addEventListener('mouseup', mouseUp, false)
 
     // Override some parts of the stage
@@ -564,20 +563,11 @@ function editorMousemove(e) {
     }
 }
 
-function editorMouseup() {
-    if (selected) {
-        selected.dragging = false
-        selected.asset.x = selected.x
-        selected.asset.y = selected.y
-        recordChange()
-    }
-}
-
 function resizeMousedown(e) {
     e.stopPropagation()
     selectedGui.dragging = true
     stage.stage.on('mousemove', resizeMousemove)
-    stage.stage.on('mouseup', resizeMouseup)
+    window.addEventListener('mouseup', resizeMouseup)
     selectedGui.origWidth = selected.width
     selectedGui.origHeight = selected.height
     selectedGui.i = e.currentTarget.i
@@ -644,7 +634,7 @@ function resizeMousemove(e) {
 function resizeMouseup() {
     selectedGui.dragging = false
     stage.stage.off('mousemove', resizeMousemove)
-    stage.stage.off('mouseup', resizeMouseup)
+    window.removeEventListener('mouseup', resizeMouseup)
     selected.asset.scaleX /= selectedGui.origWidth / selected.width
     selected.asset.scaleY /= selectedGui.origHeight / selected.height
     selected.asset.x = selected.x
@@ -656,7 +646,7 @@ function rotateMousedown(e) {
     e.stopPropagation()
     selectedGui.dragging = true
     stage.stage.on('mousemove', rotateMousemove)
-    stage.stage.on('mouseup', rotateMouseup)
+    window.addEventListener('mouseup', rotateMouseup)
     selectedGui.startRotation = Math.atan2((stage.screen.clientHeight - e.data.global.y) / scale + selected.asset.y, (e.data.global.x - stage.screen.clientWidth / 2) / scale - selected.asset.x) + selected.asset.rotation
 }
 
@@ -671,7 +661,7 @@ function rotateMousemove(e) {
 function rotateMouseup() {
     selectedGui.dragging = false
     stage.stage.off('mousemove', rotateMousemove)
-    stage.stage.off('mouseup', rotateMouseup)
+    window.removeEventListener('mouseup', rotateMouseup)
     selected.asset.rotation = selected.rotation
     recordChange()
 }
@@ -732,6 +722,16 @@ function mouseUp(e) {
                 asset = null
             }
         } else asset.clicked = true
+    }
+    if (selected && selected.dragging) {
+        if (selected.y > selected.height / 2)
+            deleteKey()
+        else {
+            selected.dragging = false
+            selected.asset.x = selected.x
+            selected.asset.y = selected.y
+            recordChange()
+        }
     }
 }
 
