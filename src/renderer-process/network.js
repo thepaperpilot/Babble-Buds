@@ -67,8 +67,13 @@ exports.host = function() {
 			for (let i = 0; i < puppets.length; i++) {
 				socket.emit('add puppet', puppets[i])
 			}
-			puppetsToAdd.push(puppet)
-			addPuppetServer(socket)
+			numPuppets++
+			puppet.socket = socket.id
+			puppet.charId = numPuppets
+			controller.addPuppet(puppet)
+			puppets.push(puppet)
+			socket.emit('assign puppet', numPuppets)
+			socket.broadcast.emit('add puppet', puppet)
 		})
 		socket.on('set puppet', (id, puppet) => {
 			controller.setPuppet(id, puppet)
@@ -169,7 +174,7 @@ exports.host = function() {
 					socket.broadcast.emit('add asset', asset)
 					if (status.decrement('Retrieving %x Asset%s')) {
 						status.log('Synced Assets!', 3, 1)
-						addPuppetServer(socket)
+						controller.reloadPuppets()
 					}
 				})
 				stream.pipe(fs.createWriteStream(path.join(project.assetsPath, asset.tab, asset.hash + '.png')))
@@ -254,8 +259,8 @@ exports.connect = function() {
 		controller.assign(id)
 	})
 	socket.on('add puppet', (puppet) => {
-		puppetsToAdd.push(puppet)
-		addPuppetClient(socket)
+		controller.addPuppet(puppet)
+		puppets.push(puppet)
 	})
 	socket.on('set puppet', (id, puppet) => {
 		controller.setPuppet(id, puppet)
@@ -331,7 +336,7 @@ exports.connect = function() {
 				controller.addAssetLocal(asset)
 				if (status.decrement('Retrieving %x Asset%s')) {
 					status.log('Synced Assets!', 3, 1)
-					addPuppetClient()
+					controller.reloadPuppets()
 				}
 			})
 			stream.pipe(fs.createWriteStream(path.join(project.assetsPath, asset.tab, asset.hash + '.png')))
@@ -362,29 +367,4 @@ function stopNetworking() {
 
 function requestAsset(stream, asset) {
 	fs.createReadStream(path.join(project.assetsPath, project.assets[asset.tab][asset.hash].location)).pipe(stream)
-}
-
-function addPuppetServer(socket) {
-	if (status.getCount("Retrieving %x Asset%s") && status.getCount("Retrieving %x Asset%s") !== 0)
-		return
-	while (puppetsToAdd.length !== 0) {
-		numPuppets++
-		puppetsToAdd[0].socket = socket.id
-		puppetsToAdd[0].charId = numPuppets
-		controller.addPuppet(puppetsToAdd[0])
-		puppets.push(puppetsToAdd[0])
-		socket.emit('assign puppet', numPuppets)
-		socket.broadcast.emit('add puppet', puppetsToAdd[0])
-		puppetsToAdd.splice(0, 1)
-	}
-}
-
-function addPuppetClient() {
-	if (status.getCount("Retrieving %x Asset%s") && status.getCount("Retrieving %x Asset%s") !== 0)
-		return
-	while (puppetsToAdd.length !== 0) {
-		controller.addPuppet(puppetsToAdd[0])
-		puppets.push(puppetsToAdd[0])
-		puppetsToAdd.splice(0, 1)
-	}
 }

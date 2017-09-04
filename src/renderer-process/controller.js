@@ -306,6 +306,10 @@ exports.reloadAssets = function() {
 	stage.reloadAssets(() => {editor.reloadAssets(); project.saveProject();})
 }
 
+exports.reloadPuppets = function() {
+	stage.reloadPuppets()
+}
+
 exports.deleteAssetList = function(tab) {
 	exports.deleteAssetListLocal(tab)
 	network.emit('delete asset list', tab)
