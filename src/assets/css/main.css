@@ -183,7 +183,6 @@ body > .editormain {
 	color: #fff;
 	cursor: pointer;
 	display: inline-block;
-	margin-bottom: 6px;
 }
 
 .emote:focus, .babble:focus {
@@ -194,7 +193,7 @@ body > .editormain {
 	background-position: center;
 	background-repeat: no-repeat;
 	background-size: contain;
-	height: calc( 33% - 8px );
+	height: calc( 33% - 3px );
 	position: relative;
 	width: calc( 33% - 6px );
 }
@@ -205,7 +204,7 @@ body > .editormain {
 	background-repeat: no-repeat;
 	background-size: contain;
 	box-shadow: 0 313px rgba(256, 0, 0, 0.2) inset;
-	height: calc( 25% - 11px );
+	height: calc( 25% - 5px );
 	position: relative;
 	width: calc( 25% - 4.2px );
 }
