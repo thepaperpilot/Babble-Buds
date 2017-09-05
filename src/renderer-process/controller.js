@@ -394,6 +394,10 @@ exports.getThumbnail = function() {
 	return stage.getThumbnail()
 }
 
+exports.openModal = function(modal) {
+	application.toggleModal(modal)
+}
+
 function loadPuppets(stage) {
 	status.log('Loading puppets...', 2, 1)
 

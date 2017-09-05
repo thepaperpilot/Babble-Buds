@@ -32,6 +32,7 @@ let selected // selected asset inside of pixi
 let selectedGui // gui that appears around selected
 let history = [] // used for undoing stuff
 let reverseHistory = [] // used for redoing stuff
+let importing  // used for importing assets from other projects
 
 exports.init = function() {
     project = remote.getGlobal('project').project
@@ -136,6 +137,10 @@ exports.init = function() {
     document.getElementById('deadbonesstyle').addEventListener('click', bobbleChange)
     document.getElementById('delete-character').addEventListener('click', deleteCharacter)
     document.getElementById('add-asset').addEventListener('click', addAsset)
+    document.getElementById('import-asset').addEventListener('click', importAssets)
+    document.getElementById('import-all').addEventListener('click', toggleImportAll)
+    document.getElementById('cancel-import-assets').addEventListener('click', controller.toggleModal)
+    document.getElementById('import-assets-btn').addEventListener('click', confirmImportAssets)
     document.getElementById('new-asset-bundle').addEventListener('click', () => {
         status.log('Not Yet Implemented!', 1, 1)
     })
@@ -144,7 +149,6 @@ exports.init = function() {
     document.getElementById('asset-list-name').addEventListener('change', renameAssetList)
     document.getElementById('delete-asset-list').addEventListener('click', deleteAssetList)
     document.getElementById('new-asset-list').addEventListener('click', newAssetList)
-    document.getElementById('import-asset-list').addEventListener('click', importAssetList)
     document.getElementById('asset selected').addEventListener('click', selectAsset)
     for (let i = 0; i < project.project.assets.length; i++) {
         let tabOption = document.createElement('option')
@@ -1085,6 +1089,107 @@ function addAsset() {
     })
 }
 
+function importAssets() {
+    remote.dialog.showOpenDialog(remote.BrowserWindow.getFocusedWindow(), {
+        title: 'Select Project',
+        defaultPath: path.join(remote.app.getPath('home'), 'projects'),
+        filters: [
+            {name: 'Babble Buds Project File', extensions: ['babble']},
+            {name: 'All Files', extensions: ['*']}
+        ],
+        properties: [
+            'openFile'
+        ] 
+        }, (filepaths) => {
+            if (filepaths) {
+                fs.readJson(filepaths[0], (err, project) => {
+                    if (err) console.log(err)
+                    importing = {}
+                    controller.openModal("#importAssets")
+                    let assetsList = document.getElementById('import-assets')
+                    assetsList.innerHTML = ''
+                    let callback = function(err, list) {
+                        // "this" refers to the name of the asset list
+                        if (err) console.log(err)
+                        let tab = document.createElement('div')
+                        let addAll = document.createElement('input')
+                        tab.appendChild(addAll)
+                        addAll.outerHTML = '<hr><input type="checkbox" id="import-all-' + this + '" class="checkbox"><label for="import-all-' + this + '" class="checkbox-label">' + this + '</label><br/>'
+                        let hashes = Object.keys(list)
+                        for (let j = 0; j < hashes.length; j++) {
+                            let asset = document.createElement('div')
+                            asset.id = 'import-asset-' + this + '-' + hashes[j]
+                            asset.tab = this.valueOf()
+                            asset.hash = hashes[j]
+                            asset.name = list[hashes[j]].name
+                            asset.location = path.join(filepaths[0], '..', 'assets', list[hashes[j]].location)
+                            asset.className = "asset"
+                            asset.style.backgroundImage = 'url(' + path.join(filepaths[0], '..', 'assets', list[hashes[j]].location + '?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
+                            asset.innerHTML = '<div class="desc">' + list[hashes[j]].name + '</div>'
+                            asset.addEventListener('click', toggleImportAsset)
+                            tab.appendChild(asset)
+                        }
+                        assetsList.appendChild(tab)
+                        document.getElementById('import-all-' + this).addEventListener('click', toggleImportList)
+                    }
+                    for (let i = 0; i < project.assets.length; i++) {
+                        fs.readJson(path.join(filepaths[0], '..', 'assets', project.assets[i].location), callback.bind(project.assets[i].name))
+                    }
+                })
+            }
+        }
+    )
+}
+
+function toggleImportAll(e) {
+    let importAll = e.target.checked
+    let assetList = document.getElementById('import-assets')
+    for (let i = 0; i < assetList.childNodes.length; i++) {
+        let list = assetList.childNodes[i]
+        list.childNodes[1].checked = importAll
+        // First four are hr, checkbox, label, and br
+        for (let j = 4; j < list.childNodes.length; j++) {
+            let asset = list.childNodes[j]
+            if ((asset.className === "asset selected") != importAll) {
+                toggleImportAsset({target: asset})
+            }
+        }
+    }
+}
+
+function toggleImportList(e) {
+    let importAll = e.target.checked
+    for (let i = 4; i < e.target.parentNode.childNodes.length; i++) {
+        let asset = e.target.parentNode.childNodes[i]
+        if ((asset.className === "asset selected") != importAll) {
+            toggleImportAsset({target: asset})
+        }
+    }
+}
+
+function toggleImportAsset(e) {
+    if (e.target.className === 'asset selected') {
+        e.target.className = 'asset'
+        delete importing[e.target.hash]
+        e.target.parentNode.childNodes[1].checked = false
+        document.getElementById('import-all').checked = false
+    } else {
+        e.target.className = 'asset selected'
+        importing[e.target.hash] = {tab: e.target.tab, hash: e.target.hash, name: e.target.name, location: e.target.location}
+    }
+}
+
+function confirmImportAssets() {
+    let assets = Object.keys(importing)
+    for (let i = 0; i < assets.length; i++) {
+        let asset = importing[assets[i]]
+        fs.ensureDirSync(path.join(project.assetsPath, asset.tab))
+        fs.copySync(asset.location, path.join(project.assetsPath, asset.tab, asset.hash + '.png'))
+        controller.addAsset(asset)
+    }
+    controller.openModal()
+}
+
 function editAssetList() {
     if (Object.keys(project.assets).length === 0) return
     document.getElementById('assets').style.display = 'none'
@@ -1122,36 +1227,6 @@ function newAssetList() {
     for (let i = 0; i < assetKeys.length; i++)
         document.getElementById('tab ' + assetKeys[i]).style.display = 'none'
     document.getElementById('tab ' + name).style.display = ''
-}
-
-function importAssetList() {
-    remote.dialog.showOpenDialog(remote.BrowserWindow.getFocusedWindow(), {
-        title: 'Import Asset List',
-        filters: [
-            {name: 'JSON Files', extensions: ['json']},
-            {name: 'All Files', extensions: ['*']}
-        ],
-        properties: [
-            'openFile'
-        ] 
-    }, (filepaths) => {
-        if (filepaths)
-            fs.readJson(filepaths[0], (err, list) => {
-                if (err) console.log(err)
-                else {
-                    let listKeys = Object.keys(list)
-                    let tab = filepaths[0].replace(/^.*[\\\/]/, '').replace(/\.[^.]+$/, '')
-                    if (!project.assets[tab]) addAssetListToDom(tab)
-                    for (let i = 0; i < listKeys.length; i++) {
-                        status.log('Importing ' + (listKeys.length - i) + ' assets...', 3, 3)
-                        if (project.assets[tab] && project.assets[tab][listKeys[i]]) continue
-                        fs.copySync(path.join(filepaths[0], '..', list[listKeys[i]].location), path.join(project.assetsPath, tab, listKeys[i] + '.png'))
-                        controller.addAsset({"tab": tab, "hash": listKeys[i], "name": list[listKeys[i]].name})
-                    }
-                    status.log('Imported ' + listKeys.length + ' assets!', 3, 1)
-                }
-            })
-    })
 }
 
 function addAssetListToDom(name) {

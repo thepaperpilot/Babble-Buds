@@ -174,9 +174,9 @@
                             <a id="new-asset-bundle" href="#">New Asset Bundle</a>
                         </div>
                     </div>
+                    <button id="import-asset" style="background: url(assets/icons/import.png) center no-repeat/contain" title="Import Assets"></button>
                     <button id="edit-asset-list" style="background: url(assets/icons/settings.png) center no-repeat/contain; margin-left: 190px" title="Edit Asset List"></button>
                     <button id="new-asset-list" style="background: url(assets/icons/new_folder.png) center no-repeat/contain" title="New Asset List"></button>
-                    <button id="import-asset-list" style="background: url(assets/icons/import_folder.png) center no-repeat/contain" title="Import Asset List"></button>
                 </div>
                 <select id="asset tabs"></select>
                 <div id="asset list" class="assetlist"></div>
@@ -212,6 +212,13 @@
             <span style="font-weight: bold;">This process is not reversible. Unsaved changes made in the puppet editor will be discarded. The project will be automatically saved once the operation is completed.</span></div>
             <button id="autocrop-btn" class="fillbutton" style="margin-top: 10px;">Begin Autocropping</button>
             <div id="autocrop-assets" class="autocrop-assets"></div>
+            <div id="autocrop-progress" class="fillbutton" style="margin-top: 10px; text-align: center; color: #fff"></div>
+        </div>
+        <div id="importAssets" style="display: none;">
+            <input type="checkbox" id="import-all" class="checkbox"><label for="import-all" class="checkbox-label">Import All</label><br/>
+            <div id="import-assets" class="import-assets"></div>
+            <button id="cancel-import-assets" style="float: right">Cancel</button>
+            <button id="import-assets-btn" style="float: right;">Import Assets</button>
             <div id="autocrop-progress" class="fillbutton" style="margin-top: 10px; text-align: center; color: #fff"></div>
         </div>
         <div class="modal">

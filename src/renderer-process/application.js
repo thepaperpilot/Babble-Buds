@@ -85,10 +85,10 @@ exports.init = function() {
 		controller.togglePopout()
 	})
 	electron.ipcRenderer.on('toggleInstructions', () => {
-		toggleModal("#instructions")
+		exports.toggleModal("#instructions")
 	})
 	electron.ipcRenderer.on('toggleAbout', () => {
-		toggleModal("#about")
+		exports.toggleModal("#about")
 	})
 	electron.ipcRenderer.on('autocrop', () => {
 		openAutocrop()
@@ -204,6 +204,13 @@ exports.setView = function(newView) {
 	view = newView
 	settings.setView(view)
 	controller.resize()
+}
+
+exports.toggleModal = function(string) {
+	if (modal.isOpen)
+		modal.close()
+	else
+		modal.open(string)
 }
 
 function keyDown(e) {
@@ -469,15 +476,8 @@ function addEditorView() {
 	document.getElementById('editor-bottom').append(document.getElementById('editor-settings-panel'))
 }
 
-function toggleModal(string) {
-	if (modal.isOpen)
-		modal.close()
-	else
-		modal.open(string)
-}
-
 function openAutocrop() {
-	toggleModal("#autocrop")
+	exports.toggleModal("#autocrop")
 	document.getElementById('autocrop-desc').style.display = 'block'
 	document.getElementById('autocrop-btn').style.display = 'block'
 	document.getElementById('autocrop-assets').innerHTML = ''

@@ -557,3 +557,11 @@ body > .editormain {
   background-position: center;
   cursor: unset;
 }
+
+.import-assets .asset {
+	width: 120px;
+	height: 120px;
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
+}
