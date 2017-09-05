@@ -302,8 +302,12 @@ exports.updateAsset = function(tab, asset, x, y) {
 	applyToAsset(tab, asset, callback)
 }
 
-exports.reloadAssets = function() {
-	stage.reloadAssets(() => {editor.reloadAssets(); project.saveProject();})
+exports.reloadAssets = function(callback) {
+	stage.reloadAssets(() => {
+		editor.reloadAssets()
+		if(callback) callback()
+		project.saveProject()
+	})
 }
 
 exports.reloadPuppets = function() {

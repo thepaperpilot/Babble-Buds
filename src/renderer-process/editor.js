@@ -139,8 +139,11 @@ exports.init = function() {
     document.getElementById('add-asset').addEventListener('click', addAsset)
     document.getElementById('import-asset').addEventListener('click', importAssets)
     document.getElementById('import-all').addEventListener('click', toggleImportAll)
-    document.getElementById('cancel-import-assets').addEventListener('click', controller.toggleModal)
+    document.getElementById('cancel-import-assets').addEventListener('click', controller.openModal)
     document.getElementById('import-assets-btn').addEventListener('click', confirmImportAssets)
+    document.getElementById('import-all-puppets').addEventListener('click', toggleImportAllPuppets)
+    document.getElementById('cancel-import-puppets').addEventListener('click', controller.openModal)
+    document.getElementById('import-puppets-btn').addEventListener('click', confirmImportPuppets)
     document.getElementById('new-asset-bundle').addEventListener('click', () => {
         status.log('Not Yet Implemented!', 1, 1)
     })
@@ -814,21 +817,122 @@ function dupePuppet() {
 
 function importPuppet() {
     remote.dialog.showOpenDialog(remote.BrowserWindow.getFocusedWindow(), {
-        title: 'Import Character',
+        title: 'Select Project',
+        defaultPath: path.join(remote.app.getPath('home'), 'projects'),
         filters: [
-            {name: 'JSON Files', extensions: ['json']},
+            {name: 'Babble Buds Project File', extensions: ['babble']},
             {name: 'All Files', extensions: ['*']}
         ],
         properties: [
             'openFile'
         ] 
-    }, (filepaths) => {
-        if (filepaths)
-            fs.readJson(filepaths[0], (err, character) => {
-                if (err) console.log(err)
-                else exports.setPuppet(JSON.parse(project.duplicateCharacter(character)))
-            })
+        }, (filepaths) => {
+            if (filepaths) {
+                fs.readJson(filepaths[0], (err, project) => {
+                    if (err) console.log(err)
+                    importing = {}
+                    controller.openModal("#importPuppets")
+                    document.getElementById('import-all-puppets').checked = false
+                    let puppetsList = document.getElementById('import-puppets')
+                    puppetsList.innerHTML = ''
+                    let callback = function(err, character) {
+                        // this = {name: string, id: number, location: string}
+                        if (err) console.log(err)
+                        let puppet = document.createElement('div')
+                        puppet.id = 'import-puppet-' + this
+                        puppet.character = character
+                        puppet.id = this.id
+                        puppet.name = this.name
+                        puppet.location = path.join(filepaths[0], '..', 'characters', this.location)
+                        puppet.assets = {}
+                        let callback = function(err, list) {
+                            // "this" refers to the name of the asset list
+                            if (err) console.log(err)
+                            puppet.assets[this] = list
+                        }
+                        for (let i = 0; i < project.assets.length; i++) {
+                            fs.readJson(path.join(filepaths[0], '..', 'assets', project.assets[i].location), callback.bind(project.assets[i].name))
+                        }
+                        puppet.className = "char"
+                        puppet.style.backgroundImage = 'url(' + path.join(filepaths[0], '..', 'thumbnails', this.id + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
+                        puppet.innerHTML = '<div class="desc">' + this.name + '</div>'
+                        puppet.addEventListener('click', toggleImportPuppet)
+                        puppetsList.appendChild(puppet)
+                    }
+                    for (let i = 0; i < project.characters.length; i++) {
+                        fs.readJson(path.join(filepaths[0], '..', 'characters', project.characters[i].location), callback.bind(project.characters[i]))
+                    }
+                })
+            }
+        }
+    )
+}
+
+function toggleImportAllPuppets(e) {
+    let importAll = e.target.checked
+    let puppetsList = document.getElementById('import-puppets')
+    for (let i = 0; i < puppetsList.childNodes.length; i++) {
+        let char = puppetsList.childNodes[i]
+        if ((char.className === "char selected") != importAll) {
+            toggleImportPuppet({target: char})
+        }
+    }
+}
+
+function toggleImportPuppet(e) {
+    if (e.target.className === 'char selected') {
+        e.target.className = 'char'
+        delete importing[e.target.id]
+        document.getElementById('import-all-puppets').checked = false
+    } else {
+        e.target.className = 'char selected'
+        importing[e.target.id] = {character: e.target.character, location: e.target.location, assets: e.target.assets}
+    }
+}
+
+function confirmImportPuppets() {
+    let chars = Object.keys(importing)
+    for (let i = 0; i < chars.length; i++) {
+        // Find any required assets we don't already have to the project
+        let character = JSON.parse(project.duplicateCharacter(importing[chars[i]].character))
+        let topLevel = ["body", "head", "hat", "props"]
+
+        for (let j = 0; j < topLevel.length; j++)
+            checkLayer(character[topLevel[j]], importing[chars[i]].assets, importing[chars[i]].location)
+
+        let emotes = Object.keys(character.emotes)
+        for (let j = 0; j < emotes.length; j++) {
+            checkLayer(character.emotes[emotes[j]].eyes, importing[chars[i]].assets, importing[chars[i]].location)
+            checkLayer(character.emotes[emotes[j]].mouth, importing[chars[i]].assets, importing[chars[i]].location)
+        }
+    }
+    // Ensure all assets are loaded so we can save puppets properly
+    controller.reloadAssets(() => {
+        // Add puppets to project
+        let oldcharacter = character
+        for (let i = 0; i < chars.length; i++) {
+            let character = JSON.parse(project.duplicateCharacter(importing[chars[i]].character))
+            exports.setPuppet(character)
+            savePuppet()
+        }
+        // Restore previous puppet
+        exports.setPuppet(oldcharacter)
     })
+    controller.openModal()
+}
+
+function checkLayer(layer, assets, characterPath) {
+    for (let k = 0; k < layer.length; k++) {
+        let asset = layer[k]
+        console.log(asset, project.assets)
+        // If we don't have the tab or the asset...
+        if (!(project.assets[asset.tab] && project.assets[asset.tab][asset.hash])) {
+            // Add it!
+            fs.ensureDirSync(path.join(project.assetsPath, asset.tab))
+            fs.copySync(path.join(characterPath, '..', '..', 'assets', assets[asset.tab][asset.hash].location), path.join(project.assetsPath, asset.tab, asset.hash + '.png'))
+            controller.addAsset({"tab": asset.tab, "hash": asset.hash, "name": assets[asset.tab][asset.hash].name})
+        }
+    }
 }
 
 function openPuppet(e) {
@@ -1106,6 +1210,7 @@ function importAssets() {
                     if (err) console.log(err)
                     importing = {}
                     controller.openModal("#importAssets")
+                    document.getElementById('import-all').checked = false
                     let assetsList = document.getElementById('import-assets')
                     assetsList.innerHTML = ''
                     let callback = function(err, list) {

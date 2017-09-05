@@ -321,6 +321,7 @@ body > .editormain {
 	position: absolute;
 	text-align: center;
 	width: 100%;
+	word-wrap: break-word;
 }
 
 .emote .desc {
@@ -564,4 +565,10 @@ body > .editormain {
 	background-size: contain;
 	background-repeat: no-repeat;
 	background-position: center;
+}
+
+.import-puppets .char {
+	width: 120px;
+	height: 120px;
+    margin: 4px 4px 0 4px;
 }
