@@ -924,7 +924,6 @@ function confirmImportPuppets() {
 function checkLayer(layer, assets, characterPath) {
     for (let k = 0; k < layer.length; k++) {
         let asset = layer[k]
-        console.log(asset, project.assets)
         // If we don't have the tab or the asset...
         if (!(project.assets[asset.tab] && project.assets[asset.tab][asset.hash])) {
             // Add it!

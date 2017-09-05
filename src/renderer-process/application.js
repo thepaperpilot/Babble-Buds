@@ -311,7 +311,7 @@ function updateHotbar(e) {
 	}
 	controller.updateHotbar(i, puppet)
 	if (('' + document.getElementById('char ' + i).className).indexOf('selected') > -1) {
-		controller.setPuppet(i)
+		controller.setPuppetLocal(i)
 	}
 	if (project.project.hotbar[i] && project.project.hotbar[i] !== 0) {
 		document.getElementById('char ' + i).getElementsByClassName('desc')[0].innerHTML = project.characters[puppet].name
