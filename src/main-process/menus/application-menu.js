@@ -37,15 +37,10 @@ const template = [
     ],
   },
   {
-    // TODO test accelerators on other platforms
-    // On my linux machine it won't detect when the
-    // accelerators for cut, copy, and paste are
-    // pressed. I can get around it by also holding down
-    // the windows key. I suspect the OS isn't passing
-    // the input to the application, but I don't
-    // know if that'll affect other OSes or not.
-    // Worst case scenario is they use the application
-    // menu to perform those actions, which still works
+    // cut, copy, and paste don't work for some reason
+    // I got around this by just checking for the keys
+    // inside of the editor's keyDown function
+    // Untested on macOS
     label: 'Edit',
     submenu: [
       {

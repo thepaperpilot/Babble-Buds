@@ -421,6 +421,16 @@ exports.keyDown = function(e) {
             return true
         }
     }
+    // Copy and paste
+    // the accelerators don't work (tried on windows and linux) unless you're holding down some other button as well (I use the windows key)
+    // but this gets around that issue, albeit in a sort of hacky way. Untested on macOS
+    if (key == 67 && e.ctrlKey) {
+        copy()
+    } else if (key == 86 && e.ctrlKey) {
+        paste()
+    } else if (key == 88 && e.ctrlKey) {
+        cut()
+    }
     return false
 }
 
