@@ -395,6 +395,14 @@ exports.removePuppet = function(id) {
 }
 
 exports.getThumbnail = function() {
+	if (document.getElementById('screen').style.display == 'none') {
+		document.getElementById('screen').style.display = ''
+		stage.resize()
+		let thumbnail = stage.getThumbnail()
+		document.getElementById('screen').style.display = 'none'
+		stage.resize()
+		return thumbnail
+	}
 	return stage.getThumbnail()
 }
 
