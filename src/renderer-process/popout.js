@@ -44,6 +44,7 @@ electron.ipcRenderer.on('setup', (event, project, mypuppet, id) => {
     puppet = mypuppet
     puppet.id = id
     stage = new babble.Stage('screen', project.project, project.assets, project.assetsPath, loadPuppets)
+    window.addEventListener("resize", () => {stage.resize()})
 })
 
 electron.ipcRenderer.on('init', (event, puppets) => {
