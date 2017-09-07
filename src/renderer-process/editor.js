@@ -130,6 +130,8 @@ exports.init = function() {
     document.getElementById('editor-settings').addEventListener('click', toggleSettings)
     document.getElementById('editor-name').addEventListener('change', nameChange)
     document.getElementById('deadbonesstyle').addEventListener('click', bobbleChange)
+    document.getElementById('eyeBabbleDuration').addEventListener('change', eyeDurationChange)
+    document.getElementById('mouthBabbleDuration').addEventListener('change', mouthDurationChange)
     document.getElementById('delete-character').addEventListener('click', deleteCharacter)
     document.getElementById('add-asset').addEventListener('click', addAsset)
     document.getElementById('import-asset').addEventListener('click', importAssets)
@@ -392,6 +394,8 @@ exports.setPuppet = function(newCharacter, override, preserveHistory) {
 
     document.getElementById('editor-name').value = character.name
     document.getElementById('deadbonesstyle').checked = character.deadbonesStyle
+    document.getElementById('eyeBabbleDuration').value = character.eyeBabbleDuration || 2000
+    document.getElementById('mouthBabbleDuration').value = character.mouthBabbleDuration || 270
 }
 
 exports.keyDown = function(e) {
@@ -1132,6 +1136,16 @@ function nameChange(e) {
 
 function bobbleChange(e) {
     character.deadbonesStyle = e.target.checked
+    recordChange()
+}
+
+function eyeDurationChange(e) {
+    character.eyeBabbleDuration = e.target.value
+    recordChange()
+}
+
+function mouthDurationChange(e) {
+    character.mouthBabbleDuration = e.target.value
     recordChange()
 }
 
