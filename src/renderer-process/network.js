@@ -60,7 +60,6 @@ exports.host = function() {
 
 		// Add Application Listeners
 		socket.on('add puppet', (puppet) => {
-			socket.emit('set slots', project.project.numCharacters)
 			let ourPuppet = project.getPuppet()
 			ourPuppet.charId = 1
 			socket.emit('add puppet', ourPuppet)
