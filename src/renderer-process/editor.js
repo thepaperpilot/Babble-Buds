@@ -106,6 +106,7 @@ exports.init = function() {
     }
     if (assetKeys[0])
         document.getElementById('tab ' + assetKeys[0]).style.display = ''
+    reloadPuppetList()
 
     // DOM listeners
     document.getElementById('editor-save').addEventListener('click', savePuppet)
@@ -377,9 +378,16 @@ exports.setPuppet = function(newCharacter, override, preserveHistory) {
         selectedElements[0].classList.remove("selected")
     document.getElementById(layer).className += " selected"
     updateEmoteDropdown()
-    document.getElementById('editor-open-panel').style.display = 'none'
-    document.getElementById('editor-emotes-panel').style.display = 'none'
-    document.getElementById('editor-settings-panel').style.display = 'none'
+
+    // Close panels if not in editor view
+    if (settings.settings.view !== 'editor') {
+        document.getElementById('editor-open-panel').style.display = 'none'
+        document.getElementById('editor-emotes-panel').style.display = 'none'
+        document.getElementById('editor-settings-panel').style.display = 'none'
+        document.getElementById('editor-open').classList.remove('open-tab')
+        document.getElementById('editor-emotes').classList.remove('open-tab')
+        document.getElementById('editor-settings').classList.remove('open-tab')
+    }
     toggleEditorScreen(true)
 
     document.getElementById('editor-name').value = character.name
@@ -778,6 +786,7 @@ function savePuppet() {
     controller.saveCharacter(JSON.parse(oldcharacter), stage.getThumbnail(), emoteThumbnails)
     document.getElementById("editor-save").classList.remove("highlight")
     status.log('Puppet saved!', 1, 1)
+    reloadPuppetList()
 }
 
 function newPuppet() {
@@ -909,9 +918,6 @@ function checkLayer(layer, assets, characterPath) {
 }
 
 function openPuppet(e) {
-    document.getElementById('editor-screen').style.display = ''
-    document.getElementById('editor-open').classList.remove('open-tab')
-    if (settings.settings.view !== 'editor') document.getElementById('editor-open-panel').style.display = 'none'
     exports.setPuppet(JSON.parse(JSON.stringify(project.characters[e.target.charid])))
 }
 
@@ -949,26 +955,29 @@ function openPuppetPanel() {
         toggleEditorScreen(false)
         panel.style.display = ''
         document.getElementById('editor-open').classList.add('open-tab')
-        let charList = document.getElementById('char open list')
-        charList.innerHTML = ''
-        let characters = Object.keys(project.characters)
-        for (let j = 0; j < characters.length; j++) {
-            let selector = document.createElement('div')
-            selector.id = project.characters[characters[j]].name.toLowerCase()
-            selector.className = "char"
-            if (fs.existsSync(path.join(project.assetsPath, '..', 'thumbnails', 'new-' + characters[j] + '.png')))
-                selector.style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', 'new-' + characters[j] + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
-            else
-                selector.style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', characters[j] + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
-            charList.appendChild(selector)
-            selector.innerHTML = '<div class="desc">' + project.characters[characters[j]].name + '</div>'
-            selector.charid = characters[j]
-            selector.addEventListener('click', openPuppet)
-        }
     } else if (settings.settings.view !== 'editor') {
         toggleEditorScreen(true)
         panel.style.display = 'none'
         document.getElementById('editor-open').classList.remove('open-tab')
+    }
+}
+
+function reloadPuppetList() {
+    let charList = document.getElementById('char open list')
+    charList.innerHTML = ''
+    let characters = Object.keys(project.characters)
+    for (let j = 0; j < characters.length; j++) {
+        let selector = document.createElement('div')
+        selector.id = project.characters[characters[j]].name.toLowerCase()
+        selector.className = "char"
+        if (fs.existsSync(path.join(project.assetsPath, '..', 'thumbnails', 'new-' + characters[j] + '.png')))
+            selector.style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', 'new-' + characters[j] + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
+        else
+            selector.style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', characters[j] + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
+        charList.appendChild(selector)
+        selector.innerHTML = '<div class="desc">' + project.characters[characters[j]].name + '</div>'
+        selector.charid = characters[j]
+        selector.addEventListener('click', openPuppet)
     }
 }
 

@@ -198,7 +198,6 @@ exports.setView = function(newView) {
 	else if (view === 'editor')
 		removeEditorView()
 	settings.setView(newView)
-	console.log(settings.settings.view)
 	if (newView === 'stage')
 		addStageView()
 	else if (newView === 'editor')
