@@ -85,6 +85,7 @@ select option {
 
 body > .editormain {
 	height: calc( 100% - 110px );
+	z-index: -1;
 }
 
 .main {
