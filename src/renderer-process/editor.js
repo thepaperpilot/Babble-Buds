@@ -17,6 +17,7 @@ let Container = PIXI.Container,
 
 // Constants
 const ROUND_ROTATION = Math.PI / 4 // When rounding angles, this is the step size to use
+const EMOTES = ['default', 'happy', 'wink', 'kiss', 'angry', 'sad', 'ponder', 'gasp', 'veryangry', 'verysad', 'confused', 'ooo']
 
 // Vars
 let project
@@ -33,6 +34,7 @@ let selectedGui // gui that appears around selected
 let history = [] // used for undoing stuff
 let reverseHistory = [] // used for redoing stuff
 let importing  // used for importing assets from other projects
+let alwaysDifferent // If this is a new puppet, it should always be considered different from its initial value
 
 exports.init = function() {
     project = remote.getGlobal('project').project
@@ -54,7 +56,7 @@ exports.init = function() {
         selected = null
         if (selectedGui) this.stage.removeChild(selectedGui)
     }
-    stage.getAsset = function(asset, layer) {
+    stage.getAsset = function(asset, layer, emote) {
         let sprite
         if (this.assets[asset.tab] && this.assets[asset.tab][asset.hash]) {
             sprite = new Sprite(TextureCache[path.join(this.assetsPath, this.assets[asset.tab][asset.hash].location)])
@@ -68,8 +70,9 @@ exports.init = function() {
         sprite.rotation = asset.rotation
         sprite.scale.x = asset.scaleX
         sprite.scale.y = asset.scaleY
-        sprite.layer = layer
         sprite.asset = asset
+        sprite.layer = layer
+        sprite.emote = emote
         clickableAssets.push(sprite)
         return sprite
     }
@@ -106,32 +109,23 @@ exports.init = function() {
 
     // DOM listeners
     document.getElementById('editor-save').addEventListener('click', savePuppet)
-    document.getElementById('editor-view-save').addEventListener('click', savePuppet)
     document.getElementById('editor-new').addEventListener('click', newPuppet)
-    document.getElementById('editor-view-new').addEventListener('click', newPuppet)
     document.getElementById('editor-duplicate').addEventListener('click', dupePuppet)
-    document.getElementById('editor-view-duplicate').addEventListener('click', dupePuppet)
     document.getElementById('editor-import').addEventListener('click', importPuppet)
-    document.getElementById('editor-view-import').addEventListener('click', importPuppet)
     document.getElementById('editor-open').addEventListener('click', openPuppetPanel)
-    document.getElementById('editor-open-settings').addEventListener('click', openPuppetSettingsPanel)
     document.getElementById('char open search').addEventListener('keyup', updateCharSearch)
     document.getElementById('char open search').addEventListener('search', updateCharSearch)
-    document.getElementById('editor-layer-babble').addEventListener('click', openLayersBabblePanel)
-    document.getElementById('editor-layers').addEventListener('click', toggleLayers)
-    let buttons = document.getElementById('editor-layers-panel').getElementsByTagName('button')
+    document.getElementById('editor-emote').addEventListener('change', selectEmote)
+    let buttons = document.getElementById('editor-layers').getElementsByTagName('button')
     for (let i = 0; i < buttons.length; i++)
         buttons[i].addEventListener('click', setLayer)
-    let emotes = document.getElementById('editor-layers-panel').getElementsByClassName('emote')
-    for (let i = 0; i < emotes.length; i++)
-        emotes[i].addEventListener('contextmenu', layerContextMenu)
-    document.getElementById('editor-babble').addEventListener('click', toggleBabble)
-    emotes = document.getElementById('babble-mouths').getElementsByClassName('emote')
-    for (let i = 0; i < emotes.length; i++)
-        emotes[i].addEventListener('click', mouthLayerClick)
-    emotes = document.getElementById('babble-eyes').getElementsByClassName('emote')
-    for (let i = 0; i < emotes.length; i++)
-        emotes[i].addEventListener('click', eyesLayerClick)
+    document.getElementById('editor-emotes').addEventListener('click', toggleEmotes)
+    for (let i = 0; i < 12; i++) {
+        document.getElementById('emote-' + (i + 1)).addEventListener('click', openEmote)
+    }
+    document.getElementById('emote-enabled').addEventListener('change', toggleEmoteEnabled)
+    document.getElementById('emote-mouth').addEventListener('change', toggleBabbleMouth)
+    document.getElementById('emote-eyes').addEventListener('change', toggleBabbleEyes)
     document.getElementById('editor-settings').addEventListener('click', toggleSettings)
     document.getElementById('editor-name').addEventListener('change', nameChange)
     document.getElementById('deadbonesstyle').addEventListener('click', bobbleChange)
@@ -148,7 +142,6 @@ exports.init = function() {
         status.log('Not Yet Implemented!', 1, 1)
     })
     document.getElementById('edit-asset-list').addEventListener('click', editAssetList)
-    document.getElementById('close-edit-asset-list').addEventListener('click', closeAssetListEditor)
     document.getElementById('asset-list-name').addEventListener('change', renameAssetList)
     document.getElementById('delete-asset-list').addEventListener('click', deleteAssetList)
     document.getElementById('new-asset-list').addEventListener('click', newAssetList)
@@ -320,9 +313,14 @@ exports.deleteAsset = function(tab, asset) {
     exports.setPuppet(character, true)
 }
 
-exports.resetChanges = function() {
+exports.clear = function() {
     character = null
     oldcharacter = 'null'
+}
+
+exports.resetChanges = function() {
+    alwaysDifferent = true
+    document.getElementById("editor-save").classList.add("highlight")
 }
 
 exports.resize = function() {
@@ -331,7 +329,7 @@ exports.resize = function() {
 
 // Returns true if its safe to change puppet
 exports.checkChanges = function() {
-    if (character && JSON.stringify(character) !== oldcharacter) {
+    if (character && (JSON.stringify(character) !== oldcharacter || alwaysDifferent)) {
         let response = remote.dialog.showMessageBox({
             "type": "question",
             "buttons": ["Don't Save", "Cancel", "Save"],
@@ -368,42 +366,21 @@ exports.setPuppet = function(newCharacter, override, preserveHistory) {
         oldcharacter = JSON.stringify(character)
         history = reverseHistory = []
         document.getElementById("editor-save").classList.remove("highlight")
+        alwaysDifferent = false
     }
     puppet = stage.createPuppet(character)
     stage.setPuppet(1, puppet)
 
     // Update Editor Panels
-    let panel = document.getElementById('editor-layers-panel')
-    let selectedElements = panel.getElementsByClassName("selected")
+    let selectedElements = document.getElementById('editor-layers').getElementsByClassName("selected")
     while (selectedElements.length)
         selectedElements[0].classList.remove("selected")
-    let available = panel.getElementsByClassName("available")
-    while (available.length)
-        available[0].classList.remove("available")
     document.getElementById(layer).className += " selected"
-    let emotes = panel.getElementsByClassName("emote")
-    for (let i = 0; i < emotes.length; i++) {
-        let emote = character.emotes[emotes[i].id.replace(/-emote/, '')]
-        if (emote && emote.enabled)
-            emotes[i].className += " available"
-    }
-
-    panel = document.getElementById('editor-babble-panel')
-    available = panel.getElementsByClassName("available")
-    while (available.length)
-        available[0].classList.remove("available")
-    emotes = document.getElementById('babble-mouths').getElementsByClassName("emote")
-    for (let i = 0; i < emotes.length; i++) {
-        let emote = emotes[i].id.replace(/-mouth/, '')
-        if (character.mouths.indexOf(emote) > -1)
-            emotes[i].className += " available"
-    }
-    emotes = document.getElementById('babble-eyes').getElementsByClassName("emote")
-    for (let i = 0; i < emotes.length; i++) {
-        let emote = emotes[i].id.replace(/-eyes/, '')
-        if (character.eyes.indexOf(emote) > -1)
-            emotes[i].className += " available"
-    }
+    updateEmoteDropdown()
+    document.getElementById('editor-open-panel').style.display = 'none'
+    document.getElementById('editor-emotes-panel').style.display = 'none'
+    document.getElementById('editor-settings-panel').style.display = 'none'
+    toggleEditorScreen(true)
 
     document.getElementById('editor-name').value = character.name
     document.getElementById('deadbonesstyle').checked = character.deadbonesStyle
@@ -519,12 +496,8 @@ function editorMousedown(e) {
         let dy = centerY - e.data.global.y;
         let dist = dx*dx + dy*dy; //Distance is not squared as it's not needed.
         if((dist < distance || distance == -1) && clickableAssets[i].visible && clickableAssets[i].containsPoint(e.data.global) && clickableAssets[i].layer === layer) {
-            if (layer.indexOf('-emote') > -1) {
-                if(document.getElementById('eyemouth').checked && character.emotes[layer.replace(/-emote/, '')].mouth.indexOf(clickableAssets[i].asset) > -1)
-                    continue
-                if(!document.getElementById('eyemouth').checked && character.emotes[layer.replace(/-emote/, '')].eyes.indexOf(clickableAssets[i].asset) > -1)
-                    continue
-            }
+            if ((layer === 'mouth' || layer === 'eyes') && clickableAssets[i].emote !== (puppet.emote || 'default'))
+                continue
             closest = clickableAssets[i];
             distance = dist;
         }
@@ -703,19 +676,19 @@ function mouseUp(e) {
                     "scaleX": 1,
                     "scaleY": 1
                 }
-                if (layer.indexOf('-emote') > -1) {
-                    if (!puppet.emotes[layer.replace(/-emote/, '')])
-                        puppet.addEmote(layer.replace(/-emote/, ''))
-                    if (document.getElementById('eyemouth').checked) {
-                        puppet.emotes[layer.replace(/-emote/, '')].eyes.addChild(stage.getAsset(newAsset, layer))
-                        character.emotes[layer.replace(/-emote/, '')].eyes.push(newAsset)
-                    } else {
-                        puppet.emotes[layer.replace(/-emote/, '')].mouth.addChild(stage.getAsset(newAsset, layer))
-                        character.emotes[layer.replace(/-emote/, '')].mouth.push(newAsset)
-                    }
-                } else {
-                    puppet[layer].addChild(stage.getAsset(newAsset, layer))
-                    character[layer === 'headBase' ? 'head' : layer].push(newAsset)
+                switch (layer) {
+                    case "mouth":
+                        puppet.emotes[puppet.emote].mouth.addChild(stage.getAsset(newAsset, layer))
+                        character.emotes[puppet.emote].mouth.push(newAsset)
+                        break
+                    case "eyes":
+                        puppet.emotes[puppet.emote].eyes.addChild(stage.getAsset(newAsset, layer))
+                        character.emotes[puppet.emote].eyes.push(newAsset)
+                        break
+                    default:
+                        puppet[layer].addChild(stage.getAsset(newAsset, layer))
+                        character[layer === 'headBase' ? 'head' : layer].push(newAsset)
+                        break
                 }
                 recordChange()
             } 
@@ -759,8 +732,8 @@ function mouseDown(e) {
     } else {
         document.getElementById('assets').style.display = 'none'
         document.getElementById('asset editor').style.display = ''
-        document.getElementById('asset selected').getElementsByClassName('desc')[0].innerHTML = project.assets[e.target.tab][e.target.asset].name
-        document.getElementById('asset selected').getElementsByTagName('img')[0].src = path.join(project.assetsPath, project.assets[e.target.tab][e.target.asset].location)
+        document.getElementById('asset selected').style.display = ''
+        document.getElementById('asset selected').style.background = 'url(' + path.join(project.assetsPath, project.assets[e.target.tab][e.target.asset].location + "?random=" + new Date().getTime()).replace(/\\/g, '/') + ') center no-repeat/contain'
         document.getElementById('asset-tab').value = e.target.tab
         document.getElementById('asset-name').value = project.assets[e.target.tab][e.target.asset].name
         document.getElementById('asset-tab').tab = e.target.tab
@@ -813,6 +786,7 @@ function newPuppet() {
 
 function dupePuppet() {
     exports.setPuppet(JSON.parse(project.duplicateCharacter(character)))
+    exports.resetChanges()
 }
 
 function importPuppet() {
@@ -936,6 +910,7 @@ function checkLayer(layer, assets, characterPath) {
 
 function openPuppet(e) {
     document.getElementById('editor-screen').style.display = ''
+    document.getElementById('editor-open').classList.remove('open-tab')
     if (settings.settings.view !== 'editor') document.getElementById('editor-open-panel').style.display = 'none'
     exports.setPuppet(JSON.parse(JSON.stringify(project.characters[e.target.charid])))
 }
@@ -955,14 +930,25 @@ function updateCharSearch(e) {
     }
 }
 
+function toggleEditorScreen(toggle) {
+    if (settings.settings.view === 'editor') return
+    let enabled = (toggle == null ? document.getElementById('editor-screen').style.display === 'none' : toggle)
+    document.getElementById('editor-screen').style.display = enabled ? '' : 'none'
+    document.getElementById('editor-layers').style.display = enabled ? '' : 'none'
+    if (enabled)
+        stage.resize()
+}
+
 function openPuppetPanel() {
-    document.getElementById('editor-layers-panel').style.display = 'none'
-    document.getElementById('editor-babble-panel').style.display = 'none'
+    document.getElementById('editor-emotes-panel').style.display = 'none'
     document.getElementById('editor-settings-panel').style.display = 'none'
+    document.getElementById('editor-emotes').classList.remove('open-tab')
+    document.getElementById('editor-settings').classList.remove('open-tab')
     let panel = document.getElementById('editor-open-panel')
     if (panel.style.display === 'none') {
-        if (settings.settings.view !== 'editor') document.getElementById('editor-screen').style.display = 'none'
+        toggleEditorScreen(false)
         panel.style.display = ''
+        document.getElementById('editor-open').classList.add('open-tab')
         let charList = document.getElementById('char open list')
         charList.innerHTML = ''
         let characters = Object.keys(project.characters)
@@ -979,125 +965,61 @@ function openPuppetPanel() {
             selector.charid = characters[j]
             selector.addEventListener('click', openPuppet)
         }
-    } else {
-        document.getElementById('editor-screen').style.display = ''
+    } else if (settings.settings.view !== 'editor') {
+        toggleEditorScreen(true)
         panel.style.display = 'none'
+        document.getElementById('editor-open').classList.remove('open-tab')
     }
 }
 
-function openPuppetSettingsPanel() {
-    document.getElementById('editor-layers-panel').style.display = 'none'
-    document.getElementById('editor-babble-panel').style.display = 'none'
-    let panel = document.getElementById('editor-open-panel')
-    if (panel.style.display === 'none') {
-        panel.style.display = ''
-        document.getElementById('editor-settings-panel').style.display = ''
-        let charList = document.getElementById('char open list')
-        charList.innerHTML = ''
-        let characters = Object.keys(project.characters)
-        for (let j = 0; j < characters.length; j++) {
-            let selector = document.createElement('div')
-            selector.id = project.characters[characters[j]].name.toLowerCase()
-            selector.className = "char"
-            if (fs.existsSync(path.join(project.assetsPath, '..', 'thumbnails', 'new-' + characters[j] + '.png')))
-                selector.style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', 'new-' + characters[j] + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
-            else
-                selector.style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', characters[j] + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
-            charList.appendChild(selector)
-            selector.innerHTML = '<div class="desc">' + project.characters[characters[j]].name + '</div>'
-            selector.charid = characters[j]
-            selector.addEventListener('click', openPuppet)
-        }
-    }
-}
-
-function openLayersBabblePanel() {
+function toggleEmotes() {
     document.getElementById('editor-open-panel').style.display = 'none'
     document.getElementById('editor-settings-panel').style.display = 'none'
-    document.getElementById('editor-layers-panel').style.display = ''
-    document.getElementById('editor-babble-panel').style.display = ''
-}
-
-function toggleLayers() {
-    document.getElementById('editor-open-panel').style.display = 'none'
-    document.getElementById('editor-babble-panel').style.display = 'none'
-    document.getElementById('editor-settings-panel').style.display = 'none'
-    let panel = document.getElementById('editor-layers-panel')
+    document.getElementById('editor-open').classList.remove('open-tab')
+    document.getElementById('editor-settings').classList.remove('open-tab')
+    let panel = document.getElementById('editor-emotes-panel')
     if (panel.style.display === 'none') {
-        document.getElementById('editor-screen').style.display = 'none'
+        toggleEditorScreen(false)
         panel.style.display = ''
-    } else {
-        document.getElementById('editor-screen').style.display = ''
-        panel.style.display = 'none'
-    }
-}
-
-function toggleBabble() {
-    document.getElementById('editor-open-panel').style.display = 'none'
-    document.getElementById('editor-layers-panel').style.display = 'none'
-    document.getElementById('editor-settings-panel').style.display = 'none'
-    let panel = document.getElementById('editor-babble-panel')
-    if (panel.style.display === 'none') {
-        document.getElementById('editor-screen').style.display = 'none'
-        panel.style.display = ''
-    } else {
-        document.getElementById('editor-screen').style.display = ''
-        panel.style.display = 'none'
-    }
-}
-
-function toggleSettings() {
-    document.getElementById('editor-open-panel').style.display = 'none'
-    document.getElementById('editor-layers-panel').style.display = 'none'
-    document.getElementById('editor-babble-panel').style.display = 'none'
-    let panel = document.getElementById('editor-settings-panel')
-    if (panel.style.display === 'none') {
-        document.getElementById('editor-screen').style.display = 'none'
-        panel.style.display = ''
-    } else {
-        document.getElementById('editor-screen').style.display = ''
-        panel.style.display = 'none'
-    }
-}
-
-function setLayer(e) {
-    document.getElementById('editor-screen').style.display = ''
-    if (settings.settings.view !== 'editor') document.getElementById('editor-layers-panel').style.display = 'none'
-    layer = e.target.id
-    if (layer.indexOf('-emote') > -1) {
-    let emote = layer.replace(/-emote/, '')
-        if (!(character.emotes[emote] && character.emotes[emote].enabled && emote !== 'default') && !character.emotes[emote]) {
-            character.emotes[emote] = {
-                "enabled": false,
-                "mouth": [],
-                "eyes": []
+        document.getElementById('editor-emotes').classList.add('open-tab')
+        for (let i = 0; i < EMOTES.length; i++) {
+            if (character.emotes[EMOTES[i]] && character.emotes[EMOTES[i]].enabled) {
+                document.getElementById('emote-' + (i + 1)).emote = EMOTES[i]
+                document.getElementById('emote-' + (i + 1)).className = "emote available"
+            } else {
+                document.getElementById('emote-' + (i + 1)).emote = EMOTES[i]
+                document.getElementById('emote-' + (i + 1)).className = "emote"
             }
-            puppet.emotes[emote] = {
-                "mouth": new Container(),
-                "eyes": new Container()
-            }
-            puppet.mouthsContainer.addChild(puppet.emotes[emote].mouth)
-            puppet.eyesContainer.addChild(puppet.emotes[emote].eyes)
         }
-        puppet.changeEmote(emote)
+        openEmote({target: document.getElementById('emote-1')})
+    } else if (settings.settings.view !== 'editor') {
+        toggleEditorScreen(true)
+        panel.style.display = 'none'
+        document.getElementById('editor-emotes').classList.remove('open-tab')
     }
-    let selected = document.getElementById('editor-layers-panel').getElementsByClassName("selected")
-    while (selected.length)
-        selected[0].classList.remove("selected")
-    document.getElementById(layer).className += " selected"
-    selected = null
-    if (selectedGui) stage.stage.removeChild(selectedGui)
 }
 
-function layerContextMenu(e) {
-    let emote = e.target.id.replace(/-emote/, '')
+function openEmote(e) {
+    let emote = character.emotes[e.target.emote]
+    document.getElementById('emote-name').innerText = e.target.emote
+    document.getElementById('emote-enabled').checked = emote && emote.enabled
+    document.getElementById('emote-eyes').checked = character.eyes.indexOf(e.target.emote) > -1
+    document.getElementById('emote-mouth').checked = character.mouths.indexOf(e.target.emote) > -1
+    document.getElementById('emote-enabled').disabled = e.target == document.getElementById('emote-1')
+    document.getElementById('emote-enabled').button = e.target
+}
+
+function toggleEmoteEnabled(e) {
+    let emote = document.getElementById('emote-name').innerText
     if (character.emotes[emote] && character.emotes[emote].enabled && emote !== 'default') {
         character.emotes[emote].enabled = false
-        e.target.classList.remove('available')
+        e.target.button.classList.remove('available')
+        updateEmoteDropdown()
     } else {
-        if (character.emotes[emote])
+        if (character.emotes[emote]) {
             character.emotes[emote].enabled = true
-        else {
+            exports.setPuppet(character, true, true)
+        } else {
             character.emotes[emote] = {
                 "enabled": true,
                 "mouth": [],
@@ -1110,33 +1032,78 @@ function layerContextMenu(e) {
             puppet.mouthsContainer.addChild(puppet.emotes[emote].mouth)
             puppet.eyesContainer.addChild(puppet.emotes[emote].eyes)
         }
-        e.target.className += " available"
+        e.target.button.className += " available"
+        updateEmoteDropdown()
     }
     recordChange()
 }
 
-function mouthLayerClick(e) {
-    let emote = e.target.id.replace(/-mouth/, '')
-    if (character.mouths.indexOf(emote) > -1) {
-        character.mouths.splice(character.mouths.indexOf(emote), 1)
-        e.target.classList.remove('available')
+function toggleBabbleMouth(e) {
+    let emote = document.getElementById('emote-name').innerText
+    let index = character.mouths.indexOf(emote)
+    if (index > -1) {
+        character.mouths.splice(index, 1)
     } else {
         character.mouths.push(emote)
-        e.target.className += ' available'
     }
     recordChange()
 }
 
-function eyesLayerClick(e) {
-    let emote = e.target.id.replace(/-eyes/, '')
-    if (character.eyes.indexOf(emote) > -1) {
-        character.eyes.splice(character.eyes.indexOf(emote), 1)
-        e.target.classList.remove('available')
+function toggleBabbleEyes(e) {
+    let emote = document.getElementById('emote-name').innerText
+    let index = character.eyes.indexOf(emote)
+    if (index > -1) {
+        character.eyes.splice(index, 1)
     } else {
         character.eyes.push(emote)
-        e.target.className += ' available'
     }
     recordChange()
+}
+
+function updateEmoteDropdown() {
+    let emotes = Object.keys(character.emotes)
+    let select = document.getElementById('editor-emote')
+    select.innerHTML = ''
+    for (let i = 0; i < emotes.length; i++) {
+        let emote = character.emotes[emotes[i]]
+        if (emote && emote.enabled) {
+            let option = document.createElement('div')
+            select.append(option)
+            option.outerHTML = '<option>' + emotes[i] + '</option>'
+        }
+    }
+    puppet.changeEmote()
+}
+
+function toggleSettings() {
+    document.getElementById('editor-open-panel').style.display = 'none'
+    document.getElementById('editor-emotes-panel').style.display = 'none'
+    document.getElementById('editor-open').classList.remove('open-tab')
+    document.getElementById('editor-emotes').classList.remove('open-tab')
+    let panel = document.getElementById('editor-settings-panel')
+    if (panel.style.display === 'none') {
+        toggleEditorScreen(false)
+        panel.style.display = ''
+        document.getElementById('editor-settings').classList.add('open-tab')
+    } else if (settings.settings.view !== 'editor') {
+        toggleEditorScreen(true)
+        panel.style.display = 'none'
+        document.getElementById('editor-settings').classList.remove('open-tab')
+    }
+}
+
+function setLayer(e) {
+    layer = e.target.id
+    let selected = document.getElementById('editor-layers').getElementsByClassName("selected")
+    while (selected.length)
+        selected[0].classList.remove("selected")
+    document.getElementById(layer).className += " selected"
+    selected = null
+    if (selectedGui) stage.stage.removeChild(selectedGui)
+}
+
+function selectEmote(e) {
+    puppet.changeEmote(e.target.value)
 }
 
 function nameChange(e) {
@@ -1296,16 +1263,20 @@ function confirmImportAssets() {
 
 function editAssetList() {
     if (Object.keys(project.assets).length === 0) return
-    document.getElementById('assets').style.display = 'none'
-    document.getElementById('asset list editor').style.display = ''
-    document.getElementById('asset-list-name').value = document.getElementById('asset tabs').value
-    document.getElementById('asset-list-name').tab = document.getElementById('asset tabs').value
-    document.getElementById('delete-asset-list').tab = document.getElementById('asset tabs').value
-}
-
-function closeAssetListEditor() {
-    document.getElementById('assets').style.display = ''
-    document.getElementById('asset list editor').style.display = 'none'
+    if (document.getElementById('asset list editor').style.display === 'none') {
+        document.getElementById('assets').style.display = 'none'
+        document.getElementById('asset list editor').style.display = ''
+        document.getElementById('asset-list-name').value = document.getElementById('asset tabs').value
+        document.getElementById('asset-list-name').tab = document.getElementById('asset tabs').value
+        document.getElementById('delete-asset-list').tab = document.getElementById('asset tabs').value
+        document.getElementById('edit-asset-list').classList.add('open-tab')
+        document.getElementById('asset editor').style.display = 'none'
+        document.getElementById('asset selected').style.display = 'none'
+    } else {
+        document.getElementById('assets').style.display = ''
+        document.getElementById('asset list editor').style.display = 'none'
+        document.getElementById('edit-asset-list').classList.remove('open-tab')
+    }
 }
 
 function renameAssetList(e) {
@@ -1314,6 +1285,7 @@ function renameAssetList(e) {
 
 function deleteAssetList(e) {
     controller.deleteAssetList(e.target.tab)
+    document.getElementById('edit-asset-list').classList.remove('open-tab')
 }
 
 function newAssetList() {
@@ -1353,6 +1325,7 @@ function addAssetListToDom(name) {
 function selectAsset() {
     document.getElementById('assets').style.display = ''
     document.getElementById('asset editor').style.display = 'none'
+    document.getElementById('asset selected').style.display = 'none'
 }
 
 function migrateAsset(e) {
@@ -1410,8 +1383,20 @@ function zoomOut() {
 function cut() {
     if (selected) {
         electron.clipboard.writeText(JSON.stringify(selected.asset))
-        puppet[layer].removeChild(selected)
-        character[layer === 'headBase' ? 'head' : layer].splice(character[layer === 'headBase' ? 'head' : layer].indexOf(selected.asset), 1)
+        switch (layer) {
+            case "mouth":
+                puppet.emotes[puppet.emote].mouth.removeChild(selected)
+                character.emotes[puppet.emote].mouth.splice(character.emotes[puppet.emote].mouth.indexOf(selected.asset), 1)
+                break
+            case "eyes":
+                puppet.emotes[puppet.emote].eyes.removeChild(selected)
+                character.emotes[puppet.emote].eyes.splice(character.emotes[puppet.emote].eyes.indexOf(selected.asset), 1)
+                break
+            default:
+                puppet[layer].removeChild(selected)
+                character[layer === 'headBase' ? 'head' : layer].splice(character[layer === 'headBase' ? 'head' : layer].indexOf(selected.asset), 1)
+                break
+        }
         selected = null
         stage.stage.removeChild(selectedGui)
         recordChange()
@@ -1430,17 +1415,19 @@ function paste() {
         return
     }
     let asset = stage.getAsset(newAsset, layer)
-    if (layer.indexOf('-emote') > -1) {
-        if (document.getElementById('eyemouth').checked) {
-            puppet.emotes[layer.replace(/-emote/, '')].eyes.addChild(asset)
-            character.emotes[layer.replace(/-emote/, '')].eyes.push(newAsset)
-        } else {
-            puppet.emotes[layer.replace(/-emote/, '')].mouth.addChild(asset)
-            character.emotes[layer.replace(/-emote/, '')].mouth.push(newAsset)
-        }
-    } else {
-        puppet[layer].addChild(asset)
-        character[layer === 'headBase' ? 'head' : layer].push(newAsset)
+    switch (layer) {
+        case "mouth":
+            puppet.emotes[puppet.emote].mouth.addChild(stage.getAsset(newAsset, layer))
+            character.emotes[puppet.emote].mouth.push(newAsset)
+            break
+        case "eyes":
+            puppet.emotes[puppet.emote].eyes.addChild(stage.getAsset(newAsset, layer))
+            character.emotes[puppet.emote].eyes.push(newAsset)
+            break
+        default:
+            puppet[layer].addChild(stage.getAsset(newAsset, layer))
+            character[layer === 'headBase' ? 'head' : layer].push(newAsset)
+            break
     }
     setSelected(asset)
     recordChange()
@@ -1448,17 +1435,19 @@ function paste() {
 
 function deleteKey() {
     if (selected) {
-        if (layer.indexOf('-emote') > -1) {
-            if (document.getElementById('eyemouth').checked) {
-                puppet.emotes[layer.replace(/-emote/, '')].eyes.removeChild(selected)
-                character.emotes[layer.replace(/-emote/, '')].eyes.splice(character.emotes[layer.replace(/-emote/, '')].eyes.indexOf(selected.asset), 1)
-            } else {
-                puppet.emotes[layer.replace(/-emote/, '')].mouth.removeChild(selected)
-                character.emotes[layer.replace(/-emote/, '')].mouth.splice(character.emotes[layer.replace(/-emote/, '')].mouth.indexOf(selected.asset), 1)
-            }
-        } else {
-            puppet[layer].removeChild(selected)
-            character[layer === 'headBase' ? 'head' : layer].splice(character[layer === 'headBase' ? 'head' : layer].indexOf(selected.asset), 1)
+        switch (layer) {
+            case "mouth":
+                puppet.emotes[puppet.emote].mouth.removeChild(selected)
+                character.emotes[puppet.emote].mouth.splice(character.emotes[puppet.emote].mouth.indexOf(selected.asset), 1)
+                break
+            case "eyes":
+                puppet.emotes[puppet.emote].eyes.removeChild(selected)
+                character.emotes[puppet.emote].eyes.splice(character.emotes[puppet.emote].eyes.indexOf(selected.asset), 1)
+                break
+            default:
+                puppet[layer].removeChild(selected)
+                character[layer === 'headBase' ? 'head' : layer].splice(character[layer === 'headBase' ? 'head' : layer].indexOf(selected.asset), 1)
+                break
         }
         selected = null
         stage.stage.removeChild(selectedGui)
@@ -1482,7 +1471,7 @@ function undo() {
     reverseHistory.push(history.pop())
     let action = history.length === 0 ? oldcharacter : history[history.length - 1]
     exports.setPuppet(JSON.parse(action), true, true)
-    if (action === oldcharacter) {
+    if (action === oldcharacter && !alwaysDifferent) {
         document.getElementById("editor-save").classList.remove("highlight")
     } else {
         document.getElementById("editor-save").classList.add("highlight")
@@ -1494,7 +1483,7 @@ function redo() {
     let action = reverseHistory.pop()
     history.push(action)
     exports.setPuppet(JSON.parse(action), true, true)
-    if (action === oldcharacter) {
+    if (action === oldcharacter && !alwaysDifferent) {
         document.getElementById("editor-save").classList.remove("highlight")
     } else {
         document.getElementById("editor-save").classList.add("highlight")
@@ -1505,5 +1494,11 @@ function deselect(e) {
     if (e.target != stage.renderer.view && selected) {
         selected = null
         stage.stage.removeChild(selectedGui)
+    }
+    if (e.target.id !== "add-asset-dropdown") {
+        document.getElementById("add-asset-dropdown").checked = false
+    }
+    if (e.target.id !== "add-puppet-dropdown") {
+        document.getElementById("add-puppet-dropdown").checked = false
     }
 }

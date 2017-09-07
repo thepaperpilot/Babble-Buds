@@ -36,7 +36,7 @@ input[type="text"], input[type="number"], input[type="search"], select {
 	color: #FFF;
 	font-size: 20px;
 	transition: border 0.3s;
-	width: calc( 100% - 8px );
+	width: 100%;
 }
 
 input[type="text"]:focus, input[type="number"]:focus, input[type="search"]:focus, select:focus {
@@ -74,7 +74,7 @@ select option {
 
 .editormain {
 	background-color: #2a323d;
-	height: calc( 100% - 90px );
+	height: calc( 100% - 80px );
 	position: relative;
 }
 
@@ -84,7 +84,7 @@ select option {
 }
 
 body > .editormain {
-	height: calc( 100% - 490px );
+	height: calc( 100% - 110px );
 }
 
 .main {
@@ -130,11 +130,11 @@ body > .editormain {
 }
 
 .s8 {
-	width: calc(100% - 200px);
-}
-
-.v5 {
-	height: 50%;
+	width: calc(100% - 192px);
+    background-color: #2a323d;
+    padding: 8px;
+    margin-left: -8px;
+    padding-left: 16px;
 }
 
 .status {
@@ -153,18 +153,13 @@ body > .editormain {
 	margin-right: 8px;
 }
 
-.sidebuttons button {
+.sidebuttons > button {
 	height: 25px;
 	width: 25px;
-}
-
-.b5 button {
-	padding: 0;
-	width: unset;
-}
-
-.b3 button {
-	width: calc( 33% - 23px );
+	margin: 0;
+    background-size: 70% !important;
+    vertical-align: middle;
+    padding: 6px 20px 35px 20px;
 }
 
 .vbar {
@@ -235,7 +230,7 @@ body > .editormain {
 }
 
 .assetlist {
-	height: calc( 100% - 114px );
+	height: calc( 100% - 44px );
 }
 
 .charselector .char {
@@ -246,7 +241,13 @@ body > .editormain {
 }
 
 .editorpanel {
-	height: calc( 100% - 90px );
+	height: calc( 100% - 55px );
+    background-color: #2a323d;
+    padding: 8px;
+}
+
+.v5 {
+	height: calc( 50% - 60px );
 }
 
 .editorpanel .char {
@@ -256,7 +257,7 @@ body > .editormain {
 }
 
 .editorpanel .charlist {
-	height: calc( 100% - 31px );
+	height: calc( 100% - 36px );
 }
 
 .editorpanel .emote, .editorpanel .babble {
@@ -265,8 +266,9 @@ body > .editormain {
 }
 
 .editorpanel .emote {
-	width: calc( 25% - 10px );
+	width: calc( 25% - 8px );
 	margin: 4px 1px;
+	overflow: hidden;
 }
 
 .editorpanel .babble {
@@ -282,14 +284,27 @@ body > .editormain {
 }
 
 .editorpanel .babble-emotes {
-	margin: 6px 4px 6px 13px;
-	outline: #2a323d solid 4px;
-	width: 361.5px;
-	padding: 6px 0 6px 0px;
+	margin: 6px 6px 18px 6px;
+	background: #242a33;
+	width: 363.5px;
+	padding: 6px 0 6px 10px;
 }
 
 .small {
 	font-size: 16px;
+}
+
+.small button {
+	margin: 1px;
+	padding: 3px;
+	font-size: 16px;
+}
+
+.small select {
+	font-size: 16px;
+	width: 92px;
+	color: #5464d4;
+	border-bottom-color: #5464d4;
 }
 
 .available {
@@ -446,6 +461,26 @@ body > .editormain {
 
 .highlight {
 	font-weight: bold;
+	position: relative;
+  	animation: pulse 5s infinite cubic-bezier(0.66, 0, 0, 1);
+  	border-radius: 50%;
+  	transform: scale(1.25);
+}
+
+@keyframes pulse {
+	0% {
+		box-shadow: 0 0 0 0 rgba(84, 100, 212, 0.7);
+		background-color: rgba(84, 100, 212, 0.7);
+	}
+
+	20% {
+		box-shadow: 0 0 0 45px rgba(84, 100, 212, 0);
+		background-color: rgba(84, 100, 212, 0);
+	}
+
+	100% {
+		box-shadow: 0 0 0 45px rgba(84, 100, 212, 0);
+	}
 }
 
 .modal {
@@ -515,32 +550,72 @@ body > .editormain {
 	transition: opacity 0.2s, transform 0.2s;
 }
 
-.dropdown:hover .dropdown-content {
-	display: block;
+.open-tab {
+	background-color: #2a323d !important;
+}
+
+.button-tab {
+    padding: 11px 32px 11px 16px;
+    margin: 0;
+    margin-top: 4px;
 }
 
 .dropdown {
-    position: relative;
-    display: inline-block;
+	display: none;
+}
+
+.dropdown ~ label {
+	cursor: pointer;
+	margin: 0 10px;
+}
+
+.dropdown:checked ~ .dropdown-content {
+	max-height: 300px;
+	transition: max-height 0.2s ease-in;
+    position: absolute;
+}
+
+.dropdown-image {
+	pointer-events: none;
+}
+
+.dropdown:checked ~ label .dropdown-image {
+	background-color: #2a323d !important;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    pointer-events: unset;
 }
 
 .dropdown-content {
-    display: none;
-    position: absolute;
+	max-height: 0;
+	padding: 0;
+	margin: 0;
+	overflow: hidden;
+	transition: max-height 0.2s ease-out;
+	position: absolute;
     background-color: #2a323d;
-    min-width: 240px;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    z-index: 1;
+    z-index: 2;
+    left: 11px;
+    top: 44px;
+    font-size: 16px;
 }
 
-.dropdown-content a {
-    padding: 12px 16px;
-    text-decoration: none;
-    display: block;
+.dropdown-content li {
+	padding: 6px;
+	cursor: pointer;
 }
 
-.dropdown-content a:hover {
+.dropdown-content li:hover {
 	background-color: #333c4a;
+}
+
+.dropdown-image {
+	width: 25px; 
+	height: 25px; 
+	padding: 16px; 
+	margin: -4px -4px -4px -9px;
+	background-size: 70% !important;
+	vertical-align: middle;
 }
 
 .autocrop-assets {
@@ -552,10 +627,10 @@ body > .editormain {
 	width: 120px;
 	height: 120px;
 	box-shadow: 0 313px rgba(255, 0, 0, 0.2) inset;
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  cursor: unset;
+  	background-size: contain;
+  	background-repeat: no-repeat;
+  	background-position: center;
+  	cursor: unset;
 }
 
 .import-assets .asset {

@@ -197,12 +197,13 @@ exports.setView = function(newView) {
 		removeStageView()
 	else if (view === 'editor')
 		removeEditorView()
+	settings.setView(newView)
+	console.log(settings.settings.view)
 	if (newView === 'stage')
 		addStageView()
 	else if (newView === 'editor')
 		addEditorView()
 	view = newView
-	settings.setView(view)
 	controller.resize()
 }
 
@@ -363,10 +364,12 @@ function toggleSettings() {
 		document.getElementById('chars').style.display = 'none'
 		document.getElementById('charselect').style.display = 'none'
 		document.getElementById('emotes').style.display = 'none'
+		document.getElementById('settings').classList.add('open-tab')
 	} else {
 		document.getElementById('settings-panel').style.display = 'none'
 		document.getElementById('chars').style.display = 'block'
 		document.getElementById('emotes').style.display = 'block'
+		document.getElementById('settings').classList.remove('open-tab')
 	}
 }
 
@@ -410,32 +413,16 @@ function removeStageView() {
 function removeEditorView() {
 	document.getElementById('screen').style.display = ''
 	document.getElementById('editor').insertBefore(document.getElementById('editor-screen'), document.getElementById('puppet-panels'))
+	document.getElementById('editor').insertBefore(document.getElementById('editor-layers'), document.getElementById('puppet-panels'))
 	document.getElementById('editor-screen').className = 'editormain'
+	document.getElementById('editor-layers').className = 'small'
     document.getElementById('editor-open-panel').style.display = 'none'
+    document.getElementById('editor-emotes-panel').style.display = 'none'
     document.getElementById('editor-settings-panel').style.display = 'none'
-    document.getElementById('editor-layers-panel').style.display = 'none'
-    document.getElementById('editor-babble-panel').style.display = 'none'
-	document.getElementById('editor').style.display = ''
+    document.getElementById('editor-open').classList.remove('open-tab')
+    document.getElementById('editor-emotes').classList.remove('open-tab')
+    document.getElementById('editor-settings').classList.remove('open-tab')
 	document.getElementById('bottom').style.display = ''
-	document.getElementById('editor-bottom').style.display = 'none'
-	document.getElementById('assets').style.height = ''
-
-	// Bottom Panel Stuff
-	document.getElementById('editor-open-panel').className = 'charselector editorpanel'
-	document.getElementById('editor-open-panel').style.height = ''
-	document.getElementById('editor-layers-panel').className = 'scroll editorpanel'
-	document.getElementById('editor-layers-panel').style.height = ''
-	document.getElementById('editor-babble-panel').className = 'scroll editorpanel'
-	document.getElementById('editor-babble-panel').style.height = ''
-	document.getElementById('editor-settings-panel').className = 'scroll editorpanel'
-	document.getElementById('editor-settings-panel').style.height = ''
-	document.getElementById('babble-emotes').style.margin = ''
-	document.getElementById('babble-mouths').style.margin = ''
-	document.getElementById('babble-eyes').style.margin = ''
-	document.getElementById('editor').insertBefore(document.getElementById('editor-open-panel'), document.getElementById('puppet-panels'))
-	document.getElementById('editor').insertBefore(document.getElementById('editor-layers-panel'), document.getElementById('puppet-panels'))
-	document.getElementById('editor').insertBefore(document.getElementById('editor-babble-panel'), document.getElementById('puppet-panels'))
-	document.getElementById('editor').insertBefore(document.getElementById('editor-settings-panel'), document.getElementById('puppet-panels'))
 }
 
 function addStageView() {
@@ -447,33 +434,14 @@ function addStageView() {
 
 function addEditorView() {
 	document.getElementById('screen').style.display = 'none'
-	document.body.prepend(document.getElementById('editor-screen'))
+	document.getElementById('editor-screen').style.display = ''
+	document.getElementById('editor-layers').style.display = ''
 	document.getElementById('editor-screen').className = 'editormain container main'
-    document.getElementById('editor-open-panel').style.display = 'none'
-    document.getElementById('editor-settings-panel').style.display = 'none'
-    document.getElementById('editor-layers-panel').style.display = ''
-    document.getElementById('editor-babble-panel').style.display = ''
-	document.getElementById('editor').style.display = 'none'
+	document.getElementById('editor-layers').className = 'container small status'
+	document.body.append(document.getElementById('editor-screen'))
+	document.body.append(document.getElementById('editor-layers'))
+    document.getElementById('editor-open').click()
 	document.getElementById('bottom').style.display = 'none'
-	document.getElementById('editor-bottom').style.display = ''
-	document.getElementById('assets').style.height = '100%'
-
-	// Bottom Panel Stuff
-	document.getElementById('editor-open-panel').className = 'charselector s4 editorpanel'
-	document.getElementById('editor-open-panel').style.height = 'calc(100% - 10px )'
-	document.getElementById('editor-layers-panel').className = 'scroll s4 editorpanel'
-	document.getElementById('editor-layers-panel').style.height = 'calc(100% - 10px )'
-	document.getElementById('editor-babble-panel').className = 'scroll s4 editorpanel'
-	document.getElementById('editor-babble-panel').style.height = 'calc(100% - 10px )'
-	document.getElementById('editor-settings-panel').className = 'scroll s4 editorpanel'
-	document.getElementById('editor-settings-panel').style.height = 'calc(100% - 10px )'
-	document.getElementById('babble-emotes').style.margin = '4px auto'
-	document.getElementById('babble-mouths').style.margin = 'auto'
-	document.getElementById('babble-eyes').style.margin = 'auto'
-	document.getElementById('editor-bottom').append(document.getElementById('editor-open-panel'))
-	document.getElementById('editor-bottom').append(document.getElementById('editor-layers-panel'))
-	document.getElementById('editor-bottom').append(document.getElementById('editor-babble-panel'))
-	document.getElementById('editor-bottom').append(document.getElementById('editor-settings-panel'))
 }
 
 function openAutocrop() {

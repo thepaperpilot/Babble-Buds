@@ -95,7 +95,7 @@ module.exports = {
 		this.oldCharacters = 'null'
 		settings.settings.openProject = ""
 		settings.save()
-		editor.resetChanges()
+		editor.clear()
 		menu.updateMenu()
 
 		main.redirect('welcome.html')

@@ -11,7 +11,7 @@
         <div id="bottom" class="container bottom">
             <div id="project-buttons" class="buttons s2">
                 <input type="checkbox" id="greenscreen" class="checkbox"><label for="greenscreen" class="checkbox-label">Green Screen</label>
-                <button id="settings">Project Settings</button>
+                <button id="settings" class="button-tab">Project Settings</button>
                 <button id="popout">Pop Out Stage</button>
                 <button id="host">Host Server</button>
                 <button id="connect">Connect to Server</button>
@@ -66,24 +66,20 @@
                 </div>
             </div>
         </div>
-        <div id="editor-bottom" class="container bottom" style="display: none;height: 400px;">
-            <div id="project-buttons" class="buttons s2">
-                <button id="editor-view-save">Save</button>
-                <button id="editor-open-settings">Open/Settings</button>
-                <button id="editor-layer-babble">Layers/Babble</button>
-                <button id="editor-view-new">New</button>
-                <button id="editor-view-duplicate">Duplicate</button>
-                <button id="editor-view-import">Import</button>
-            </div>
-        </div>
         <div id="side" class="container side">
-            <div id="editor" class="v5 vbar">
-                <div id="puppet-buttons" class="sidebuttons b5">
-                    <button id="editor-open">Open</button>
-                    <button id="editor-save">Save</button>
-                    <button id="editor-new">New</button>
-                    <button id="editor-duplicate">Duplicate</button>
-                    <button id="editor-import">Import</button>
+            <div id="editor" class="vbar" style="height: calc( 50% - 8px );">
+                <div id="puppet-buttons" class="sidebuttons">
+                    <input id="add-puppet-dropdown" type="checkbox" class="dropdown">
+                    <label for="add-puppet-dropdown" id="add-puppet-label" style="margin-left: 20px;"><button id="add-puppet-img" class="dropdown-image" style="background: url(assets/icons/add_asset.png) center no-repeat/contain" title="Add Puppets"></button></label>
+                    <ul class="dropdown-content" style="margin-left: 10px;">
+                        <li id="editor-new">New Puppet</li>
+                        <li id="editor-duplicate">Duplicate Puppet</li>
+                    </ul>
+                    <button id="editor-import" style="background: url(assets/icons/import.png) center no-repeat/contain; background-size: 50% !important;" title="Import Puppets"></button>
+                    <button id="editor-save" style="background: url(assets/icons/save.png) center no-repeat/contain" title="Save"></button>
+                    <button id="editor-open" style="background: url(assets/icons/grid.png) center no-repeat/contain; margin-left: 123px" title="Open"></button>
+                    <button id="editor-emotes" style="background: url(assets/icons/face.png) center no-repeat/contain" title="Emote Settings"></button>
+                    <button id="editor-settings" style="background: url(assets/icons/settings.png) center no-repeat/contain" title="Puppet Settings"></button>
                 </div>
                 <div id="editor-screen" class="editormain">
                     <button id="zoom in" style="top: 1px">+</button><button id="zoom out" style="left: 30px">-</button>
@@ -92,108 +88,85 @@
                     <div id="char open list" class="scroll charlist"></div>
                     <input type="search" id="char open search" placeholder="Search">
                 </div>
-                <div id="editor-layers-panel" class="editorpanel scroll" style="display: none">
-                    <button id="props" class="babble">Props</button>
-                    <button id="hat" class="babble">Hat</button>
-                    <div id="babble-emotes" class="emotes">
-                        <button id="default-emote" class="emote available">default</button>
-                        <button id="happy-emote" class="emote">happy</button>
-                        <button id="wink-emote" class="emote">wink</button>
-                        <button id="kiss-emote" class="emote">kiss</button>
-                        <button id="angry-emote" class="emote">angry</button>
-                        <button id="sad-emote" class="emote">sad</button>
-                        <button id="ponder-emote" class="emote">ponder</button>
-                        <button id="gasp-emote" class="emote">gasp</button>
-                        <button id="veryangry-emote" class="emote small">veryangry</button>
-                        <button id="verysad-emote" class="emote">verysad</button>
-                        <button id="confused-emote" class="emote small">confused</button>
-                        <button id="ooo-emote" class="emote">ooo</button>
-                        <div class="flipswitch">
-                            <input type="checkbox" name="flipswitch" class="flipswitch-cb" id="eyemouth">
-                            <label class="flipswitch-label" for="eyemouth">
-                                <div class="flipswitch-inner"></div>
-                                <div class="flipswitch-switch"></div>
-                            </label>
-                        </div>
+                <div id="editor-emotes-panel" class="editorpanel scroll small" style="display: none;">
+                    <div class="babble-emotes">
+                        <button id="emote-1" class="emote available">default</button>
+                        <button id="emote-2" class="emote">happy</button>
+                        <button id="emote-3" class="emote">wink</button>
+                        <button id="emote-4" class="emote">kiss</button>
+                        <button id="emote-5" class="emote">angry</button>
+                        <button id="emote-6" class="emote">sad</button>
+                        <button id="emote-7" class="emote">ponder</button>
+                        <button id="emote-8" class="emote">gasp</button>
+                        <button id="emote-9" class="emote">veryangry</button>
+                        <button id="emote-10" class="emote">verysad</button>
+                        <button id="emote-11" class="emote">confused</button>
+                        <button id="emote-12" class="emote">ooo</button>
                     </div>
-                    <button id="headBase" class="babble">Head</button>
-                    <button id="body" class="babble">Body</button>
-                    <button id="bundles" class="babble">Asset Bundles</button>
-                </div>
-                <div id="editor-babble-panel" class="editorpanel scroll" style="display: none; text-align: center">
-                    <p style="margin: 0 0 8px; padding-top: 16px;">Select mouths to rotate through</p>
-                    <div id="babble-mouths" class="babble-emotes">
-                        <button id="default-mouth" class="emote available">default</button>
-                        <button id="happy-mouth" class="emote">happy</button>
-                        <button id="wink-mouth" class="emote">wink</button>
-                        <button id="kiss-mouth" class="emote">kiss</button>
-                        <button id="angry-mouth" class="emote">angry</button>
-                        <button id="sad-mouth" class="emote">sad</button>
-                        <button id="ponder-mouth" class="emote">ponder</button>
-                        <button id="gasp-mouth" class="emote">gasp</button>
-                        <button id="veryangry-mouth" class="emote small">veryangry</button>
-                        <button id="verysad-mouth" class="emote">verysad</button>
-                        <button id="confused-mouth" class="emote small">confused</button>
-                        <button id="ooo-mouth" class="emote">ooo</button>
-                    </div>
-                    <p style="margin: 0 0 8px; padding-top: 16px;">Select eyes to rotate through</p>
-                    <div id="babble-eyes" class="babble-emotes">
-                        <button id="default-eyes" class="emote available">default</button>
-                        <button id="happy-eyes" class="emote">happy</button>
-                        <button id="wink-eyes" class="emote">wink</button>
-                        <button id="kiss-eyes" class="emote">kiss</button>
-                        <button id="angry-eyes" class="emote">angry</button>
-                        <button id="sad-eyes" class="emote">sad</button>
-                        <button id="ponder-eyes" class="emote">ponder</button>
-                        <button id="gasp-eyes" class="emote">gasp</button>
-                        <button id="veryangry-eyes" class="emote small">veryangry</button>
-                        <button id="verysad-eyes" class="emote">verysad</button>
-                        <button id="confused-eyes" class="emote small">confused</button>
-                        <button id="ooo-eyes" class="emote">ooo</button>
+                    <div style="padding: 8px">
+                        <p id="emote-name" style="margin: 8px">Default</p>
+                        <input type="checkbox" id="emote-enabled" class="checkbox"><label for="emote-enabled" class="checkbox-label">Enabled</label><br/>
+                        <input type="checkbox" id="emote-eyes" class="checkbox"><label for="emote-eyes" class="checkbox-label">Use this emote's eyes while babbling</label><br/>
+                        <input type="checkbox" id="emote-mouth" class="checkbox"><label for="emote-mouth" class="checkbox-label">Use this emote's mouth while babbling</label><br/>
                     </div>
                 </div>
                 <div id="editor-settings-panel" class="editorpanel scroll" style="display: none">
-                    <p style="margin: 0 0 8px; padding-top: 16px;">Puppet Name:</p>
-                    <input type="text" id="editor-name" value="New Puppet" style="width: calc(100% - 16px)"><br>
+                    <p style="margin: 8px 0;">Puppet Name:</p>
+                    <input type="text" id="editor-name" value="New Puppet"><br>
                     <input type="checkbox" id="deadbonesstyle" class="checkbox"><label for="deadbonesstyle" class="checkbox-label">Bobble head while talking</label><br/>
                     <button id="delete-character">Delete Character</button>
                 </div>
-                <div id="puppet-panels" class="sidebuttons b3">
-                    <button id="editor-layers">Layers</button>
-                    <button id="editor-babble">Babble</button>
-                    <button id="editor-settings">Settings</button>
+                <div id="editor-layers" class="small" style="margin-top: 4px;">
+                    <select id="editor-emote">
+                        <option id="emote-1">default</option>
+                        <option id="emote-2">happy</option>
+                        <option id="emote-3">wink</option>
+                        <option id="emote-4">kiss</option>
+                        <option id="emote-5">angry</option>
+                        <option id="emote-6">sad</option>
+                        <option id="emote-7">ponder</option>
+                        <option id="emote-8">gasp</option>
+                        <option id="emote-9">veryangry</option>
+                        <option id="emote-10">verysad</option>
+                        <option id="emote-11">confused</option>
+                        <option id="emote-12">ooo</option>
+                    </select>
+                    <button id="body">Body</button>
+                    <button id="headBase">Head</button>
+                    <button id="eyes">Eyes</button>
+                    <button id="mouth">Mouth</button>
+                    <button id="hat">Hat</button>
+                    <button id="props">Props</button>
                 </div>
             </div>
+            <div class="sidebuttons" style="padding-left: 10px; position: relative;">
+                <input id="add-asset-dropdown" type="checkbox" class="dropdown">
+                <label for="add-asset-dropdown"><button id="add-asset-img" class="dropdown-image" style="background: url(assets/icons/add_asset.png) center no-repeat/contain" title="Add Assets"></button></label>
+                <ul class="dropdown-content" style="top: 34px;">
+                    <li id="add-asset">Add Asset</li>
+                    <li id="add-animated-asset">Add Animated Asset</li>
+                    <li id="new-asset-bundle">New Asset Bundle</li>
+                </ul>
+                <button id="import-asset" style="background: url(assets/icons/import.png) center no-repeat/contain; background-size: 50% !important;" title="Import Assets"></button>
+                <button id="new-asset-list" style="background: url(assets/icons/new_folder.png) center no-repeat/contain" title="New Asset List"></button>
+                <button id="edit-asset-list" style="background: url(assets/icons/settings.png) center no-repeat/contain; float: right" title="Edit Asset List"></button>
+                <button id="asset selected" class="open-tab" style="display: none; float: right"></button>
+            </div>
             <div id="assets" class="v5">
-                <div class="sidebuttons" style="padding-left: 10px">
-                    <div class="dropdown">
-                        <button style="background: url(assets/icons/add_asset.png) center no-repeat/contain"></button>
-                        <div class="dropdown-content">
-                            <a id="add-asset" href="#">Add Asset</a>
-                            <a id="add-animated-asset" href="#">Add Animated Asset</a>
-                            <a id="new-asset-bundle" href="#">New Asset Bundle</a>
-                        </div>
-                    </div>
-                    <button id="import-asset" style="background: url(assets/icons/import.png) center no-repeat/contain" title="Import Assets"></button>
-                    <button id="edit-asset-list" style="background: url(assets/icons/settings.png) center no-repeat/contain; margin-left: 190px" title="Edit Asset List"></button>
-                    <button id="new-asset-list" style="background: url(assets/icons/new_folder.png) center no-repeat/contain" title="New Asset List"></button>
-                </div>
                 <select id="asset tabs"></select>
                 <div id="asset list" class="assetlist"></div>
                 <input type="search" id="asset search" placeholder="Search">
             </div>
-            <div id="asset editor" class="v5" style="display: none">
-                <div id="asset selected" class="asset"><div class="desc"></div><img class="contain" style="width: 120px; height: 120px"></div>
+            <div id="asset editor" class="editorpanel v5" style="display: none">
                 <p style="margin: 0 0 8px; padding-top: 16px;">Asset List:</p>
                 <select id="asset-tab"></select>
                 <p style="margin: 0 0 8px; padding-top: 16px;">Asset Name:</p>
-                <input type="text" id="asset-name" value="New Asset" style="width: calc(100% - 16px)"><br>
+                <input type="text" id="asset-name" value="New Asset"><br>
                 <button id="delete-asset">Delete Asset</button>
             </div>
-            <div id="asset list editor" class="v5" style="display: none">
-                <button id="close-edit-asset-list" style="background: url(assets/icons/settings.png) center no-repeat/contain; margin-right: 140px; width: 25px; height: 25px;" title="Close Asset List Editor"></button>
+            <div id="asset list editor" class="editorpanel v5" style="display: none">
                 <p style="margin: 0 0 8px; padding-top: 16px;">Asset List Name:</p>
-                <input type="text" id="asset-list-name" value="New Asset List" style="width: calc(100% - 16px)"><br>
+                <input type="text" id="asset-list-name" value="New Asset List"><br>
                 <button id="delete-asset-list">Delete Asset List</button>
             </div>
         </div>

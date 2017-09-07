@@ -413,6 +413,7 @@ function loadPuppets(stage) {
 	editor.init()
 	stage.registerPuppetListener('mousedown', (e) => {
 		editor.setPuppet(JSON.parse(project.duplicateCharacter(e.target.puppet)))
+    	editor.resetChanges()
 	})
 
 	// Create Hotbar Puppets
