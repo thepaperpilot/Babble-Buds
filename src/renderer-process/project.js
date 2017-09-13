@@ -36,17 +36,44 @@ module.exports = {
 			this.assetsPath = path.join(filepath, '..', 'assets')
 			this.numCharacters = 0
 			for (let i = 0; i < proj.characters.length; i++) {
-				this.characters[proj.characters[i].id] = fs.readJsonSync(path.join(this.charactersPath, proj.characters[i].location))
-				this.characters[proj.characters[i].id].name = proj.characters[i].name
-				this.characters[proj.characters[i].id].id = proj.characters[i].id
+				let character = this.characters[proj.characters[i].id] = fs.readJsonSync(path.join(this.charactersPath, proj.characters[i].location))
+				character.name = proj.characters[i].name
+				character.id = proj.characters[i].id
 				if (proj.characters[i].id > this.numCharacters)
 					this.numCharacters = proj.characters[i].id
+				if (Object.prototype.toString.call(character.emotes) === "[object Object]") {
+					// Convert from object to array
+					let arr = []
+					let emotes = ['default', 'happy', 'wink', 'kiss', 'angry', 'sad', 'ponder', 'gasp', 'veryangry', 'verysad', 'confused', 'ooo']
+					for (let i = 0; i < emotes.length; i++) {
+						if (character.emotes[emotes[i]]) {
+							let emote = character.emotes[emotes[i]]
+							emote.name = emotes[i]
+							arr.push(emote)
+						} else {
+							arr.push({
+								enabled: false,
+								mouth: [],
+								eyes: [],
+								name: emotes[i]
+							})
+						}
+					}
+					character.emotes = arr
+					character.emote = emotes.indexOf(character.emote || "default")
+					if (proj.actor.id === character.id) {
+						proj.actor.emote = emotes.indexOf(character.emote || "default")
+					}
+					for (let i = 0; i < character.eyes.length; i++) {
+						character.eyes[i] = emotes.indexOf(character.eyes[i] || "default")
+					}
+					for (let i = 0; i < character.mouths.length; i++) {
+						character.mouths[i] = emotes.indexOf(character.mouths[i] || "default")
+					}
+				}
 			}
 			this.oldCharacters = JSON.stringify(this.characters)
 			this.actor = proj.actor
-			this.actor.position = proj.actor.position
-			this.actor.facingLeft = proj.actor.facingLeft
-			this.actor.emote = proj.actor.emote
 			for (let i = 0; i < proj.assets.length; i++) {
 				this.assets[proj.assets[i].name] = fs.readJsonSync(path.join(this.assetsPath, proj.assets[i].location))
 			}

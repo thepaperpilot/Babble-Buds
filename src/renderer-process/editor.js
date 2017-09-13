@@ -17,7 +17,6 @@ let Container = PIXI.Container,
 
 // Constants
 const ROUND_ROTATION = Math.PI / 4 // When rounding angles, this is the step size to use
-const EMOTES = ['default', 'happy', 'wink', 'kiss', 'angry', 'sad', 'ponder', 'gasp', 'veryangry', 'verysad', 'confused', 'ooo']
 
 // Vars
 let project
@@ -124,6 +123,7 @@ exports.init = function() {
     for (let i = 0; i < 12; i++) {
         document.getElementById('emote-' + (i + 1)).addEventListener('click', openEmote)
     }
+    document.getElementById('emote-name').addEventListener('change', changeEmoteName)
     document.getElementById('emote-enabled').addEventListener('change', toggleEmoteEnabled)
     document.getElementById('emote-mouth').addEventListener('change', toggleBabbleMouth)
     document.getElementById('emote-eyes').addEventListener('change', toggleBabbleEyes)
@@ -178,7 +178,7 @@ exports.init = function() {
     character = JSON.parse(JSON.stringify(project.characters[project.actor.id]))
     character.position = 1
     character.facingLeft = false
-    character.emote = 'default'
+    character.emote = 0
     puppet = stage.addPuppet(character, 1)
     // I realize it's slightly redundant, but I want to update the editor panels
     //  while also adding the initial puppet so stage.setPuppet will work
@@ -782,15 +782,16 @@ function savePuppet() {
     // Get thumbnails for the different emotes
     let emoteThumbnails = {}
     let emote = puppet.emote
-    let emotes = Object.keys(puppet.emotes)
     // Disable all layers except the head and emotes
     puppet.body.visible = false
     puppet.hat.visible = false
     puppet.props.visible = false
+    let emotes = Object.keys(puppet.emotes)
     for (let i = 0; i < emotes.length; i++) {
-        puppet.changeEmote(emotes[i])
-        emoteThumbnails[emotes[i]] = stage.getThumbnail()
+        puppet.changeEmote(i)
+        emoteThumbnails[i] = stage.getThumbnail()
     }
+    console.log(puppet.emotes, emoteThumbnails)
     puppet.changeEmote(emote)
     puppet.body.visible = true
     puppet.hat.visible = true
@@ -1005,12 +1006,11 @@ function toggleEmotes() {
         toggleEditorScreen(false)
         panel.style.display = ''
         document.getElementById('editor-emotes').classList.add('open-tab')
-        for (let i = 0; i < EMOTES.length; i++) {
-            if (character.emotes[EMOTES[i]] && character.emotes[EMOTES[i]].enabled) {
-                document.getElementById('emote-' + (i + 1)).emote = EMOTES[i]
+        for (let i = 0; i < character.emotes.length; i++) {
+            document.getElementById('emote-' + (i + 1)).emote = i
+            if (character.emotes[i].enabled) {
                 document.getElementById('emote-' + (i + 1)).className = "emote available"
             } else {
-                document.getElementById('emote-' + (i + 1)).emote = EMOTES[i]
                 document.getElementById('emote-' + (i + 1)).className = "emote"
             }
         }
@@ -1024,7 +1024,9 @@ function toggleEmotes() {
 
 function openEmote(e) {
     let emote = character.emotes[e.target.emote]
-    document.getElementById('emote-name').innerText = e.target.emote
+    document.getElementById('emote-name').value = emote.name
+    document.getElementById('emote-name').disabled = e.target.emote === 0
+    document.getElementById('emote-name').emote = e.target.emote
     document.getElementById('emote-enabled').checked = emote && emote.enabled
     document.getElementById('emote-eyes').checked = character.eyes.indexOf(e.target.emote) > -1
     document.getElementById('emote-mouth').checked = character.mouths.indexOf(e.target.emote) > -1
@@ -1032,8 +1034,16 @@ function openEmote(e) {
     document.getElementById('emote-enabled').button = e.target
 }
 
+function changeEmoteName(e) {
+    let emote = e.target.emote
+    character.emotes[emote].name = e.target.value
+    updateEmoteDropdown()
+    document.getElementById('emote-' + (emote + 1)).innerText = e.target.value
+    recordChange()
+}
+
 function toggleEmoteEnabled(e) {
-    let emote = document.getElementById('emote-name').innerText
+    let emote = document.getElementById('emote-name').emote
     if (character.emotes[emote] && character.emotes[emote].enabled && emote !== 'default') {
         character.emotes[emote].enabled = false
         e.target.button.classList.remove('available')
@@ -1042,6 +1052,9 @@ function toggleEmoteEnabled(e) {
         if (character.emotes[emote]) {
             character.emotes[emote].enabled = true
             exports.setPuppet(character, true, true)
+            e.target.button.className += " available"
+            updateEmoteDropdown()
+            document.getElementById('editor-emote').value = character.emotes[emote].name
         } else {
             character.emotes[emote] = {
                 "enabled": true,
@@ -1054,15 +1067,15 @@ function toggleEmoteEnabled(e) {
             }
             puppet.mouthsContainer.addChild(puppet.emotes[emote].mouth)
             puppet.eyesContainer.addChild(puppet.emotes[emote].eyes)
+            e.target.button.className += " available"
+            updateEmoteDropdown()
         }
-        e.target.button.className += " available"
-        updateEmoteDropdown()
     }
     recordChange()
 }
 
 function toggleBabbleMouth(e) {
-    let emote = document.getElementById('emote-name').innerText
+    let emote = document.getElementById('emote-name').emote
     let index = character.mouths.indexOf(emote)
     if (index > -1) {
         character.mouths.splice(index, 1)
@@ -1073,7 +1086,7 @@ function toggleBabbleMouth(e) {
 }
 
 function toggleBabbleEyes(e) {
-    let emote = document.getElementById('emote-name').innerText
+    let emote = document.getElementById('emote-name').emote
     let index = character.eyes.indexOf(emote)
     if (index > -1) {
         character.eyes.splice(index, 1)
@@ -1092,7 +1105,7 @@ function updateEmoteDropdown() {
         if (emote && emote.enabled) {
             let option = document.createElement('div')
             select.append(option)
-            option.outerHTML = '<option>' + emotes[i] + '</option>'
+            option.outerHTML = '<option>' + emote.name + '</option>'
         }
     }
     puppet.changeEmote()
