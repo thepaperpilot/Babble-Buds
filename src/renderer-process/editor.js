@@ -791,7 +791,6 @@ function savePuppet() {
         puppet.changeEmote(i)
         emoteThumbnails[i] = stage.getThumbnail()
     }
-    console.log(puppet.emotes, emoteThumbnails)
     puppet.changeEmote(emote)
     puppet.body.visible = true
     puppet.hat.visible = true
