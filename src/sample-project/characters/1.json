@@ -1,1 +1,331 @@
-{"deadbonesStyle":false,"body":[{"tab":"shirts","hash":"1879914476","x":1.5,"y":-54,"rotation":0,"scaleX":1,"scaleY":1}],"head":[{"tab":"skin","hash":"-925878550","x":1,"y":-210.5,"rotation":0,"scaleX":1,"scaleY":1}],"hat":[],"mouths":["gasp","confused","sad","ooo"],"eyes":["default","happy","angry","sad"],"emotes":{"default":{"enabled":true,"mouth":[{"tab":"mouths","hash":"-1156489428","x":-15.5,"y":-125,"rotation":0,"scaleX":1,"scaleY":1}],"eyes":[{"tab":"eyes","hash":"-679379193","x":-7,"y":-187.5,"rotation":0,"scaleX":1,"scaleY":1},{"tab":"eyebrows","hash":"-1478408941","x":-6.5,"y":-210,"rotation":0,"scaleX":1,"scaleY":1}]},"happy":{"enabled":true,"mouth":[{"tab":"mouths","hash":"-1156489428","x":-16,"y":-125.5,"rotation":0,"scaleX":1,"scaleY":1}],"eyes":[{"tab":"eyes","hash":"-679379193","x":-7,"y":-187.5,"rotation":0,"scaleX":1,"scaleY":1},{"tab":"eyebrows","hash":"94370077","x":-10.5,"y":-225,"rotation":0,"scaleX":1,"scaleY":1}]},"wink":{"enabled":false,"mouth":[],"eyes":[]},"confused":{"enabled":true,"mouth":[{"tab":"mouths","hash":"256135152","x":-6,"y":-126.5,"rotation":0,"scaleX":1,"scaleY":1}],"eyes":[{"tab":"eyes","hash":"-679379193","x":-7,"y":-187.5,"rotation":0,"scaleX":1,"scaleY":1},{"tab":"eyebrows","hash":"-1370165314","x":-9,"y":-212.5,"rotation":0,"scaleX":1,"scaleY":1}]},"kiss":{"enabled":false,"mouth":[],"eyes":[]},"gasp":{"enabled":true,"mouth":[{"tab":"mouths","hash":"-2006318913","x":-5.5,"y":-123.5,"rotation":0,"scaleX":1,"scaleY":1}],"eyes":[{"tab":"eyebrows","hash":"94370077","x":-10.5,"y":-225,"rotation":0,"scaleX":1,"scaleY":1},{"tab":"eyes","hash":"-679379193","x":-7,"y":-187.5,"rotation":0,"scaleX":1,"scaleY":1}]},"ooo":{"enabled":true,"mouth":[{"tab":"mouths","hash":"1802568030","x":-2,"y":-122.5,"rotation":0,"scaleX":1,"scaleY":1}],"eyes":[{"tab":"eyebrows","hash":"94370077","x":-9.5,"y":-220,"rotation":0,"scaleX":1,"scaleY":1},{"tab":"eyes","hash":"-679379193","x":-7,"y":-187.5,"rotation":0,"scaleX":1,"scaleY":1}]},"sad":{"enabled":true,"mouth":[{"tab":"mouths","hash":"-1834200705","x":-14.5,"y":-125.5,"rotation":0,"scaleX":1,"scaleY":1}],"eyes":[{"tab":"eyes","hash":"-679379193","x":-7,"y":-187.75,"rotation":0,"scaleX":1,"scaleY":1},{"tab":"eyebrows","hash":"-894109551","x":-7.5,"y":-211.5,"rotation":0,"scaleX":1,"scaleY":1}]},"angry":{"enabled":true,"mouth":[{"tab":"mouths","hash":"256135152","x":-12,"y":-128.5,"rotation":0,"scaleX":1,"scaleY":1}],"eyes":[{"tab":"eyes","hash":"-679379193","x":-7,"y":-187.5,"rotation":0,"scaleX":1,"scaleY":1},{"tab":"eyebrows","hash":"-1624236206","x":-7,"y":-207,"rotation":0,"scaleX":1,"scaleY":1}]}},"props":[{"tab":"glasses","hash":"-1259854622","x":-3,"y":-158,"rotation":0,"scaleX":1,"scaleY":1}],"name":"Gravy","id":1,"position":1,"facingLeft":false,"emote":"default"}
+{
+    "deadbonesStyle": false,
+    "body": [
+        {
+            "tab": "shirts",
+            "hash": "1879914476",
+            "x": 1.5,
+            "y": -54,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1
+        }
+    ],
+    "head": [
+        {
+            "tab": "skin",
+            "hash": "-925878550",
+            "x": 1,
+            "y": -210.5,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1
+        }
+    ],
+    "hat": [],
+    "mouths": [
+        7,
+        10,
+        5,
+        11
+    ],
+    "eyes": [
+        0,
+        1,
+        4,
+        5
+    ],
+    "emotes": [
+        {
+            "enabled": true,
+            "mouth": [
+                {
+                    "tab": "mouths",
+                    "hash": "-1156489428",
+                    "x": -15.5,
+                    "y": -125,
+                    "rotation": 0,
+                    "scaleX": 1,
+                    "scaleY": 1
+                }
+            ],
+            "eyes": [
+                {
+                    "tab": "eyes",
+                    "hash": "-679379193",
+                    "x": -7,
+                    "y": -187.5,
+                    "rotation": 0,
+                    "scaleX": 1,
+                    "scaleY": 1
+                },
+                {
+                    "tab": "eyebrows",
+                    "hash": "-1478408941",
+                    "x": -6.5,
+                    "y": -210,
+                    "rotation": 0,
+                    "scaleX": 1,
+                    "scaleY": 1
+                }
+            ],
+            "name": "default"
+        },
+        {
+            "enabled": true,
+            "mouth": [
+                {
+                    "tab": "mouths",
+                    "hash": "-1156489428",
+                    "x": -16,
+                    "y": -125.5,
+                    "rotation": 0,
+                    "scaleX": 1,
+                    "scaleY": 1
+                }
+            ],
+            "eyes": [
+                {
+                    "tab": "eyes",
+                    "hash": "-679379193",
+                    "x": -7,
+                    "y": -187.5,
+                    "rotation": 0,
+                    "scaleX": 1,
+                    "scaleY": 1
+                },
+                {
+                    "tab": "eyebrows",
+                    "hash": "94370077",
+                    "x": -10.5,
+                    "y": -225,
+                    "rotation": 0,
+                    "scaleX": 1,
+                    "scaleY": 1
+                }
+            ],
+            "name": "happy"
+        },
+        {
+            "enabled": false,
+            "mouth": [],
+            "eyes": [],
+            "name": "wink"
+        },
+        {
+            "enabled": false,
+            "mouth": [],
+            "eyes": [],
+            "name": "kiss"
+        },
+        {
+            "enabled": true,
+            "mouth": [
+                {
+                    "tab": "mouths",
+                    "hash": "256135152",
+                    "x": -12,
+                    "y": -128.5,
+                    "rotation": 0,
+                    "scaleX": 1,
+                    "scaleY": 1
+                }
+            ],
+            "eyes": [
+                {
+                    "tab": "eyes",
+                    "hash": "-679379193",
+                    "x": -7,
+                    "y": -187.5,
+                    "rotation": 0,
+                    "scaleX": 1,
+                    "scaleY": 1
+                },
+                {
+                    "tab": "eyebrows",
+                    "hash": "-1624236206",
+                    "x": -7,
+                    "y": -207,
+                    "rotation": 0,
+                    "scaleX": 1,
+                    "scaleY": 1
+                }
+            ],
+            "name": "angry"
+        },
+        {
+            "enabled": true,
+            "mouth": [
+                {
+                    "tab": "mouths",
+                    "hash": "-1834200705",
+                    "x": -14.5,
+                    "y": -125.5,
+                    "rotation": 0,
+                    "scaleX": 1,
+                    "scaleY": 1
+                }
+            ],
+            "eyes": [
+                {
+                    "tab": "eyes",
+                    "hash": "-679379193",
+                    "x": -7,
+                    "y": -187.75,
+                    "rotation": 0,
+                    "scaleX": 1,
+                    "scaleY": 1
+                },
+                {
+                    "tab": "eyebrows",
+                    "hash": "-894109551",
+                    "x": -7.5,
+                    "y": -211.5,
+                    "rotation": 0,
+                    "scaleX": 1,
+                    "scaleY": 1
+                }
+            ],
+            "name": "sad"
+        },
+        {
+            "enabled": false,
+            "mouth": [],
+            "eyes": [],
+            "name": "ponder"
+        },
+        {
+            "enabled": true,
+            "mouth": [
+                {
+                    "tab": "mouths",
+                    "hash": "-2006318913",
+                    "x": -5.5,
+                    "y": -123.5,
+                    "rotation": 0,
+                    "scaleX": 1,
+                    "scaleY": 1
+                }
+            ],
+            "eyes": [
+                {
+                    "tab": "eyebrows",
+                    "hash": "94370077",
+                    "x": -10.5,
+                    "y": -225,
+                    "rotation": 0,
+                    "scaleX": 1,
+                    "scaleY": 1
+                },
+                {
+                    "tab": "eyes",
+                    "hash": "-679379193",
+                    "x": -7,
+                    "y": -187.5,
+                    "rotation": 0,
+                    "scaleX": 1,
+                    "scaleY": 1
+                }
+            ],
+            "name": "gasp"
+        },
+        {
+            "enabled": false,
+            "mouth": [],
+            "eyes": [],
+            "name": "veryangry"
+        },
+        {
+            "enabled": false,
+            "mouth": [],
+            "eyes": [],
+            "name": "verysad"
+        },
+        {
+            "enabled": true,
+            "mouth": [
+                {
+                    "tab": "mouths",
+                    "hash": "256135152",
+                    "x": -6,
+                    "y": -126.5,
+                    "rotation": 0,
+                    "scaleX": 1,
+                    "scaleY": 1
+                }
+            ],
+            "eyes": [
+                {
+                    "tab": "eyes",
+                    "hash": "-679379193",
+                    "x": -7,
+                    "y": -187.5,
+                    "rotation": 0,
+                    "scaleX": 1,
+                    "scaleY": 1
+                },
+                {
+                    "tab": "eyebrows",
+                    "hash": "-1370165314",
+                    "x": -9,
+                    "y": -212.5,
+                    "rotation": 0,
+                    "scaleX": 1,
+                    "scaleY": 1
+                }
+            ],
+            "name": "confused"
+        },
+        {
+            "enabled": true,
+            "mouth": [
+                {
+                    "tab": "mouths",
+                    "hash": "1802568030",
+                    "x": -2,
+                    "y": -122.5,
+                    "rotation": 0,
+                    "scaleX": 1,
+                    "scaleY": 1
+                }
+            ],
+            "eyes": [
+                {
+                    "tab": "eyebrows",
+                    "hash": "94370077",
+                    "x": -9.5,
+                    "y": -220,
+                    "rotation": 0,
+                    "scaleX": 1,
+                    "scaleY": 1
+                },
+                {
+                    "tab": "eyes",
+                    "hash": "-679379193",
+                    "x": -7,
+                    "y": -187.5,
+                    "rotation": 0,
+                    "scaleX": 1,
+                    "scaleY": 1
+                }
+            ],
+            "name": "ooo"
+        }
+    ],
+    "props": [
+        {
+            "tab": "glasses",
+            "hash": "-1259854622",
+            "x": -3,
+            "y": -158,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1
+        }
+    ],
+    "name": "Gravy",
+    "id": 1,
+    "position": 1,
+    "facingLeft": false,
+    "emote": 0
+}

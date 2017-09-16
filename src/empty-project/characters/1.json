@@ -1,16 +1,86 @@
 {
-  "deadbonesStyle": false,
-  "body": [],
-  "head": [],
-  "hat": [],
-  "mouths": [],
-  "eyes": [],
-  "emotes": {
-    "default": {
-      "enabled": true,
-      "mouth": [],
-      "eyes": []
-    }
-  },
-  "props": []
+    "deadbonesStyle": false,
+    "body": [],
+    "head": [],
+    "hat": [],
+    "mouths": [],
+    "eyes": [],
+    "emotes": [
+        {
+            "enabled": true,
+            "mouth": [],
+            "eyes": [],
+            "name": "default"
+        },
+        {
+            "enabled": false,
+            "mouth": [],
+            "eyes": [],
+            "name": "happy"
+        },
+        {
+            "enabled": false,
+            "mouth": [],
+            "eyes": [],
+            "name": "wink"
+        },
+        {
+            "enabled": false,
+            "mouth": [],
+            "eyes": [],
+            "name": "kiss"
+        },
+        {
+            "enabled": false,
+            "mouth": [],
+            "eyes": [],
+            "name": "angry"
+        },
+        {
+            "enabled": false,
+            "mouth": [],
+            "eyes": [],
+            "name": "sad"
+        },
+        {
+            "enabled": false,
+            "mouth": [],
+            "eyes": [],
+            "name": "ponder"
+        },
+        {
+            "enabled": false,
+            "mouth": [],
+            "eyes": [],
+            "name": "gasp"
+        },
+        {
+            "enabled": false,
+            "mouth": [],
+            "eyes": [],
+            "name": "veryangry"
+        },
+        {
+            "enabled": false,
+            "mouth": [],
+            "eyes": [],
+            "name": "verysad"
+        },
+        {
+            "enabled": false,
+            "mouth": [],
+            "eyes": [],
+            "name": "confused"
+        },
+        {
+            "enabled": false,
+            "mouth": [],
+            "eyes": [],
+            "name": "ooo"
+        }
+    ],
+    "props": [],
+    "name": "",
+    "id": 1,
+    "emote": 0
 }

@@ -1,349 +1,386 @@
 {
-  "deadbonesStyle": false,
-  "body": [
-    {
-      "tab": "shirts",
-      "hash": "1058819590",
-      "x": 0,
-      "y": -79.5,
-      "rotation": 0,
-      "scaleX": 1,
-      "scaleY": 1
-    },
-    {
-      "tab": "shirts",
-      "hash": "1008358788",
-      "x": -81,
-      "y": -55.49999999999998,
-      "rotation": -0.6427652911522213,
-      "scaleX": -1,
-      "scaleY": 1
-    },
-    {
-      "tab": "shirts",
-      "hash": "1008358788",
-      "x": 84,
-      "y": -61.5,
-      "rotation": 0.5576254809580075,
-      "scaleX": 1,
-      "scaleY": 1
-    },
-    {
-      "tab": "skin",
-      "hash": "340037365",
-      "x": 0,
-      "y": -155.5,
-      "rotation": 0,
-      "scaleX": 1,
-      "scaleY": 1
-    }
-  ],
-  "head": [
-    {
-      "tab": "skin",
-      "hash": "1453497562",
-      "x": 0,
-      "y": -234.5,
-      "rotation": 0,
-      "scaleX": 1,
-      "scaleY": 1
-    },
-    {
-      "tab": "noses",
-      "hash": "405894913",
-      "x": 5,
-      "y": -219.5,
-      "rotation": 0,
-      "scaleX": 1,
-      "scaleY": 1
-    },
-    {
-      "tab": "eyes",
-      "hash": "1348834734",
-      "x": -27,
-      "y": -243.5,
-      "rotation": 0,
-      "scaleX": 1,
-      "scaleY": 1
-    },
-    {
-      "tab": "eyes",
-      "hash": "1348834734",
-      "x": 30,
-      "y": -243.5,
-      "rotation": 0,
-      "scaleX": 1,
-      "scaleY": 1
-    }
-  ],
-  "mouths": [
-    "default",
-    "angry",
-    "confused",
-    "gasp",
-    "happy"
-  ],
-  "eyes": [
-    "default",
-    "angry",
-    "confused",
-    "sad"
-  ],
-  "emotes": {
-    "default": {
-      "enabled": true,
-      "mouth": [
+    "deadbonesStyle": false,
+    "body": [
         {
-          "tab": "mouths",
-          "hash": "537440389",
-          "x": -8,
-          "y": -190.5,
-          "rotation": 0,
-          "scaleX": 1,
-          "scaleY": 1
-        }
-      ],
-      "eyes": [
-        {
-          "tab": "eyebrows",
-          "hash": "-133227719",
-          "x": -25,
-          "y": -263.5,
-          "rotation": 0,
-          "scaleX": 1,
-          "scaleY": 1
+            "tab": "shirts",
+            "hash": "1058819590",
+            "x": 0,
+            "y": -79.5,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1
         },
         {
-          "tab": "eyebrows",
-          "hash": "-133227719",
-          "x": 26,
-          "y": -268.5,
-          "rotation": 0,
-          "scaleX": -1,
-          "scaleY": 1
-        }
-      ]
-    },
-    "angry": {
-      "enabled": true,
-      "mouth": [
-        {
-          "tab": "mouths",
-          "hash": "537440389",
-          "x": -10,
-          "y": -190.5,
-          "rotation": 0.06414119475849511,
-          "scaleX": 1,
-          "scaleY": 1
-        }
-      ],
-      "eyes": [
-        {
-          "tab": "eyebrows",
-          "hash": "1388022209",
-          "x": -26,
-          "y": -255.5,
-          "rotation": 0.16297746494555687,
-          "scaleX": 1,
-          "scaleY": 1
+            "tab": "shirts",
+            "hash": "1008358788",
+            "x": -81,
+            "y": -55.49999999999998,
+            "rotation": -0.6427652911522213,
+            "scaleX": -1,
+            "scaleY": 1
         },
         {
-          "tab": "eyebrows",
-          "hash": "1388022209",
-          "x": 31,
-          "y": -254.5,
-          "rotation": -0.14715603762359764,
-          "scaleX": 1,
-          "scaleY": 1
-        }
-      ]
-    },
-    "confused": {
-      "enabled": true,
-      "mouth": [
-        {
-          "tab": "mouths",
-          "hash": "537440389",
-          "x": -8,
-          "y": -190.5,
-          "rotation": 0,
-          "scaleX": 1,
-          "scaleY": 1
-        }
-      ],
-      "eyes": [
-        {
-          "tab": "eyebrows",
-          "hash": "1388022209",
-          "x": -28,
-          "y": -257.5,
-          "rotation": 0,
-          "scaleX": 1,
-          "scaleY": 1
+            "tab": "shirts",
+            "hash": "1008358788",
+            "x": 84,
+            "y": -61.5,
+            "rotation": 0.5576254809580075,
+            "scaleX": 1,
+            "scaleY": 1
         },
         {
-          "tab": "eyebrows",
-          "hash": "-133227719",
-          "x": 25,
-          "y": -269.5,
-          "rotation": 0,
-          "scaleX": -1,
-          "scaleY": 1
+            "tab": "skin",
+            "hash": "340037365",
+            "x": 0,
+            "y": -155.5,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1
         }
-      ]
-    },
-    "gasp": {
-      "enabled": true,
-      "mouth": [
+    ],
+    "head": [
         {
-          "tab": "mouths",
-          "hash": "305161883",
-          "x": -9,
-          "y": -190.5,
-          "rotation": 0,
-          "scaleX": 1,
-          "scaleY": 1
-        }
-      ],
-      "eyes": [
-        {
-          "tab": "eyebrows",
-          "hash": "-133227719",
-          "x": -31,
-          "y": -273.5,
-          "rotation": 0,
-          "scaleX": 1,
-          "scaleY": 1
+            "tab": "skin",
+            "hash": "1453497562",
+            "x": 0,
+            "y": -234.5,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1
         },
         {
-          "tab": "eyebrows",
-          "hash": "-133227719",
-          "x": 31,
-          "y": -271.5,
-          "rotation": 0,
-          "scaleX": -1,
-          "scaleY": 1
-        }
-      ]
-    },
-    "ooo": {
-      "enabled": true,
-      "mouth": [
-        {
-          "tab": "mouths",
-          "hash": "1011022939",
-          "x": -11,
-          "y": -190.5,
-          "rotation": 0,
-          "scaleX": 1,
-          "scaleY": 1
-        }
-      ],
-      "eyes": [
-        {
-          "tab": "eyebrows",
-          "hash": "-533676313",
-          "x": 27,
-          "y": -272.5,
-          "rotation": 0,
-          "scaleX": -1,
-          "scaleY": 1
+            "tab": "noses",
+            "hash": "405894913",
+            "x": 5,
+            "y": -219.5,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1
         },
         {
-          "tab": "eyebrows",
-          "hash": "-533676313",
-          "x": -31,
-          "y": -272.5,
-          "rotation": 0,
-          "scaleX": 1,
-          "scaleY": 1
-        }
-      ]
-    },
-    "sad": {
-      "enabled": true,
-      "mouth": [
-        {
-          "tab": "mouths",
-          "hash": "509289366",
-          "x": -10,
-          "y": -190.5,
-          "rotation": 0,
-          "scaleX": 1,
-          "scaleY": 1
-        }
-      ],
-      "eyes": [
-        {
-          "tab": "eyebrows",
-          "hash": "-133227719",
-          "x": -26,
-          "y": -266.5,
-          "rotation": 0,
-          "scaleX": 1,
-          "scaleY": 1
+            "tab": "eyes",
+            "hash": "1348834734",
+            "x": -27,
+            "y": -243.5,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1
         },
         {
-          "tab": "eyebrows",
-          "hash": "-133227719",
-          "x": 29,
-          "y": -266.5,
-          "rotation": 0,
-          "scaleX": -1,
-          "scaleY": 1
+            "tab": "eyes",
+            "hash": "1348834734",
+            "x": 30,
+            "y": -243.5,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1
         }
-      ]
-    },
-    "happy": {
-      "enabled": true,
-      "mouth": [
+    ],
+    "mouths": [
+        0,
+        4,
+        10,
+        7,
+        1
+    ],
+    "eyes": [
+        0,
+        4,
+        10,
+        5
+    ],
+    "emotes": [
         {
-          "tab": "mouths",
-          "hash": "260003300",
-          "x": -9,
-          "y": -189.5,
-          "rotation": 0,
-          "scaleX": 1,
-          "scaleY": 1
-        }
-      ],
-      "eyes": [
-        {
-          "tab": "eyebrows",
-          "hash": "-533676313",
-          "x": -30,
-          "y": -275.5,
-          "rotation": 0,
-          "scaleX": 1,
-          "scaleY": 1
+            "enabled": true,
+            "mouth": [
+                {
+                    "tab": "mouths",
+                    "hash": "537440389",
+                    "x": -8,
+                    "y": -190.5,
+                    "rotation": 0,
+                    "scaleX": 1,
+                    "scaleY": 1
+                }
+            ],
+            "eyes": [
+                {
+                    "tab": "eyebrows",
+                    "hash": "-133227719",
+                    "x": -25,
+                    "y": -263.5,
+                    "rotation": 0,
+                    "scaleX": 1,
+                    "scaleY": 1
+                },
+                {
+                    "tab": "eyebrows",
+                    "hash": "-133227719",
+                    "x": 26,
+                    "y": -268.5,
+                    "rotation": 0,
+                    "scaleX": -1,
+                    "scaleY": 1
+                }
+            ],
+            "name": "default"
         },
         {
-          "tab": "eyebrows",
-          "hash": "-533676313",
-          "x": 33,
-          "y": -275.5,
-          "rotation": 0,
-          "scaleX": -1,
-          "scaleY": 1
+            "enabled": true,
+            "mouth": [
+                {
+                    "tab": "mouths",
+                    "hash": "260003300",
+                    "x": -9,
+                    "y": -189.5,
+                    "rotation": 0,
+                    "scaleX": 1,
+                    "scaleY": 1
+                }
+            ],
+            "eyes": [
+                {
+                    "tab": "eyebrows",
+                    "hash": "-533676313",
+                    "x": -30,
+                    "y": -275.5,
+                    "rotation": 0,
+                    "scaleX": 1,
+                    "scaleY": 1
+                },
+                {
+                    "tab": "eyebrows",
+                    "hash": "-533676313",
+                    "x": 33,
+                    "y": -275.5,
+                    "rotation": 0,
+                    "scaleX": -1,
+                    "scaleY": 1
+                }
+            ],
+            "name": "happy"
+        },
+        {
+            "enabled": false,
+            "mouth": [],
+            "eyes": [],
+            "name": "wink"
+        },
+        {
+            "enabled": false,
+            "mouth": [],
+            "eyes": [],
+            "name": "kiss"
+        },
+        {
+            "enabled": true,
+            "mouth": [
+                {
+                    "tab": "mouths",
+                    "hash": "537440389",
+                    "x": -10,
+                    "y": -190.5,
+                    "rotation": 0.06414119475849511,
+                    "scaleX": 1,
+                    "scaleY": 1
+                }
+            ],
+            "eyes": [
+                {
+                    "tab": "eyebrows",
+                    "hash": "1388022209",
+                    "x": -26,
+                    "y": -255.5,
+                    "rotation": 0.16297746494555687,
+                    "scaleX": 1,
+                    "scaleY": 1
+                },
+                {
+                    "tab": "eyebrows",
+                    "hash": "1388022209",
+                    "x": 31,
+                    "y": -254.5,
+                    "rotation": -0.14715603762359764,
+                    "scaleX": 1,
+                    "scaleY": 1
+                }
+            ],
+            "name": "angry"
+        },
+        {
+            "enabled": true,
+            "mouth": [
+                {
+                    "tab": "mouths",
+                    "hash": "509289366",
+                    "x": -10,
+                    "y": -190.5,
+                    "rotation": 0,
+                    "scaleX": 1,
+                    "scaleY": 1
+                }
+            ],
+            "eyes": [
+                {
+                    "tab": "eyebrows",
+                    "hash": "-133227719",
+                    "x": -26,
+                    "y": -266.5,
+                    "rotation": 0,
+                    "scaleX": 1,
+                    "scaleY": 1
+                },
+                {
+                    "tab": "eyebrows",
+                    "hash": "-133227719",
+                    "x": 29,
+                    "y": -266.5,
+                    "rotation": 0,
+                    "scaleX": -1,
+                    "scaleY": 1
+                }
+            ],
+            "name": "sad"
+        },
+        {
+            "enabled": false,
+            "mouth": [],
+            "eyes": [],
+            "name": "ponder"
+        },
+        {
+            "enabled": true,
+            "mouth": [
+                {
+                    "tab": "mouths",
+                    "hash": "305161883",
+                    "x": -9,
+                    "y": -190.5,
+                    "rotation": 0,
+                    "scaleX": 1,
+                    "scaleY": 1
+                }
+            ],
+            "eyes": [
+                {
+                    "tab": "eyebrows",
+                    "hash": "-133227719",
+                    "x": -31,
+                    "y": -273.5,
+                    "rotation": 0,
+                    "scaleX": 1,
+                    "scaleY": 1
+                },
+                {
+                    "tab": "eyebrows",
+                    "hash": "-133227719",
+                    "x": 31,
+                    "y": -271.5,
+                    "rotation": 0,
+                    "scaleX": -1,
+                    "scaleY": 1
+                }
+            ],
+            "name": "gasp"
+        },
+        {
+            "enabled": false,
+            "mouth": [],
+            "eyes": [],
+            "name": "veryangry"
+        },
+        {
+            "enabled": false,
+            "mouth": [],
+            "eyes": [],
+            "name": "verysad"
+        },
+        {
+            "enabled": true,
+            "mouth": [
+                {
+                    "tab": "mouths",
+                    "hash": "537440389",
+                    "x": -8,
+                    "y": -190.5,
+                    "rotation": 0,
+                    "scaleX": 1,
+                    "scaleY": 1
+                }
+            ],
+            "eyes": [
+                {
+                    "tab": "eyebrows",
+                    "hash": "1388022209",
+                    "x": -28,
+                    "y": -257.5,
+                    "rotation": 0,
+                    "scaleX": 1,
+                    "scaleY": 1
+                },
+                {
+                    "tab": "eyebrows",
+                    "hash": "-133227719",
+                    "x": 25,
+                    "y": -269.5,
+                    "rotation": 0,
+                    "scaleX": -1,
+                    "scaleY": 1
+                }
+            ],
+            "name": "confused"
+        },
+        {
+            "enabled": true,
+            "mouth": [
+                {
+                    "tab": "mouths",
+                    "hash": "1011022939",
+                    "x": -11,
+                    "y": -190.5,
+                    "rotation": 0,
+                    "scaleX": 1,
+                    "scaleY": 1
+                }
+            ],
+            "eyes": [
+                {
+                    "tab": "eyebrows",
+                    "hash": "-533676313",
+                    "x": 27,
+                    "y": -272.5,
+                    "rotation": 0,
+                    "scaleX": -1,
+                    "scaleY": 1
+                },
+                {
+                    "tab": "eyebrows",
+                    "hash": "-533676313",
+                    "x": -31,
+                    "y": -272.5,
+                    "rotation": 0,
+                    "scaleX": 1,
+                    "scaleY": 1
+                }
+            ],
+            "name": "ooo"
         }
-      ]
-    }
-  },
-  "hat": [
-    {
-      "tab": "hair",
-      "hash": "-780465996",
-      "x": 7,
-      "y": -283.5,
-      "rotation": 0,
-      "scaleX": 1,
-      "scaleY": 1
-    }
-  ],
-  "props": [],
-  "name": "Kenney",
-  "id": 1,
-  "position": 1,
-  "facingLeft": false,
-  "emote": "default"
+    ],
+    "hat": [
+        {
+            "tab": "hair",
+            "hash": "-780465996",
+            "x": 7,
+            "y": -283.5,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1
+        }
+    ],
+    "props": [],
+    "name": "Kenney",
+    "id": 1,
+    "position": 1,
+    "facingLeft": false,
+    "emote": 0
 }

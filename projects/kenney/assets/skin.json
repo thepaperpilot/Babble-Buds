@@ -1,86 +1,86 @@
 {
-  "340037365": {
-    "name": "tint1_neck",
-    "location": "skin/340037365.png"
-  },
-  "569308906": {
-    "name": "tint3_head",
-    "location": "skin/569308906.png"
-  },
-  "1101600210": {
-    "name": "tint3_neck",
-    "location": "skin/1101600210.png"
-  },
-  "1291825479": {
-    "name": "tint5_neck",
-    "location": "skin/1291825479.png"
-  },
-  "1453497562": {
-    "name": "tint1_head",
-    "location": "skin/1453497562.png"
-  },
-  "1565235344": {
-    "name": "tint7_neck",
-    "location": "skin/1565235344.png"
-  },
-  "1697108187": {
-    "name": "tint2_head",
-    "location": "skin/1697108187.png"
-  },
-  "1859871394": {
-    "name": "tint7_arm",
-    "location": "skin/1859871394.png"
-  },
-  "1876903984": {
-    "name": "tint6_arm",
-    "location": "skin/1876903984.png"
-  },
-  "-1946781682": {
-    "name": "tint1_arm",
-    "location": "skin/-1946781682.png"
-  },
-  "-375385713": {
-    "name": "tint2_arm",
-    "location": "skin/-375385713.png"
-  },
-  "-1338913942": {
-    "name": "tint2_neck",
-    "location": "skin/-1338913942.png"
-  },
-  "-1875825889": {
-    "name": "tint3_arm",
-    "location": "skin/-1875825889.png"
-  },
-  "-1777228635": {
-    "name": "tint5_arm",
-    "location": "skin/-1777228635.png"
-  },
-  "-593476488": {
-    "name": "tint5_head",
-    "location": "skin/-593476488.png"
-  },
-  "-1272164443": {
-    "name": "tint6_head",
-    "location": "skin/-1272164443.png"
-  },
-  "-985316737": {
-    "name": "tint6_neck",
-    "location": "skin/-985316737.png"
-  },
-  "-1183886366": {
-    "name": "tint7_head",
-    "location": "skin/-1183886366.png"
-  },
-  "-722003058": {
-    "name": "tint8_arm",
-    "location": "skin/-722003058.png"
-  },
-  "-1959519536": {
-    "name": "tint8_head",
-    "location": "skin/-1959519536.png"
-  },
-  "-1646209805": {
-    "name": "tint8_neck",
-    "location": "skin/-1646209805.png"
-  }
+    "340037365": {
+        "name": "tint1_neck",
+        "location": "skin/340037365.png"
+    },
+    "569308906": {
+        "name": "tint3_head",
+        "location": "skin/569308906.png"
+    },
+    "1101600210": {
+        "name": "tint3_neck",
+        "location": "skin/1101600210.png"
+    },
+    "1291825479": {
+        "name": "tint5_neck",
+        "location": "skin/1291825479.png"
+    },
+    "1453497562": {
+        "name": "tint1_head",
+        "location": "skin/1453497562.png"
+    },
+    "1565235344": {
+        "name": "tint7_neck",
+        "location": "skin/1565235344.png"
+    },
+    "1697108187": {
+        "name": "tint2_head",
+        "location": "skin/1697108187.png"
+    },
+    "1859871394": {
+        "name": "tint7_arm",
+        "location": "skin/1859871394.png"
+    },
+    "1876903984": {
+        "name": "tint6_arm",
+        "location": "skin/1876903984.png"
+    },
+    "-1946781682": {
+        "name": "tint1_arm",
+        "location": "skin/-1946781682.png"
+    },
+    "-375385713": {
+        "name": "tint2_arm",
+        "location": "skin/-375385713.png"
+    },
+    "-1338913942": {
+        "name": "tint2_neck",
+        "location": "skin/-1338913942.png"
+    },
+    "-1875825889": {
+        "name": "tint3_arm",
+        "location": "skin/-1875825889.png"
+    },
+    "-1777228635": {
+        "name": "tint5_arm",
+        "location": "skin/-1777228635.png"
+    },
+    "-593476488": {
+        "name": "tint5_head",
+        "location": "skin/-593476488.png"
+    },
+    "-1272164443": {
+        "name": "tint6_head",
+        "location": "skin/-1272164443.png"
+    },
+    "-985316737": {
+        "name": "tint6_neck",
+        "location": "skin/-985316737.png"
+    },
+    "-1183886366": {
+        "name": "tint7_head",
+        "location": "skin/-1183886366.png"
+    },
+    "-722003058": {
+        "name": "tint8_arm",
+        "location": "skin/-722003058.png"
+    },
+    "-1959519536": {
+        "name": "tint8_head",
+        "location": "skin/-1959519536.png"
+    },
+    "-1646209805": {
+        "name": "tint8_neck",
+        "location": "skin/-1646209805.png"
+    }
 }

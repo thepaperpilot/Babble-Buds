@@ -1,33 +1,33 @@
 {
-  "numCharacters": 5,
-  "puppetScale": 1,
-  "greenScreen": "#00FF00",
-  "alwaysOnTop": false,
-  "ip": "localhost",
-  "port": 8080,
-  "characters": [
-    {
-      "name": "",
-      "id": 1,
-      "location": "1.json"
+    "numCharacters": 5,
+    "puppetScale": 1,
+    "greenScreen": "#00FF00",
+    "alwaysOnTop": false,
+    "ip": "localhost",
+    "port": 8080,
+    "characters": [
+        {
+            "name": "",
+            "id": 1,
+            "location": "1.json"
+        }
+    ],
+    "assets": [],
+    "hotbar": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+    ],
+    "actor": {
+        "id": 1,
+        "position": 1,
+        "facingLeft": false,
+        "emote": 0
     }
-  ],
-  "assets": [],
-  "hotbar": [
-    1,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0
-  ],
-  "actor": {
-    "id": 1,
-    "position": 1,
-    "facingLeft": false,
-    "emote": "default"
-  }
 }

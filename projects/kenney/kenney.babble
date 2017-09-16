@@ -1,62 +1,62 @@
 {
-  "numCharacters": 5,
-  "minSlotWidth": 250,
-  "greenScreen": "#00FF00",
-  "transparent": false,
-  "ip": "localhost",
-  "port": 8080,
-  "characters": [
-    {
-      "name": "Kenney",
-      "id": 1,
-      "location": "Kenney.json"
+    "numCharacters": 5,
+    "minSlotWidth": 250,
+    "greenScreen": "#00FF00",
+    "transparent": false,
+    "ip": "localhost",
+    "port": 8080,
+    "characters": [
+        {
+            "name": "Kenney",
+            "id": 1,
+            "location": "Kenney.json"
+        }
+    ],
+    "assets": [
+        {
+            "name": "hair",
+            "location": "hair.json"
+        },
+        {
+            "name": "eyebrows",
+            "location": "eyebrows.json"
+        },
+        {
+            "name": "eyes",
+            "location": "eyes.json"
+        },
+        {
+            "name": "mouths",
+            "location": "mouths.json"
+        },
+        {
+            "name": "noses",
+            "location": "noses.json"
+        },
+        {
+            "name": "shirts",
+            "location": "shirts.json"
+        },
+        {
+            "name": "skin",
+            "location": "skin.json"
+        }
+    ],
+    "hotbar": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+    ],
+    "actor": {
+        "id": 1,
+        "position": 1,
+        "facingLeft": false,
+        "emote": 0
     }
-  ],
-  "assets": [
-    {
-      "name": "hair",
-      "location": "hair.json"
-    },
-    {
-      "name": "eyebrows",
-      "location": "eyebrows.json"
-    },
-    {
-      "name": "eyes",
-      "location": "eyes.json"
-    },
-    {
-      "name": "mouths",
-      "location": "mouths.json"
-    },
-    {
-      "name": "noses",
-      "location": "noses.json"
-    },
-    {
-      "name": "shirts",
-      "location": "shirts.json"
-    },
-    {
-      "name": "skin",
-      "location": "skin.json"
-    }
-  ],
-  "hotbar": [
-    1,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0
-  ],
-  "actor": {
-    "id": 1,
-    "position": 1,
-    "facingLeft": false,
-    "emote": "default"
-  }
 }

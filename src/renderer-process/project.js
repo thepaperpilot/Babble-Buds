@@ -91,11 +91,11 @@ module.exports = {
 		})
 	},
 	saveProject: function() {
-		fs.writeJson(settings.settings.openProject, this.project)
+		fs.writeFile(settings.settings.openProject, JSON.stringify(this.project, null, 4))
 		for (let i = 0; i < this.project.assets.length; i++)
-			fs.writeJson(path.join(settings.settings.openProject, '..', 'assets', this.project.assets[i].location), this.assets[this.project.assets[i].name])
+			fs.writeFile(path.join(settings.settings.openProject, '..', 'assets', this.project.assets[i].location), JSON.stringify(this.assets[this.project.assets[i].name], null, 4))
 		for (let i = 0; i < this.project.characters.length; i++) {
-			fs.writeJson(path.join(settings.settings.openProject, '..', 'characters', this.project.characters[i].location), this.characters[this.project.characters[i].id])
+			fs.writeFile(path.join(settings.settings.openProject, '..', 'characters', this.project.characters[i].location), JSON.stringify(this.characters[this.project.characters[i].id], null, 4))
 			if (fs.existsSync(path.join(this.assetsPath, '..', 'thumbnails', 'new-' + this.project.characters[i].id + '.png')))
                 fs.renameSync(path.join(this.assetsPath, '..', 'thumbnails', 'new-' + this.project.characters[i].id + '.png'), 
                 	path.join(this.assetsPath, '..', 'thumbnails', this.project.characters[i].id + '.png'))
