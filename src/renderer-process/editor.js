@@ -1,6 +1,8 @@
 // Imports
 const electron = require('electron')
 const remote = electron.remote
+const sizeOf = require('image-size')
+const crop = require('png-crop').crop
 const PIXI = require('pixi.js')
 const path = require('path')
 const controller = require('./controller.js')
@@ -8,11 +10,15 @@ const settings = remote.require('./main-process/settings')
 const status = require('./status.js')
 const babble = require('babble.js')
 const fs = require('fs-extra')
+const gifuct = require('./../lib/gifuct-js')
 
 // Aliases
-let Container = PIXI.Container,
+let BaseTextureCache = PIXI.utils.BaseTextureCache,
+    Container = PIXI.Container,
     Sprite = PIXI.Sprite,
+    Texture = PIXI.Texture,
     TextureCache = PIXI.utils.TextureCache,
+    Rectangle = PIXI.Rectangle,
     Graphics = PIXI.Graphics
 
 // Constants
@@ -58,7 +64,21 @@ exports.init = function() {
     stage.getAsset = function(asset, layer, emote) {
         let sprite
         if (this.assets[asset.tab] && this.assets[asset.tab][asset.hash]) {
-            sprite = new Sprite(TextureCache[path.join(this.assetsPath, this.assets[asset.tab][asset.hash].location)])
+            let assetData = this.assets[asset.tab][asset.hash]
+            if (assetData.type === "animated") {
+                let base = BaseTextureCache[path.join(this.assetsPath, assetData.location)]
+                let textures = []
+                let width = base.width / assetData.cols
+                let height = base.height / assetData.rows
+                for (let i = 0; i < assetData.numFrames; i++) {
+                    if ((i % assetData.cols) * width + width > base.width || Math.floor(i / assetData.cols) * height + height > base.height) continue
+                    let rect = new Rectangle((i % assetData.cols) * width, Math.floor(i / assetData.cols) * height, width, height)
+                    textures.push(new Texture(base, rect))
+                }
+                sprite = new PIXI.extras.AnimatedSprite(textures)
+                sprite.animationSpeed = 20 / assetData.delay
+                sprite.play()
+            } else sprite = new Sprite(TextureCache[path.join(this.assetsPath, assetData.location)])
         } else {
             sprite = new Sprite()
             if (this.log) this.log("Unable to load asset \"" + asset.tab + ":" + asset.hash + "\"", 5, 2)
@@ -134,6 +154,7 @@ exports.init = function() {
     document.getElementById('mouthBabbleDuration').addEventListener('change', mouthDurationChange)
     document.getElementById('delete-character').addEventListener('click', deleteCharacter)
     document.getElementById('add-asset').addEventListener('click', addAsset)
+    document.getElementById('add-animated-asset').addEventListener('click', addAnimatedAsset)
     document.getElementById('import-asset').addEventListener('click', importAssets)
     document.getElementById('import-all').addEventListener('click', toggleImportAll)
     document.getElementById('cancel-import-assets').addEventListener('click', controller.openModal)
@@ -157,6 +178,11 @@ exports.init = function() {
     }
     document.getElementById('asset-tab').addEventListener('change', migrateAsset)
     document.getElementById('asset-name').addEventListener('change', renameAsset)
+    document.getElementById('asset-type').addEventListener('change', assetType)
+    document.getElementById('animation-rows').addEventListener('change', animationRows)
+    document.getElementById('animation-cols').addEventListener('change', animationCols)
+    document.getElementById('animation-numFrames').addEventListener('change', animationFrames)
+    document.getElementById('animation-delay').addEventListener('change', animationDelay)
     document.getElementById('delete-asset').addEventListener('click', deleteAsset)
     document.getElementById('asset tabs').addEventListener('change', assetTabs)
     document.getElementById('asset search').addEventListener('keyup', updateAssetSearch)
@@ -198,7 +224,13 @@ exports.addAsset = function(tab, asset) {
     assetDraggable.asset = asset
     assetDraggable.style.height = assetDraggable.style.width = '120px'
     assetDraggable.className = 'contain'
-    assetDraggable.src = path.join(project.assetsPath, project.assets[tab][asset].location)
+    if (project.assets[tab][asset].type === "animated") {
+        let location = project.assets[tab][asset].location
+        location = [location.slice(0, location.length - 4), '.thumb', location.slice(location.length - 4)].join('')
+        assetDraggable.src = path.join(project.assetsPath, location)
+        assetElement.className += ' animated'
+    } else 
+        assetDraggable.src = path.join(project.assetsPath, project.assets[tab][asset].location)
     assetDraggable.addEventListener('mousedown', mouseDown, false)
 }
 
@@ -314,6 +346,10 @@ exports.deleteAsset = function(tab, asset) {
                 character.emotes[emotes[j]].mouth.splice(k, 1)
     }
     exports.setPuppet(character, true)
+}
+
+exports.updateAsset = function(tab, asset) {
+    stage.updateAsset(tab, asset)
 }
 
 exports.clear = function() {
@@ -755,13 +791,38 @@ function mouseDown(e) {
         document.getElementById('assets').style.display = 'none'
         document.getElementById('asset editor').style.display = ''
         document.getElementById('asset selected').style.display = ''
-        document.getElementById('asset selected').style.background = 'url(' + path.join(project.assetsPath, project.assets[e.target.tab][e.target.asset].location + "?random=" + new Date().getTime()).replace(/\\/g, '/') + ') center no-repeat/contain'
+        let asset = project.assets[e.target.tab][e.target.asset]
+        document.getElementById('asset-type').value = asset.type ? asset.type.charAt(0).toUpperCase() + asset.type.slice(1) : "Sprite"
+        if (asset.type === "animated") {
+            let location = asset.location
+            location = [location.slice(0, location.length - 4), '.thumb', location.slice(location.length - 4)].join('')
+            document.getElementById('asset selected').style.background = 'url(' + path.join(project.assetsPath, location + "?random=" + new Date().getTime()).replace(/\\/g, '/') + ') center no-repeat/contain'
+            document.getElementById('animated-settings').style.display = ''
+            document.getElementById('animated-spritesheet').src = path.join(project.assetsPath, asset.location + "?random=" + new Date().getTime()).replace(/\\/g, '/')
+            document.getElementById('animation-rows').value = asset.rows
+            document.getElementById('animation-cols').value = asset.cols
+            document.getElementById('animation-numFrames').value = asset.numFrames
+            document.getElementById('animation-delay').value = asset.delay
+            document.getElementById('animation-rows').tab = e.target.tab
+            document.getElementById('animation-rows').asset = e.target.asset
+            document.getElementById('animation-cols').tab = e.target.tab
+            document.getElementById('animation-cols').asset = e.target.asset
+            document.getElementById('animation-numFrames').tab = e.target.tab
+            document.getElementById('animation-numFrames').asset = e.target.asset
+            document.getElementById('animation-delay').tab = e.target.tab
+            document.getElementById('animation-delay').asset = e.target.asset
+        } else {
+            document.getElementById('asset selected').style.background = 'url(' + path.join(project.assetsPath, asset.location + "?random=" + new Date().getTime()).replace(/\\/g, '/') + ') center no-repeat/contain'
+            document.getElementById('animated-settings').style.display = 'none'
+        }
         document.getElementById('asset-tab').value = e.target.tab
         document.getElementById('asset-name').value = project.assets[e.target.tab][e.target.asset].name
         document.getElementById('asset-tab').tab = e.target.tab
         document.getElementById('asset-tab').asset = e.target.asset
         document.getElementById('asset-name').tab = e.target.tab
         document.getElementById('asset-name').asset = e.target.asset
+        document.getElementById('asset-type').tab = e.target.tab
+        document.getElementById('asset-type').asset = e.target.asset
         document.getElementById('delete-asset').tab = e.target.tab
         document.getElementById('delete-asset').asset = e.target.asset
     }
@@ -924,9 +985,7 @@ function checkLayer(layer, assets, characterPath) {
         // If we don't have the tab or the asset...
         if (!(project.assets[asset.tab] && project.assets[asset.tab][asset.hash])) {
             // Add it!
-            fs.ensureDirSync(path.join(project.assetsPath, asset.tab))
-            fs.copySync(path.join(characterPath, '..', '..', 'assets', assets[asset.tab][asset.hash].location), path.join(project.assetsPath, asset.tab, asset.hash + '.png'))
-            controller.addAsset({"tab": asset.tab, "hash": asset.hash, "name": assets[asset.tab][asset.hash].name})
+            importAsset({tab: asset.tab, hash: asset.hash, asset: assets[asset.tab][asset.hash], location: path.join(characterPath, '..', '..', 'assets', assets[asset.tab][asset.hash].location)})
         }
     }
 }
@@ -1199,7 +1258,88 @@ function addAsset() {
             let tab = document.getElementById('asset tabs').value
             fs.ensureDirSync(path.join(project.assetsPath, tab))
             fs.writeFileSync(path.join(project.assetsPath, tab, hash + '.png'), file)
-            controller.addAsset({"tab": tab, "hash": hash, "name": name})
+            controller.addAsset({
+                "tab": tab, 
+                "hash": hash, 
+                "type": "sprite", 
+                "name": name, 
+                "location": path.join(tab, hash + '.png')
+            })
+        }
+    })
+}
+
+function addAnimatedAsset() {
+    remote.dialog.showOpenDialog(remote.BrowserWindow.getFocusedWindow(), {
+        title: 'Add Animated Assets',
+        filters: [
+          {name: 'Animated Image', extensions: ['gif']},
+          {name: 'Animated Spritesheet', extensions: ['png']}
+        ],
+        properties: [
+          'openFile',
+          'multiSelections'
+        ] 
+    }, (filepaths) => {
+        if (!filepaths) return
+        for (let i = 0; i < filepaths.length; i++) {
+            let file = fs.readFileSync(filepaths[i])
+            let name = filepaths[i].replace(/^.*[\\\/]/, '').replace(/.png/, '').replace(/.gif/, '')
+            let rows = 1
+            let cols = 1
+            let numFrames = 1
+            let delay = 60
+            if (filepaths[i].substr(filepaths[i].length - 4) === ".gif") {
+                // If gif, turn it into animated png spritesheet
+                let gif = new GIF(file)
+                let frames = gif.decompressFrames(true)
+                numFrames = frames.length
+                delay = frames[0].delay
+                // Optimize rows and columns to make an approximately square sheet
+                // (idk if this is useful but figured it wouldn't hurt)
+                rows = Math.ceil(Math.sqrt(frames.length))
+                cols = Math.ceil(frames.length / rows)
+                let width = gif.raw.lsd.width
+                let height = gif.raw.lsd.height
+                // Create canvas to put each frame onto
+                var canvas = document.createElement('canvas')
+                var ctx = canvas.getContext('2d')
+                canvas.width = width * cols
+                canvas.height = height * rows
+                for (let j = 0; j < rows; j++) {
+                    for (let k = 0; k < cols; k++) {
+                        if (numFrames <= j * cols + k) break
+                        let frame = frames[j * cols + k]
+                        let imageData = ctx.createImageData(frame.dims.width, frame.dims.height)
+                        imageData.data.set(frame.patch)
+                        ctx.putImageData(imageData, k * width + frame.dims.left, j * height + frame.dims.top)
+                    }
+                }
+                file = new Buffer(canvas.toDataURL().replace(/^data:image\/\w+;base64,/, ""), 'base64')
+            }
+            let fileString = file.toString('base64')
+            let hash = 0, char, j, l
+            for (j = 0, l = fileString.length; j < l; j++) {
+                char  = fileString.charCodeAt(j)
+                hash  = ((hash<<5)-hash)+char
+                hash |= 0
+            }
+            hash = "" + hash
+            let tab = document.getElementById('asset tabs').value
+            fs.ensureDirSync(path.join(project.assetsPath, tab))
+            fs.writeFileSync(path.join(project.assetsPath, tab, hash + '.png'), file)
+            if (numFrames === 1) fs.copySync(path.join(project.assetsPath, tab, hash + '.png'), path.join(project.assetsPath, tab, hash + '.thumb.png'))
+            controller.addAsset({
+                "tab": tab, 
+                "hash": hash, 
+                "type": "animated", 
+                "name": name, 
+                "rows": rows, 
+                "cols": cols, 
+                "numFrames": numFrames, 
+                "delay": delay, 
+                "location": path.join(tab, hash + '.png')
+            })
         }
     })
 }
@@ -1237,11 +1377,17 @@ function importAssets() {
                             asset.id = 'import-asset-' + this + '-' + hashes[j]
                             asset.tab = this.valueOf()
                             asset.hash = hashes[j]
-                            asset.name = list[hashes[j]].name
+                            asset.asset = list[hashes[j]]
                             asset.location = path.join(filepaths[0], '..', 'assets', list[hashes[j]].location)
                             asset.className = "asset"
-                            asset.style.backgroundImage = 'url(' + path.join(filepaths[0], '..', 'assets', list[hashes[j]].location + '?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
                             asset.innerHTML = '<div class="desc">' + list[hashes[j]].name + '</div>'
+                            if (list[hashes[j]].type === "animated") {
+                                let location = list[hashes[j]].location
+                                location = [location.slice(0, location.length - 4), '.thumb', location.slice(location.length - 4)].join('')
+                                asset.style.backgroundImage = 'url(' + path.join(filepaths[0], '..', 'assets', location + '?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
+                                asset.className += ' animated'
+                            } else 
+                                asset.style.backgroundImage = 'url(' + path.join(filepaths[0], '..', 'assets', list[hashes[j]].location + '?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
                             asset.addEventListener('click', toggleImportAsset)
                             tab.appendChild(asset)
                         }
@@ -1284,26 +1430,36 @@ function toggleImportList(e) {
 }
 
 function toggleImportAsset(e) {
-    if (e.target.className === 'asset selected') {
-        e.target.className = 'asset'
+    if (e.target.className === 'asset selected' || e.target.className === 'asset selected animated') {
+        e.target.className = 'asset' + (e.target.asset.type === "animated" ? " animated" : "")
         delete importing[e.target.hash]
         e.target.parentNode.childNodes[1].checked = false
         document.getElementById('import-all').checked = false
     } else {
-        e.target.className = 'asset selected'
-        importing[e.target.hash] = {tab: e.target.tab, hash: e.target.hash, name: e.target.name, location: e.target.location}
+        e.target.className = 'asset selected' + (e.target.asset.type === "animated" ? " animated" : "")
+        importing[e.target.hash] = {tab: e.target.tab, hash: e.target.hash, asset: e.target.asset, location: e.target.location}
     }
 }
 
 function confirmImportAssets() {
     let assets = Object.keys(importing)
     for (let i = 0; i < assets.length; i++) {
-        let asset = importing[assets[i]]
-        fs.ensureDirSync(path.join(project.assetsPath, asset.tab))
-        fs.copySync(asset.location, path.join(project.assetsPath, asset.tab, asset.hash + '.png'))
-        controller.addAsset(asset)
+        importAsset(importing[assets[i]])
     }
     controller.openModal()
+}
+
+function importAsset(asset) {
+    fs.ensureDirSync(path.join(project.assetsPath, asset.tab))
+    fs.copySync(asset.location, path.join(project.assetsPath, asset.tab, asset.hash + '.png'))
+    if (asset.asset.type === 'animated') {
+        let location = asset.location
+        location = [location.slice(0, location.length - 4), '.thumb', location.slice(location.length - 4)].join('')
+        fs.copySync(location, path.join(project.assetsPath, asset.tab, asset.hash + '.thumb.png'))
+    }
+    asset.asset.tab = asset.tab
+    asset.asset.hash = asset.hash
+    controller.addAsset(asset.asset)
 }
 
 function editAssetList() {
@@ -1374,7 +1530,7 @@ function selectAsset() {
 }
 
 function migrateAsset(e) {
-    controller.moveAsset(e.target.tab, e.target.asset, e.target.value)
+    controller.changeAssetTab(e.target.tab, e.target.asset, e.target.value)
     e.target.tab = e.target.value
 }
 
@@ -1384,6 +1540,73 @@ function renameAsset(e) {
     let list = document.getElementById('tab ' + e.target.tab)
     list.getElementsByClassName(e.target.asset)[0].getElementsByClassName('desc')[0].innerHTML = e.target.value
     list.getElementsByClassName(e.target.asset)[0].id = e.target.value.toLowerCase()
+}
+
+function assetType(e) {
+    let asset = project.assets[e.target.tab][e.target.asset]
+    asset.type = e.target.value.toLowerCase()
+    if (e.target.value.toLowerCase() === "animated") {
+        asset.rows = asset.rows || 1
+        asset.cols = asset.cols || 1
+        asset.numFrames = asset.numFrames || 1
+        asset.delay = asset.delay || 60
+        let location = asset.location
+        location = [location.slice(0, location.length - 4), '.thumb', location.slice(location.length - 4)].join('')
+        if (!fs.existsSync(path.join(project.assetsPath, location))) {
+            fs.copySync(path.join(project.assetsPath, asset.location), path.join(project.assetsPath, location))
+        }
+        document.getElementById('asset selected').style.background = 'url(' + path.join(project.assetsPath, location + "?random=" + new Date().getTime()).replace(/\\/g, '/') + ') center no-repeat/contain'
+        document.getElementById('animated-settings').style.display = ''
+        document.getElementById('animated-spritesheet').src = path.join(project.assetsPath, asset.location + "?random=" + new Date().getTime()).replace(/\\/g, '/')
+        document.getElementById('animation-rows').value = asset.rows
+        document.getElementById('animation-cols').value = asset.cols
+        document.getElementById('animation-numFrames').value = asset.numFrames
+        document.getElementById('animation-delay').value = asset.delay
+    } else {
+        document.getElementById('asset selected').style.background = 'url(' + path.join(project.assetsPath, asset.location + "?random=" + new Date().getTime()).replace(/\\/g, '/') + ') center no-repeat/contain'
+        document.getElementById('animated-settings').style.display = 'none'
+    }
+    controller.updateAsset(e.target.tab, e.target.asset)
+}
+
+function animationRows(e) {
+    let asset = project.assets[e.target.tab][e.target.asset]
+    asset.rows = e.target.value
+    controller.updateAsset(e.target.tab, e.target.asset)
+    recreateThumb(asset)
+}
+
+function animationCols(e) {
+    let asset = project.assets[e.target.tab][e.target.asset]
+    asset.cols = e.target.value
+    controller.updateAsset(e.target.tab, e.target.asset)
+    recreateThumb(asset)
+}
+
+function animationFrames(e) {
+    let asset = project.assets[e.target.tab][e.target.asset]
+    asset.numFrames = e.target.value
+    controller.updateAsset(e.target.tab, e.target.asset)
+}
+
+function animationDelay(e) {
+    let asset = project.assets[e.target.tab][e.target.asset]
+    asset.delay = e.target.value
+    controller.updateAsset(e.target.tab, e.target.asset)
+}
+
+function recreateThumb(asset) {
+    let location = asset.location
+    location = [location.slice(0, location.length - 4), '.thumb', location.slice(location.length - 4)].join('')
+    let dimensions = sizeOf(path.join(project.assetsPath, asset.location))
+    dimensions.width /= asset.cols
+    dimensions.height /= asset.rows
+    dimensions.width = Math.floor(dimensions.width)
+    dimensions.height = Math.floor(dimensions.height)
+    crop(path.join(project.assetsPath, asset.location), path.join(project.assetsPath, location), dimensions, () => {
+        document.getElementById('asset selected').style.background = 'url(' + path.join(project.assetsPath, location + "?random=" + new Date().getTime()).replace(/\\/g, '/') + ') center no-repeat/contain'
+        document.getElementById(asset.name.toLowerCase()).children[1].src = path.join(project.assetsPath, location + "?random=" + new Date().getTime()).replace(/\\/g, '/')
+    })
 }
 
 function deleteAsset(e) {

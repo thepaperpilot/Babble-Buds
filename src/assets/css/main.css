@@ -466,6 +466,7 @@ body > .editormain {
   	animation: pulse 5s infinite cubic-bezier(0.66, 0, 0, 1);
   	border-radius: 50%;
   	transform: scale(1.25);
+  	z-index: 100;
 }
 
 @keyframes pulse {
@@ -646,4 +647,16 @@ body > .editormain {
 	width: 120px;
 	height: 120px;
     margin: 4px 4px 0 4px;
+}
+
+.animated::after {
+	position: absolute;
+    right: 2px;
+    top: 2px;
+    content: "";
+    width: 20px;
+    height: 20px;
+    background-size: contain;
+    background-image: url(../icons/animated.png);
+    pointer-events: none;
 }

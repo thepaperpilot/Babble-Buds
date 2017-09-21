@@ -161,11 +161,27 @@
                 <div id="asset list" class="assetlist"></div>
                 <input type="search" id="asset search" placeholder="Search">
             </div>
-            <div id="asset editor" class="editorpanel v5" style="display: none">
+            <div id="asset editor" class="editorpanel v5 scroll" style="display: none">
                 <p style="margin: 0 0 8px; padding-top: 16px;">Asset List:</p>
                 <select id="asset-tab"></select>
                 <p style="margin: 0 0 8px; padding-top: 16px;">Asset Name:</p>
                 <input type="text" id="asset-name" value="New Asset"><br>
+                <p style="margin: 0 0 8px;">Asset Type:</p>
+                <select id="asset-type">
+                    <option>Sprite</option>
+                    <option>Animated</option>
+                </select>
+                <div id="animated-settings" style="margin-top: 12px">
+                    <img id="animated-spritesheet" style="display: block; margin: auto; width: 90%;">
+                    <p style="margin: 0; padding-top: 16px;">Rows:</p>
+                    <input type="number" id="animation-rows" value="1">
+                    Columns:
+                    <input type="number" id="animation-cols" value="1">
+                    Number of frames:
+                    <input type="number" id="animation-numFrames" value="1">
+                    Delay between frames:
+                    <input type="number" id="animation-delay" value="60">
+                </div>
                 <button id="delete-asset">Delete Asset</button>
             </div>
             <div id="asset list editor" class="editorpanel v5" style="display: none">

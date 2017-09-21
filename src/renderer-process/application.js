@@ -235,18 +235,18 @@ function keyUp(e) {
 		if (project.project.hotbar.length > key - 49) {
 			controller.setPuppetLocal(key - 49, e.shiftKey, e.ctrlKey)
 		}
-	} else if (key == 85) controller.setEmoteLocal('default')
-	else if (key == 73) controller.setEmoteLocal('happy')
-	else if (key == 79) controller.setEmoteLocal('wink')
-	else if (key == 80) controller.setEmoteLocal('kiss')
-	else if (key == 74) controller.setEmoteLocal('angry')
-	else if (key == 75) controller.setEmoteLocal('sad')
-	else if (key == 76) controller.setEmoteLocal('ponder')
-	else if (key == 186) controller.setEmoteLocal('gasp')
-	else if (key == 77) controller.setEmoteLocal('veryangry')
-	else if (key == 188) controller.setEmoteLocal('verysad')
-	else if (key == 190) controller.setEmoteLocal('confused')
-	else if (key == 191) controller.setEmoteLocal('ooo')
+	} else if (key == 85) controller.setEmoteLocal('0')
+	else if (key == 73) controller.setEmoteLocal('1')
+	else if (key == 79) controller.setEmoteLocal('2')
+	else if (key == 80) controller.setEmoteLocal('3')
+	else if (key == 74) controller.setEmoteLocal('4')
+	else if (key == 75) controller.setEmoteLocal('5')
+	else if (key == 76) controller.setEmoteLocal('6')
+	else if (key == 186) controller.setEmoteLocal('7')
+	else if (key == 77) controller.setEmoteLocal('8')
+	else if (key == 188) controller.setEmoteLocal('9')
+	else if (key == 190) controller.setEmoteLocal('10')
+	else if (key == 191) controller.setEmoteLocal('11')
 	else if (key == 37) controller.moveLeftLocal()
 	else if (key == 38) controller.jiggleLocal()
 	else if (key == 39) controller.moveRightLocal()
@@ -497,7 +497,7 @@ function startAutocrop() {
 			fs.writeFileSync(path.join(project.assetsPath, assets[i].location), new Buffer(newAsset, 'base64'))
 			document.getElementById('autocrop-' + assets[i].tab + '-' + assets[i].hash).style.backgroundImage = 'url(' + path.join(project.assetsPath, assets[i].location + '?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
 			// Move assets to compensate for cropping
-			controller.updateAsset(assets[i].tab, assets[i].hash, data.x, data.y)
+			controller.moveAsset(assets[i].tab, assets[i].hash, data.x, data.y)
 		} catch (e) {
 			// Failed to crop asset, probably because the image has no non-transparent pixels
 			console.error(e)

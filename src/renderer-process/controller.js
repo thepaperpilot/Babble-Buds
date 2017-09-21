@@ -1,6 +1,8 @@
 // Imports
 const remote = require('electron').remote
 const windowStateKeeper = require('electron-window-state')
+const sizeOf = require('image-size')
+const crop = require('png-crop').crop
 const BrowserWindow = remote.BrowserWindow
 const application = require('./application.js')
 const editor = require('./editor.js')
@@ -243,21 +245,32 @@ exports.addAsset = function(asset) {
 
 exports.addAssetLocal = function(asset) {
 	project.addAsset(asset)
-	stage.addAsset(asset)
-	editor.addAsset(asset.tab, asset.hash)
-	exports.emitPopout('add asset', asset)
+	stage.addAsset(asset.tab, asset.hash, asset, () => {
+		let location = asset.location
+	    location = [location.slice(0, location.length - 4), '.thumb', location.slice(location.length - 4)].join('')
+		if (asset.type === "animated" && !fs.existsSync(path.join(project.assetsPath, asset.location))) {
+		    let dimensions = sizeOf(path.join(project.assetsPath, asset.location))
+		    dimensions.width /= asset.rows
+		    dimensions.height /= asset.cols
+		    crop(path.join(project.assetsPath, asset.location), path.join(project.assetsPath, location), dimensions, () => {
+		        editor.addAsset(asset.tab, asset.hash)
+		    })
+		} else editor.addAsset(asset.tab, asset.hash)
+		exports.updateAsset(asset.tab, asset.hash)
+		exports.emitPopout('add asset', asset)
+	})
 }
 
-exports.moveAsset = function(tab, asset, newTab) {
+exports.changeAssetTab = function(tab, asset, newTab) {
 	exports.moveAssetLocal(tab, asset, newTab)
 	network.emit('move asset', tab, asset, newTab)
 }
 
-exports.moveAssetLocal = function(tab, asset, newTab) {
+exports.changeAssetTabLocal = function(tab, asset, newTab) {
     status.log("Moving asset to " + newTab + " list...", 2, 1)
 	editor.migrateAsset(tab, asset, newTab)
 	project.moveAsset(tab, asset, newTab)
-	stage.addAsset({"tab": newTab, "hash": asset, "name": project.assets[newTab][asset].name})
+	stage.addAsset(newTab, asset, project.assets[newTab][asset])
 	applyToAsset(tab, asset, (asset) => {
 		asset.tab = newTab
 	})
@@ -294,7 +307,7 @@ exports.renameAssetListLocal = function(tab, newTab) {
 	})
 }
 
-exports.updateAsset = function(tab, asset, x, y) {
+exports.moveAsset = function(tab, asset, x, y) {
 	let callback = function(asset) {
 		asset.x += x
 		asset.y += y
@@ -302,11 +315,29 @@ exports.updateAsset = function(tab, asset, x, y) {
 	applyToAsset(tab, asset, callback)
 }
 
+exports.updateAsset = function(tab, asset) {
+	stage.updateAsset(tab, asset)
+	editor.updateAsset(tab, asset)
+    let callback = function(asset, sprite) {
+        let parent = sprite.parent
+        let index = parent.getChildIndex(sprite)
+        let newAsset = stage.getAsset(asset)
+        newAsset.layer = asset.layer
+        newAsset.emote = asset.emote
+        parent.removeChildAt(index)
+        parent.addChildAt(newAsset, index)
+    }
+    for (let i = 0; i < hotbar.length; i++) {
+        hotbar[i].applyToAsset({tab, hash: asset}, callback)
+    }
+}
+
 exports.reloadAssets = function(callback) {
 	stage.reloadAssets(() => {
 		editor.reloadAssets()
 		if(callback) callback()
 		project.saveProject()
+		editor.reloadPuppetList()
 	})
 }
 

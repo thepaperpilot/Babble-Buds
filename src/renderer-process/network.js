@@ -53,8 +53,10 @@ exports.host = function() {
 		for (let i = 0; i < tabs.length; i++) {
 			let assetKeys = Object.keys(project.assets[tabs[i]])
 			for (let j = 0; j < assetKeys.length; j++) {
-				let asset = project.assets[tabs[i]][assetKeys[j]]
-				socket.emit('add asset', {"tab": tabs[i], "hash": assetKeys[j], "name": asset.name})
+				let asset = JSON.parse(JSON.stringify((project.assets[tabs[i]][assetKeys[j]])))
+				asset.tab = tabs[i]
+				asset.hash = assetKeys[j]
+				socket.emit('add asset', asset)
 			}
 		}
 
@@ -143,7 +145,7 @@ exports.host = function() {
 			socket.broadcast.emit('set slots', slots)
 		})
 		socket.on('move asset', (tab, asset, newTab) => {
-			controller.moveAssetLocal(tab, asset, newTab)
+			controller.changeAssetTabLocal(tab, asset, newTab)
 			socket.broadcast.emit('move asset', tab, asset, newTab)
 		})
 		socket.on('delete asset', (tab, asset) => {
@@ -173,7 +175,6 @@ exports.host = function() {
 					socket.broadcast.emit('add asset', asset)
 					if (status.decrement('Retrieving %x Asset%s')) {
 						status.log('Synced Assets!', 3, 1)
-						controller.reloadPuppets()
 					}
 				})
 				stream.pipe(fs.createWriteStream(path.join(project.assetsPath, asset.tab, asset.hash + '.png')))
@@ -213,8 +214,10 @@ exports.connect = function() {
 		for (let i = 0; i < tabs.length; i++) {
 			let assetKeys = Object.keys(project.assets[tabs[i]])
 			for (let j = 0; j < assetKeys.length; j++) {
-				let asset = project.assets[tabs[i]][assetKeys[j]]
-				socket.emit('add asset', {"tab": tabs[i], "hash": assetKeys[j], "name": asset.name})
+				let asset = JSON.parse(JSON.stringify((project.assets[tabs[i]][assetKeys[j]])))
+				asset.tab = tabs[i]
+				asset.hash = assetKeys[j]
+				socket.emit('add asset', asset)
 			}
 		}
 	    socket.emit('add puppet', project.getPuppet())
@@ -323,7 +326,7 @@ exports.connect = function() {
 		document.getElementById('numslots').value = slots
 		controller.resize()
 	})
-	socket.on('move asset', controller.moveAssetLocal)
+	socket.on('move asset', controller.changeAssetTabLocal)
 	socket.on('delete asset', controller.deleteAssetLocal)
 	socket.on('add asset', (asset) => {
 		if (!(project.assets[asset.tab] && project.assets[asset.tab][asset.hash])) {
@@ -335,7 +338,6 @@ exports.connect = function() {
 				controller.addAssetLocal(asset)
 				if (status.decrement('Retrieving %x Asset%s')) {
 					status.log('Synced Assets!', 3, 1)
-					controller.reloadPuppets()
 				}
 			})
 			stream.pipe(fs.createWriteStream(path.join(project.assetsPath, asset.tab, asset.hash + '.png')))
@@ -365,5 +367,5 @@ function stopNetworking() {
 }
 
 function requestAsset(stream, asset) {
-	fs.createReadStream(path.join(project.assetsPath, project.assets[asset.tab][asset.hash].location)).pipe(stream)
+	fs.createReadStream(path.join(project.assetsPath, asset.location)).pipe(stream)
 }

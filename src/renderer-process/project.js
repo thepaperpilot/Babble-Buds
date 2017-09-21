@@ -158,14 +158,12 @@ module.exports = {
 
 		return true
 	},
-	// asset = {
-	//	 tab: string,
-	//	 hash: string,
-	//	 name: string
-	// }
 	addAsset: function(asset) {
 		this.addAssetList(asset.tab)
-		this.assets[asset.tab][asset.hash] = {"name": asset.name, "location": path.join(asset.tab, asset.hash + '.png')}
+		let newAsset = JSON.parse(JSON.stringify(asset))
+		delete newAsset.tab
+		delete newAsset.hash
+		this.assets[asset.tab][asset.hash] = newAsset
 	},
 	addAssetList: function(tab) {
 		if (this.assets[tab]) return
@@ -233,13 +231,80 @@ module.exports = {
             "hat": [],
             "mouths": [],
             "eyes": [],
-            "emotes": {
-                "default": {
-                    "enabled": true,
-                    "mouth": [],
-                    "eyes": []
-                }
-            },
+            "emotes": [
+		        {
+		            "enabled": true,
+		            "mouth": [],
+		            "eyes": [],
+		            "name": "default"
+		        },
+		        {
+		            "enabled": false,
+		            "mouth": [],
+		            "eyes": [],
+		            "name": "happy"
+		        },
+		        {
+		            "enabled": false,
+		            "mouth": [],
+		            "eyes": [],
+		            "name": "wink"
+		        },
+		        {
+		            "enabled": false,
+		            "mouth": [],
+		            "eyes": [],
+		            "name": "kiss"
+		        },
+		        {
+		            "enabled": false,
+		            "mouth": [],
+		            "eyes": [],
+		            "name": "angry"
+		        },
+		        {
+		            "enabled": false,
+		            "mouth": [],
+		            "eyes": [],
+		            "name": "sad"
+		        },
+		        {
+		            "enabled": false,
+		            "mouth": [],
+		            "eyes": [],
+		            "name": "ponder"
+		        },
+		        {
+		            "enabled": false,
+		            "mouth": [],
+		            "eyes": [],
+		            "name": "gasp"
+		        },
+		        {
+		            "enabled": false,
+		            "mouth": [],
+		            "eyes": [],
+		            "name": "veryangry"
+		        },
+		        {
+		            "enabled": false,
+		            "mouth": [],
+		            "eyes": [],
+		            "name": "verysad"
+		        },
+		        {
+		            "enabled": false,
+		            "mouth": [],
+		            "eyes": [],
+		            "name": "confused"
+		        },
+		        {
+		            "enabled": false,
+		            "mouth": [],
+		            "eyes": [],
+		            "name": "ooo"
+		        }
+		    ],
             "props": [],
             "name": "New Puppet",
             "id": this.numCharacters
