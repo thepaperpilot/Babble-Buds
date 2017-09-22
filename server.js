@@ -44,8 +44,10 @@ server.sockets.on('connection', function(socket) {
 	for (var i = 0; i < tabs.length; i++) {
 		var assetKeys = Object.keys(assets[tabs[i]])
 		for (var j = 0; j < assetKeys.length; j++) {
-			var asset = assets[tabs[i]][assetKeys[j]]
-			socket.emit('add asset', {"tab": tabs[i], "hash": assetKeys[j], "name": asset.name})
+			var asset = JSON.parse(JSON.stringify(assets[tabs[i]][assetKeys[j]]))
+			asset.tab = tabs[i]
+			asset.hash = assetKeys[j]
+			socket.emit('add asset', asset)
 		}
 	}
 
@@ -172,7 +174,7 @@ server.sockets.on('connection', function(socket) {
 		}
 	})
 	ss(socket).on('request asset', function(stream, asset) {
-		fs.createReadStream(path.join(assetsPath, assets[asset.tab][asset.hash].location)).pipe(stream)
+		fs.createReadStream(path.join(assetsPath, asset.location)).pipe(stream)
 	})
 })
 
