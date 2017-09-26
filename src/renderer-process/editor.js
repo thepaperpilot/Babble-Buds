@@ -2,7 +2,6 @@
 const electron = require('electron')
 const remote = electron.remote
 const sizeOf = require('image-size')
-const crop = require('png-crop').crop
 const PIXI = require('pixi.js')
 const path = require('path')
 const controller = require('./controller.js')
@@ -1599,14 +1598,26 @@ function recreateThumb(asset) {
     let location = asset.location
     location = [location.slice(0, location.length - 4), '.thumb', location.slice(location.length - 4)].join('')
     let dimensions = sizeOf(path.join(project.assetsPath, asset.location))
-    dimensions.width /= asset.cols
-    dimensions.height /= asset.rows
-    dimensions.width = Math.floor(dimensions.width)
-    dimensions.height = Math.floor(dimensions.height)
-    crop(path.join(project.assetsPath, asset.location), path.join(project.assetsPath, location), dimensions, () => {
-        document.getElementById('asset selected').style.background = 'url(' + path.join(project.assetsPath, location + "?random=" + new Date().getTime()).replace(/\\/g, '/') + ') center no-repeat/contain'
-        document.getElementById(asset.name.toLowerCase()).children[1].src = path.join(project.assetsPath, location + "?random=" + new Date().getTime()).replace(/\\/g, '/')
-    })
+    let width = Math.floor(dimensions.width / asset.cols)
+    let height = Math.floor(dimensions.height / asset.rows)
+    let image = new Image()
+    image.onload = () => {
+        let canvas = document.createElement('canvas')
+        canvas.width = dimensions.width
+        canvas.height = dimensions.height
+        canvas.getContext('2d').drawImage(image, 0, 0)
+        let data = canvas.getContext('2d').getImageData(0, 0, width, height)
+        canvas = document.createElement('canvas')
+        canvas.width = width
+        canvas.height = height
+        canvas.getContext('2d').putImageData(data, 0, 0)
+        fs.writeFile(path.join(project.assetsPath, location), new Buffer(canvas.toDataURL().replace(/^data:image\/\w+;base64,/, ""), 'base64'), (err) => {
+            if (err) console.log(err)
+            document.getElementById('asset selected').style.background = 'url(' + path.join(project.assetsPath, location + "?random=" + new Date().getTime()).replace(/\\/g, '/') + ') center no-repeat/contain'
+            document.getElementById(asset.name.toLowerCase()).children[1].src = path.join(project.assetsPath, location + "?random=" + new Date().getTime()).replace(/\\/g, '/')
+        })
+    }
+    image.src = path.join(project.assetsPath, asset.location)
 }
 
 function deleteAsset(e) {

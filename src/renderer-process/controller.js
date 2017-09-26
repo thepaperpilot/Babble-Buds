@@ -2,7 +2,6 @@
 const remote = require('electron').remote
 const windowStateKeeper = require('electron-window-state')
 const sizeOf = require('image-size')
-const crop = require('png-crop').crop
 const BrowserWindow = remote.BrowserWindow
 const application = require('./application.js')
 const editor = require('./editor.js')
@@ -248,13 +247,27 @@ exports.addAssetLocal = function(asset) {
 	stage.addAsset(asset.tab, asset.hash, asset, () => {
 		let location = asset.location
 	    location = [location.slice(0, location.length - 4), '.thumb', location.slice(location.length - 4)].join('')
-		if (asset.type === "animated" && !fs.existsSync(path.join(project.assetsPath, asset.location))) {
+		if (asset.type === "animated" && !fs.existsSync(path.join(project.assetsPath, location))) {
 		    let dimensions = sizeOf(path.join(project.assetsPath, asset.location))
-		    dimensions.width /= asset.rows
-		    dimensions.height /= asset.cols
-		    crop(path.join(project.assetsPath, asset.location), path.join(project.assetsPath, location), dimensions, () => {
-		        editor.addAsset(asset.tab, asset.hash)
-		    })
+		    let width = Math.floor(dimensions.width / asset.cols)
+		    let height = Math.floor(dimensions.height / asset.rows)
+		    let image = new Image()
+		    image.onload = () => {
+		        let canvas = document.createElement('canvas')
+		        canvas.width = dimensions.width
+		        canvas.height = dimensions.height
+		        canvas.getContext('2d').drawImage(image, 0, 0)
+		        let data = canvas.getContext('2d').getImageData(0, 0, width, height)
+		        canvas = document.createElement('canvas')
+		        canvas.width = width
+		        canvas.height = height
+		        canvas.getContext('2d').putImageData(data, 0, 0)
+		        fs.writeFile(path.join(project.assetsPath, location), new Buffer(canvas.toDataURL().replace(/^data:image\/\w+;base64,/, ""), 'base64'), (err) => {
+		            if (err) console.log(err)
+		            editor.addAsset(asset.tab, asset.hash)
+		        })
+		    }
+		    image.src = path.join(project.assetsPath, asset.location)
 		} else editor.addAsset(asset.tab, asset.hash)
 		exports.updateAsset(asset.tab, asset.hash)
 		exports.emitPopout('add asset', asset)
