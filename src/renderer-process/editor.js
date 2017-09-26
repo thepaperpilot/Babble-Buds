@@ -847,9 +847,13 @@ function savePuppet() {
     puppet.hat.visible = false
     puppet.props.visible = false
     let emotes = Object.keys(puppet.emotes)
+    let empty = document.createElement('canvas')
+    empty.width = stage.renderer.view.width
+    empty.height = stage.renderer.view.height
     for (let i = 0; i < emotes.length; i++) {
         puppet.changeEmote(i)
-        emoteThumbnails[i] = stage.getThumbnail()
+        if (stage.renderer.view.toDataURL() !== empty.toDataURL())
+            emoteThumbnails[i] = stage.getThumbnail()
     }
     puppet.changeEmote(emote)
     puppet.body.visible = true
@@ -857,7 +861,7 @@ function savePuppet() {
     puppet.props.visible = true
 
     // Save character
-    controller.saveCharacter(JSON.parse(oldcharacter), stage.getThumbnail(), emoteThumbnails)
+    controller.saveCharacter(JSON.parse(oldcharacter), stage.renderer.view.toDataURL() === empty.toDataURL() ? null : stage.getThumbnail(), emoteThumbnails)
     document.getElementById("editor-save").classList.remove("highlight")
     status.log('Puppet saved!', 1, 1)
     reloadPuppetList()
