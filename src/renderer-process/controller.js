@@ -237,14 +237,15 @@ exports.updateHotbar = function(i, puppet) {
 	}
 }
 
-exports.addAsset = function(asset) {
-	exports.addAssetLocal(asset)
-	network.emit('add asset', asset)
+exports.addAsset = function(id, asset) {
+	exports.addAssetLocal(id, asset)
+	network.emit('add asset', id, asset)
 }
 
-exports.addAssetLocal = function(asset) {
-	project.addAsset(asset)
-	stage.addAsset(asset.tab, asset.hash, asset, () => {
+exports.addAssetLocal = function(id, asset) {
+	project.addAsset(id, asset)
+	console.log(id, asset, asset.id)
+	stage.addAsset(id, asset, () => {
 		let location = asset.location
 	    location = [location.slice(0, location.length - 4), '.thumb', location.slice(location.length - 4)].join('')
 		if (asset.type === "animated" && !fs.existsSync(path.join(project.assetsPath, location))) {
@@ -264,43 +265,42 @@ exports.addAssetLocal = function(asset) {
 		        canvas.getContext('2d').putImageData(data, 0, 0)
 		        fs.writeFile(path.join(project.assetsPath, location), new Buffer(canvas.toDataURL().replace(/^data:image\/\w+;base64,/, ""), 'base64'), (err) => {
 		            if (err) console.log(err)
-		            editor.addAsset(asset.tab, asset.hash)
+		            editor.addAsset(asset.id)
 		        })
 		    }
 		    image.src = path.join(project.assetsPath, asset.location)
-		} else editor.addAsset(asset.tab, asset.hash)
-		exports.updateAsset(asset.tab, asset.hash)
+		} else editor.addAsset(id)
+		exports.updateAsset(id)
 		exports.emitPopout('add asset', asset)
 	})
 }
 
-exports.changeAssetTab = function(tab, asset, newTab) {
-	exports.moveAssetLocal(tab, asset, newTab)
-	network.emit('move asset', tab, asset, newTab)
+exports.changeAssetTab = function(id, newTab) {
+	exports.changeAssetTabLocal(id, newTab)
+	network.emit('move asset', id, newTab)
 }
 
-exports.changeAssetTabLocal = function(tab, asset, newTab) {
+exports.changeAssetTabLocal = function(id, newTab) {
     status.log("Moving asset to " + newTab + " list...", 2, 1)
-	editor.migrateAsset(tab, asset, newTab)
-	project.moveAsset(tab, asset, newTab)
-	stage.addAsset(newTab, asset, project.assets[newTab][asset])
-	applyToAsset(tab, asset, (asset) => {
+	editor.migrateAsset(id, newTab)
+	project.moveAsset(id, newTab)
+	applyToAsset(id, (asset) => {
 		asset.tab = newTab
 	})
     status.log("Moved asset!", 1, 1)
 }
 
-exports.deleteAsset = function(tab, asset) {
-	exports.deleteAssetLocal(tab, asset)
-	network.emit('delete asset', tab, asset)
+exports.deleteAsset = function(id) {
+	exports.deleteAssetLocal(id)
+	network.emit('delete asset', id)
 }
 
-exports.deleteAssetLocal = function(tab, asset) {
+exports.deleteAssetLocal = function(id) {
     status.log("Deleting asset...", 2, 1)
-	editor.deleteAsset(tab, asset)
-	project.deleteAsset(tab, asset)
+	editor.deleteAsset(id)
+	project.deleteAsset(id)
 
-	applyToAsset(tab, asset, (asset, array, index) => {
+	applyToAsset(id, (asset, array, index) => {
 		array.splice(index, 1)
 	})
     status.log("Deleted asset!", 1, 1)
@@ -315,22 +315,29 @@ exports.renameAssetListLocal = function(tab, newTab) {
 	editor.renameAssetList(tab, newTab)
 	project.renameAssetList(tab, newTab)
 
-	applyToAsset(tab, null, (asset) => {
+	let keys = Object.keys(project.assets)
+	let callback = (asset) => {
 		asset.tab = newTab
-	})
+	}
+    for (let i = 0; i < keys.length; i++) {
+    	if (project.assets[keys[i]].tab === tab)
+        	applyToAsset(keys[i], callback)
+    }
 }
 
-exports.moveAsset = function(tab, asset, x, y) {
+exports.moveAsset = function(id, x, y) {
 	let callback = function(asset) {
 		asset.x += x
 		asset.y += y
 	}
-	applyToAsset(tab, asset, callback)
+	applyToAsset(id, callback)
 }
 
-exports.updateAsset = function(tab, asset) {
-	stage.updateAsset(tab, asset)
-	editor.updateAsset(tab, asset)
+exports.updateAsset = function(id) {
+	// tbh I'm not sure why this seems to be working
+	// without a project.updateAsset function
+	stage.updateAsset(id)
+	editor.updateAsset(id)
     let callback = function(asset, sprite) {
         let parent = sprite.parent
         let index = parent.getChildIndex(sprite)
@@ -341,7 +348,7 @@ exports.updateAsset = function(tab, asset) {
         parent.addChildAt(newAsset, index)
     }
     for (let i = 0; i < hotbar.length; i++) {
-        hotbar[i].applyToAsset({tab, hash: asset}, callback)
+        hotbar[i].applyToAsset(id, callback)
     }
 }
 
@@ -364,11 +371,13 @@ exports.deleteAssetList = function(tab) {
 }
 
 exports.deleteAssetListLocal = function(tab) {
-	let keys = Object.keys(project.assets[tab])
+	let keys = Object.keys(project.assets)
     for (let i = 0; i < keys.length; i++) {
-        exports.deleteAsset(tab, keys[i])
+    	if (project.assets[keys[i]].tab === tab) {
+        	exports.deleteAsset(keys[i])
+        	project.deleteAsset(keys[i])
+    	}
     }
-    project.deleteAssetList(tab)
     editor.deleteAssetList(tab)
 }
 
@@ -515,7 +524,7 @@ function popOut() {
 	application.openPopout()
 }
 
-function applyToAsset(tab, asset, callback) {
+function applyToAsset(id, callback) {
     let characters = Object.keys(project.characters)
     for (let i = 0; i < characters.length; i++) {
     	let character = project.characters[characters[i]]
@@ -523,16 +532,16 @@ function applyToAsset(tab, asset, callback) {
 
     	for (let j = 0; j < topLevel.length; j++)
 	        for (let k = 0; k < character[topLevel[j]].length; k++)
-	        	if (character[topLevel[j]][k].tab === tab && (asset === null || character[topLevel[j]][k].hash === asset))
+	        	if (character[topLevel[j]][k].id === id)
 	        		callback(character[topLevel[j]][k], character[topLevel[j]], k)
 
 	    let emotes = Object.keys(character.emotes)
 	    for (let j = 0; j < emotes.length; j++) {
 	    	for (let k = 0; k < character.emotes[emotes[j]].eyes.length; k++)
-	    		if (character.emotes[emotes[j]].eyes[k].tab === tab && (asset === null || character.emotes[emotes[j]].eyes[k].hash === asset))
+	    		if (character.emotes[emotes[j]].eyes[k].id === id)
 	    			callback(character.emotes[emotes[j]].eyes[k], character.emotes[emotes[j]].eyes, k)
 	    	for (let k = 0; k < character.emotes[emotes[j]].mouth.length; k++)
-	    		if (character.emotes[emotes[j]].mouth[k].tab === tab && (asset === null || character.emotes[emotes[j]].mouth[k].hash === asset))
+	    		if (character.emotes[emotes[j]].mouth[k].id === putImageData)
 	    			callback(character.emotes[emotes[j]].mouth[k], character.emotes[emotes[j]].mouth, k)
 	    }
 

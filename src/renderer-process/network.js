@@ -49,15 +49,11 @@ exports.host = function() {
 		socket.emit('set slots', project.project.numCharacters)
 
 		// Send list of assets
-		let tabs = Object.keys(project.assets)
-		for (let i = 0; i < tabs.length; i++) {
-			let assetKeys = Object.keys(project.assets[tabs[i]])
-			for (let j = 0; j < assetKeys.length; j++) {
-				let asset = JSON.parse(JSON.stringify((project.assets[tabs[i]][assetKeys[j]])))
-				asset.tab = tabs[i]
-				asset.hash = assetKeys[j]
-				socket.emit('add asset', asset)
-			}
+		let keys = Object.keys(project.assets)
+		for (let i = 0; i < keys.length; i++) {
+			let asset = JSON.parse(JSON.stringify((project.assets[keys[i]])))
+			asset.id = keys[i]
+			socket.emit('add asset', asset)
 		}
 
 		// Add Application Listeners
@@ -144,13 +140,13 @@ exports.host = function() {
 			controller.resize()
 			socket.broadcast.emit('set slots', slots)
 		})
-		socket.on('move asset', (tab, asset, newTab) => {
-			controller.changeAssetTabLocal(tab, asset, newTab)
-			socket.broadcast.emit('move asset', tab, asset, newTab)
+		socket.on('move asset', (asset, newTab) => {
+			controller.changeAssetTabLocal(asset, newTab)
+			socket.broadcast.emit('move asset', asset, newTab)
 		})
-		socket.on('delete asset', (tab, asset) => {
-			controller.deleteAssetLocal(tab, asset)
-			socket.broadcast.emit('delete asset', tab, asset)
+		socket.on('delete asset', (asset) => {
+			controller.deleteAssetLocal(asset)
+			socket.broadcast.emit('delete asset', asset)
 		})
 
 		socket.on('disconnect', () => {
@@ -164,20 +160,20 @@ exports.host = function() {
 			}
 		})
 
-		socket.on('add asset', (asset) => {
-			if (!(project.assets[asset.tab] && project.assets[asset.tab][asset.hash])) {
+		socket.on('add asset', (id, asset) => {
+			if (!project.assets[id]) {
 				status.increment('Retrieving %x Asset%s')
 				let stream = ss.createStream()
-				fs.ensureDirSync(path.join(project.assetsPath, asset.tab))
-				ss(socket).emit('request asset', stream, asset)
+				fs.ensureDirSync(path.join(project.assetsPath, id.split(':')[0]))
+				ss(socket).emit('request asset', stream, id)
 				stream.on('end', () => {
-					controller.addAssetLocal(asset)
-					socket.broadcast.emit('add asset', asset)
+					controller.addAssetLocal(id, asset)
+					socket.broadcast.emit('add asset', id, asset)
 					if (status.decrement('Retrieving %x Asset%s')) {
 						status.log('Synced Assets!', 3, 1)
 					}
 				})
-				stream.pipe(fs.createWriteStream(path.join(project.assetsPath, asset.tab, asset.hash + '.png')))
+				stream.pipe(fs.createWriteStream(path.join(project.assetsPath, id.split(':')[0], id.split(':')[1] + '.png')))
 			}
 		})
 		ss(socket).on('request asset', requestAsset)
@@ -210,15 +206,11 @@ exports.connect = function() {
 	socket.on('connect', function() {
 		puppets = []
 		// Send list of assets
-		let tabs = Object.keys(project.assets)
-		for (let i = 0; i < tabs.length; i++) {
-			let assetKeys = Object.keys(project.assets[tabs[i]])
-			for (let j = 0; j < assetKeys.length; j++) {
-				let asset = JSON.parse(JSON.stringify((project.assets[tabs[i]][assetKeys[j]])))
-				asset.tab = tabs[i]
-				asset.hash = assetKeys[j]
-				socket.emit('add asset', asset)
-			}
+		let keys = Object.keys(project.assets)
+		for (let i = 0; i < keys.length; i++) {
+			let asset = JSON.parse(JSON.stringify((project.assets[keys[i]])))
+			asset.id = keys[i]
+			socket.emit('add asset', asset)
 		}
 	    socket.emit('add puppet', project.getPuppet())
 		controller.connect()
@@ -328,19 +320,19 @@ exports.connect = function() {
 	})
 	socket.on('move asset', controller.changeAssetTabLocal)
 	socket.on('delete asset', controller.deleteAssetLocal)
-	socket.on('add asset', (asset) => {
-		if (!(project.assets[asset.tab] && project.assets[asset.tab][asset.hash])) {
+	socket.on('add asset', (id, asset) => {
+		if (!project.assets[id]) {
 			status.increment('Retrieving %x Asset%s')
 			let stream = ss.createStream()
-			fs.ensureDirSync(path.join(project.assetsPath, asset.tab))
-			ss(socket).emit('request asset', stream, asset)
+			fs.ensureDirSync(path.join(project.assetsPath, id.split(':')[0]))
+			ss(socket).emit('request asset', stream, id)
 			stream.on('end', () => {
 				controller.addAssetLocal(asset)
 				if (status.decrement('Retrieving %x Asset%s')) {
 					status.log('Synced Assets!', 3, 1)
 				}
 			})
-			stream.pipe(fs.createWriteStream(path.join(project.assetsPath, asset.tab, asset.hash + '.png')))
+			stream.pipe(fs.createWriteStream(path.join(project.assetsPath, id.split(':')[0], id.split(':')[1] + '.png')))
 		}
 	})
 	ss(socket).on('request asset', requestAsset)
@@ -366,6 +358,6 @@ function stopNetworking() {
 	status.log('Disconnected.', 2, 1)
 }
 
-function requestAsset(stream, asset) {
-	fs.createReadStream(path.join(project.assetsPath, asset.location)).pipe(stream)
+function requestAsset(stream, id) {
+	fs.createReadStream(path.join(project.assetsPath, project.assets[id].location)).pipe(stream)
 }

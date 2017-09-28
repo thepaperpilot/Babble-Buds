@@ -12,7 +12,6 @@ const path = require('path')
 module.exports = {
     // project: {},
     // characters: {},
-    // assets: {},
     // charactersPath: "",
     // assetsPath: "",
     // numCharacters: 0,
@@ -74,10 +73,55 @@ module.exports = {
 			}
 			this.oldCharacters = JSON.stringify(this.characters)
 			this.actor = proj.actor
-			for (let i = 0; i < proj.assets.length; i++) {
-				this.assets[proj.assets[i].name] = fs.readJsonSync(path.join(this.assetsPath, proj.assets[i].location))
+
+			// Old version of assets
+			if (proj.assets) {
+				this.assets = {}
+				this.project.numAssets = 0
+				let oldAssets = {}
+				for (let i = 0; i < proj.assets.length; i++) {
+					let assets = fs.readJsonSync(path.join(this.assetsPath, proj.assets[i].location))
+					oldAssets[proj.assets[i].name] = {}
+					let keys = Object.keys(assets)
+					for (let j = 0; j < keys.length; j++) {
+						assets[keys[j]].tab = proj.assets[i].name
+						this.assets[settings.settings.uuid + ":" + this.project.numAssets] = assets[keys[j]]
+						oldAssets[proj.assets[i].name][keys[j]] = this.project.numAssets
+						this.project.numAssets++
+					}
+				}
+
+				// Update asset references in puppets
+				let keys = Object.keys(this.characters)
+				for (let i = 0; i < keys.length; i++) {
+					let character = this.characters[keys[i]]
+			    	let topLevel = ["body", "head", "hat", "props"]
+
+			    	for (let j = 0; j < topLevel.length; j++)
+				        for (let k = 0; k < character[topLevel[j]].length; k++) {
+				        	character[topLevel[j]][k].id = settings.settings.uuid + ":" + oldAssets[character[topLevel[j]][k].tab][character[topLevel[j]][k].hash]
+				        	delete character[topLevel[j]][k].tab
+				        	delete character[topLevel[j]][k].hash
+				        }
+
+				    let emotes = Object.keys(character.emotes)
+				    for (let j = 0; j < emotes.length; j++) {
+				    	for (let k = 0; k < character.emotes[emotes[j]].eyes.length; k++) {
+				    		character.emotes[emotes[j]].eyes[k].id = settings.settings.uuid + ":" + oldAssets[character.emotes[emotes[j]].eyes[k].tab][character.emotes[emotes[j]].eyes[k].hash]
+				        	delete character.emotes[emotes[j]].eyes[k].tab
+				        	delete character.emotes[emotes[j]].eyes[k].hash
+				    	}
+				    	for (let k = 0; k < character.emotes[emotes[j]].mouth.length; k++) {
+				    		character.emotes[emotes[j]].mouth[k].id = settings.settings.uuid + ":" + oldAssets[character.emotes[emotes[j]].mouth[k].tab][character.emotes[emotes[j]].mouth[k].hash]
+				        	delete character.emotes[emotes[j]].mouth[k].tab
+				        	delete character.emotes[emotes[j]].mouth[k].hash
+				    	}
+				    }
+				}
+				delete this.project.assets
+			} else {
+				this.assets = fs.readJsonSync(path.join(this.assetsPath, "assets.json"))
 			}
-			this.oldAssets = JSON.stringify(this.assets)
 
 			for (let i = 0; i < this.project.characters.length; i++) {
 				fs.removeSync(path.join(this.assetsPath, '..', 'thumbnails', 'new-' + this.project.characters[i].id + '.png'))
@@ -92,8 +136,7 @@ module.exports = {
 	},
 	saveProject: function() {
 		fs.writeFile(settings.settings.openProject, JSON.stringify(this.project, null, 4))
-		for (let i = 0; i < this.project.assets.length; i++)
-			fs.writeFile(path.join(settings.settings.openProject, '..', 'assets', this.project.assets[i].location), JSON.stringify(this.assets[this.project.assets[i].name], null, 4))
+		fs.writeFile(path.join(settings.settings.openProject, '..', 'assets', 'assets.json'), JSON.stringify(this.assets, null, 4))
 		for (let i = 0; i < this.project.characters.length; i++) {
 			fs.writeFile(path.join(settings.settings.openProject, '..', 'characters', this.project.characters[i].location), JSON.stringify(this.characters[this.project.characters[i].id], null, 4))
 			if (fs.existsSync(path.join(this.assetsPath, '..', 'thumbnails', 'new-' + this.project.characters[i].id + '.png')))
@@ -158,25 +201,14 @@ module.exports = {
 
 		return true
 	},
-	addAsset: function(asset) {
-		this.addAssetList(asset.tab)
-		let newAsset = JSON.parse(JSON.stringify(asset))
-		delete newAsset.tab
-		delete newAsset.hash
-		this.assets[asset.tab][asset.hash] = newAsset
+	getNewAssetId: function() {
+		return this.project.numAssets++
 	},
-	addAssetList: function(tab) {
-		if (this.assets[tab]) return
-		this.project.assets.push({"name": tab, "location": tab + '.json'})
-		this.assets[tab] = {}
+	addAsset: function(id, asset) {
+		this.assets[id] = asset
 	},
-	moveAsset: function(tab, asset, newTab) {
-		this.assets[newTab][asset] = this.assets[tab][asset]
-		this.assets[newTab][asset].location = path.join(newTab, asset + '.png')
-		delete this.assets[tab][asset]
-	},
-	renameAsset: function(tab, hash, name) {
-		this.assets[tab][hash].name = name
+	renameAsset: function(id, name) {
+		this.assets[id].name = name
 	},
 	renameAssetList: function(tab, newTab) {
 		this.assets[newTab] = this.assets[tab]
@@ -185,12 +217,8 @@ module.exports = {
 		list.name = newTab
 		list.location = newTab + ".json"
 	},
-    deleteAsset: function(tab, asset) {
-        delete this.assets[tab][asset]
-    },
-    deleteAssetList: function(tab) {
-        delete this.assets[tab]
-        this.project.assets.splice(this.project.assets.indexOf(this.project.assets.find((x) => x.name === tab)), 1)
+    deleteAsset: function(id) {
+        delete this.assets[id]
     },
     saveCharacter: function(character) {
         let char = null

@@ -12,7 +12,6 @@
             "location": "1.json"
         }
     ],
-    "assets": [],
     "hotbar": [
         1,
         0,
@@ -29,5 +28,6 @@
         "position": 1,
         "facingLeft": false,
         "emote": 0
-    }
+    },
+    "numAssets": 0
 }

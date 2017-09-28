@@ -12,36 +12,6 @@
             "location": "1.json"
         }
     ],
-    "assets": [
-        {
-            "name": "eyebrows",
-            "location": "eyebrows.json"
-        },
-        {
-            "name": "eyes",
-            "location": "eyes.json"
-        },
-        {
-            "name": "mouths",
-            "location": "mouths.json"
-        },
-        {
-            "name": "shirts",
-            "location": "shirts.json"
-        },
-        {
-            "name": "skin",
-            "location": "skin.json"
-        },
-        {
-            "name": "glasses",
-            "location": "glasses.json"
-        },
-        {
-            "name": "hats",
-            "location": "hats.json"
-        }
-    ],
     "hotbar": [
         1,
         0,
@@ -58,5 +28,6 @@
         "position": 3,
         "facingLeft": false,
         "emote": 0
-    }
+    },
+    "numAssets": 22
 }

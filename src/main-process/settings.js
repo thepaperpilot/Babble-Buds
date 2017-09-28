@@ -4,6 +4,7 @@ const util = require('./util')
 const fs = require('fs-extra')
 
 const path = require('path')
+const uuid = require('uuid')
 
 const filepath = path.join(app.getPath('userData'), 'settings.json')
 
@@ -11,7 +12,8 @@ module.exports = exports = {
 	settings: {
 		openProject: "",
 		recentProjects: [],
-		view: "hybrid"
+		view: "hybrid",
+		uuid: uuid.v4()
 	},
 	save: function() {
 		fs.writeJson(filepath, this.settings)
@@ -24,7 +26,7 @@ module.exports = exports = {
 					return;
 				}
 				
-				this.settings = obj
+				Object.assign(this.settings, obj)
 				if (!this.settings.recentProjects) {
 					this.settings.recentProjects = []
 				}

@@ -454,21 +454,19 @@ function startAutocrop() {
 	document.getElementById('autocrop-btn').style.display = 'none'
 	let assetsList = document.getElementById('autocrop-assets')
 	let assets = []
-	let tabs = Object.keys(project.assets)
-	for (let i = 0; i < tabs.length; i++) {
-		let hashes = Object.keys(project.assets[tabs[i]])
-		for (let j = 0; j < hashes.length; j++) {
+	let keys = Object.keys(project.assets)
+	for (let i = 0; i < keys.length; i++) {
+		for (let j = 0; j < keys.length; j++) {
 			assets.push({
-				name: project.assets[tabs[i]][hashes[j]].name,
-				location: project.assets[tabs[i]][hashes[j]].location,
-				tab: tabs[i],
-				hash: hashes[j]
+				name: project.assets[keys[i]].name,
+				location: project.assets[keys[i]].location,
+				id: keys[i]
 			})
 			let asset = document.createElement('div')
-			asset.id = 'autocrop-' + tabs[i] + '-' + hashes[j]
+			asset.id = 'autocrop-' + keys[i]
 			asset.className = "asset"
-			asset.style.backgroundImage = 'url(' + path.join(project.assetsPath, project.assets[tabs[i]][hashes[j]].location + '?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
-			asset.innerHTML = '<div class="desc">' + project.assets[tabs[i]][hashes[j]].name + '</div>'
+			asset.style.backgroundImage = 'url(' + path.join(project.assetsPath, project.assets[keys[i]].location + '?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
+			asset.innerHTML = '<div class="desc">' + project.assets[keys[i]].name + '</div>'
 			assetsList.appendChild(asset)
 		}
 	}
@@ -479,7 +477,7 @@ function startAutocrop() {
 	let trimmer = require('./../lib/trim_canvas')
 	let errors = 0
 	for (let i = 0; i < assets.length; i++) {
-		document.getElementById('autocrop-' + assets[i].tab + '-' + assets[i].hash).className = "asset available selected"
+		document.getElementById('autocrop-' + assets[i].id).className = "asset available selected"
 		document.getElementById('autocrop-progress').innerHTML = 'Autocropping asset ' + (i + 1) + ' of ' + assets.length
 	    let canvas = document.createElement('canvas')
 	    let ctx = canvas.getContext("2d")
@@ -493,15 +491,15 @@ function startAutocrop() {
 		try {
 			let data = trimmer.trimCanvas(canvas)
 			let newAsset = data.canvas.toDataURL().replace(/^data:image\/\w+;base64,/, "")
-			document.getElementById('autocrop-' + assets[i].tab + '-' + assets[i].hash).className = "asset available"
+			document.getElementById('autocrop-' + assets[i].id).className = "asset available"
 			fs.writeFileSync(path.join(project.assetsPath, assets[i].location), new Buffer(newAsset, 'base64'))
-			document.getElementById('autocrop-' + assets[i].tab + '-' + assets[i].hash).style.backgroundImage = 'url(' + path.join(project.assetsPath, assets[i].location + '?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
+			document.getElementById('autocrop-' + assets[i].id).style.backgroundImage = 'url(' + path.join(project.assetsPath, assets[i].location + '?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
 			// Move assets to compensate for cropping
-			controller.moveAsset(assets[i].tab, assets[i].hash, data.x, data.y)
+			controller.moveAsset(assets[i].id, data.x, data.y)
 		} catch (e) {
 			// Failed to crop asset, probably because the image has no non-transparent pixels
 			console.error(e)
-			document.getElementById('autocrop-' + assets[i].tab + '-' + assets[i].hash).className = "asset"
+			document.getElementById('autocrop-' + assets[i].id).className = "asset"
 			errors++
 		}
 		canvas.remove()
