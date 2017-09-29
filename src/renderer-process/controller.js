@@ -71,10 +71,14 @@ exports.setPuppetLocal = function(index, shiftKey, ctrlKey) {
 	project.actor.id = project.project.hotbar[index]
 
 	// Update Server
-	network.emit('set puppet', puppet.id, project.getPuppet())
+	let tempPuppet = JSON.parse(JSON.stringify(character))
+	tempPuppet.position = project.actor.position
+	tempPuppet.emote = project.actor.emote
+	tempPuppet.facingLeft = project.actor.facingLeft
+	network.emit('set puppet', puppet.id, tempPuppet)
 
 	// Update popout
-	if (popout) popout.webContents.send('set puppet', puppet.id, project.project.hotbar[index])
+	if (popout) popout.webContents.send('set puppet', puppet.id, tempPuppet)
 }
 
 exports.setEmoteLocal = function(emote) {
@@ -222,6 +226,20 @@ exports.setupPopout = function() {
 	exports.emitPopout('setup', project, project.getPuppet(), puppet.id)
 }
 
+exports.initPopout = function() {
+	let puppets = network.getPuppets()
+	let characters = []
+	for (let i = 0; i < puppets.length; i++) {
+		let puppet = stage.getPuppet(puppets[i].id)
+		let character = puppets[i]
+		character.position = puppet.position
+		character.facingLeft = puppet.facingLeft
+		character.emote = puppet.emote
+		characters.push(character)
+	}
+	exports.emitPopout('init', characters)
+}
+
 exports.resize = function() {
 	stage.resize()
 	editor.resize()
@@ -244,7 +262,6 @@ exports.addAsset = function(id, asset) {
 
 exports.addAssetLocal = function(id, asset) {
 	project.addAsset(id, asset)
-	console.log(id, asset, asset.id)
 	stage.addAsset(id, asset, () => {
 		let location = asset.location
 	    location = [location.slice(0, location.length - 4), '.thumb', location.slice(location.length - 4)].join('')
@@ -265,13 +282,13 @@ exports.addAssetLocal = function(id, asset) {
 		        canvas.getContext('2d').putImageData(data, 0, 0)
 		        fs.writeFile(path.join(project.assetsPath, location), new Buffer(canvas.toDataURL().replace(/^data:image\/\w+;base64,/, ""), 'base64'), (err) => {
 		            if (err) console.log(err)
-		            editor.addAsset(asset.id)
+		            editor.addAsset(id)
 		        })
 		    }
 		    image.src = path.join(project.assetsPath, asset.location)
 		} else editor.addAsset(id)
-		exports.updateAsset(id)
-		exports.emitPopout('add asset', asset)
+		exports.emitPopout('add asset', id, asset)
+		exports.reloadAsset(id)
 	})
 }
 
@@ -333,11 +350,10 @@ exports.moveAsset = function(id, x, y) {
 	applyToAsset(id, callback)
 }
 
-exports.updateAsset = function(id) {
-	// tbh I'm not sure why this seems to be working
-	// without a project.updateAsset function
+exports.reloadAsset = function(id) {
 	stage.updateAsset(id)
 	editor.updateAsset(id)
+	exports.emitPopout('reload asset', id, project.assets[id])
     let callback = function(asset, sprite) {
         let parent = sprite.parent
         let index = parent.getChildIndex(sprite)
@@ -350,6 +366,18 @@ exports.updateAsset = function(id) {
     for (let i = 0; i < hotbar.length; i++) {
         hotbar[i].applyToAsset(id, callback)
     }
+}
+
+exports.updateAsset = function(id) {
+	project.assets[id].version++
+	exports.updateAssetLocal(id, project.assets[id])
+	network.emit('add asset', id, project.assets[id])
+}
+
+exports.updateAssetLocal = function(id, asset) {
+	project.addAsset(id, asset)
+	editor.reloadAsset(id)
+	exports.reloadAsset(id)
 }
 
 exports.reloadAssets = function(callback) {
@@ -510,6 +538,7 @@ function popOut() {
 		alwaysOnTop: project.project.alwaysOnTop
 	})
 	popoutWindowState.manage(popout)
+	// popout.openDevTools()
 	// popout.setIgnoreMouseEvents(true)
 	popout.on('close', () => {
 		application.closePopout()

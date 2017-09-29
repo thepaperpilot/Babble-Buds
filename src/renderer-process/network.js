@@ -52,8 +52,7 @@ exports.host = function() {
 		let keys = Object.keys(project.assets)
 		for (let i = 0; i < keys.length; i++) {
 			let asset = JSON.parse(JSON.stringify((project.assets[keys[i]])))
-			asset.id = keys[i]
-			socket.emit('add asset', asset)
+			socket.emit('add asset', keys[i], asset)
 		}
 
 		// Add Application Listeners
@@ -161,13 +160,16 @@ exports.host = function() {
 		})
 
 		socket.on('add asset', (id, asset) => {
-			if (!project.assets[id]) {
+			if (!project.assets[id] || asset.version > project.assets[id].version) {
 				status.increment('Retrieving %x Asset%s')
 				let stream = ss.createStream()
 				fs.ensureDirSync(path.join(project.assetsPath, id.split(':')[0]))
 				ss(socket).emit('request asset', stream, id)
 				stream.on('end', () => {
-					controller.addAssetLocal(id, asset)
+					if (project.assets[id])
+						controller.updateAssetLocal(id, asset)
+					else
+						controller.addAssetLocal(id, asset)
 					socket.broadcast.emit('add asset', id, asset)
 					if (status.decrement('Retrieving %x Asset%s')) {
 						status.log('Synced Assets!', 3, 1)
@@ -209,8 +211,7 @@ exports.connect = function() {
 		let keys = Object.keys(project.assets)
 		for (let i = 0; i < keys.length; i++) {
 			let asset = JSON.parse(JSON.stringify((project.assets[keys[i]])))
-			asset.id = keys[i]
-			socket.emit('add asset', asset)
+			socket.emit('add asset', keys[i], asset)
 		}
 	    socket.emit('add puppet', project.getPuppet())
 		controller.connect()
@@ -321,13 +322,16 @@ exports.connect = function() {
 	socket.on('move asset', controller.changeAssetTabLocal)
 	socket.on('delete asset', controller.deleteAssetLocal)
 	socket.on('add asset', (id, asset) => {
-		if (!project.assets[id]) {
+		if (!project.assets[id] || asset.version > project.assets[id].version) {
 			status.increment('Retrieving %x Asset%s')
 			let stream = ss.createStream()
 			fs.ensureDirSync(path.join(project.assetsPath, id.split(':')[0]))
 			ss(socket).emit('request asset', stream, id)
 			stream.on('end', () => {
-				controller.addAssetLocal(asset)
+				if (project.assets[id])
+					controller.updateAssetLocal(id, asset)
+				else
+					controller.addAssetLocal(id, asset)
 				if (status.decrement('Retrieving %x Asset%s')) {
 					status.log('Synced Assets!', 3, 1)
 				}

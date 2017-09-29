@@ -4,6 +4,7 @@ const babble = require('babble.js')
 
 let stage
 let puppet
+let assets
 
 function loadPuppets() {
     // Add Puppet
@@ -43,7 +44,7 @@ electron.ipcRenderer.on('resize', () => {
 electron.ipcRenderer.on('setup', (event, project, mypuppet, id) => {
     puppet = mypuppet
     puppet.id = id
-    stage = new babble.Stage('screen', project.project, project.assets, project.assetsPath, loadPuppets)
+    stage = new babble.Stage('screen', project.project, assets = project.assets, project.assetsPath, loadPuppets)
     window.addEventListener("resize", () => {stage.resize()})
 })
 
@@ -91,8 +92,12 @@ electron.ipcRenderer.on('jiggle', (event, id) => {
 electron.ipcRenderer.on('remove puppet', (event, id) => {
     stage.removePuppet(id)
 })
-electron.ipcRenderer.on('add asset', (event, asset) => {
-    stage.addAsset(asset)
+electron.ipcRenderer.on('add asset', (event, id, asset) => {
+    stage.addAsset(id, asset)
+})
+electron.ipcRenderer.on('reload asset', (event, id, asset) => {
+    assets[id] = asset
+    stage.updateAsset(id)
 })
 
 electron.ipcRenderer.on('togglePopout', () => {

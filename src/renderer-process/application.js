@@ -67,7 +67,7 @@ exports.init = function() {
 		window.onkeyup({"keyCode": key})
 	})
 	electron.ipcRenderer.on('init', () => {
-		controller.emitPopout('init', network.getPuppets())
+		controller.initPopout()
 	})
 	electron.ipcRenderer.on('save', () => {
 		project.saveProject()

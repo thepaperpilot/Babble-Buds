@@ -231,10 +231,10 @@ exports.addAsset = function(id) {
     if (asset.type === "animated") {
         let location = asset.location
         location = [location.slice(0, location.length - 4), '.thumb', location.slice(location.length - 4)].join('')
-        assetDraggable.src = path.join(project.assetsPath, location)
+        assetDraggable.src = path.join(project.assetsPath, location + "?random=" + new Date().getTime())
         assetElement.className += ' animated'
     } else 
-        assetDraggable.src = path.join(project.assetsPath, asset.location)
+        assetDraggable.src = path.join(project.assetsPath, asset.location + "?random=" + new Date().getTime())
     assetDraggable.addEventListener('mousedown', mouseDown, false)
 }
 
@@ -327,6 +327,21 @@ exports.deleteAsset = function(id) {
 
 exports.updateAsset = function(id) {
     stage.updateAsset(id)
+}
+
+exports.reloadAsset = function(id) {
+    let asset = project.assets[id]
+    let assetDraggable = document.getElementById('tab ' + asset.tab).getElementsByClassName(id)[0].childNodes[0]
+    if (asset.type === "animated") {
+        let location = asset.location
+        location = [location.slice(0, location.length - 4), '.thumb', location.slice(location.length - 4)].join('')
+        assetDraggable.src = path.join(project.assetsPath, location + "?random=" + new Date().getTime())
+    } else 
+        assetDraggable.src = path.join(project.assetsPath, asset.location + "?random=" + new Date().getTime()) 
+
+    if (document.getElementById('asset-name').asset === id) {
+        openAssetSettings(id)
+    }
 }
 
 exports.clear = function() {
@@ -764,36 +779,40 @@ function mouseDown(e) {
         e.preventDefault()
         window.addEventListener('mousemove', moveAsset, true);
     } else {
-        document.getElementById('assets').style.display = 'none'
-        document.getElementById('asset editor').style.display = ''
-        document.getElementById('asset selected').style.display = ''
-        let asset = project.assets[e.target.asset]
-        document.getElementById('asset-type').value = asset.type ? asset.type.charAt(0).toUpperCase() + asset.type.slice(1) : "Sprite"
-        if (asset.type === "animated") {
-            let location = asset.location
-            location = [location.slice(0, location.length - 4), '.thumb', location.slice(location.length - 4)].join('')
-            document.getElementById('asset selected').style.background = 'url(' + path.join(project.assetsPath, location + "?random=" + new Date().getTime()).replace(/\\/g, '/') + ') center no-repeat/contain'
-            document.getElementById('animated-settings').style.display = ''
-            document.getElementById('animated-spritesheet').src = path.join(project.assetsPath, asset.location + "?random=" + new Date().getTime()).replace(/\\/g, '/')
-            document.getElementById('animation-rows').value = asset.rows
-            document.getElementById('animation-cols').value = asset.cols
-            document.getElementById('animation-numFrames').value = asset.numFrames
-            document.getElementById('animation-delay').value = asset.delay
-            document.getElementById('animation-rows').asset = e.target.asset
-            document.getElementById('animation-cols').asset = e.target.asset
-            document.getElementById('animation-numFrames').asset = e.target.asset
-            document.getElementById('animation-delay').asset = e.target.asset
-        } else {
-            document.getElementById('asset selected').style.background = 'url(' + path.join(project.assetsPath, asset.location + "?random=" + new Date().getTime()).replace(/\\/g, '/') + ') center no-repeat/contain'
-            document.getElementById('animated-settings').style.display = 'none'
-        }
-        document.getElementById('asset-tab').value = asset.tab
-        document.getElementById('asset-name').value = asset.name
-        document.getElementById('asset-tab').asset = e.target.asset
-        document.getElementById('asset-name').asset = e.target.asset
-        document.getElementById('asset-type').asset = e.target.asset
-        document.getElementById('delete-asset').asset = e.target.asset
+        openAssetSettings(e.target.asset)
     }
+}
+
+function openAssetSettings(id) {
+    document.getElementById('assets').style.display = 'none'
+    document.getElementById('asset editor').style.display = ''
+    document.getElementById('asset selected').style.display = ''
+    let asset = project.assets[id]
+    document.getElementById('asset-type').value = asset.type ? asset.type.charAt(0).toUpperCase() + asset.type.slice(1) : "Sprite"
+    if (asset.type === "animated") {
+        let location = asset.location
+        location = [location.slice(0, location.length - 4), '.thumb', location.slice(location.length - 4)].join('')
+        document.getElementById('asset selected').style.background = 'url(' + path.join(project.assetsPath, location + "?random=" + new Date().getTime()).replace(/\\/g, '/') + ') center no-repeat/contain'
+        document.getElementById('animated-settings').style.display = ''
+        document.getElementById('animated-spritesheet').src = path.join(project.assetsPath, asset.location + "?random=" + new Date().getTime()).replace(/\\/g, '/')
+        document.getElementById('animation-rows').value = asset.rows
+        document.getElementById('animation-cols').value = asset.cols
+        document.getElementById('animation-numFrames').value = asset.numFrames
+        document.getElementById('animation-delay').value = asset.delay
+        document.getElementById('animation-rows').asset = id
+        document.getElementById('animation-cols').asset = id
+        document.getElementById('animation-numFrames').asset = id
+        document.getElementById('animation-delay').asset = id
+    } else {
+        document.getElementById('asset selected').style.background = 'url(' + path.join(project.assetsPath, asset.location + "?random=" + new Date().getTime()).replace(/\\/g, '/') + ') center no-repeat/contain'
+        document.getElementById('animated-settings').style.display = 'none'
+    }
+    document.getElementById('asset-tab').value = asset.tab
+    document.getElementById('asset-name').value = asset.name
+    document.getElementById('asset-tab').asset = id
+    document.getElementById('asset-name').asset = id
+    document.getElementById('asset-type').asset = id
+    document.getElementById('delete-asset').asset = id
 }
 
 function moveAsset(e) {
@@ -1254,6 +1273,7 @@ function addAsset() {
             controller.addAsset(settings.settings.uuid + ":" + id, {
                 "tab": tab, 
                 "type": "sprite", 
+                "version": 0,
                 "name": name, 
                 "location": path.join(settings.settings.uuid, id + '.png')
             })
@@ -1317,6 +1337,7 @@ function addAnimatedAsset() {
             controller.addAsset(settings.settings.uuid + ":" + id, {
                 "tab": tab, 
                 "type": "animated", 
+                "version": 0,
                 "name": name, 
                 "rows": rows, 
                 "cols": cols, 
@@ -1385,6 +1406,7 @@ function importAssets() {
                             let assets = {}
                             for (let j = 0; j < keys.length; j++) {
                                 list[keys[j]].tab = this.valueOf()
+                                list[keys[j]].version = 0
                                 assets["invalid:" + numAssets] = list[keys[j]]
                                 this.numAssets++
                             }

@@ -40,15 +40,10 @@ server.sockets.on('connection', function(socket) {
 	socket.emit('set slots', numCharacters)
 
 	// Send list of assets
-	var tabs = Object.keys(assets)
-	for (var i = 0; i < tabs.length; i++) {
-		var assetKeys = Object.keys(assets[tabs[i]])
-		for (var j = 0; j < assetKeys.length; j++) {
-			var asset = JSON.parse(JSON.stringify(assets[tabs[i]][assetKeys[j]]))
-			asset.tab = tabs[i]
-			asset.hash = assetKeys[j]
-			socket.emit('add asset', asset)
-		}
+	let keys = Object.keys(assets)
+	for (let i = 0; i < keys.length; i++) {
+		let asset = JSON.parse(JSON.stringify((assets[keys[i]])))
+		socket.emit('add asset', keys[i], asset)
 	}
 
 	// Add Application Listeners
@@ -154,27 +149,24 @@ server.sockets.on('connection', function(socket) {
 		}
 	})
 
-	socket.on('add asset', (asset) => {
+	socket.on('add asset', (id, asset) => {
 		if (logLevel >= 3) console.log("Received new asset " + JSON.stringify(asset) + " from " + socket.id)
-		if (!(assets[asset.tab] && assets[asset.tab][asset.hash])) {
+		if (!assets[id] || asset.version > assets[id].version) {
 			if (logLevel >= 3) console.log("Downloading new asset from " + socket.id)
 			assetsDownloading++
 			var stream = ss.createStream()
-			fs.ensureDirSync(path.join(assetsPath, asset.tab))
-			ss(socket).emit('request asset', stream, asset)
+			fs.ensureDirSync(path.join(assetsPath, id.split(':')[0]))
+			ss(socket).emit('request asset', stream, id)
 			stream.on('end', () => {
-				if (!assets[asset.tab]) {
-					assets[asset.tab] = {}
-				}
-				assets[asset.tab][asset.hash] = {"name": asset.name, "location": path.join(asset.tab, asset.hash + '.png')}
-				socket.broadcast.emit('add asset', asset)
+				assets[id] = asset
+				socket.broadcast.emit('add asset', id, asset)
 				assetsDownloading--
 			})
-			stream.pipe(fs.createWriteStream(path.join(assetsPath, asset.tab, asset.hash + '.png')))
+			stream.pipe(fs.createWriteStream(path.join(assetsPath, id.split(':')[0], id.split(':')[1] + '.png')))
 		}
 	})
-	ss(socket).on('request asset', function(stream, asset) {
-		fs.createReadStream(path.join(assetsPath, asset.location)).pipe(stream)
+	ss(socket).on('request asset', function(stream, id) {
+		fs.createReadStream(path.join(assetsPath, assets[id].location)).pipe(stream)
 	})
 })
 

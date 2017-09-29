@@ -85,6 +85,7 @@ module.exports = {
 					let keys = Object.keys(assets)
 					for (let j = 0; j < keys.length; j++) {
 						assets[keys[j]].tab = proj.assets[i].name
+						assets[keys[j]].version = 0
 						this.assets[settings.settings.uuid + ":" + this.project.numAssets] = assets[keys[j]]
 						oldAssets[proj.assets[i].name][keys[j]] = this.project.numAssets
 						this.project.numAssets++
@@ -122,6 +123,7 @@ module.exports = {
 			} else {
 				this.assets = fs.readJsonSync(path.join(this.assetsPath, "assets.json"))
 			}
+			this.oldAssets = JSON.stringify(this.assets)
 
 			for (let i = 0; i < this.project.characters.length; i++) {
 				fs.removeSync(path.join(this.assetsPath, '..', 'thumbnails', 'new-' + this.project.characters[i].id + '.png'))
@@ -219,6 +221,9 @@ module.exports = {
 	},
     deleteAsset: function(id) {
         delete this.assets[id]
+    },
+    updateAsset: function(id, version) {
+    	this.assets[id].version = version
     },
     saveCharacter: function(character) {
         let char = null
