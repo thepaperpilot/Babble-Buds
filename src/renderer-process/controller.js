@@ -375,9 +375,11 @@ exports.updateAsset = function(id) {
 }
 
 exports.updateAssetLocal = function(id, asset) {
-	project.addAsset(id, asset)
-	editor.reloadAsset(id)
-	exports.reloadAsset(id)
+	stage.addAsset(id, asset, () => {
+		project.addAsset(id, asset)
+		editor.reloadAsset(id)
+		exports.reloadAsset(id)
+	})
 }
 
 exports.reloadAssets = function(callback) {
@@ -570,7 +572,7 @@ function applyToAsset(id, callback) {
 	    		if (character.emotes[emotes[j]].eyes[k].id === id)
 	    			callback(character.emotes[emotes[j]].eyes[k], character.emotes[emotes[j]].eyes, k)
 	    	for (let k = 0; k < character.emotes[emotes[j]].mouth.length; k++)
-	    		if (character.emotes[emotes[j]].mouth[k].id === putImageData)
+	    		if (character.emotes[emotes[j]].mouth[k].id === id)
 	    			callback(character.emotes[emotes[j]].mouth[k], character.emotes[emotes[j]].mouth, k)
 	    }
 

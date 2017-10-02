@@ -129,7 +129,7 @@ exports.init = function() {
     }
     if (assetTabs[0])
         document.getElementById('tab ' + assetTabs[0]).style.display = ''
-    reloadPuppetList()
+    exports.reloadPuppetList()
 
     // DOM listeners
     document.getElementById('editor-save').addEventListener('click', savePuppet)
@@ -187,6 +187,7 @@ exports.init = function() {
     document.getElementById('animation-cols').addEventListener('change', animationCols)
     document.getElementById('animation-numFrames').addEventListener('change', animationFrames)
     document.getElementById('animation-delay').addEventListener('change', animationDelay)
+    document.getElementById('replace-asset').addEventListener('click', replaceAsset)
     document.getElementById('delete-asset').addEventListener('click', deleteAsset)
     document.getElementById('asset tabs').addEventListener('change', changeAssetTabs)
     document.getElementById('asset search').addEventListener('keyup', updateAssetSearch)
@@ -331,7 +332,7 @@ exports.updateAsset = function(id) {
 
 exports.reloadAsset = function(id) {
     let asset = project.assets[id]
-    let assetDraggable = document.getElementById('tab ' + asset.tab).getElementsByClassName(id)[0].childNodes[0]
+    let assetDraggable = document.getElementById('tab ' + asset.tab).getElementsByClassName(id)[0].childNodes[1]
     if (asset.type === "animated") {
         let location = asset.location
         location = [location.slice(0, location.length - 4), '.thumb', location.slice(location.length - 4)].join('')
@@ -464,6 +465,25 @@ exports.keyDown = function(e) {
         cut()
     }
     return false
+}
+
+exports.reloadPuppetList = function() {
+    let charList = document.getElementById('char open list')
+    charList.innerHTML = ''
+    let characters = Object.keys(project.characters)
+    for (let j = 0; j < characters.length; j++) {
+        let selector = document.createElement('div')
+        selector.id = project.characters[characters[j]].name.toLowerCase()
+        selector.className = "char"
+        if (fs.existsSync(path.join(project.assetsPath, '..', 'thumbnails', 'new-' + characters[j] + '.png')))
+            selector.style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', 'new-' + characters[j] + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
+        else
+            selector.style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', characters[j] + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
+        charList.appendChild(selector)
+        selector.innerHTML = '<div class="desc">' + project.characters[characters[j]].name + '</div>'
+        selector.charid = characters[j]
+        selector.addEventListener('click', openPuppet)
+    }
 }
 
 function drawBox(box) {
@@ -812,6 +832,7 @@ function openAssetSettings(id) {
     document.getElementById('asset-tab').asset = id
     document.getElementById('asset-name').asset = id
     document.getElementById('asset-type').asset = id
+    document.getElementById('replace-asset').asset = id
     document.getElementById('delete-asset').asset = id
 }
 
@@ -852,7 +873,7 @@ function savePuppet() {
     controller.saveCharacter(JSON.parse(oldcharacter), stage.renderer.view.toDataURL() === empty.toDataURL() ? null : stage.getThumbnail(), emoteThumbnails)
     document.getElementById("editor-save").classList.remove("highlight")
     status.log('Puppet saved!', 1, 1)
-    reloadPuppetList()
+    exports.reloadPuppetList()
 }
 
 function newPuppet() {
@@ -1051,25 +1072,6 @@ function openPuppetPanel() {
         toggleEditorScreen(true)
         panel.style.display = 'none'
         document.getElementById('editor-open').classList.remove('open-tab')
-    }
-}
-
-function reloadPuppetList() {
-    let charList = document.getElementById('char open list')
-    charList.innerHTML = ''
-    let characters = Object.keys(project.characters)
-    for (let j = 0; j < characters.length; j++) {
-        let selector = document.createElement('div')
-        selector.id = project.characters[characters[j]].name.toLowerCase()
-        selector.className = "char"
-        if (fs.existsSync(path.join(project.assetsPath, '..', 'thumbnails', 'new-' + characters[j] + '.png')))
-            selector.style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', 'new-' + characters[j] + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
-        else
-            selector.style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', characters[j] + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
-        charList.appendChild(selector)
-        selector.innerHTML = '<div class="desc">' + project.characters[characters[j]].name + '</div>'
-        selector.charid = characters[j]
-        selector.addEventListener('click', openPuppet)
     }
 }
 
@@ -1651,6 +1653,24 @@ function recreateThumb(asset) {
         })
     }
     image.src = path.join(project.assetsPath, asset.location)
+}
+
+function replaceAsset(e) {
+    remote.dialog.showOpenDialog(remote.BrowserWindow.getFocusedWindow(), {
+        title: 'Replace Asset',
+        filters: [
+          {name: 'Image', extensions: ['png']}
+        ],
+        properties: [
+          'openFile'
+        ] 
+    }, (filepaths) => {
+        if (!filepaths) return
+        let asset = project.assets[e.target.asset]
+        let file = fs.readFileSync(filepaths[0])
+        fs.writeFileSync(path.join(project.assetsPath, asset.location), file)
+        controller.updateAsset(e.target.asset)
+    })
 }
 
 function deleteAsset(e) {
