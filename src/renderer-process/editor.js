@@ -1334,6 +1334,8 @@ function addAnimatedAsset() {
             fs.ensureDirSync(path.join(project.assetsPath, settings.settings.uuid))
             fs.writeFileSync(path.join(project.assetsPath, settings.settings.uuid, id + '.png'), file)
             if (numFrames === 1) fs.copySync(path.join(project.assetsPath, settings.settings.uuid, id + '.png'), path.join(project.assetsPath, settings.settings.uuid, id + '.thumb.png'))
+            else if (fs.existsSync(path.join(project.assetsPath, settings.settings.uuid, id + '.thumb.png')))
+                fs.remove(path.join(project.assetsPath, settings.settings.uuid, id + '.thumb.png'))
             controller.addAsset(settings.settings.uuid + ":" + id, {
                 "tab": tab, 
                 "type": "animated", 
