@@ -29,7 +29,7 @@ exports.init = function() {
 	application.init()
 	network.init()
 	stage = new babble.Stage('screen', project.project, project.assets, project.assetsPath, loadPuppets, status)
-	window.addEventListener("resize", () => {stage.resize()})
+	window.addEventListener("resize", () => {stage.resize(); stage.resize()})
 
 	popoutWindowState = windowStateKeeper({
 		file: "popout-window.json",
