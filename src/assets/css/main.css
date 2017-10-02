@@ -119,11 +119,11 @@ body > .editormain {
 }
 
 .s2 {
-	width: 192px;
+	width: 200px;
 }
 
 .s4 {
-	width: calc(50% - 100px);
+	width: calc(50% - 104px);
 }
 
 .s5 {
@@ -131,7 +131,7 @@ body > .editormain {
 }
 
 .s8 {
-	width: calc(100% - 192px);
+	width: calc(100% - 200px);
     background-color: #2a323d;
     padding: 8px;
     margin-left: -8px;
@@ -557,9 +557,10 @@ body > .editormain {
 }
 
 .button-tab {
-    padding: 11px 32px 11px 16px;
+    padding: 11px 40px 11px 16px;
     margin: 0;
     margin-top: 4px;
+    margin-right: -8px;
 }
 
 .dropdown {
