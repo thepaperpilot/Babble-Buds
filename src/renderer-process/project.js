@@ -213,11 +213,11 @@ module.exports = {
 		this.assets[id].name = name
 	},
 	renameAssetList: function(tab, newTab) {
-		this.assets[newTab] = this.assets[tab]
-		delete this.assets[tab]
-		let list = this.project.assets.find((x) => x.name === tab)
-		list.name = newTab
-		list.location = newTab + ".json"
+		let keys = Object.keys(this.assets)
+		for (let i = 0; i < keys.length; i++) {
+			if (this.assets[keys[i]].tab === tab)
+				this.assets[keys[i]].tab = newTab
+		}
 	},
     deleteAsset: function(id) {
         delete this.assets[id]
