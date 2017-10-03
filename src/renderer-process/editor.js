@@ -312,15 +312,15 @@ exports.deleteAsset = function(id) {
     let topLevel = ["body", "head", "hat", "props"]
     for (let j = 0; j < topLevel.length; j++)
         for (let k = 0; k < character[topLevel[j]].length; k++)
-            if (character[topLevel[j]][k].asset === id)
+            if (character[topLevel[j]][k].id === id)
                 character[topLevel[j]].splice(k, 1)
     let emotes = Object.keys(character.emotes)
     for (let j = 0; j < emotes.length; j++) {
         for (let k = 0; k < character.emotes[emotes[j]].eyes.length; k++) 
-            if (character.emotes[emotes[j]].eyes[k].asset === id)
+            if (character.emotes[emotes[j]].eyes[k].id === id)
                 character.emotes[emotes[j]].eyes.splice(k, 1)
         for (let k = 0; k < character.emotes[emotes[j]].mouth.length; k++)
-            if (character.emotes[emotes[j]].mouth[k].asset === id)
+            if (character.emotes[emotes[j]].mouth[k].id === id)
                 character.emotes[emotes[j]].mouth.splice(k, 1)
     }
     exports.setPuppet(character, true)
