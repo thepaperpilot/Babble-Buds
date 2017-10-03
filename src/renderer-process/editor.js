@@ -1674,7 +1674,16 @@ function replaceAsset(e) {
 }
 
 function deleteAsset(e) {
-    controller.deleteAsset(e.target.asset)
+    if (remote.dialog.showMessageBox({
+        "type": "question",
+        "buttons": ["Delete Asset", "Cancel"],
+        "defaultId": 1,
+        "title": "Delete Asset?",
+        "message": "Are you sure you want to delete this asset?",
+        "detail": "This action cannot be undone.",
+        "cancelId": 1
+    }) === 0)
+        controller.deleteAsset(e.target.asset)
 }
 
 function changeAssetTabs(e) {
