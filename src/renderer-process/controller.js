@@ -323,20 +323,17 @@ exports.deleteAssetLocal = function(id) {
 exports.renameAssetList = function(tab, newTab) {
 	exports.renameAssetListLocal(tab, newTab)
 	network.emit('rename asset list', tab, newTab)
+	let keys = Object.keys(project.assets)
+    for (let i = 0; i < keys.length; i++) {
+    	if (project.assets[keys[i]].tab === tab) {
+        	project.assets[keys[i]].tab = newTab
+        	exports.updateAsset(keys[i])
+    	}
+    }
 }
 
 exports.renameAssetListLocal = function(tab, newTab) {
 	editor.renameAssetList(tab, newTab)
-	project.renameAssetList(tab, newTab)
-
-	let keys = Object.keys(project.assets)
-	let callback = (asset) => {
-		asset.tab = newTab
-	}
-    for (let i = 0; i < keys.length; i++) {
-    	if (project.assets[keys[i]].tab === tab)
-        	applyToAsset(keys[i], callback)
-    }
 }
 
 exports.moveAsset = function(id, x, y) {

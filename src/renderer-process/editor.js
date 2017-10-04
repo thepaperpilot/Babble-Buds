@@ -294,6 +294,7 @@ exports.renameAssetList = function(tab, newTab) {
     document.getElementById('asset-tab option ' + tab).id = 'asset-tab option ' + newTab
     document.getElementById('asset-list-name').tab = newTab
     document.getElementById('delete-asset-list').tab = newTab
+    assetTabs[assetTabs.indexOf(tab)] = newTab
 }
 
 exports.deleteAssetList = function(tab) {

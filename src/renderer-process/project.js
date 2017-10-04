@@ -209,18 +209,8 @@ module.exports = {
 	addAsset: function(id, asset) {
 		this.assets[id] = asset
 	},
-	renameAssetList: function(tab, newTab) {
-		let keys = Object.keys(this.assets)
-		for (let i = 0; i < keys.length; i++) {
-			if (this.assets[keys[i]].tab === tab)
-				this.assets[keys[i]].tab = newTab
-		}
-	},
     deleteAsset: function(id) {
         delete this.assets[id]
-    },
-    updateAsset: function(id, version) {
-    	this.assets[id].version = version
     },
     saveCharacter: function(character) {
         let char = null
