@@ -58,6 +58,7 @@ exports.init = function() {
 	document.getElementById('host').addEventListener('click', network.host)
 	document.getElementById('connect').addEventListener('click', network.connect)
 	document.getElementById('autocrop-btn').addEventListener('click', startAutocrop)
+	document.getElementById('prune-btn').addEventListener('click', pruneAssets)
 
 	// Handle input events from popout
 	electron.ipcRenderer.on('keyDown', (event, key) => {
@@ -92,6 +93,9 @@ exports.init = function() {
 	})
 	electron.ipcRenderer.on('reload', () => {
 		controller.reloadAssets()
+	})
+	electron.ipcRenderer.on('prune', () => {
+		openPrune()
 	})
 	electron.ipcRenderer.on('loaded', controller.setupPopout)
 
@@ -507,4 +511,14 @@ function startAutocrop() {
 	document.getElementById('autocrop-progress').innerHTML = (errors === 0 ? 'Finished autocropping' : 'Finished with ' + errors + ' failed assets')
 	// Reload everything
 	controller.reloadAssets()
+}
+
+function openPrune() {
+	exports.toggleModal("#prune")
+	document.getElementById('prune-btn').disabled = network.isNetworking()
+}
+
+function pruneAssets() {
+	exports.toggleModal()
+	controller.pruneAssets()
 }

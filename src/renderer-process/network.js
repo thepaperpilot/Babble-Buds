@@ -10,7 +10,7 @@ const path = require('path')
 
 // Vars
 let project
-let server
+let server = null
 let puppets = []
 let numPuppets = 1
 let puppetsToAdd = []
@@ -350,6 +350,10 @@ exports.emit = function(...args) {
 
 exports.getPuppets = function() {
 	return puppets
+}
+
+exports.isNetworking = function() {
+	return server !== null
 }
 
 function stopNetworking() {

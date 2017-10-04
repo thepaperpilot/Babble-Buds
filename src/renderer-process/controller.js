@@ -388,6 +388,22 @@ exports.reloadAssets = function(callback) {
 	})
 }
 
+exports.pruneAssets = function() {
+	let keys = Object.keys(project.assets)
+	let foundAsset = false
+	let callback = function() {
+        foundAsset = true
+    }
+    for (let i = 0; i < keys.length; i++) {
+        if (keys[i].split(':')[0] !== settings.settings.uuid) {
+        	applyToAsset(keys[i], callback)
+        	if (!foundAsset) {
+        		exports.deleteAsset(keys[i])
+        	} else foundAsset = false
+        }
+    }
+}
+
 exports.reloadPuppets = function() {
 	stage.reloadPuppets()
 }

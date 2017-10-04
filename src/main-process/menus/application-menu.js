@@ -152,6 +152,12 @@ const template = [
           // How can I ensure users are aware of that?
           focusedWindow.webContents.send('reload')
         }
+      },
+      {
+        label: 'Prune Downloaded Assets',
+        click (item, focusedWindow) {
+          focusedWindow.webContents.send('prune')
+        }
       }
     ]
   },
