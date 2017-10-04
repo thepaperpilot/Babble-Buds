@@ -123,7 +123,6 @@ module.exports = {
 			} else {
 				this.assets = fs.readJsonSync(path.join(this.assetsPath, "assets.json"))
 			}
-			this.oldAssets = JSON.stringify(this.assets)
 
 			for (let i = 0; i < this.project.characters.length; i++) {
 				fs.removeSync(path.join(this.assetsPath, '..', 'thumbnails', 'new-' + this.project.characters[i].id + '.png'))
@@ -138,7 +137,6 @@ module.exports = {
 	},
 	saveProject: function() {
 		fs.writeFile(settings.settings.openProject, JSON.stringify(this.project, null, 4))
-		fs.writeFile(path.join(settings.settings.openProject, '..', 'assets', 'assets.json'), JSON.stringify(this.assets, null, 4))
 		for (let i = 0; i < this.project.characters.length; i++) {
 			fs.writeFile(path.join(settings.settings.openProject, '..', 'characters', this.project.characters[i].location), JSON.stringify(this.characters[this.project.characters[i].id], null, 4))
 			if (fs.existsSync(path.join(this.assetsPath, '..', 'thumbnails', 'new-' + this.project.characters[i].id + '.png')))
@@ -153,7 +151,6 @@ module.exports = {
 		}
 		settings.addRecentProject(controller.getThumbnail())
 		this.oldProject = JSON.stringify(this.project)
-		this.oldAssets = JSON.stringify(this.assets)
 		this.oldCharacters = JSON.stringify(this.characters)
 	},
 	closeProject: function() {
@@ -163,7 +160,6 @@ module.exports = {
 		this.assets = null
 		this.characters = null
 		this.oldProject = 'null'
-		this.oldAssets = 'null'
 		this.oldCharacters = 'null'
 		settings.settings.openProject = ""
 		settings.save()
@@ -177,7 +173,6 @@ module.exports = {
 		if (!editor.checkChanges())
         	return false
 		let changes = this.oldProject !== JSON.stringify(this.project)
-		changes = changes || this.oldAssets !== JSON.stringify(this.assets)
 		changes = changes || this.oldCharacters !== JSON.stringify(this.characters)
 		if (changes) {
 			let response = dialog.showMessageBox({
@@ -208,9 +203,11 @@ module.exports = {
 	},
 	addAsset: function(id, asset) {
 		this.assets[id] = asset
+		fs.writeFile(path.join(settings.settings.openProject, '..', 'assets', 'assets.json'), JSON.stringify(this.assets, null, 4))
 	},
     deleteAsset: function(id) {
         delete this.assets[id]
+        fs.writeFile(path.join(settings.settings.openProject, '..', 'assets', 'assets.json'), JSON.stringify(this.assets, null, 4))
     },
     saveCharacter: function(character) {
         let char = null
