@@ -237,6 +237,9 @@ exports.addAsset = function(id) {
         assetElement.className += ' animated'
     } else 
         assetDraggable.src = path.join(project.assetsPath, asset.location + "?random=" + new Date().getTime())
+    if (id.split(':')[0] !== settings.settings.uuid) {
+        assetElement.className += ' downloaded'
+    }
     assetDraggable.addEventListener('mousedown', mouseDown, false)
 }
 
@@ -334,6 +337,7 @@ exports.updateAsset = function(id) {
 exports.reloadAsset = function(id) {
     let asset = project.assets[id]
     let assetElement = document.getElementById('tab ' + asset.tab).getElementsByClassName(id)[0]
+    assetElement.className = 'asset ' + id
     assetElement.id = asset.name.toLowerCase()
     assetElement.childNodes[0].innerHTML = asset.name
     let assetDraggable = assetElement.childNodes[1]
@@ -341,8 +345,12 @@ exports.reloadAsset = function(id) {
         let location = asset.location
         location = [location.slice(0, location.length - 4), '.thumb', location.slice(location.length - 4)].join('')
         assetDraggable.src = path.join(project.assetsPath, location + "?random=" + new Date().getTime())
+        assetElement.className += ' animated'
     } else 
         assetDraggable.src = path.join(project.assetsPath, asset.location + "?random=" + new Date().getTime()) 
+    if (id.split(':')[0] !== settings.settings.uuid) {
+        assetElement.className += ' downloaded'
+    }
 
     if (document.getElementById('asset-name').asset === id) {
         openAssetSettings(id)

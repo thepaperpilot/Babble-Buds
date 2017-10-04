@@ -664,4 +664,24 @@ body > .editormain {
     background-size: contain;
     background-image: url(../icons/animated.png);
     pointer-events: none;
+    background-color: #888;
+    border-radius: 10px;
+}
+
+.downloaded::before {
+	position: absolute;
+    right: 2px;
+    top: 2px;
+    content: "";
+    width: 20px;
+    height: 20px;
+    background-size: contain;
+    background-image: url(../icons/downloaded.png);
+    pointer-events: none;
+    background-color: #888;
+    border-radius: 10px;
+}
+
+.animated.downloaded::after {
+	top: 24px;
 }
