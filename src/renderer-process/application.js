@@ -460,19 +460,18 @@ function startAutocrop() {
 	let assets = []
 	let keys = Object.keys(project.assets)
 	for (let i = 0; i < keys.length; i++) {
-		for (let j = 0; j < keys.length; j++) {
-			assets.push({
-				name: project.assets[keys[i]].name,
-				location: project.assets[keys[i]].location,
-				id: keys[i]
-			})
-			let asset = document.createElement('div')
-			asset.id = 'autocrop-' + keys[i]
-			asset.className = "asset"
-			asset.style.backgroundImage = 'url(' + path.join(project.assetsPath, project.assets[keys[i]].location + '?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
-			asset.innerHTML = '<div class="desc">' + project.assets[keys[i]].name + '</div>'
-			assetsList.appendChild(asset)
-		}
+		if (project.assets[keys[i]].type === "animated") continue
+		assets.push({
+			name: project.assets[keys[i]].name,
+			location: project.assets[keys[i]].location,
+			id: keys[i]
+		})
+		let asset = document.createElement('div')
+		asset.id = 'autocrop-' + keys[i]
+		asset.className = "asset"
+		asset.style.backgroundImage = 'url(' + path.join(project.assetsPath, project.assets[keys[i]].location + '?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
+		asset.innerHTML = '<div class="desc">' + project.assets[keys[i]].name + '</div>'
+		assetsList.appendChild(asset)
 	}
 	document.getElementById('autocrop-progress').innerHTML = 'Autocropping asset 0 of ' + assets.length
 
@@ -500,6 +499,7 @@ function startAutocrop() {
 			document.getElementById('autocrop-' + assets[i].id).style.backgroundImage = 'url(' + path.join(project.assetsPath, assets[i].location + '?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
 			// Move assets to compensate for cropping
 			controller.moveAsset(assets[i].id, data.x, data.y)
+			controller.updateAsset(assets[i].id)
 		} catch (e) {
 			// Failed to crop asset, probably because the image has no non-transparent pixels
 			console.error(e)
@@ -509,8 +509,6 @@ function startAutocrop() {
 		canvas.remove()
 	}
 	document.getElementById('autocrop-progress').innerHTML = (errors === 0 ? 'Finished autocropping' : 'Finished with ' + errors + ' failed assets')
-	// Reload everything
-	controller.reloadAssets()
 }
 
 function openPrune() {
