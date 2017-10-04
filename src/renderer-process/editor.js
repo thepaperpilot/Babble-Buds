@@ -333,7 +333,10 @@ exports.updateAsset = function(id) {
 
 exports.reloadAsset = function(id) {
     let asset = project.assets[id]
-    let assetDraggable = document.getElementById('tab ' + asset.tab).getElementsByClassName(id)[0].childNodes[1]
+    let assetElement = document.getElementById('tab ' + asset.tab).getElementsByClassName(id)[0]
+    assetElement.id = asset.name.toLowerCase()
+    assetElement.childNodes[0].innerHTML = asset.name
+    let assetDraggable = assetElement.childNodes[1]
     if (asset.type === "animated") {
         let location = asset.location
         location = [location.slice(0, location.length - 4), '.thumb', location.slice(location.length - 4)].join('')
@@ -1569,11 +1572,9 @@ function migrateAsset(e) {
 }
 
 function renameAsset(e) {
-    project.renameAsset(e.target.asset, e.target.value)
-    document.getElementById('asset selected').getElementsByClassName('desc')[0].innerHTML = e.target.value
-    let list = document.getElementById('tab ' + e.target.tab)
-    list.getElementsByClassName(e.target.asset)[0].getElementsByClassName('desc')[0].innerHTML = e.target.value
-    list.getElementsByClassName(e.target.asset)[0].id = e.target.value.toLowerCase()
+    let asset = project.assets[e.target.asset]
+    asset.name = e.target.value
+    controller.updateAsset(e.target.asset)
 }
 
 function assetType(e) {

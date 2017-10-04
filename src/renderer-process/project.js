@@ -209,9 +209,6 @@ module.exports = {
 	addAsset: function(id, asset) {
 		this.assets[id] = asset
 	},
-	renameAsset: function(id, name) {
-		this.assets[id].name = name
-	},
 	renameAssetList: function(tab, newTab) {
 		let keys = Object.keys(this.assets)
 		for (let i = 0; i < keys.length; i++) {
