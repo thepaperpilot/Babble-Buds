@@ -809,6 +809,8 @@ function openAssetSettings(id) {
     document.getElementById('asset editor').style.display = ''
     document.getElementById('asset selected').style.display = ''
     let asset = project.assets[id]
+    let enabled = settings.settings.uuid === id.split(':')[0]
+    let elements = ['asset-tab', 'asset-name', 'asset-type', 'replace-asset', 'delete-asset']
     document.getElementById('asset-type').value = asset.type ? asset.type.charAt(0).toUpperCase() + asset.type.slice(1) : "Sprite"
     if (asset.type === "animated") {
         let location = asset.location
@@ -820,22 +822,18 @@ function openAssetSettings(id) {
         document.getElementById('animation-cols').value = asset.cols
         document.getElementById('animation-numFrames').value = asset.numFrames
         document.getElementById('animation-delay').value = asset.delay
-        document.getElementById('animation-rows').asset = id
-        document.getElementById('animation-cols').asset = id
-        document.getElementById('animation-numFrames').asset = id
-        document.getElementById('animation-delay').asset = id
+        elements = elements.concat(['animation-rows', 'animation-cols', 'animation-numFrames', 'animation-delay'])
     } else {
         document.getElementById('asset selected').style.background = 'url(' + path.join(project.assetsPath, asset.location + "?random=" + new Date().getTime()).replace(/\\/g, '/') + ') center no-repeat/contain'
         document.getElementById('animated-settings').style.display = 'none'
     }
     document.getElementById('asset-tab').value = asset.tab
     document.getElementById('asset-name').value = asset.name
-    document.getElementById('asset-tab').asset = id
-    document.getElementById('asset-name').asset = id
-    document.getElementById('asset-type').asset = id
     document.getElementById('duplicate-asset').asset = id
-    document.getElementById('replace-asset').asset = id
-    document.getElementById('delete-asset').asset = id
+    for (let i = 0; i < elements.length; i++) {
+        document.getElementById(elements[i]).asset = id
+        document.getElementById(elements[i]).disabled = !enabled
+    }
 }
 
 function moveAsset(e) {
