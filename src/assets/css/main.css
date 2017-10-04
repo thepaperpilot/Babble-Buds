@@ -64,6 +64,10 @@ select option {
 	color: #000;
 }
 
+button:disabled, select:disabled, input:disabled {
+	color: #888;
+}
+
 .container {
 	background-color: #242a33;
 	box-shadow: 2px 2px 3px #222;
