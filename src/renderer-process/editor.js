@@ -40,6 +40,7 @@ let history = [] // used for undoing stuff
 let reverseHistory = [] // used for redoing stuff
 let importing  // used for importing assets from other projects
 let alwaysDifferent // If this is a new puppet, it should always be considered different from its initial value
+let networking = false // whether or not we're currently using online features. Disables deleting downloaded assets while true
 
 exports.init = function() {
     project = remote.getGlobal('project').project
@@ -498,6 +499,16 @@ exports.reloadPuppetList = function() {
     }
 }
 
+exports.connect = function() {
+    networking = true
+    document.getElementById('delete-asset').disabled = document.getElementById('delete-asset').asset.split(':')[0] !== settings.settings.uuid
+}
+
+exports.disconnect = function() {
+    networking = false
+    document.getElementById('delete-asset').disabled = false
+}
+
 function drawBox(box) {
     box.lineStyle(4, 0x242a33)
     box.moveTo(stage.screen.clientWidth / 2 - selected.width / 2 * scale - 12, stage.screen.clientHeight + selected.height / 2 * scale + 12)
@@ -821,7 +832,7 @@ function openAssetSettings(id) {
     document.getElementById('asset selected').style.display = ''
     let asset = project.assets[id]
     let enabled = settings.settings.uuid === id.split(':')[0]
-    let elements = ['asset-tab', 'asset-name', 'asset-type', 'replace-asset', 'delete-asset']
+    let elements = ['asset-tab', 'asset-name', 'asset-type', 'replace-asset']
     document.getElementById('asset-type').value = asset.type ? asset.type.charAt(0).toUpperCase() + asset.type.slice(1) : "Sprite"
     if (asset.type === "animated") {
         let location = asset.location
@@ -841,6 +852,8 @@ function openAssetSettings(id) {
     document.getElementById('asset-tab').value = asset.tab
     document.getElementById('asset-name').value = asset.name
     document.getElementById('duplicate-asset').asset = id
+    document.getElementById('delete-asset').asset = id
+    document.getElementById('delete-asset').disabled = !enabled && networking
     for (let i = 0; i < elements.length; i++) {
         document.getElementById(elements[i]).asset = id
         document.getElementById(elements[i]).disabled = !enabled

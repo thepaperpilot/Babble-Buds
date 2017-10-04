@@ -441,17 +441,20 @@ exports.saveCharacter = function(character, thumbnail, emoteThumbnails) {
 
 exports.connect = function() {
     stage.clearPuppets()
+    editor.connect()
 	if (popout) popout.webContents.send('connect')
 }
 
 exports.disconnect = function() {
 	stage.clearPuppets()
+	editor.disconnect()
 	puppet = stage.addPuppet(project.getPuppet(), 1)
 	character = JSON.parse(JSON.stringify(project.getPuppet()))
 	if (popout) popout.webContents.send('disconnect', project.getPuppet())
 }
 
 exports.host = function() {
+	editor.connect()
 	if (popout) {
 		popout.webContents.send('connect')
 		popout.webContents.send('assign puppet', project.getPuppet())
