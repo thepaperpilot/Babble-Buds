@@ -187,6 +187,7 @@ exports.init = function() {
     document.getElementById('animation-cols').addEventListener('change', animationCols)
     document.getElementById('animation-numFrames').addEventListener('change', animationFrames)
     document.getElementById('animation-delay').addEventListener('change', animationDelay)
+    document.getElementById('duplicate-asset').addEventListener('click', duplicateAsset)
     document.getElementById('replace-asset').addEventListener('click', replaceAsset)
     document.getElementById('delete-asset').addEventListener('click', deleteAsset)
     document.getElementById('asset tabs').addEventListener('change', changeAssetTabs)
@@ -832,6 +833,7 @@ function openAssetSettings(id) {
     document.getElementById('asset-tab').asset = id
     document.getElementById('asset-name').asset = id
     document.getElementById('asset-type').asset = id
+    document.getElementById('duplicate-asset').asset = id
     document.getElementById('replace-asset').asset = id
     document.getElementById('delete-asset').asset = id
 }
@@ -1653,6 +1655,16 @@ function recreateThumb(asset) {
         })
     }
     image.src = path.join(project.assetsPath, asset.location)
+}
+
+function duplicateAsset(e) {
+    let newAsset = JSON.parse(JSON.stringify(project.assets[e.target.asset]))
+    let id = project.getNewAssetId()
+    newAsset.location = path.join(settings.settings.uuid, id + ".png")
+    newAsset.version = 0
+    fs.copySync(path.join(project.assetsPath, project.assets[e.target.asset].location), path.join(project.assetsPath, newAsset.location))
+    controller.addAsset(settings.settings.uuid + ":" + id, newAsset)
+    selectAsset()
 }
 
 function replaceAsset(e) {
