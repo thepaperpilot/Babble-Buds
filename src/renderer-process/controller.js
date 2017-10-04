@@ -298,13 +298,10 @@ exports.changeAssetTab = function(id, newTab) {
 }
 
 exports.changeAssetTabLocal = function(id, newTab) {
-    status.log("Moving asset to " + newTab + " list...", 2, 1)
 	editor.migrateAsset(id, newTab)
-	project.moveAsset(id, newTab)
 	applyToAsset(id, (asset) => {
 		asset.tab = newTab
 	})
-    status.log("Moved asset!", 1, 1)
 }
 
 exports.deleteAsset = function(id) {
