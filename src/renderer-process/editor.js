@@ -886,6 +886,7 @@ function savePuppet() {
     empty.height = stage.renderer.view.height
     for (let i = 0; i < emotes.length; i++) {
         puppet.changeEmote(i)
+        stage.renderer.render(stage.stage)
         if (stage.renderer.view.toDataURL() !== empty.toDataURL())
             emoteThumbnails[i] = stage.getThumbnail()
     }
@@ -895,6 +896,7 @@ function savePuppet() {
     puppet.props.visible = true
 
     // Save character
+    stage.renderer.render(stage.stage)
     controller.saveCharacter(JSON.parse(oldcharacter), stage.renderer.view.toDataURL() === empty.toDataURL() ? null : stage.getThumbnail(), emoteThumbnails)
     document.getElementById("editor-save").classList.remove("highlight")
     status.log('Puppet saved!', 1, 1)
