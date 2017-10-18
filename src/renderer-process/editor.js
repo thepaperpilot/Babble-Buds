@@ -1245,7 +1245,7 @@ function setLayer(e) {
 }
 
 function selectEmote(e) {
-    puppet.changeEmote(e.target.value)
+    puppet.changeEmote(character.emotes.findIndex((emote) => emote.name === e.target.value))
 }
 
 function nameChange(e) {
