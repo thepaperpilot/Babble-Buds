@@ -502,7 +502,8 @@ exports.reloadPuppetList = function() {
 
 exports.connect = function() {
     networking = true
-    document.getElementById('delete-asset').disabled = document.getElementById('delete-asset').asset.split(':')[0] !== settings.settings.uuid
+    if (document.getElementById('delete-asset').asset)
+        document.getElementById('delete-asset').disabled = document.getElementById('delete-asset').asset.split(':')[0] !== settings.settings.uuid
 }
 
 exports.disconnect = function() {
