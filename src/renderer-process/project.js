@@ -6,6 +6,7 @@ const settings = remote.require('./main-process/settings')
 const menu = remote.require('./main-process/menus/application-menu')
 const controller = require('./controller')
 const editor = require('./editor')
+const status = require('./status')
 
 const path = require('path')
 
@@ -26,6 +27,7 @@ module.exports = {
 				return
 			}
 
+			status.init()
 			remote.getGlobal('project').project = this
 			this.project = proj
 			this.oldProject = JSON.stringify(proj)
@@ -86,6 +88,8 @@ module.exports = {
 					for (let j = 0; j < keys.length; j++) {
 						assets[keys[j]].tab = proj.assets[i].name
 						assets[keys[j]].version = 0
+						assets[keys[j]].panning = []
+						assets[keys[j]].location = assets[keys[j]].location.replace(/\\/g, '/')
 						this.assets[settings.settings.uuid + ":" + this.project.numAssets] = assets[keys[j]]
 						oldAssets[proj.assets[i].name][keys[j]] = this.project.numAssets
 						this.project.numAssets++
@@ -122,6 +126,16 @@ module.exports = {
 				delete this.project.assets
 			} else {
 				this.assets = fs.readJsonSync(path.join(this.assetsPath, "assets.json"))
+
+				// Cross compatibility - windows will handle UNIX-style paths, but not vice versa
+				let keys = Object.keys(this.assets)
+				for (let i = 0; i < keys.length; i++) {
+					this.assets[keys[i]].location = this.assets[keys[i]].location.replace(/\\/g, '/')
+					if (!this.assets[keys[i]].version) {
+						this.assets[keys[i]].version =  0
+						this.assets[keys[i]].panning = []
+					}
+				}
 			}
 
 			for (let i = 0; i < this.project.characters.length; i++) {

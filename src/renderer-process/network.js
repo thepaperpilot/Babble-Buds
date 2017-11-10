@@ -166,10 +166,7 @@ exports.host = function() {
 				fs.ensureDirSync(path.join(project.assetsPath, id.split(':')[0]))
 				ss(socket).emit('request asset', stream, id)
 				stream.on('end', () => {
-					if (project.assets[id])
-						controller.updateAssetLocal(id, asset)
-					else
-						controller.addAssetLocal(id, asset)
+					controller.addAssetLocal(id, asset)
 					socket.broadcast.emit('add asset', id, asset)
 					if (status.decrement('Retrieving %x Asset%s')) {
 						status.log('Synced Assets!', 3, 1)
@@ -328,10 +325,7 @@ exports.connect = function() {
 			fs.ensureDirSync(path.join(project.assetsPath, id.split(':')[0]))
 			ss(socket).emit('request asset', stream, id)
 			stream.on('end', () => {
-				if (project.assets[id])
-					controller.updateAssetLocal(id, asset)
-				else
-					controller.addAssetLocal(id, asset)
+				controller.addAssetLocal(id, asset)
 				if (status.decrement('Retrieving %x Asset%s')) {
 					status.log('Synced Assets!', 3, 1)
 				}

@@ -89,7 +89,8 @@ button:disabled, select:disabled, input:disabled {
 
 body > .editormain {
 	height: calc( 100% - 110px );
-	z-index: -1;
+	z-index: 0;
+    width: calc( 100% - 450px );
 }
 
 .main {
@@ -111,6 +112,7 @@ body > .editormain {
 	right: 0;
 	top: 0;
 	width: 400px;
+	z-index: 1;
 }
 
 .s2, .s4, .s5, .s8 {

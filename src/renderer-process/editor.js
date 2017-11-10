@@ -41,12 +41,13 @@ let reverseHistory = [] // used for redoing stuff
 let importing  // used for importing assets from other projects
 let alwaysDifferent // If this is a new puppet, it should always be considered different from its initial value
 let networking = false // whether or not we're currently using online features. Disables deleting downloaded assets while true
+let topLevel = ["body", "head", "hat", "props"] // The top level containers in puppets
 
 exports.init = function() {
     project = remote.getGlobal('project').project
     // Create some basic objects
     stage = new babble.Stage('editor-screen', {'numCharacters': 1, 'puppetScale': 1, 'assets': project.project.assets}, project.assets, project.assetsPath, null, status)
-    window.addEventListener("resize", () => {stage.resize()})
+    window.addEventListener("resize", () => {stage.resize(); stage.resize();})
     stage.stage.interactive = true
     stage.stage.on('mousedown', editorMousedown)
     stage.stage.on('mousemove', editorMousemove)
@@ -61,6 +62,20 @@ exports.init = function() {
         puppet.container.x = (this.screen.clientWidth / scale) / 2
         selected = null
         if (selectedGui) this.stage.removeChild(selectedGui)
+    }
+    stage.updateAsset = function(id) {
+        let stage = this
+        let callback = function(asset, sprite, layer, emote) {
+            let parent = sprite.parent
+            let index = parent.getChildIndex(sprite)
+            clickableAssets.splice(clickableAssets.indexOf(sprite), 1)
+            let newAsset = stage.getAsset(asset, layer, emote)
+            parent.removeChildAt(index)
+            parent.addChildAt(newAsset, index)
+        }
+        for (let i = 0; i < this.puppets.length; i++) {
+            this.puppets[i].applyToAsset(id, callback)
+        }
     }
     stage.getAsset = function(asset, layer, emote) {
         let sprite
@@ -258,6 +273,8 @@ exports.reloadAssets = function() {
     let tabsList = document.getElementById('asset tabs')
     let keys = Object.keys(project.assets)
     assetTabs = []
+    tabs.innerHTML = ''
+    tabsList.innerHTML = ''
     for (let i = 0; i < keys.length; i++) {
         if (assetTabs.indexOf(project.assets[keys[i]].tab) === -1) {
             assetTabs.push(project.assets[keys[i]].tab)
@@ -315,7 +332,6 @@ exports.deleteAsset = function(id) {
     }
     let element = document.getElementById('tab ' + asset.tab).getElementsByClassName(id)[0]
     element.parentNode.removeChild(element)
-    let topLevel = ["body", "head", "hat", "props"]
     for (let j = 0; j < topLevel.length; j++)
         for (let k = 0; k < character[topLevel[j]].length; k++)
             if (character[topLevel[j]][k].id === id)
@@ -334,6 +350,28 @@ exports.deleteAsset = function(id) {
 
 exports.updateAsset = function(id) {
     stage.updateAsset(id)
+}
+
+exports.moveAsset = function(id, x, y) {
+    let callback = (asset) => {
+        asset.x += Math.cos(asset.rotation) * x - Math.sin(asset.rotation) * y
+        asset.y += Math.cos(asset.rotation) * y + Math.sin(asset.rotation) * x
+    }
+
+    for (let j = 0; j < topLevel.length; j++)
+        for (let k = 0; k < character[topLevel[j]].length; k++)
+            if (character[topLevel[j]][k].id === id)
+                callback(character[topLevel[j]][k], character[topLevel[j]], k)
+
+    let emotes = Object.keys(character.emotes)
+    for (let j = 0; j < emotes.length; j++) {
+        for (let k = 0; k < character.emotes[emotes[j]].eyes.length; k++)
+            if (character.emotes[emotes[j]].eyes[k].id === id)
+                callback(character.emotes[emotes[j]].eyes[k], character.emotes[emotes[j]].eyes, k)
+        for (let k = 0; k < character.emotes[emotes[j]].mouth.length; k++)
+            if (character.emotes[emotes[j]].mouth[k].id === id)
+                callback(character.emotes[emotes[j]].mouth[k], character.emotes[emotes[j]].mouth, k)
+    }
 }
 
 exports.reloadAsset = function(id) {
@@ -591,7 +629,7 @@ function editorMousedown(e) {
         let dy = centerY - e.data.global.y;
         let dist = dx*dx + dy*dy; //Distance is not squared as it's not needed.
         if((dist < distance || distance == -1) && clickableAssets[i].visible && clickableAssets[i].containsPoint(e.data.global) && clickableAssets[i].layer === layer) {
-            if ((layer === 'mouth' || layer === 'eyes') && clickableAssets[i].emote !== (puppet.emote || 'default'))
+            if ((layer === 'mouth' || layer === 'eyes') && clickableAssets[i].emote != (puppet.emote || 'default'))
                 continue
             closest = clickableAssets[i];
             distance = dist;
@@ -953,7 +991,6 @@ function importPuppet() {
                         if (err) console.log(err)
                         let puppet = document.createElement('div')                    
                         if (project.assets) {
-                            let topLevel = ["body", "head", "hat", "props"]
                             for (let j = 0; j < topLevel.length; j++)
                                 for (let k = 0; k < character[topLevel[j]].length; k++) {
                                     character[topLevel[j]][k].id = "invalid:" + oldAssets[character[topLevel[j]][k].tab][character[topLevel[j]][k].hash]
@@ -1021,7 +1058,6 @@ function confirmImportPuppets() {
     for (let i = 0; i < chars.length; i++) {
         // Find any required assets we don't already have to the project
         let character = JSON.parse(project.duplicateCharacter(importing[chars[i]].character))
-        let topLevel = ["body", "head", "hat", "props"]
 
         for (let j = 0; j < topLevel.length; j++)
             checkLayer(character[topLevel[j]], importing[chars[i]].assets, importing[chars[i]].location)
@@ -1240,7 +1276,7 @@ function setLayer(e) {
     let selected = document.getElementById('editor-layers').getElementsByClassName("selected")
     while (selected.length)
         selected[0].classList.remove("selected")
-    document.getElementById(layer).className += " selected"
+    e.target.classList.add("selected")
     selected = null
     if (selectedGui) stage.stage.removeChild(selectedGui)
 }
@@ -1304,6 +1340,7 @@ function addAsset() {
                 "tab": tab, 
                 "type": "sprite", 
                 "version": 0,
+                "panning": [],
                 "name": name, 
                 "location": path.join(settings.settings.uuid, id + '.png')
             })
@@ -1370,6 +1407,7 @@ function addAnimatedAsset() {
                 "tab": tab, 
                 "type": "animated", 
                 "version": 0,
+                "padding": [],
                 "name": name, 
                 "rows": rows, 
                 "cols": cols, 
@@ -1439,6 +1477,7 @@ function importAssets() {
                             for (let j = 0; j < keys.length; j++) {
                                 list[keys[j]].tab = this.valueOf()
                                 list[keys[j]].version = 0
+                                list[keys[j]].panning = []
                                 assets["invalid:" + numAssets] = list[keys[j]]
                                 this.numAssets++
                             }
@@ -1845,7 +1884,10 @@ function undo() {
     if (history.length === 0 && JSON.stringify(character) === oldcharacter) return
     reverseHistory.push(history.pop())
     let action = history.length === 0 ? oldcharacter : history[history.length - 1]
+    let emote = puppet.emote
     exports.setPuppet(JSON.parse(action), true, true)
+    document.getElementById('editor-emote').value = puppet.emotes[emote].name
+    puppet.changeEmote(emote)
     if (action === oldcharacter && !alwaysDifferent) {
         document.getElementById("editor-save").classList.remove("highlight")
     } else {

@@ -23,7 +23,6 @@ let popout
 let popoutWindowState
 
 exports.init = function() {
-	status.init()
 	status.log('Loading project...', 1, 1)
 	project = remote.getGlobal('project').project
 	application.init()
@@ -261,6 +260,8 @@ exports.addAsset = function(id, asset) {
 }
 
 exports.addAssetLocal = function(id, asset) {
+	let oldVersion = project.assets[id] ? project.assets[id].version : asset.version
+	asset.location = asset.location.replace(/\\/g, '/')
 	project.addAsset(id, asset)
 	stage.addAsset(id, asset, () => {
 		let location = asset.location
@@ -290,6 +291,10 @@ exports.addAssetLocal = function(id, asset) {
 		exports.emitPopout('add asset', id, asset)
 		exports.reloadAsset(id)
 	})
+	for (let i = oldVersion; i < asset.version; i++) {
+		if (asset.panning[i])
+			exports.moveAsset(id, asset.panning[i].x, asset.panning[i].y)
+	}
 }
 
 exports.changeAssetTab = function(id, newTab) {
@@ -301,7 +306,7 @@ exports.changeAssetTabLocal = function(id, newTab) {
 	editor.migrateAsset(id, newTab)
 	applyToAsset(id, (asset) => {
 		asset.tab = newTab
-	})
+	}, false)
 }
 
 exports.deleteAsset = function(id) {
@@ -316,7 +321,7 @@ exports.deleteAssetLocal = function(id) {
 
 	applyToAsset(id, (asset, array, index) => {
 		array.splice(index, 1)
-	})
+	}, true)
     status.log("Deleted asset!", 1, 1)
 }
 
@@ -338,10 +343,11 @@ exports.renameAssetListLocal = function(tab, newTab) {
 
 exports.moveAsset = function(id, x, y) {
 	let callback = function(asset) {
-		asset.x += x
-		asset.y += y
+        asset.x += Math.cos(asset.rotation) * x - Math.sin(asset.rotation) * y
+        asset.y += Math.cos(asset.rotation) * y + Math.sin(asset.rotation) * x
 	}
-	applyToAsset(id, callback)
+	applyToAsset(id, callback, true)
+	editor.moveAsset(id, x, y)
 }
 
 exports.reloadAsset = function(id) {
@@ -362,7 +368,11 @@ exports.reloadAsset = function(id) {
     }
 }
 
-exports.updateAsset = function(id) {
+exports.updateAsset = function(id, x, y) {
+	if (x || y) {
+		project.assets[id].panning[project.assets[id].version] = {x, y}
+		exports.moveAsset(id, x, y)
+	}
 	project.assets[id].version++
 	exports.updateAssetLocal(id, project.assets[id])
 	network.emit('add asset', id, project.assets[id])
@@ -371,8 +381,8 @@ exports.updateAsset = function(id) {
 exports.updateAssetLocal = function(id, asset) {
 	stage.addAsset(id, asset, () => {
 		project.addAsset(id, asset)
-		editor.reloadAsset(id)
 		exports.reloadAsset(id)
+		editor.reloadAsset(id)
 	})
 }
 
@@ -393,7 +403,7 @@ exports.pruneAssets = function() {
     }
     for (let i = 0; i < keys.length; i++) {
         if (keys[i].split(':')[0] !== settings.settings.uuid) {
-        	applyToAsset(keys[i], callback)
+        	applyToAsset(keys[i], callback, true)
         	if (!foundAsset) {
         		exports.deleteAsset(keys[i])
         	} else foundAsset = false
@@ -568,7 +578,7 @@ function popOut() {
 	application.openPopout()
 }
 
-function applyToAsset(id, callback) {
+function applyToAsset(id, callback, savePuppet) {
     let characters = Object.keys(project.characters)
     for (let i = 0; i < characters.length; i++) {
     	let character = project.characters[characters[i]]
@@ -589,6 +599,7 @@ function applyToAsset(id, callback) {
 	    			callback(character.emotes[emotes[j]].mouth[k], character.emotes[emotes[j]].mouth, k)
 	    }
 
-	    exports.saveCharacter(character)
+	    if (savePuppet)
+	    	exports.saveCharacter(character)
     }
 }

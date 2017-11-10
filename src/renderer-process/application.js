@@ -153,7 +153,11 @@ exports.setBabble = function(babbling) {
 exports.updateCharacter = function(character, updateThumbnail) {
 	let index = project.project.hotbar.indexOf(character.id)
 	if (index > -1) {
-		controller.updateCharacter(index, character)
+		document.getElementById('char ' + index).getElementsByClassName('desc')[0].innerHTML = character.name
+		if (updateThumbnail) {
+			controller.updateCharacter(index, character)
+			document.getElementById('char ' + index).style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', 'new-' + character.id + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
+		}
 		if (('' + document.getElementById('char ' + index).className).indexOf('selected') > -1) {
 			controller.setPuppetLocal(index)
 			if (updateThumbnail) {
@@ -163,10 +167,6 @@ exports.updateCharacter = function(character, updateThumbnail) {
 						document.getElementById(emotes[i]).style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', 'new-' + character.id, emotes[i] + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
 				}
 			}
-		}
-		document.getElementById('char ' + index).getElementsByClassName('desc')[0].innerHTML = character.name
-		if (updateThumbnail) {
-			document.getElementById('char ' + index).style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', 'new-' + character.id + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
 		}
 	}
 }
@@ -475,40 +475,20 @@ function startAutocrop() {
 	}
 	document.getElementById('autocrop-progress').innerHTML = 'Autocropping asset 0 of ' + assets.length
 
-
 	// I tried to do this with web workers but since they can't use the DOM it didn't work (needed for using canvases)
-	let trimmer = require('./../lib/trim_canvas')
-	let errors = 0
-	for (let i = 0; i < assets.length; i++) {
-		document.getElementById('autocrop-' + assets[i].id).className = "asset available selected"
-		document.getElementById('autocrop-progress').innerHTML = 'Autocropping asset ' + (i + 1) + ' of ' + assets.length
-	    let canvas = document.createElement('canvas')
-	    let ctx = canvas.getContext("2d")
-	    let image = document.createElement('img')
-	    image.src = path.join(project.assetsPath, assets[i].location)
-	    canvas.width = image.width
-	    canvas.height = image.height
-		ctx.drawImage(image, 0, 0)
-	    canvas.style.display = 'none'
-	    document.body.appendChild(canvas)
-		try {
-			let data = trimmer.trimCanvas(canvas)
-			let newAsset = data.canvas.toDataURL().replace(/^data:image\/\w+;base64,/, "")
-			document.getElementById('autocrop-' + assets[i].id).className = "asset available"
-			fs.writeFileSync(path.join(project.assetsPath, assets[i].location), new Buffer(newAsset, 'base64'))
-			document.getElementById('autocrop-' + assets[i].id).style.backgroundImage = 'url(' + path.join(project.assetsPath, assets[i].location + '?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
-			// Move assets to compensate for cropping
-			controller.moveAsset(assets[i].id, data.x, data.y)
-			controller.updateAsset(assets[i].id)
-		} catch (e) {
-			// Failed to crop asset, probably because the image has no non-transparent pixels
-			console.error(e)
-			document.getElementById('autocrop-' + assets[i].id).className = "asset"
-			errors++
-		}
-		canvas.remove()
+	document.body.style.pointerEvents = 'none'
+	let object = {
+		trimmer: require('./../lib/trim_canvas'),
+		errors: 0,
+		assets: assets,
+		i: 0
 	}
-	document.getElementById('autocrop-progress').innerHTML = (errors === 0 ? 'Finished autocropping' : 'Finished with ' + errors + ' failed assets')
+	if (assets.length > 0)
+		requestAnimationFrame(autocrop.bind(object))
+	else {
+		document.body.style.pointerEvents = 'none'
+		document.getElementById('autocrop-progress').innerHTML = 'No assets to crop'	
+	}
 }
 
 function openPrune() {
@@ -519,4 +499,46 @@ function openPrune() {
 function pruneAssets() {
 	exports.toggleModal()
 	controller.pruneAssets()
+}
+
+function autocrop() {
+	let trimmer = this.trimmer
+	let errors = this.errors
+	let assets = this.assets
+	let i = this.i
+	document.getElementById('autocrop-' + assets[i].id).className = "asset available selected"
+	document.getElementById('autocrop-progress').innerHTML = 'Autocropping asset ' + (i + 1) + ' of ' + assets.length
+    let canvas = document.createElement('canvas')
+    let ctx = canvas.getContext("2d")
+    let image = document.createElement('img')
+    image.src = path.join(project.assetsPath, assets[i].location)
+    canvas.width = image.width
+    canvas.height = image.height
+	ctx.drawImage(image, 0, 0)
+    canvas.style.display = 'none'
+    document.body.appendChild(canvas)
+	try {
+		let data = trimmer.trimCanvas(canvas)
+		let newAsset = data.canvas.toDataURL().replace(/^data:image\/\w+;base64,/, "")
+		document.getElementById('autocrop-' + assets[i].id).className = "asset available"
+		fs.writeFileSync(path.join(project.assetsPath, assets[i].location), new Buffer(newAsset, 'base64'))
+		document.getElementById('autocrop-' + assets[i].id).style.backgroundImage = 'url(' + path.join(project.assetsPath, assets[i].location + '?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
+		// Move assets to compensate for cropping
+		controller.updateAsset(assets[i].id, data.x, data.y)
+	} catch (e) {
+		// Failed to crop asset, probably because the image has no non-transparent pixels
+		console.error(e)
+		document.getElementById('autocrop-' + assets[i].id).className = "asset"
+		errors++
+	}
+	canvas.remove()
+	if (i + 1 === assets.length) {
+		document.body.style.pointerEvents = ''
+		document.getElementById('autocrop-progress').innerHTML = (errors === 0 ? 'Finished autocropping' : 'Finished with ' + errors + ' failed assets')
+		project.saveProject()
+	} else {
+		requestAnimationFrame(autocrop.bind({
+			trimmer, errors, assets, i: i+1
+		}))
+	}
 }
