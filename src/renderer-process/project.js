@@ -7,6 +7,7 @@ const menu = remote.require('./main-process/menus/application-menu')
 const controller = require('./controller')
 const editor = require('./editor')
 const status = require('./status')
+const cmp = require('semver-compare')
 
 const path = require('path')
 
@@ -36,6 +37,35 @@ module.exports = {
 			this.charactersPath = path.join(filepath, '..', 'characters')
 			this.assetsPath = path.join(filepath, '..', 'assets')
 			this.numCharacters = 0
+
+			let compare = proj.clientVersion ? cmp(proj.clientVersion, remote.app.getVersion()) : -1
+			if (compare !== 0) {
+				let options = {
+					"type": "question",
+					"buttons": ["Cancel", "Open Anyways"],
+					"defaultId": 0,
+					"title": "Open Project?",
+					"cancelId": 0
+				}
+				if (compare > 0) {
+					options.message = "You are attempting to open a project made with a more recent version of Babble Buds."
+					options.detail = "Caution is advised. Saving this project will downgrade it to this version of Babble Buds, and may cause problems or lose features."
+				} else {
+					options.message = "You are attempting to open a project made with a less recent version of Babble Buds."
+					options.detail = "Opening this project will upgrade it to this version of Babble Buds."
+				}
+
+				let response = dialog.showMessageBox(options)
+				switch (response) {
+					default: 
+						this.project.clientVersion = remote.app.getVersion();
+						break
+					case 0:
+						main.redirect('welcome.html')
+						return false
+				}
+			}
+
 			for (let i = 0; i < proj.characters.length; i++) {
 				let character = this.characters[proj.characters[i].id] = fs.readJsonSync(path.join(this.charactersPath, proj.characters[i].location))
 				character.name = proj.characters[i].name
