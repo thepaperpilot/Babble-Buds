@@ -7,7 +7,7 @@ const menu = remote.require('./main-process/menus/application-menu')
 const controller = require('./controller')
 const editor = require('./editor')
 const status = require('./status')
-const cmp = require('semver-compare')
+const semver = require('semver')
 
 const path = require('path')
 
@@ -38,7 +38,7 @@ module.exports = {
 			this.assetsPath = path.join(filepath, '..', 'assets')
 			this.numCharacters = 0
 
-			let compare = proj.clientVersion ? cmp(proj.clientVersion, remote.app.getVersion()) : -1
+			let compare = proj.clientVersion ? semver.compare(proj.clientVersion, remote.app.getVersion()) : -1
 			if (compare !== 0) {
 				let options = {
 					"type": "question",

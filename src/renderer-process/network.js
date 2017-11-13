@@ -7,6 +7,7 @@ const ioClient = require('socket.io-client')
 const http = require('http')
 const fs = require('fs-extra')
 const path = require('path')
+const semver = require('semver')
 
 // Vars
 let project
@@ -47,6 +48,7 @@ exports.host = function() {
 		// Send project settings
 		socket.emit('set scale', project.project.puppetScale)
 		socket.emit('set slots', project.project.numCharacters)
+		socket.emit('serverVersion', project.project.clientVersion)
 
 		// Send list of assets
 		let keys = Object.keys(project.assets)
@@ -247,6 +249,12 @@ exports.connect = function() {
 	})
 
 	// Add Application Listeners
+	socket.on('serverVersion', (version) => {
+		if(!semver.intersects(version, project.project.clientVersion)) {
+			stopNetworking()
+			status.log("Server Version Mismatch! Server required " + version + ", our version: " + project.project.clientVersion, 2, 1)
+		}
+	})
 	socket.on('assign puppet', (id) => {
 		controller.assign(id)
 	})

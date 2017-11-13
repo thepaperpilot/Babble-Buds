@@ -2,6 +2,7 @@
 const http = require('http')
 const path = require('path')
 // You'll need to install these using npm:
+// e.g. `npm install fs-extra socket.io socket.io-stream`
 const fs = require('fs-extra')
 const io = require('socket.io')
 const ss = require('socket.io-stream')
@@ -12,6 +13,7 @@ var numCharacters = 5
 var puppetScale = 1
 var assetsPath = path.join(__dirname, 'assets')
 var logLevel = 2 // 0 = No messages, 1 = Connect/Disconnect messages, 2 = Also include puppet changes, 3 = All known commands
+var clientVersion = "~0.5.1"	// Clients will need to match this version/range
 
 // Variables
 var server
@@ -38,6 +40,7 @@ server.sockets.on('connection', function(socket) {
 	// Send project settings
 	socket.emit('set scale', puppetScale)
 	socket.emit('set slots', numCharacters)
+	socket.emit('serverVersion', clientVersion)
 
 	// Send list of assets
 	let keys = Object.keys(assets)
