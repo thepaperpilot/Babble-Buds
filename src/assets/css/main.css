@@ -248,6 +248,7 @@ body > .editormain {
 }
 
 .editorpanel {
+	width: calc(100% - 16px);
 	height: calc( 100% - 55px );
     background-color: #2a323d;
     padding: 8px;

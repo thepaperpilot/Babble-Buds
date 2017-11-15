@@ -13,7 +13,7 @@ var numCharacters = 5
 var puppetScale = 1
 var assetsPath = path.join(__dirname, 'assets')
 var logLevel = 2 // 0 = No messages, 1 = Connect/Disconnect messages, 2 = Also include puppet changes, 3 = All known commands
-var clientVersion = "~0.5.1"	// Clients will need to match this version/range
+var clientVersion = "~0.6.1"	// Clients will need to match this version/range
 
 // Variables
 var server

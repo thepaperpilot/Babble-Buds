@@ -235,6 +235,8 @@ exports.init = function() {
 
 exports.addAsset = function(id) {
     let asset = project.assets[id]
+    if (document.getElementById('tab ' + asset.tab).getElementsByClassName(id)[0])
+        return
     let assetElement = document.createElement('div')
     if (!document.getElementById('tab ' + asset.tab)) addAssetListToDom(asset.tab)
     document.getElementById('tab ' + asset.tab).appendChild(assetElement)
@@ -729,8 +731,8 @@ function resizeMousemove(e) {
     selectedGui.box.clear()
     drawBox(selectedGui.box)
     for (let i = 0; i < selectedGui.corners.length; i++) {
-        selectedGui.corners[i].x = stage.screen.clientWidth / 2 / scale - selected.width / 2 - 20 + (24 + selected.width) * (i % 2)
-        selectedGui.corners[i].y = stage.screen.clientHeight / scale - selected.height / 2 - 20 + (24 + selected.height) * Math.floor(i / 2)
+        selectedGui.corners[i].x = stage.screen.clientWidth / 2 - selected.width / 2 * scale - 20 + (24 + selected.width * scale) * (i % 2)
+        selectedGui.corners[i].y = stage.screen.clientHeight - selected.height / 2 * scale - 20 + (24 + selected.height * scale) * Math.floor(i / 2)
     }
     selectedGui.rotate.x = selectedGui.corners[1].x + 12
     selectedGui.rotate.y = selectedGui.corners[1].y - 24

@@ -353,6 +353,7 @@ exports.moveAsset = function(id, x, y) {
 exports.reloadAsset = function(id) {
 	stage.updateAsset(id)
 	editor.updateAsset(id)
+	editor.reloadAsset(id)
 	exports.emitPopout('reload asset', id, project.assets[id])
     let callback = function(asset, sprite) {
         let parent = sprite.parent
