@@ -177,7 +177,7 @@ body > .editormain {
 
 .scroll {
 	overflow-x: hidden;
-	overflow-y: auto;
+	overflow-y: overlay;
 }
 
 .char, .emote, .babble {
