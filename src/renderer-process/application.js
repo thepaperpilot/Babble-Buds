@@ -511,34 +511,36 @@ function autocrop() {
     let canvas = document.createElement('canvas')
     let ctx = canvas.getContext("2d")
     let image = document.createElement('img')
+    image.onload = () => {
+    	canvas.width = image.width
+	    canvas.height = image.height
+		ctx.drawImage(image, 0, 0)
+	    canvas.style.display = 'none'
+	    document.body.appendChild(canvas)
+		try {
+			let data = trimmer.trimCanvas(canvas)
+			let newAsset = data.canvas.toDataURL().replace(/^data:image\/\w+;base64,/, "")
+			document.getElementById('autocrop-' + assets[i].id).className = "asset available"
+			fs.writeFileSync(path.join(project.assetsPath, assets[i].location), new Buffer(newAsset, 'base64'))
+			document.getElementById('autocrop-' + assets[i].id).style.backgroundImage = 'url(' + path.join(project.assetsPath, assets[i].location + '?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
+			// Move assets to compensate for cropping
+			controller.updateAsset(assets[i].id, data.x, data.y)
+		} catch (e) {
+			// Failed to crop asset, probably because the image has no non-transparent pixels
+			console.error(e)
+			document.getElementById('autocrop-' + assets[i].id).className = "asset"
+			errors++
+		}
+		canvas.remove()
+		if (i + 1 === assets.length) {
+			document.body.style.pointerEvents = ''
+			document.getElementById('autocrop-progress').innerHTML = (errors === 0 ? 'Finished autocropping' : 'Finished with ' + errors + ' failed assets')
+			project.saveProject()
+		} else {
+			requestAnimationFrame(autocrop.bind({
+				trimmer, errors, assets, i: i+1
+			}))
+		}
+    }
     image.src = path.join(project.assetsPath, assets[i].location)
-    canvas.width = image.width
-    canvas.height = image.height
-	ctx.drawImage(image, 0, 0)
-    canvas.style.display = 'none'
-    document.body.appendChild(canvas)
-	try {
-		let data = trimmer.trimCanvas(canvas)
-		let newAsset = data.canvas.toDataURL().replace(/^data:image\/\w+;base64,/, "")
-		document.getElementById('autocrop-' + assets[i].id).className = "asset available"
-		fs.writeFileSync(path.join(project.assetsPath, assets[i].location), new Buffer(newAsset, 'base64'))
-		document.getElementById('autocrop-' + assets[i].id).style.backgroundImage = 'url(' + path.join(project.assetsPath, assets[i].location + '?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
-		// Move assets to compensate for cropping
-		controller.updateAsset(assets[i].id, data.x, data.y)
-	} catch (e) {
-		// Failed to crop asset, probably because the image has no non-transparent pixels
-		console.error(e)
-		document.getElementById('autocrop-' + assets[i].id).className = "asset"
-		errors++
-	}
-	canvas.remove()
-	if (i + 1 === assets.length) {
-		document.body.style.pointerEvents = ''
-		document.getElementById('autocrop-progress').innerHTML = (errors === 0 ? 'Finished autocropping' : 'Finished with ' + errors + ' failed assets')
-		project.saveProject()
-	} else {
-		requestAnimationFrame(autocrop.bind({
-			trimmer, errors, assets, i: i+1
-		}))
-	}
 }
