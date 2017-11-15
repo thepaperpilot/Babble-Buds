@@ -32,7 +32,7 @@ window.onkeyup = function(e) {
     if (key == 27) { 
         remote.getCurrentWindow().close()
         return
-    }
+    } else if (key == 123) remote.webContents.getFocusedWebContents().toggleDevTools()
 
     remote.getCurrentWindow().getParentWindow().webContents.send('keyUp', key)
 }
@@ -45,7 +45,7 @@ electron.ipcRenderer.on('setup', (event, project, mypuppet, id) => {
     puppet = mypuppet
     puppet.id = id
     stage = new babble.Stage('screen', project.project, assets = project.assets, project.assetsPath, loadPuppets)
-    window.addEventListener("resize", () => {stage.resize()})
+    window.addEventListener("resize", () => {stage.resize();stage.resize();})
 })
 
 electron.ipcRenderer.on('init', (event, puppets) => {

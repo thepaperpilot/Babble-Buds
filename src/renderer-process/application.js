@@ -271,6 +271,7 @@ function keyUp(e) {
 	else if (key == 38) controller.jiggleLocal()
 	else if (key == 39) controller.moveRightLocal()
 	else if (key == 32) controller.stopBabblingLocal()
+	else if (key == 123) electron.remote.webContents.getFocusedWebContents().toggleDevTools()
 }
 
 function beforeUnload() {

@@ -229,7 +229,7 @@ exports.initPopout = function() {
 	let puppets = network.getPuppets()
 	let characters = []
 	for (let i = 0; i < puppets.length; i++) {
-		let puppet = stage.getPuppet(puppets[i].id)
+		let puppet = stage.getPuppet(puppets[i].charId)
 		let character = puppets[i]
 		character.position = puppet.position
 		character.facingLeft = puppet.facingLeft
@@ -563,8 +563,6 @@ function popOut() {
 		alwaysOnTop: project.project.alwaysOnTop
 	})
 	popoutWindowState.manage(popout)
-	// popout.openDevTools()
-	// popout.setIgnoreMouseEvents(true)
 	popout.on('close', () => {
 		application.closePopout()
 		stage.reattach('screen')
