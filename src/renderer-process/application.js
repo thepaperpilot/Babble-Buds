@@ -169,6 +169,19 @@ exports.updateCharacter = function(character, updateThumbnail) {
 			}
 		}
 	}
+	if (updateThumbnail) {
+		let selector = document.getElementById('char list').querySelector("[puppet='" + character.id + "']")
+		let charPath
+		if (fs.existsSync(path.join(project.assetsPath, '..', 'thumbnails', "new-" + character.id + '.png')))
+			charPath = path.join(project.assetsPath, '..', 'thumbnails', 'new-' + character.id + '.png?random=' + new Date().getTime()).replace(/\\/g, '/')
+		else charPath = path.join(project.assetsPath, '..', 'thumbnails', character.id + '.png?random=' + new Date().getTime()).replace(/\\/g, '/')
+		if (selector)
+			selector.style.backgroundImage = 'url(' + charPath + ')'
+		selector = document.getElementById('char selected')
+		console.log(selector, selector.i, character.id)
+		if (selector && selector.i == character.id)
+			selector.style.backgroundImage = 'url(' + charPath + ')'
+	}
 }
 
 // Remove a character from the hotbar
@@ -270,11 +283,12 @@ function charContextMenu(e) {
 	let i = e.target.i
 	document.getElementById('chars').style.display = 'none'
 	document.getElementById('charselect').style.display = 'block'
+	document.getElementById('char selected').i = project.project.hotbar[i]
 	if (project.project.hotbar[i]) {
-		if (fs.existsSync(path.join(project.assetsPath, '..', 'thumbnails', project.project.hotbar[i] + '.png')))
-			document.getElementById('char selected').style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', project.project.hotbar[i] + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
-		else
+		if (fs.existsSync(path.join(project.assetsPath, '..', 'thumbnails', 'new-' + project.project.hotbar[i] + '.png')))
 			document.getElementById('char selected').style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', 'new-' + project.project.hotbar[i] + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
+		else
+			document.getElementById('char selected').style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', project.project.hotbar[i] + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
 	} else {
 		document.getElementById('char selected').style.backgroundImage = ''
 	}
@@ -286,14 +300,15 @@ function charContextMenu(e) {
 		let selector = document.createElement('div')
 		selector.id = project.characters[characters[j]].name.toLowerCase()
 		selector.className = "char"
-		if (fs.existsSync(path.join(project.assetsPath, '..', 'thumbnails', characters[j] + '.png')))
-			selector.style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', characters[j] + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
-		else
+		if (fs.existsSync(path.join(project.assetsPath, '..', 'thumbnails', 'new-' + characters[j] + '.png')))
 			selector.style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', 'new-' + characters[j] + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
+		else
+			selector.style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', characters[j] + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
 		charList.appendChild(selector)
 		selector.innerHTML = '<div class="desc">' + project.characters[characters[j]].name + '</div>'
 		selector.i = i
 		selector.puppet = characters[j]
+		selector.setAttribute("puppet", parseInt(characters[j]))
 		if (project.project.hotbar.indexOf(parseInt(characters[j])) > -1) {
 			selector.className += " disabled"
 		} else {
@@ -416,12 +431,12 @@ function removeEditorView() {
 	document.getElementById('editor').insertBefore(document.getElementById('editor-layers'), document.getElementById('puppet-panels'))
 	document.getElementById('editor-screen').className = 'editormain'
 	document.getElementById('editor-layers').className = 'small'
-    document.getElementById('editor-open-panel').style.display = 'none'
-    document.getElementById('editor-emotes-panel').style.display = 'none'
-    document.getElementById('editor-settings-panel').style.display = 'none'
-    document.getElementById('editor-open').classList.remove('open-tab')
-    document.getElementById('editor-emotes').classList.remove('open-tab')
-    document.getElementById('editor-settings').classList.remove('open-tab')
+	document.getElementById('editor-open-panel').style.display = 'none'
+	document.getElementById('editor-emotes-panel').style.display = 'none'
+	document.getElementById('editor-settings-panel').style.display = 'none'
+	document.getElementById('editor-open').classList.remove('open-tab')
+	document.getElementById('editor-emotes').classList.remove('open-tab')
+	document.getElementById('editor-settings').classList.remove('open-tab')
 	document.getElementById('bottom').style.display = ''
 }
 
@@ -440,7 +455,7 @@ function addEditorView() {
 	document.getElementById('editor-layers').className = 'container small status'
 	document.body.append(document.getElementById('editor-screen'))
 	document.body.append(document.getElementById('editor-layers'))
-    document.getElementById('editor-open').click()
+	document.getElementById('editor-open').click()
 	document.getElementById('bottom').style.display = 'none'
 }
 
@@ -487,7 +502,7 @@ function startAutocrop() {
 		requestAnimationFrame(autocrop.bind(object))
 	else {
 		document.body.style.pointerEvents = 'none'
-		document.getElementById('autocrop-progress').innerHTML = 'No assets to crop'	
+		document.getElementById('autocrop-progress').innerHTML = 'No assets to crop'    
 	}
 }
 
@@ -508,15 +523,15 @@ function autocrop() {
 	let i = this.i
 	document.getElementById('autocrop-' + assets[i].id).className = "asset available selected"
 	document.getElementById('autocrop-progress').innerHTML = 'Autocropping asset ' + (i + 1) + ' of ' + assets.length
-    let canvas = document.createElement('canvas')
-    let ctx = canvas.getContext("2d")
-    let image = document.createElement('img')
-    image.onload = () => {
-    	canvas.width = image.width
-	    canvas.height = image.height
+	let canvas = document.createElement('canvas')
+	let ctx = canvas.getContext("2d")
+	let image = document.createElement('img')
+	image.onload = () => {
+		canvas.width = image.width
+		canvas.height = image.height
 		ctx.drawImage(image, 0, 0)
-	    canvas.style.display = 'none'
-	    document.body.appendChild(canvas)
+		canvas.style.display = 'none'
+		document.body.appendChild(canvas)
 		try {
 			let data = trimmer.trimCanvas(canvas)
 			let newAsset = data.canvas.toDataURL().replace(/^data:image\/\w+;base64,/, "")
@@ -541,6 +556,6 @@ function autocrop() {
 				trimmer, errors, assets, i: i+1
 			}))
 		}
-    }
-    image.src = path.join(project.assetsPath, assets[i].location)
+	}
+	image.src = path.join(project.assetsPath, assets[i].location)
 }
