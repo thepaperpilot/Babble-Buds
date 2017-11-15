@@ -170,17 +170,20 @@ exports.updateCharacter = function(character, updateThumbnail) {
 		}
 	}
 	if (updateThumbnail) {
-		let selector = document.getElementById('char list').querySelector("[puppet='" + character.id + "']")
 		let charPath
 		if (fs.existsSync(path.join(project.assetsPath, '..', 'thumbnails', "new-" + character.id + '.png')))
 			charPath = path.join(project.assetsPath, '..', 'thumbnails', 'new-' + character.id + '.png?random=' + new Date().getTime()).replace(/\\/g, '/')
 		else charPath = path.join(project.assetsPath, '..', 'thumbnails', character.id + '.png?random=' + new Date().getTime()).replace(/\\/g, '/')
+		
+		let selector = document.getElementById('char selected')
+		let i = selector.i
+		if (selector && i == character.id)
+			selector.style.backgroundImage = 'url(' + charPath + ')'
+		
+		selector = document.getElementById('char list').querySelector("[puppet='" + character.id + "']")
 		if (selector)
 			selector.style.backgroundImage = 'url(' + charPath + ')'
-		selector = document.getElementById('char selected')
-		console.log(selector, selector.i, character.id)
-		if (selector && selector.i == character.id)
-			selector.style.backgroundImage = 'url(' + charPath + ')'
+		else addCharSelector(character.id, i)
 	}
 }
 
@@ -297,23 +300,27 @@ function charContextMenu(e) {
 	charList.innerHTML = ''
 	let characters = Object.keys(project.characters)
 	for (let j = 0; j < characters.length; j++) {
-		let selector = document.createElement('div')
-		selector.id = project.characters[characters[j]].name.toLowerCase()
-		selector.className = "char"
-		if (fs.existsSync(path.join(project.assetsPath, '..', 'thumbnails', 'new-' + characters[j] + '.png')))
-			selector.style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', 'new-' + characters[j] + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
-		else
-			selector.style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', characters[j] + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
-		charList.appendChild(selector)
-		selector.innerHTML = '<div class="desc">' + project.characters[characters[j]].name + '</div>'
-		selector.i = i
-		selector.puppet = characters[j]
-		selector.setAttribute("puppet", parseInt(characters[j]))
-		if (project.project.hotbar.indexOf(parseInt(characters[j])) > -1) {
-			selector.className += " disabled"
-		} else {
-			selector.addEventListener('click', updateHotbar)
-		}
+		addCharSelector(characters[j], i)
+	}
+}
+
+function addCharSelector(character, i) {
+	let selector = document.createElement('div')
+	selector.id = project.characters[character].name.toLowerCase()
+	selector.className = "char"
+	if (fs.existsSync(path.join(project.assetsPath, '..', 'thumbnails', 'new-' + character + '.png')))
+		selector.style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', 'new-' + character + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
+	else
+		selector.style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', character + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
+	document.getElementById('char list').appendChild(selector)
+	selector.innerHTML = '<div class="desc">' + project.characters[character].name + '</div>'
+	selector.i = i
+	selector.puppet = character
+	selector.setAttribute("puppet", parseInt(character))
+	if (project.project.hotbar.indexOf(parseInt(character)) > -1) {
+		selector.className += " disabled"
+	} else {
+		selector.addEventListener('click', updateHotbar)
 	}
 }
 
