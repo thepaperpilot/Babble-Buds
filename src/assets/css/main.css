@@ -78,7 +78,7 @@ button:disabled, select:disabled, input:disabled {
 
 .editormain {
 	background-color: #2a323d;
-	height: calc( 100% - 80px );
+	height: calc( 100% - 95px );
 	position: relative;
 }
 
@@ -158,6 +158,10 @@ body > .editormain {
 .buttons {
 	border-right: solid 4px #2a323d;
 	margin-right: 8px;
+}
+
+.sidebuttons {
+	display: inline-block;
 }
 
 .sidebuttons > button {
@@ -299,20 +303,40 @@ body > .editormain {
 }
 
 .small {
-	font-size: 16px;
+	font-size: 14px;
+	text-align: center;
 }
 
 .small button {
-	margin: 1px;
-	padding: 3px;
-	font-size: 16px;
+	margin: 0;
+	padding: 3px 6px;
+	font-size: inherit;
 }
 
 .small select {
-	font-size: 16px;
-	width: 92px;
+	font-size: inherit;
 	color: #5464d4;
+	margin-bottom: 4px;
 	border-bottom-color: #5464d4;
+}
+
+.justify {
+	display: flex;
+	justify-content: space-between;
+}
+
+body > .small {
+	display: flex;
+}
+
+body > .small select {
+	margin-right: 8px;
+	margin-bottom: 0;
+	max-width: 400px;
+}
+
+body > .small .justify {
+	flex-grow: 10;
 }
 
 .available {
@@ -576,7 +600,9 @@ body > .editormain {
 
 .dropdown ~ label {
 	cursor: pointer;
-	margin: 0 10px;
+	margin-right: 10px;
+	padding-left: 4px;
+	margin-left: 6px;
 }
 
 .dropdown:checked ~ .dropdown-content {
@@ -671,6 +697,20 @@ body > .editormain {
     border-radius: 10px;
 }
 
+.bundle::after {
+	position: absolute;
+	right: 2px;
+	top: 2px;
+	content: "";
+	width: 20px;
+	height: 20px;
+	background-size: contain;
+	background-image: url(../icons/bundle.png);
+	pointer-events: none;
+	background-color: #888;
+	border-radius: 10px;
+}
+
 .downloaded::before {
 	position: absolute;
     right: 2px;
@@ -685,6 +725,6 @@ body > .editormain {
     border-radius: 10px;
 }
 
-.animated.downloaded::after {
+.animated.downloaded::after, .bundle.downloaded::after {
 	top: 24px;
 }

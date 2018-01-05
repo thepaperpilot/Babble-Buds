@@ -70,15 +70,17 @@
             <div id="editor" class="vbar" style="height: calc( 50% - 8px );">
                 <div id="puppet-buttons" class="sidebuttons">
                     <input id="add-puppet-dropdown" type="checkbox" class="dropdown">
-                    <label for="add-puppet-dropdown" id="add-puppet-label" style="margin-left: 20px;"><button id="add-puppet-img" class="dropdown-image" style="background: url(assets/icons/add_asset.png) center no-repeat/contain" title="Add Puppets"></button></label>
+                    <label for="add-puppet-dropdown" id="add-puppet-label" style="margin-left: 16px;"><button id="add-puppet-img" class="dropdown-image" style="background: url(assets/icons/add_asset.png) center no-repeat/contain" title="Add Puppets"></button></label>
                     <ul class="dropdown-content" style="margin-left: 10px;">
                         <li id="editor-new">New Puppet</li>
                         <li id="editor-duplicate">Duplicate Puppet</li>
                     </ul>
                     <button id="editor-import" style="background: url(assets/icons/import.png) center no-repeat/contain; background-size: 50% !important;" title="Import Puppets"></button>
                     <button id="editor-save" style="background: url(assets/icons/save.png) center no-repeat/contain" title="Save"></button>
-                    <button id="editor-open" style="background: url(assets/icons/grid.png) center no-repeat/contain; margin-left: 123px" title="Open"></button>
+                </div>
+                <div id="puppet-buttons-right" class="sidebuttons" style="float: right;">
                     <button id="editor-emotes" style="background: url(assets/icons/face.png) center no-repeat/contain" title="Emote Settings"></button>
+                    <button id="editor-open" style="background: url(assets/icons/grid.png) center no-repeat/contain;" title="Open"></button>
                     <button id="editor-settings" style="background: url(assets/icons/settings.png) center no-repeat/contain" title="Puppet Settings"></button>
                 </div>
                 <div id="editor-screen" class="editormain">
@@ -135,12 +137,15 @@
                         <option id="emote-11">confused</option>
                         <option id="emote-12">ooo</option>
                     </select>
-                    <button id="body">Body</button>
-                    <button id="headBase">Head</button>
-                    <button id="eyes">Eyes</button>
-                    <button id="mouth">Mouth</button>
-                    <button id="hat">Hat</button>
-                    <button id="props">Props</button>
+                    <div class="justify">
+                        <button id="bundle" disabled>Bundles</button>
+                        <button id="body">Body</button>
+                        <button id="headBase">Head</button>
+                        <button id="eyes">Eyes</button>
+                        <button id="mouth">Mouth</button>
+                        <button id="hat">Hat</button>
+                        <button id="props">Props</button>
+                    </div>
                 </div>
             </div>
             <div class="sidebuttons" style="padding-left: 10px; position: relative;">
@@ -149,7 +154,7 @@
                 <ul class="dropdown-content" style="top: 34px;">
                     <li id="add-asset">Add Asset</li>
                     <li id="add-animated-asset">Add Animated Asset</li>
-                    <li id="new-asset-bundle">New Asset Bundle</li>
+                    <li id="new-asset-bundle" class="disabled">New Asset Bundle</li>
                 </ul>
                 <button id="import-asset" style="background: url(assets/icons/import.png) center no-repeat/contain; background-size: 50% !important;" title="Import Assets"></button>
                 <button id="new-asset-list" style="background: url(assets/icons/new_folder.png) center no-repeat/contain" title="New Asset List"></button>
