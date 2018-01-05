@@ -57,8 +57,9 @@ for (let i = 0; i < recentProjects.length; i++) {
     selector.id = recentProjects[i]
     selector.className = "recent-project"
     selector.style.backgroundImage = 'url(' +  path.join(app.getPath('userData'), filename + '.png').replace(/\\/g, '/') + ')'
+    selector.title = recentProjects[i]
     recentProjectsElement.appendChild(selector)
-    selector.innerHTML = '<div class="desc">' + recentProjects[i].replace(/^.*[\\\/]/, '') + '</div>'
+    selector.innerHTML = '<div class="desc">' + recentProjects[i].replace(/^.*[\\\/]/, '').replace(/\..*/, '') + '</div>'
     selector.addEventListener('click', openProject)
 }
 function openProject() {
