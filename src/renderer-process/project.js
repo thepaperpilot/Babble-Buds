@@ -67,7 +67,8 @@ module.exports = {
 			}
 
 			for (let i = 0; i < proj.characters.length; i++) {
-				let character = this.characters[proj.characters[i].id] = fs.readJsonSync(path.join(this.charactersPath, proj.characters[i].location))
+				let character = this.characters[proj.characters[i].id] = JSON.parse(this.getEmptyCharacter(true))
+				Object.assign(character, fs.readJsonSync(path.join(this.charactersPath, proj.characters[i].location)))
 				character.name = proj.characters[i].name
 				character.id = proj.characters[i].id
 				if (proj.characters[i].id > this.numCharacters)
@@ -160,10 +161,13 @@ module.exports = {
 				// Cross compatibility - windows will handle UNIX-style paths, but not vice versa
 				let keys = Object.keys(this.assets)
 				for (let i = 0; i < keys.length; i++) {
-					this.assets[keys[i]].location = this.assets[keys[i]].location.replace(/\\/g, '/')
-					if (!this.assets[keys[i]].version) {
-						this.assets[keys[i]].version =  0
-						this.assets[keys[i]].panning = []
+					let asset = this.assets[keys[i]]
+					asset.location = asset.location.replace(/\\/g, '/')
+					if (keys[i].split(":")[0] == settings.settings.uuid && parseInt(keys[i].split(":")[1]) >= proj.numAssets)
+						proj.numAssets = parseInt(keys[i].split(":")[1]) + 1
+					if (!asset.version) {
+						asset.version =  0
+						asset.panning = []
 					}
 				}
 			}
@@ -283,10 +287,11 @@ module.exports = {
             }
         }
 	},
-    getEmptyCharacter: function() {
-        this.numCharacters++
+    getEmptyCharacter: function(dontIncrement) {
+        if (!dontIncrement) this.numCharacters++
         return JSON.stringify({
             "deadbonesStyle": false,
+            "bundles": [],
             "body": [],
             "head": [],
             "hat": [],

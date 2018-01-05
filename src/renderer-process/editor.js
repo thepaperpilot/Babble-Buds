@@ -31,6 +31,7 @@ let assetTabs = [] // list of asset tabs
 let scale = 1 // scale of the editor view
 let puppet // puppet being edited
 let character // character being edited
+let bundle // asset bundle id being edited, if applicable
 let oldcharacter // currently saved version of character
 let layer // layer being edited
 let clickableAssets = [] // assets in editor that are clickable
@@ -79,8 +80,8 @@ exports.init = function() {
     }
     stage.getAsset = function(asset, layer, emote) {
         let sprite
-        if (this.assets[asset.id]) {
-            let assetData = this.assets[asset.id]
+        let assetData = this.assets[asset.id]
+        if (assetData) {
             if (assetData.type === "animated") {
                 let base = BaseTextureCache[path.join(this.assetsPath, assetData.location)]
                 let textures = []
@@ -105,15 +106,17 @@ exports.init = function() {
         sprite.rotation = asset.rotation
         sprite.scale.x = asset.scaleX
         sprite.scale.y = asset.scaleY
-        sprite.asset = asset
-        sprite.layer = layer
-        sprite.emote = emote
-        clickableAssets.push(sprite)
+        if (!assetData || assetData.type !== "bundle") {
+            sprite.asset = asset
+            sprite.layer = layer
+            sprite.emote = emote
+            clickableAssets.push(sprite)
+        }
         return sprite
     }
 
     // Make mousedown work on entire stage
-    let backdrop = new PIXI.Container();
+    let backdrop = new Container();
     backdrop.interactive = true;
     backdrop.containsPoint = () => true;
     stage.stage.addChild(backdrop)
@@ -248,13 +251,15 @@ exports.addAsset = function(id) {
     assetDraggable.asset = id
     assetDraggable.style.height = assetDraggable.style.width = '120px'
     assetDraggable.className = 'contain'
-    if (asset.type === "animated") {
+    // Asset types with thumbnails
+    if (asset.type === "animated" || asset.type === "bundle") {
         let location = asset.location
         location = [location.slice(0, location.length - 4), '.thumb', location.slice(location.length - 4)].join('')
         assetDraggable.src = path.join(project.assetsPath, location + "?random=" + new Date().getTime())
-        assetElement.className += ' animated'
-    } else 
+        assetElement.className += ' ' + asset.type
+    } else {
         assetDraggable.src = path.join(project.assetsPath, asset.location + "?random=" + new Date().getTime())
+    }
     if (id.split(':')[0] !== settings.settings.uuid) {
         assetElement.className += ' downloaded'
     }
@@ -383,13 +388,14 @@ exports.reloadAsset = function(id) {
     assetElement.id = asset.name.toLowerCase()
     assetElement.childNodes[0].innerHTML = asset.name
     let assetDraggable = assetElement.childNodes[1]
-    if (asset.type === "animated") {
+    if (asset.type === "animated" || asset.type === "bundle") {
         let location = asset.location
         location = [location.slice(0, location.length - 4), '.thumb', location.slice(location.length - 4)].join('')
         assetDraggable.src = path.join(project.assetsPath, location + "?random=" + new Date().getTime())
-        assetElement.className += ' animated'
-    } else 
-        assetDraggable.src = path.join(project.assetsPath, asset.location + "?random=" + new Date().getTime()) 
+        assetElement.className += ' ' + asset.type
+    } else {
+        assetDraggable.src = path.join(project.assetsPath, asset.location + "?random=" + new Date().getTime())
+    }
     if (id.split(':')[0] !== settings.settings.uuid) {
         assetElement.className += ' downloaded'
     }
@@ -479,6 +485,10 @@ exports.setPuppet = function(newCharacter, override, preserveHistory) {
     document.getElementById('deadbonesstyle').checked = character.deadbonesStyle
     document.getElementById('eyeBabbleDuration').value = character.eyeBabbleDuration || 2000
     document.getElementById('mouthBabbleDuration').value = character.mouthBabbleDuration || 270
+
+    // Undo asset bundle changes
+    document.getElementById('editor-emotes').style.display = ''
+    document.getElementById('editor-screen').classList.remove('bundle')
 }
 
 exports.keyDown = function(e) {
@@ -551,6 +561,15 @@ exports.disconnect = function() {
     document.getElementById('delete-asset').disabled = false
 }
 
+function setBundle(id) {
+    bundle = project.assets[id]
+    exports.setPuppet(bundle.bundle)
+    bundle.id = id
+
+    document.getElementById('editor-emotes').style.display = 'none'
+    document.getElementById('editor-screen').classList.add('bundle')
+}
+
 function drawBox(box) {
     box.lineStyle(4, 0x242a33)
     box.moveTo(stage.screen.clientWidth / 2 - selected.width / 2 * scale - 12, stage.screen.clientHeight + selected.height / 2 * scale + 12)
@@ -618,6 +637,7 @@ function setSelected(asset) {
     selectedGui.y = selected.y * scale + selectedGui.pivot.y
     selectedGui.rotation = selected.rotation
     stage.stage.addChild(selectedGui)
+    status.info(selected)
 }
 
 function editorMousedown(e) {
@@ -863,7 +883,11 @@ function mouseDown(e) {
         asset.style.left = (e.clientX - asset.width / 2) + 'px'
         e.preventDefault()
         window.addEventListener('mousemove', moveAsset, true);
+    } else if (project.assets[e.target.asset].type === "bundle") {
+        status.info("Opening bundle " + e.target.asset)
+        setBundle(e.target.asset)
     } else {
+        status.info("Opening asset " + e.target.asset)
         openAssetSettings(e.target.asset)
     }
 }
@@ -909,6 +933,11 @@ function moveAsset(e) {
 }
 
 function savePuppet() {
+    if (bundle) {
+        saveBundle()
+        return
+    }
+
     status.log('Saving puppet...', 2, 1)
     selected = null
     if (selectedGui) stage.stage.removeChild(selectedGui)
@@ -1800,6 +1829,12 @@ function cut() {
     if (selected) {
         electron.clipboard.writeText(JSON.stringify(selected.asset))
         switch (layer) {
+            case "bundle":
+                puppet.container.removeChild(selected)
+                for (var i = 0; i < selected.children.length; i++) {
+                    selected.children[i].remove()
+                }
+                break
             case "mouth":
                 puppet.emotes[puppet.emote].mouth.removeChild(selected)
                 character.emotes[puppet.emote].mouth.splice(character.emotes[puppet.emote].mouth.indexOf(selected.asset), 1)
@@ -1832,6 +1867,14 @@ function paste() {
     }
     let asset = stage.getAsset(newAsset, layer)
     switch (layer) {
+        case "bundle":
+            if (project.assets[asset.asset].type !== "bundle") {
+                status.log("Error: You cannot add a non-asset bundle to the asset bundles layer")
+                 break
+            }
+            character.bundles.push(newAsset)
+            exports.setPuppet(character, true, true)
+            break
         case "mouth":
             puppet.emotes[puppet.emote].mouth.addChild(stage.getAsset(newAsset, layer))
             character.emotes[puppet.emote].mouth.push(newAsset)
@@ -1852,6 +1895,12 @@ function paste() {
 function deleteKey() {
     if (selected) {
         switch (layer) {
+            case "bundle":
+                puppet.container.removeChild(selected)
+                for (var i = 0; i < selected.children.length; i++) {
+                    selected.children[i].remove()
+                }
+                break
             case "mouth":
                 puppet.emotes[puppet.emote].mouth.removeChild(selected)
                 character.emotes[puppet.emote].mouth.splice(character.emotes[puppet.emote].mouth.indexOf(selected.asset), 1)

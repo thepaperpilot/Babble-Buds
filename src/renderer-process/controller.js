@@ -289,7 +289,6 @@ exports.addAssetLocal = function(id, asset) {
 		    image.src = path.join(project.assetsPath, asset.location)
 		} else editor.addAsset(id)
 		exports.emitPopout('add asset', id, asset)
-		exports.reloadAsset(id)
 	})
 	for (let i = oldVersion; i < asset.version; i++) {
 		if (asset.panning[i])
