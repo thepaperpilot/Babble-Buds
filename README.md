@@ -1,6 +1,6 @@
 # Babble Buds
 
-> This is an **ALPHA** release. It is not yet feature complete, and existing features are not thoroughly tested. 
+> This is a **BETA** release. It is almost feature complete, and pretty stable but no promises. Backwards compatibility is assured. 
 
 Babble buds is a free, open source puppet show software. It is heavily based on the non-public software called "Puppet Pals", used in URealms Live. The software is written using electron and PIXI.js.
 
