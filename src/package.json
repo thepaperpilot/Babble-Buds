@@ -15,7 +15,7 @@
   "author": "thepaperpilot",
   "license": "CC0-1.0",
   "devDependencies": {
-    "electron-packager": "^8.7.1"
+    "electron-packager": "^8.7.2"
   },
   "dependencies": {
     "babble.js": "~1.6.1",
