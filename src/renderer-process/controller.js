@@ -23,7 +23,6 @@ let popout
 let popoutWindowState
 
 exports.init = function() {
-	status.log('Loading project...', 1, 1)
 	project = remote.getGlobal('project').project
 	application.init()
 	network.init()

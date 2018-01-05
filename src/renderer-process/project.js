@@ -29,6 +29,8 @@ module.exports = {
 			}
 
 			status.init()
+			status.log('Loading project...', 1, 1)
+
 			remote.getGlobal('project').project = this
 			this.project = proj
 			this.oldProject = JSON.stringify(proj)
@@ -38,149 +40,153 @@ module.exports = {
 			this.assetsPath = path.join(filepath, '..', 'assets')
 			this.numCharacters = 0
 
-			let compare = proj.clientVersion ? semver.compare(proj.clientVersion, remote.app.getVersion()) : -1
-			if (compare !== 0) {
-				let options = {
-					"type": "question",
-					"buttons": ["Cancel", "Open Anyways"],
-					"defaultId": 0,
-					"title": "Open Project?",
-					"cancelId": 0
-				}
-				if (compare > 0) {
-					options.message = "You are attempting to open a project made with a more recent version of Babble Buds."
-					options.detail = "Caution is advised. Saving this project will downgrade it to this version of Babble Buds, and may cause problems or lose features."
-				} else {
-					options.message = "You are attempting to open a project made with a less recent version of Babble Buds."
-					options.detail = "Opening this project will upgrade it to this version of Babble Buds."
-				}
-
-				let response = dialog.showMessageBox(options)
-				switch (response) {
-					default: 
-						this.project.clientVersion = remote.app.getVersion();
-						break
-					case 0:
-						main.redirect('welcome.html')
-						return false
-				}
-			}
-
-			for (let i = 0; i < proj.characters.length; i++) {
-				let character = this.characters[proj.characters[i].id] = JSON.parse(this.getEmptyCharacter(true))
-				Object.assign(character, fs.readJsonSync(path.join(this.charactersPath, proj.characters[i].location)))
-				character.name = proj.characters[i].name
-				character.id = proj.characters[i].id
-				if (proj.characters[i].id > this.numCharacters)
-					this.numCharacters = proj.characters[i].id
-				if (Object.prototype.toString.call(character.emotes) === "[object Object]") {
-					// Convert from object to array
-					let arr = []
-					let emotes = ['default', 'happy', 'wink', 'kiss', 'angry', 'sad', 'ponder', 'gasp', 'veryangry', 'verysad', 'confused', 'ooo']
-					for (let i = 0; i < emotes.length; i++) {
-						if (character.emotes[emotes[i]]) {
-							let emote = character.emotes[emotes[i]]
-							emote.name = emotes[i]
-							arr.push(emote)
-						} else {
-							arr.push({
-								enabled: false,
-								mouth: [],
-								eyes: [],
-								name: emotes[i]
-							})
-						}
-					}
-					character.emotes = arr
-					character.emote = emotes.indexOf(character.emote || "default")
-					if (proj.actor.id === character.id) {
-						proj.actor.emote = emotes.indexOf(character.emote || "default")
-					}
-					for (let i = 0; i < character.eyes.length; i++) {
-						character.eyes[i] = emotes.indexOf(character.eyes[i] || "default")
-					}
-					for (let i = 0; i < character.mouths.length; i++) {
-						character.mouths[i] = emotes.indexOf(character.mouths[i] || "default")
-					}
-				}
-			}
-			this.oldCharacters = JSON.stringify(this.characters)
-			this.actor = proj.actor
-
-			// Old version of assets
-			if (proj.assets) {
-				this.assets = {}
-				let oldAssets = {}
-				for (let i = 0; i < proj.assets.length; i++) {
-					let assets = fs.readJsonSync(path.join(this.assetsPath, proj.assets[i].location))
-					oldAssets[proj.assets[i].name] = {}
-					let keys = Object.keys(assets)
-					for (let j = 0; j < keys.length; j++) {
-						assets[keys[j]].tab = proj.assets[i].name
-						assets[keys[j]].version = 0
-						assets[keys[j]].panning = []
-						assets[keys[j]].location = assets[keys[j]].location.replace(/\\/g, '/')
-						this.assets[settings.settings.uuid + ":" + settings.settings.numAssets] = assets[keys[j]]
-						oldAssets[proj.assets[i].name][keys[j]] = settings.settings.numAssets
-						settings.setNumAssets(settings.settings.numAssets + 1)
-					}
-				}
-
-				// Update asset references in puppets
-				let keys = Object.keys(this.characters)
-				for (let i = 0; i < keys.length; i++) {
-					let character = this.characters[keys[i]]
-			    	let topLevel = ["body", "head", "hat", "props"]
-
-			    	for (let j = 0; j < topLevel.length; j++)
-				        for (let k = 0; k < character[topLevel[j]].length; k++) {
-				        	character[topLevel[j]][k].id = settings.settings.uuid + ":" + oldAssets[character[topLevel[j]][k].tab][character[topLevel[j]][k].hash]
-				        	delete character[topLevel[j]][k].tab
-				        	delete character[topLevel[j]][k].hash
-				        }
-
-				    let emotes = Object.keys(character.emotes)
-				    for (let j = 0; j < emotes.length; j++) {
-				    	for (let k = 0; k < character.emotes[emotes[j]].eyes.length; k++) {
-				    		character.emotes[emotes[j]].eyes[k].id = settings.settings.uuid + ":" + oldAssets[character.emotes[emotes[j]].eyes[k].tab][character.emotes[emotes[j]].eyes[k].hash]
-				        	delete character.emotes[emotes[j]].eyes[k].tab
-				        	delete character.emotes[emotes[j]].eyes[k].hash
-				    	}
-				    	for (let k = 0; k < character.emotes[emotes[j]].mouth.length; k++) {
-				    		character.emotes[emotes[j]].mouth[k].id = settings.settings.uuid + ":" + oldAssets[character.emotes[emotes[j]].mouth[k].tab][character.emotes[emotes[j]].mouth[k].hash]
-				        	delete character.emotes[emotes[j]].mouth[k].tab
-				        	delete character.emotes[emotes[j]].mouth[k].hash
-				    	}
-				    }
-				}
-				delete this.project.assets
-			} else {
-				this.assets = fs.readJsonSync(path.join(this.assetsPath, "assets.json"))
-
-				// Cross compatibility - windows will handle UNIX-style paths, but not vice versa
-				let keys = Object.keys(this.assets)
-				for (let i = 0; i < keys.length; i++) {
-					let asset = this.assets[keys[i]]
-					asset.location = asset.location.replace(/\\/g, '/')
-					if (keys[i].split(":")[0] == settings.settings.uuid && parseInt(keys[i].split(":")[1]) >= settings.settings.numAssets)
-						settings.setNumAssets(parseInt(keys[i].split(":")[1]) + 1)
-					if (!asset.version) {
-						asset.version =  0
-						asset.panning = []
-					}
-				}
-			}
-
-			for (let i = 0; i < this.project.characters.length; i++) {
-				fs.removeSync(path.join(this.assetsPath, '..', 'thumbnails', 'new-' + this.project.characters[i].id + '.png'))
-				fs.removeSync(path.join(this.assetsPath, '..', 'thumbnails', 'new-' + this.project.characters[i].id))
-			}
-
 			settings.settings.openProject = filepath
 			settings.save()
-            controller.init()
-			menu.updateMenu()
+
+			requestAnimationFrame(() => {this.loadProject(proj)})
 		})
+	},
+	loadProject: function(proj) {
+		let compare = proj.clientVersion ? semver.compare(proj.clientVersion, remote.app.getVersion()) : -1
+		if (compare !== 0) {
+			let options = {
+				"type": "question",
+				"buttons": ["Cancel", "Open Anyways"],
+				"defaultId": 0,
+				"title": "Open Project?",
+				"cancelId": 0
+			}
+			if (compare > 0) {
+				options.message = "You are attempting to open a project made with a more recent version of Babble Buds."
+				options.detail = "Caution is advised. Saving this project will downgrade it to this version of Babble Buds, and may cause problems or lose features."
+			} else {
+				options.message = "You are attempting to open a project made with a less recent version of Babble Buds."
+				options.detail = "Opening this project will upgrade it to this version of Babble Buds."
+			}
+
+			let response = dialog.showMessageBox(options)
+			switch (response) {
+				default: 
+					this.project.clientVersion = remote.app.getVersion();
+					break
+				case 0:
+					main.redirect('welcome.html')
+					return false
+			}
+		}
+
+		for (let i = 0; i < proj.characters.length; i++) {
+			let character = this.characters[proj.characters[i].id] = JSON.parse(this.getEmptyCharacter(true))
+			Object.assign(character, fs.readJsonSync(path.join(this.charactersPath, proj.characters[i].location)))
+			character.name = proj.characters[i].name
+			character.id = proj.characters[i].id
+			if (proj.characters[i].id > this.numCharacters)
+				this.numCharacters = proj.characters[i].id
+			if (Object.prototype.toString.call(character.emotes) === "[object Object]") {
+				// Convert from object to array
+				let arr = []
+				let emotes = ['default', 'happy', 'wink', 'kiss', 'angry', 'sad', 'ponder', 'gasp', 'veryangry', 'verysad', 'confused', 'ooo']
+				for (let i = 0; i < emotes.length; i++) {
+					if (character.emotes[emotes[i]]) {
+						let emote = character.emotes[emotes[i]]
+						emote.name = emotes[i]
+						arr.push(emote)
+					} else {
+						arr.push({
+							enabled: false,
+							mouth: [],
+							eyes: [],
+							name: emotes[i]
+						})
+					}
+				}
+				character.emotes = arr
+				character.emote = emotes.indexOf(character.emote || "default")
+				if (proj.actor.id === character.id) {
+					proj.actor.emote = emotes.indexOf(character.emote || "default")
+				}
+				for (let i = 0; i < character.eyes.length; i++) {
+					character.eyes[i] = emotes.indexOf(character.eyes[i] || "default")
+				}
+				for (let i = 0; i < character.mouths.length; i++) {
+					character.mouths[i] = emotes.indexOf(character.mouths[i] || "default")
+				}
+			}
+		}
+		this.oldCharacters = JSON.stringify(this.characters)
+		this.actor = proj.actor
+
+		// Old version of assets
+		if (proj.assets) {
+			this.assets = {}
+			let oldAssets = {}
+			for (let i = 0; i < proj.assets.length; i++) {
+				let assets = fs.readJsonSync(path.join(this.assetsPath, proj.assets[i].location))
+				oldAssets[proj.assets[i].name] = {}
+				let keys = Object.keys(assets)
+				for (let j = 0; j < keys.length; j++) {
+					assets[keys[j]].tab = proj.assets[i].name
+					assets[keys[j]].version = 0
+					assets[keys[j]].panning = []
+					assets[keys[j]].location = assets[keys[j]].location.replace(/\\/g, '/')
+					this.assets[settings.settings.uuid + ":" + settings.settings.numAssets] = assets[keys[j]]
+					oldAssets[proj.assets[i].name][keys[j]] = settings.settings.numAssets
+					settings.setNumAssets(settings.settings.numAssets + 1)
+				}
+			}
+
+			// Update asset references in puppets
+			let keys = Object.keys(this.characters)
+			for (let i = 0; i < keys.length; i++) {
+				let character = this.characters[keys[i]]
+		    	let topLevel = ["body", "head", "hat", "props"]
+
+		    	for (let j = 0; j < topLevel.length; j++)
+			        for (let k = 0; k < character[topLevel[j]].length; k++) {
+			        	character[topLevel[j]][k].id = settings.settings.uuid + ":" + oldAssets[character[topLevel[j]][k].tab][character[topLevel[j]][k].hash]
+			        	delete character[topLevel[j]][k].tab
+			        	delete character[topLevel[j]][k].hash
+			        }
+
+			    let emotes = Object.keys(character.emotes)
+			    for (let j = 0; j < emotes.length; j++) {
+			    	for (let k = 0; k < character.emotes[emotes[j]].eyes.length; k++) {
+			    		character.emotes[emotes[j]].eyes[k].id = settings.settings.uuid + ":" + oldAssets[character.emotes[emotes[j]].eyes[k].tab][character.emotes[emotes[j]].eyes[k].hash]
+			        	delete character.emotes[emotes[j]].eyes[k].tab
+			        	delete character.emotes[emotes[j]].eyes[k].hash
+			    	}
+			    	for (let k = 0; k < character.emotes[emotes[j]].mouth.length; k++) {
+			    		character.emotes[emotes[j]].mouth[k].id = settings.settings.uuid + ":" + oldAssets[character.emotes[emotes[j]].mouth[k].tab][character.emotes[emotes[j]].mouth[k].hash]
+			        	delete character.emotes[emotes[j]].mouth[k].tab
+			        	delete character.emotes[emotes[j]].mouth[k].hash
+			    	}
+			    }
+			}
+			delete this.project.assets
+		} else {
+			this.assets = fs.readJsonSync(path.join(this.assetsPath, "assets.json"))
+
+			// Cross compatibility - windows will handle UNIX-style paths, but not vice versa
+			let keys = Object.keys(this.assets)
+			for (let i = 0; i < keys.length; i++) {
+				let asset = this.assets[keys[i]]
+				asset.location = asset.location.replace(/\\/g, '/')
+				if (keys[i].split(":")[0] == settings.settings.uuid && parseInt(keys[i].split(":")[1]) >= settings.settings.numAssets)
+					settings.setNumAssets(parseInt(keys[i].split(":")[1]) + 1)
+				if (!asset.version) {
+					asset.version =  0
+					asset.panning = []
+				}
+			}
+		}
+
+		for (let i = 0; i < this.project.characters.length; i++) {
+			fs.removeSync(path.join(this.assetsPath, '..', 'thumbnails', 'new-' + this.project.characters[i].id + '.png'))
+			fs.removeSync(path.join(this.assetsPath, '..', 'thumbnails', 'new-' + this.project.characters[i].id))
+		}
+
+        controller.init()
+		menu.updateMenu()
 	},
 	saveProject: function() {
 		fs.writeFile(settings.settings.openProject, JSON.stringify(this.project, null, 4))
