@@ -110,7 +110,6 @@ module.exports = {
 			// Old version of assets
 			if (proj.assets) {
 				this.assets = {}
-				this.project.numAssets = 0
 				let oldAssets = {}
 				for (let i = 0; i < proj.assets.length; i++) {
 					let assets = fs.readJsonSync(path.join(this.assetsPath, proj.assets[i].location))
@@ -121,9 +120,9 @@ module.exports = {
 						assets[keys[j]].version = 0
 						assets[keys[j]].panning = []
 						assets[keys[j]].location = assets[keys[j]].location.replace(/\\/g, '/')
-						this.assets[settings.settings.uuid + ":" + this.project.numAssets] = assets[keys[j]]
-						oldAssets[proj.assets[i].name][keys[j]] = this.project.numAssets
-						this.project.numAssets++
+						this.assets[settings.settings.uuid + ":" + settings.settings.numAssets] = assets[keys[j]]
+						oldAssets[proj.assets[i].name][keys[j]] = settings.settings.numAssets
+						settings.setNumAssets(settings.settings.numAssets + 1)
 					}
 				}
 
@@ -163,8 +162,8 @@ module.exports = {
 				for (let i = 0; i < keys.length; i++) {
 					let asset = this.assets[keys[i]]
 					asset.location = asset.location.replace(/\\/g, '/')
-					if (keys[i].split(":")[0] == settings.settings.uuid && parseInt(keys[i].split(":")[1]) >= proj.numAssets)
-						proj.numAssets = parseInt(keys[i].split(":")[1]) + 1
+					if (keys[i].split(":")[0] == settings.settings.uuid && parseInt(keys[i].split(":")[1]) >= settings.settings.numAssets)
+						settings.setNumAssets(parseInt(keys[i].split(":")[1]) + 1)
 					if (!asset.version) {
 						asset.version =  0
 						asset.panning = []
@@ -247,7 +246,8 @@ module.exports = {
 		return true
 	},
 	getNewAssetId: function() {
-		return this.project.numAssets++
+		settings.setNumAssets(settings.settings.numAssets + 1)
+		return settings.settings.numAssets
 	},
 	addAsset: function(id, asset) {
 		this.assets[id] = asset

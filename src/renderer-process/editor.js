@@ -1510,7 +1510,7 @@ function importAssets() {
                                 list[keys[j]].version = 0
                                 list[keys[j]].panning = []
                                 assets["invalid:" + numAssets] = list[keys[j]]
-                                this.numAssets++
+                                numAssets++
                             }
                             readAssetList(this.valueOf(), assets)
                         }

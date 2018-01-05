@@ -13,7 +13,8 @@ module.exports = exports = {
 		openProject: "",
 		recentProjects: [],
 		view: "hybrid",
-		uuid: uuid.v4()
+		uuid: uuid.v4(),
+		numAssets: 0
 	},
 	save: function() {
 		fs.writeJson(filepath, this.settings)
@@ -50,6 +51,10 @@ module.exports = exports = {
 	},
 	setView: function(view) {
 		this.settings.view = view;
+		this.save()
+	},
+	setNumAssets: function(numAssets) {
+		this.settings.numAssets = numAssets;
 		this.save()
 	}
 }
