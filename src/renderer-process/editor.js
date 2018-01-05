@@ -832,11 +832,11 @@ function mouseUp(e) {
                 }
                 switch (layer) {
                     case "mouth":
-                        puppet.emotes[puppet.emote].mouth.addChild(stage.getAsset(newAsset, layer))
+                        puppet.emotes[puppet.emote].mouth.addChild(stage.getAsset(newAsset, layer, puppet.emote))
                         character.emotes[puppet.emote].mouth.push(newAsset)
                         break
                     case "eyes":
-                        puppet.emotes[puppet.emote].eyes.addChild(stage.getAsset(newAsset, layer))
+                        puppet.emotes[puppet.emote].eyes.addChild(stage.getAsset(newAsset, layer, puppet.emote))
                         character.emotes[puppet.emote].eyes.push(newAsset)
                         break
                     default:
