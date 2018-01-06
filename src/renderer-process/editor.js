@@ -57,7 +57,7 @@ exports.init = function() {
     // Override some parts of the stage
     stage.resize = function() {
         this.renderer.resize(this.screen.clientWidth, this.screen.clientHeight)
-        this.slotWidth = this.screen.clientWidth / this.project.numCharacters
+        this.slotWidth = this.screen.clientWidth
         this.puppetStage.scale.x = this.puppetStage.scale.y = scale
         puppet.container.y = this.screen.clientHeight / scale
         puppet.container.x = (this.screen.clientWidth / scale) / 2

@@ -4,8 +4,16 @@
     "puppetScale": 1,
     "greenScreen": "#00FF00",
     "alwaysOnTop": false,
-    "ip": "localhost",
-    "port": 8080,
+    "joinName": "lobby",
+    "joinPassword": "",
+    "joinIp": "babblebuds.xyz",
+    "joinPort": 8080,
+    "createName": "lobby",
+    "createPassword": "",
+    "createIp": "babblebuds.xyz",
+    "createPort": 8080,
+    "createNumCharacters": 5,
+    "createPuppetScale": 1,
     "characters": [
         {
             "name": "Gravy",

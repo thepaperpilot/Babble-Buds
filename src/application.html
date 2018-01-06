@@ -11,61 +11,125 @@
         <div id="bottom" class="container bottom">
             <div id="project-buttons" class="buttons s2">
                 <input type="checkbox" id="greenscreen" class="checkbox"><label for="greenscreen" class="checkbox-label">Green Screen</label>
-                <button id="settings" class="button-tab">Project Settings</button>
                 <button id="popout">Pop Out Stage</button>
-                <button id="host">Host Server</button>
-                <button id="connect">Connect to Server</button>
+                <button id="settings" class="button-tab">Settings</button>
+                <button id="join" class="button-tab">Join Room</button>
+                <button id="create" class="button-tab">Create Room</button>
             </div>
-            <div id="chars" class="s4">
-                <div id="char 0" class="char"><div class="hotkey">1</div><div class="desc"></div></div>
-                <div id="char 1" class="char"><div class="hotkey">2</div><div class="desc"></div></div>
-                <div id="char 2" class="char"><div class="hotkey">3</div><div class="desc"></div></div><br>
-                <div id="char 3" class="char"><div class="hotkey">4</div><div class="desc"></div></div>
-                <div id="char 4" class="char"><div class="hotkey">5</div><div class="desc"></div></div>
-                <div id="char 5" class="char"><div class="hotkey">6</div><div class="desc"></div></div><br>
-                <div id="char 6" class="char"><div class="hotkey">7</div><div class="desc"></div></div>
-                <div id="char 7" class="char"><div class="hotkey">8</div><div class="desc"></div></div>
-                <div id="char 8" class="char"><div class="hotkey">9</div><div class="desc"></div></div>
-            </div>
-            <div id="charselect" class="s4 charselector" style="display: none;">
-                <div id="char selected" class="char" style="margin: 0;"><div class="desc">Keep Current</div></div>
-                <div id="char null" class="char"><div class="desc">Empty</div></div>
-                <div id="char list" class="scroll charlist"></div>
-                <input type="search" id="char search" placeholder="Search" style="width: calc(100% - 8px);">
-            </div>
-            <div id="emotes" class="s4">
-                <div id="0" class="emote selected"><div class="hotkey">u</div><div class="desc">Default</div></div>
-                <div id="1" class="emote"><div class="hotkey">i</div><div class="desc">Happy</div></div>
-                <div id="2" class="emote"><div class="hotkey">o</div><div class="desc">Wink</div></div>
-                <div id="3" class="emote"><div class="hotkey">p</div><div class="desc">Kiss</div></div><br>
-                <div id="4" class="emote"><div class="hotkey">j</div><div class="desc">Angry</div></div>
-                <div id="5" class="emote"><div class="hotkey">k</div><div class="desc">Sad</div></div>
-                <div id="6" class="emote"><div class="hotkey">l</div><div class="desc">Ponder</div></div>
-                <div id="7" class="emote"><div class="hotkey">;</div><div class="desc">Gasp</div></div><br>
-                <div id="8" class="emote"><div class="hotkey">m</div><div class="desc">Very Angry</div></div>
-                <div id="9" class="emote"><div class="hotkey">,</div><div class="desc">Very Sad</div></div>
-                <div id="10" class="emote"><div class="hotkey">.</div><div class="desc">Confused</div></div>
-                <div id="11" class="emote"><div class="hotkey">/</div><div class="desc">Oooooooo</div></div><br>
-                <div id="babble" class="babble"><div class="hotkey">space</div><div class="desc">Babble</div></div>
+            <div id="character-panel" style="width: 100%; height: 100%;">
+                <div id="chars" class="s4">
+                    <div id="char 0" class="char"><div class="hotkey">1</div><div class="desc"></div></div>
+                    <div id="char 1" class="char"><div class="hotkey">2</div><div class="desc"></div></div>
+                    <div id="char 2" class="char"><div class="hotkey">3</div><div class="desc"></div></div><br>
+                    <div id="char 3" class="char"><div class="hotkey">4</div><div class="desc"></div></div>
+                    <div id="char 4" class="char"><div class="hotkey">5</div><div class="desc"></div></div>
+                    <div id="char 5" class="char"><div class="hotkey">6</div><div class="desc"></div></div><br>
+                    <div id="char 6" class="char"><div class="hotkey">7</div><div class="desc"></div></div>
+                    <div id="char 7" class="char"><div class="hotkey">8</div><div class="desc"></div></div>
+                    <div id="char 8" class="char"><div class="hotkey">9</div><div class="desc"></div></div>
+                </div>
+                <div id="charselect" class="s4 charselector" style="display: none;">
+                    <div id="char selected" class="char" style="margin: 0;"><div class="desc">Keep Current</div></div>
+                    <div id="char null" class="char"><div class="desc">Empty</div></div>
+                    <div id="char list" class="scroll charlist"></div>
+                    <input type="search" id="char search" placeholder="Search" style="width: calc(100% - 8px);">
+                </div>
+                <div id="emotes" class="s4">
+                    <div id="0" class="emote selected"><div class="hotkey">u</div><div class="desc">Default</div></div>
+                    <div id="1" class="emote"><div class="hotkey">i</div><div class="desc">Happy</div></div>
+                    <div id="2" class="emote"><div class="hotkey">o</div><div class="desc">Wink</div></div>
+                    <div id="3" class="emote"><div class="hotkey">p</div><div class="desc">Kiss</div></div><br>
+                    <div id="4" class="emote"><div class="hotkey">j</div><div class="desc">Angry</div></div>
+                    <div id="5" class="emote"><div class="hotkey">k</div><div class="desc">Sad</div></div>
+                    <div id="6" class="emote"><div class="hotkey">l</div><div class="desc">Ponder</div></div>
+                    <div id="7" class="emote"><div class="hotkey">;</div><div class="desc">Gasp</div></div><br>
+                    <div id="8" class="emote"><div class="hotkey">m</div><div class="desc">Very Angry</div></div>
+                    <div id="9" class="emote"><div class="hotkey">,</div><div class="desc">Very Sad</div></div>
+                    <div id="10" class="emote"><div class="hotkey">.</div><div class="desc">Confused</div></div>
+                    <div id="11" class="emote"><div class="hotkey">/</div><div class="desc">Oooooooo</div></div><br>
+                    <div id="babble" class="babble"><div class="hotkey">space</div><div class="desc">Babble</div></div>
+                </div>
             </div>
             <div id="settings-panel" class="s8 scroll" style="display: none;">
-                <div class="s5">
-                    Green Screen Color:
-                    <input type="color" id="colorpicker" value="#00FF00" style="width: calc(100% - 16px)">
-                    <input type="checkbox" id="alwaysontop" class="checkbox"><label for="alwaysontop" class="checkbox-label" style="margin-bottom: 24px;">Pop Out Always On Top</label><br>
-                    Server IP: (for connecting only)
-                    <input type="text" id="ip" value="localhost" style="width: calc(100% - 16px)">
+                <h4>General Settings</h4>
+                <div style="display: table;width: 100%;margin-bottom: 24px;">
+                    <div style="display:table-row;">
+                        <div style="width: 50%; display: table-cell; vertical-align: middle;">
+                            Green Screen Color:
+                            <input type="color" id="colorpicker" value="#00FF00" style="width: calc(100% - 16px); margin-bottom: 0">
+                        </div>
+                        <div style="width: 50%; display: table-cell; vertical-align: middle;">
+                            <input type="checkbox" id="alwaysontop" class="checkbox"><label for="alwaysontop" class="checkbox-label">Pop Out Always On Top</label><br>
+                        </div>
+                    </div>
                 </div>
+                <h4>Room Settings</h4>
                 <div class="s5">
                     Puppet Scale:
                     <input type="number" id="puppetscale" value="1" style="width: calc(100% - 16px)" step="0.1">
+                </div>
+                <div class="s5">
                     Number of Slots:
                     <input type="number" id="numslots" value="5" style="width: calc(100% - 16px)">
+                </div>
+            </div>
+            <div id="join-panel" class="s8 scroll" style="display: none;">
+                <button id="joinRoom" class="fillbutton">Join Room</button>
+                <h4>Room Settings</h4>
+                <div class="s5">
+                    Room Name:
+                    <input type="text" id="joinName" value="lobby" style="width: calc(100% - 16px)">
+                </div>
+                <div class="s5">
+                    Room Password:
+                    <input type="text" id="joinPassword" style="width: calc(100% - 16px)">
+                </div>
+                <br/>
+                <h4>Advanced Settings</h4>
+                <div class="s5">
+                    Server IP:
+                    <input type="text" id="joinIp" value="namedraw.tech" style="width: calc(100% - 16px)">
+                </div>
+                <div class="s5">
                     Server Port:
-                    <input type="number" id="port" value="8080" style="width: calc(100% - 16px)">
+                    <input type="number" id="joinPort" value="8080" style="width: calc(100% - 16px)">
+                </div>
+            </div>
+            <div id="create-panel" class="s8 scroll" style="display: none;">
+                <button id="createRoom" class="fillbutton">Create Room</button>
+                <h4>Room Settings</h4>
+                <div class="s5">
+                    Room Name:
+                    <input type="text" id="createName" value="lobby" style="width: calc(100% - 16px)">
+                </div>
+                <div class="s5">
+                    Room Password:
+                    <input type="text" id="createPassword" style="width: calc(100% - 16px)">
+                </div>
+                <br/>
+                <h4>Admin Settings</h4>
+                <div class="s5">
+                    Puppet Scale:
+                    <input type="number" id="createPuppetscale" value="1" style="width: calc(100% - 16px)" step="0.1">
+                </div>
+                <div class="s5">
+                    Number of Slots:
+                    <input type="number" id="createNumslots" value="5" style="width: calc(100% - 16px)">
+                </div>
+                <br/>
+                <h4>Advanced Settings</h4>
+                <div class="s5">
+                    Server IP:
+                    <input type="text" id="createIp" value="namedraw.tech" style="width: calc(100% - 16px)">
+                </div>
+                <div class="s5">
+                    Server Port:
+                    <input type="number" id="createPort" value="8080" style="width: calc(100% - 16px)">
                 </div>
             </div>
         </div>
+
+
         <div id="side" class="container side">
             <div id="editor" class="vbar" style="height: calc( 50% - 8px );">
                 <div id="puppet-buttons" class="sidebuttons">
@@ -199,6 +263,8 @@
                 <button id="delete-asset-list">Delete Asset List</button>
             </div>
         </div>
+
+
         <div id="instructions" style="display: none;">
             <iframe src="./instructions.html" style="width: 100%; height: 500px;" frameborder=0></iframe>
         </div>

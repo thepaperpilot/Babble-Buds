@@ -37,7 +37,9 @@ window.onkeyup = function(e) {
     remote.getCurrentWindow().getParentWindow().webContents.send('keyUp', key)
 }
 
-electron.ipcRenderer.on('resize', () => {
+electron.ipcRenderer.on('resize', (puppetScale, numCharacters) => {
+    stage.project.puppetScale = puppetScale
+    stage.project.numCharacters = numCharacters
     stage.resize()
 })
 

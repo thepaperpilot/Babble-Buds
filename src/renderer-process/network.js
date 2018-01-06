@@ -130,14 +130,12 @@ exports.host = function() {
 			socket.broadcast.emit('jiggle', id)
 		})
 		socket.on('set scale', (scale) => {
-			project.project.puppetScale = scale
-			document.getElementById('puppetscale').value = scale
+			project.network.puppetScale = scale
 			controller.resize()
 			socket.broadcast.emit('set scale', scale)
 		})
 		socket.on('set slots', (slots) => {
-			project.project.numCharacters = slots
-			document.getElementById('numslots').value = slots
+			project.network.numCharacters = slots
 			controller.resize()
 			socket.broadcast.emit('set slots', slots)
 		})
@@ -315,13 +313,11 @@ exports.connect = function() {
 		}
 	})
 	socket.on('set scale', (scale) => {
-		project.project.puppetScale = scale
-		document.getElementById('puppetscale').value = scale
+		project.network.puppetScale = scale
 		controller.resize()
 	})
 	socket.on('set slots', (slots) => {
-		project.project.numCharacters = slots
-		document.getElementById('numslots').value = slots
+		project.network.numCharacters = slots
 		controller.resize()
 	})
 	socket.on('move asset', controller.changeAssetTabLocal)
