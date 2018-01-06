@@ -233,7 +233,7 @@ exports.toggleModal = function(string) {
 function keyDown(e) {
 	let key = e.keyCode ? e.keyCode : e.which
 
-	if (e.target && (e.target.type === 'number' || e.target.type === 'text' || e.target.type === 'search'))
+	if (e.target && (e.target.type === 'number' || e.target.type === 'text' || e.target.type === 'search' || e.target.type === 'select-one'))
 		return
 
 	if (key == 32) {
@@ -245,7 +245,7 @@ function keyDown(e) {
 function keyUp(e) {
 	let key = e.keyCode ? e.keyCode : e.which
 
-	if (e.target && (e.target.type === 'number' || e.target.type === 'text' || e.target.type === 'search'))
+	if (e.target && (e.target.type === 'number' || e.target.type === 'text' || e.target.type === 'search' || e.target.type === 'select-one'))
 		return
 
 	if (editor.keyDown(e))
