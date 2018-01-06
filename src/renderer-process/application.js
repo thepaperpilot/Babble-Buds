@@ -49,14 +49,22 @@ exports.init = function() {
 	document.getElementById('babble').addEventListener('mouseup', controller.stopBabblingLocal)
 	document.getElementById('popout').addEventListener('click', controller.togglePopout)
 	document.getElementById('settings').addEventListener('click', toggleSettings)
+	document.getElementById('join').addEventListener('click', toggleJoinRoom)
+	document.getElementById('create').addEventListener('click', toggleCreateRoom)
 	document.getElementById('colorpicker').addEventListener('change', colorpickerChange)
 	document.getElementById('alwaysontop').addEventListener('click', toggleAlwaysOnTop)
 	document.getElementById('puppetscale').addEventListener('change', puppetscaleChange)
 	document.getElementById('numslots').addEventListener('change', numslotsChange)
-	document.getElementById('ip').addEventListener('change', ipChange)
-	document.getElementById('port').addEventListener('change', portChange)
-	document.getElementById('host').addEventListener('click', network.host)
-	document.getElementById('connect').addEventListener('click', network.connect)
+	document.getElementById('createPuppetscale').addEventListener('change', createPuppetscaleChange)
+	document.getElementById('createNumslots').addEventListener('change', createNumslotsChange)
+	document.getElementById('joinName').addEventListener('change', (e) => { project.project.joinName = e.target.value })
+	document.getElementById('joinPassword').addEventListener('change', (e) => { project.project.joinPassword = e.target.value })
+	document.getElementById('joinIp').addEventListener('change', (e) => { project.project.joinIp = e.target.value })
+	document.getElementById('joinPort').addEventListener('change', (e) => { project.project.joinPort = parseInt(e.target.value) })
+	document.getElementById('createName').addEventListener('change', (e) => { project.project.createName = e.target.value })
+	document.getElementById('createPassword').addEventListener('change', (e) => { project.project.createPassword = e.target.value })
+	document.getElementById('createIp').addEventListener('change', (e) => { project.project.createIp = e.target.value })
+	document.getElementById('createPort').addEventListener('change', (e) => { project.project.createPort = parseInt(e.target.value) })
 	document.getElementById('autocrop-btn').addEventListener('click', startAutocrop)
 	document.getElementById('prune-btn').addEventListener('click', pruneAssets)
 
@@ -104,8 +112,16 @@ exports.init = function() {
 	document.getElementById('alwaysontop').checked = project.project.alwaysOnTop
 	document.getElementById('puppetscale').value = project.project.puppetScale
 	document.getElementById('numslots').value = project.project.numCharacters
-	document.getElementById('ip').value = project.project.ip
-	document.getElementById('port').value = project.project.port
+	document.getElementById('joinName').value = project.project.joinName
+	document.getElementById('joinPassword').value = project.project.joinPassword
+	document.getElementById('joinIp').value = project.project.joinIp
+	document.getElementById('joinPort').value = project.project.joinPort
+	document.getElementById('createName').value = project.project.createName
+	document.getElementById('createPassword').value = project.project.createPassword
+	document.getElementById('createIp').value = project.project.createIp
+	document.getElementById('createPort').value = project.project.createPort
+	document.getElementById('createPuppetscale').value = project.project.createPuppetScale
+	document.getElementById('createNumslots').value = project.project.createNumCharacters
 }
 
 // Update UI when user selects a new puppet
@@ -233,7 +249,7 @@ exports.toggleModal = function(string) {
 function keyDown(e) {
 	let key = e.keyCode ? e.keyCode : e.which
 
-	if (e.target && (e.target.type === 'number' || e.target.type === 'text' || e.target.type === 'search'))
+	if (e.target && (e.target.type === 'number' || e.target.type === 'text' || e.target.type === 'search' || e.target.type === 'select-one'))
 		return
 
 	if (key == 32) {
@@ -245,7 +261,7 @@ function keyDown(e) {
 function keyUp(e) {
 	let key = e.keyCode ? e.keyCode : e.which
 
-	if (e.target && (e.target.type === 'number' || e.target.type === 'text' || e.target.type === 'search'))
+	if (e.target && (e.target.type === 'number' || e.target.type === 'text' || e.target.type === 'search' || e.target.type === 'select-one'))
 		return
 
 	if (editor.keyDown(e))
@@ -384,15 +400,54 @@ function emoteClick(e) {
 function toggleSettings() {
 	if (document.getElementById('settings-panel').style.display == 'none') {
 		document.getElementById('settings-panel').style.display = 'block'
-		document.getElementById('chars').style.display = 'none'
-		document.getElementById('charselect').style.display = 'none'
-		document.getElementById('emotes').style.display = 'none'
+		document.getElementById('character-panel').style.display = 'none'
+		document.getElementById('join-panel').style.display = 'none'
+		document.getElementById('create-panel').style.display = 'none'
+		
 		document.getElementById('settings').classList.add('open-tab')
+		document.getElementById('join').classList.remove('open-tab')
+		document.getElementById('create').classList.remove('open-tab')
 	} else {
 		document.getElementById('settings-panel').style.display = 'none'
-		document.getElementById('chars').style.display = 'block'
-		document.getElementById('emotes').style.display = 'block'
+		document.getElementById('character-panel').style.display = 'block'
+
 		document.getElementById('settings').classList.remove('open-tab')
+	}
+}
+
+function toggleJoinRoom() {
+	if (document.getElementById('join-panel').style.display == 'none') {
+		document.getElementById('settings-panel').style.display = 'none'
+		document.getElementById('character-panel').style.display = 'none'
+		document.getElementById('join-panel').style.display = 'block'
+		document.getElementById('create-panel').style.display = 'none'
+		
+		document.getElementById('settings').classList.remove('open-tab')
+		document.getElementById('join').classList.add('open-tab')
+		document.getElementById('create').classList.remove('open-tab')
+	} else {
+		document.getElementById('join-panel').style.display = 'none'
+		document.getElementById('character-panel').style.display = 'block'
+
+		document.getElementById('join').classList.remove('open-tab')
+	}
+}
+
+function toggleCreateRoom() {
+	if (document.getElementById('create-panel').style.display == 'none') {
+		document.getElementById('settings-panel').style.display = 'none'
+		document.getElementById('character-panel').style.display = 'none'
+		document.getElementById('join-panel').style.display = 'none'
+		document.getElementById('create-panel').style.display = 'block'
+		
+		document.getElementById('settings').classList.remove('open-tab')
+		document.getElementById('join').classList.remove('open-tab')
+		document.getElementById('create').classList.add('open-tab')
+	} else {
+		document.getElementById('create-panel').style.display = 'none'
+		document.getElementById('character-panel').style.display = 'block'
+
+		document.getElementById('create').classList.remove('open-tab')
 	}
 }
 
@@ -409,21 +464,23 @@ function toggleAlwaysOnTop(e) {
 function puppetscaleChange(e) {
 	project.project.puppetScale = parseFloat(e.target.value)
 	controller.resize()
-	network.emit('set scale', project.project.puppetScale)
 }
 
 function numslotsChange(e) {
 	project.project.numCharacters = parseInt(e.target.value)
 	controller.resize()
+}
+
+function createPuppetscaleChange(e) {
+	project.project.createPuppetScale = project.network.puppetScale = parseFloat(e.target.value)
+	controller.resize()
+	network.emit('set scale', project.project.puppetScale)
+}
+
+function createNumslotsChange(e) {
+	project.project.createNumCharacters = project.network.numCharacters = parseInt(e.target.value)
+	controller.resize()
 	network.emit('set slots', project.project.numCharacters)
-}
-
-function ipChange(e) {
-	project.project.ip = e.target.value
-}
-
-function portChange(e) {
-	project.project.port = parseInt(e.target.value)
 }
 
 function removeStageView() {

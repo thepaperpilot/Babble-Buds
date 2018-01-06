@@ -26,7 +26,7 @@ exports.init = function() {
 	project = remote.getGlobal('project').project
 	application.init()
 	network.init()
-	stage = new babble.Stage('screen', project.project, project.assets, project.assetsPath, loadPuppets, status)
+	stage = new babble.Stage('screen', Object.assign({}, project.project), project.assets, project.assetsPath, loadPuppets, status)
 	window.addEventListener("resize", () => {stage.resize(); stage.resize()})
 
 	popoutWindowState = windowStateKeeper({
@@ -222,6 +222,7 @@ exports.emitPopout = function(...args) {
 
 exports.setupPopout = function() {
 	exports.emitPopout('setup', project, project.getPuppet(), puppet.id)
+	exports.resize()
 }
 
 exports.initPopout = function() {
@@ -239,9 +240,13 @@ exports.initPopout = function() {
 }
 
 exports.resize = function() {
+	let puppetScale = network.isNetworking() ? project.network.puppetScale : project.project.puppetScale
+	let numCharacters = network.isNetworking() ? project.network.numCharacters : project.project.numCharacters
+	stage.project.puppetScale = puppetScale
+	stage.project.numCharacters = numCharacters
 	stage.resize()
 	editor.resize()
-	exports.emitPopout('resize')
+	exports.emitPopout('resize', puppetScale, numCharacters)
 }
 
 exports.updateHotbar = function(i, puppet) {

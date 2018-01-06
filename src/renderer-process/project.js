@@ -12,6 +12,51 @@ const semver = require('semver')
 const path = require('path')
 
 module.exports = {
+	defaults: {
+	    "clientVersion": "0.7.0",
+	    "numCharacters": 5,
+	    "puppetScale": 1,
+	    "greenScreen": "#00FF00",
+	    "alwaysOnTop": false,
+	    "joinName": "lobby",
+	    "joinPassword": "",
+	    "joinIp": "babblebuds.xyz",
+	    "joinPort": 8080,
+	    "createName": "lobby",
+	    "createPassword": "",
+	    "createIp": "babblebuds.xyz",
+	    "createPort": 8080,
+	    "createNumCharacters": 5,
+	    "createPuppetScale": 1,
+	    "characters": [
+	        {
+	            "name": "",
+	            "id": 1,
+	            "location": "1.json"
+	        }
+	    ],
+	    "hotbar": [
+	        1,
+	        0,
+	        0,
+	        0,
+	        0,
+	        0,
+	        0,
+	        0,
+	        0
+	    ],
+	    "actor": {
+	        "id": 1,
+	        "position": 1,
+	        "facingLeft": false,
+	        "emote": 0
+	    }
+	},
+	network : {
+		"numCharacters": 5,
+		"puppetScale": 1
+	},
     // project: {},
     // characters: {},
     // charactersPath: "",
@@ -32,8 +77,10 @@ module.exports = {
 			status.log('Loading project...', 1, 1)
 
 			remote.getGlobal('project').project = this
-			this.project = proj
-			this.oldProject = JSON.stringify(proj)
+
+			// clones default properties, then overrides them with project's properties
+			this.project = Object.assign(Object.assign({}, this.defaults), proj)
+			this.oldProject = JSON.stringify(this.project)
 			this.characters = {}
 			this.assets = {}
 			this.charactersPath = path.join(filepath, '..', 'characters')
@@ -43,7 +90,7 @@ module.exports = {
 			settings.settings.openProject = filepath
 			settings.save()
 
-			requestAnimationFrame(() => {this.loadProject(proj)})
+			requestAnimationFrame(() => {this.loadProject(this.project)})
 		})
 	},
 	loadProject: function(proj) {

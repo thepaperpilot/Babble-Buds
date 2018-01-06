@@ -68,6 +68,13 @@ button:disabled, select:disabled, input:disabled {
 	color: #888;
 }
 
+h4 {
+	border-bottom: solid white;
+    text-align: center;
+    width: 50%;
+    margin: .25em auto .5em auto;
+}
+
 .container {
 	background-color: #242a33;
 	box-shadow: 2px 2px 3px #222;
@@ -134,6 +141,7 @@ body > .editormain {
 
 .s5 {
 	width: 50%;
+	height: unset;
 }
 
 .s8 {
@@ -353,6 +361,7 @@ body > .small .justify {
 
 .fillbutton {
 	width: calc( 100% - 20px );
+    text-align: center;
 }
 
 .desc{
@@ -588,10 +597,10 @@ body > .small .justify {
 }
 
 .button-tab {
-    padding: 11px 40px 11px 16px;
+    padding: 11px 100% 11px 16px;
     margin: 0;
     margin-top: 4px;
-    margin-right: -8px;
+    margin-right: -100%;
 }
 
 .dropdown {
