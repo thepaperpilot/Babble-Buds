@@ -180,6 +180,22 @@ server.sockets.on('connection', function(socket) {
 		if (logLevel >= 3) console.log(socket.id + " jiggled")
 		socket.broadcast.to(socket.room).emit('jiggle', id)
 	})
+	socket.on('banish', () => {
+		let room = rooms[socket.room]
+		if (!socket.room || !room || room.host !== socket.id) return
+		if (logLevel >= 3) console.log(socket.id + " sent all puppets off the stage")
+		socket.broadcast.to(socket.room).emit('banish')
+        for (let i = 0; i < room.puppets.length; i++) {
+            let puppet = room.puppets[i]
+            if (puppet.target > room.numCharacters / 2) {
+                puppet.target = room.numCharacters + 1
+                puppet.facingLeft = false
+            } else {
+                puppet.target = 0
+                puppet.facingLeft = true
+            }
+        }
+	})
 	socket.on('set scale', (scale) => {
 		let room = rooms[socket.room]
 		if (!socket.room || !room || room.host !== socket.id) return

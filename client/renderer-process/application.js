@@ -56,6 +56,7 @@ exports.init = function() {
 	document.getElementById('numslots').addEventListener('change', numslotsChange)
 	document.getElementById('ip').addEventListener('change', (e) => { project.project.ip = e.target.value })
 	document.getElementById('port').addEventListener('change', (e) => { project.project.port = parseInt(e.target.value) })
+	document.getElementById('banish').addEventListener('click', controller.banishLocal)
 	document.getElementById('connect').addEventListener('click', network.connect)
 	document.getElementById('joinRoom').addEventListener('click', network.join)
 	document.getElementById('createRoom').addEventListener('click', network.create)

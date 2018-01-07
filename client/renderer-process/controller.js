@@ -140,11 +140,19 @@ exports.stopBabblingLocal = function() {
 }
 
 exports.jiggleLocal = function() {
-	// Stop Babbling
+	// Jiggle
 	exports.jiggle(puppet.id)
 
 	// Update Server
 	network.emit('jiggle', puppet.id)
+}
+
+exports.banishLocal = function() {
+	// Banish
+	exports.banish()
+
+	// Update server
+	network.emit('banish')
 }
 
 exports.setPuppet = function(id, puppet) {
@@ -209,6 +217,14 @@ exports.jiggle = function(id) {
 
 	// Update popout
 	if (popout) popout.webContents.send('jiggle', id)
+}
+
+exports.banish = function() {
+	// Banish
+	stage.banishPuppets()
+
+	// Update popout
+	if (popout) popout.webContents.send('banish')
 }
 
 exports.togglePopout = function() {
@@ -480,14 +496,6 @@ exports.disconnect = function() {
 	character = JSON.parse(JSON.stringify(project.getPuppet()))
 	exports.resize()
 	if (popout) popout.webContents.send('disconnect', project.getPuppet())
-}
-
-exports.host = function() {
-	editor.connect()
-	if (popout) {
-		popout.webContents.send('connect')
-		popout.webContents.send('assign puppet', project.getPuppet())
-	}
 }
 
 exports.assign = function(id) {

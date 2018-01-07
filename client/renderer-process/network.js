@@ -179,6 +179,7 @@ exports.connect = function(callback) {
 	socket.on('start babbling', controller.startBabbling)
 	socket.on('stop babbling', controller.stopBabbling)
 	socket.on('jiggle', controller.jiggle)
+	socket.on('banish', controller.banish)
 	socket.on('remove puppet', (id) => {
 		controller.removePuppet(id)
 		for (let i = 0; i < puppets.length; i++) {
