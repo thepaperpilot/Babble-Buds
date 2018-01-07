@@ -257,13 +257,13 @@ function leaveRoom(socket) {
 	if (room.host === socket.id) {
 		if (logLevel >= 1) console.log("Closing room:", socket.room)
 		server.sockets.in(socket.room).emit('leave room')
+		delete rooms[socket.room]
 		let sockets = server.sockets.in(socket.room).sockets
 		let keys = Object.keys(sockets)
 		for (let i = 0; i < keys.length; i++) {
 			sockets[keys[i]].leave(socket.room)
 			sockets[keys[i]].room = null
 		}
-		delete rooms[socket.room]
 		fs.remove(path.join(assetsPath, room.host))
 	} else {
 		socket.emit('leave room')
