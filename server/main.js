@@ -67,10 +67,12 @@ server.sockets.on('connection', function(socket) {
 	socket.on('create room', (name, password, puppetScale, numCharacters) => {
 		if (socket.room) {
 			socket.emit('info', 'Already in a room')
+			return
 		}
 
 		if (rooms[name]) {
 			socket.emit('info', 'Room already exists')
+			return
 		}
 
 		socket.join(name)
@@ -254,7 +256,6 @@ function leaveRoom(socket) {
 		fs.remove(path.join(assetsPath, room.host))
 	} else {
 		socket.emit('leave room')
-		socket.room = null
 		for (var i = 0; i < room.puppets.length; i++) {
 			if (room.puppets[i].socket === socket.id) {
 				socket.broadcast.to(socket.room).emit('remove puppet', room.puppets[i].charId)
@@ -262,5 +263,6 @@ function leaveRoom(socket) {
 				break
 			}
 		}
+		socket.room = null
 	}
 }
