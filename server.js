@@ -9,18 +9,13 @@ const ss = require('socket.io-stream')
 
 // Settings
 var port = process.env.babblePort || 8080 // Will read port from environment variable "babblePort" or default to 8080
-var numCharacters = 5
-var puppetScale = 1
 var assetsPath = path.join(__dirname, 'assets')
 var logLevel = 2 // 0 = No messages, 1 = Connect/Disconnect messages, 2 = Also include puppet changes, 3 = All known commands
 var clientVersion = "~0.7.0"	// Clients will need to match this version/range
 
 // Variables
 var server
-var puppets = []
-var assets = {}
-var numPuppets = 1
-var assetsDownloading = 0
+var rooms = {}
 
 // Create server & socket
 if (logLevel >= 1) console.log("Starting server on port " + port + "...")
@@ -37,140 +32,235 @@ if (logLevel >= 1) console.log("Adding listeners...")
 server.sockets.on('connection', function(socket) {
 	if (logLevel >= 1) console.log("New connection:", socket.id)
 
-	// Send project settings
-	socket.emit('set scale', puppetScale)
-	socket.emit('set slots', numCharacters)
+	// Send server version, to ensure client version is compatible
 	socket.emit('serverVersion', clientVersion)
 
-	// Send list of assets
-	let keys = Object.keys(assets)
-	for (let i = 0; i < keys.length; i++) {
-		let asset = JSON.parse(JSON.stringify((assets[keys[i]])))
-		socket.emit('add asset', keys[i], asset)
-	}
-
 	// Add Application Listeners
-	socket.on('add puppet', (puppet) => {
-		if (logLevel >= 1) console.log("Received puppet from " + socket.id)
-		for (var i = 0; i < puppets.length; i++) {
-			socket.emit('add puppet', puppets[i])
+	socket.on('join room', (name, password) => {
+		if (socket.room) {
+			socket.emit('info', 'Already in a room')
+			return
 		}
-		numPuppets++
+
+		if (!rooms[name] || rooms[name].password !== password) {
+			socket.emit('info', 'Wrong password or room does not exist.')
+			return
+		}
+
+		socket.join(name)
+		socket.room = name
+		socket.emit('joined room', name)
+		if (logLevel >= 1) console.log(socket.id + " joined room:", name)
+
+		// Send room settings
+		let room = rooms[name]
+		socket.emit('set scale', room.puppetScale)
+		socket.emit('set slots', room.numCharacters)
+
+		// Send list of assets
+		let keys = Object.keys(room.assets)
+		for (let i = 0; i < keys.length; i++) {
+			let asset = JSON.parse(JSON.stringify((room.assets[keys[i]])))
+			socket.emit('add asset', keys[i], asset)
+		}
+	})
+	socket.on('create room', (name, password, puppetScale, numCharacters) => {
+		if (socket.room) {
+			socket.emit('info', 'Already in a room')
+		}
+
+		if (rooms[name]) {
+			socket.emit('info', 'Room already exists')
+		}
+
+		socket.join(name)
+		socket.room = name
+		rooms[name] = {
+			host: socket.id,
+			password: password,
+			puppetScale: puppetScale,
+			numCharacters: numCharacters,
+			puppets: [],
+			assets: {},
+			numPuppets: 0
+		}
+		socket.emit('created room', name)
+		if (logLevel >= 1) console.log(socket.id + " created room:", name)
+	})
+	socket.on('leave room', () => {
+		leaveRoom(socket)
+	})
+	socket.on('add puppet', (puppet) => {
+		let room = rooms[socket.room]
+		if (!socket.room || !room) return
+		if (logLevel >= 1) console.log("Received puppet from " + socket.id)
+		for (var i = 0; i < room.puppets.length; i++) {
+			socket.emit('add puppet', room.puppets[i])
+		}
+		room.numPuppets++
 		puppet.socket = socket.id
-		puppet.charId = numPuppets
-		puppets.push(puppet)
-		socket.emit('assign puppet', numPuppets)
-		socket.broadcast.emit('add puppet', puppet)
+		puppet.charId = room.numPuppets
+		room.puppets.push(puppet)
+		socket.emit('assign puppet', room.numPuppets)
+		socket.broadcast.to(socket.room).emit('add puppet', puppet)
 	})
 	socket.on('set puppet', (id, puppet) => {
+		let room = rooms[socket.room]
+		if (!socket.room || !room) return
 		if (logLevel >= 2) console.log(socket.id + " changed puppets")
-		socket.broadcast.emit('set puppet', id, puppet)
-		for (var i = 0; i < puppets.length; i++) {
-			if (puppets[i].charId == id) {
-				puppet.socket = puppets[i].socket
-				puppet.charId = puppets[i].charId
-				puppets[i] = puppet
+		socket.broadcast.to(socket.room).emit('set puppet', id, puppet)
+		for (var i = 0; i < room.puppets.length; i++) {
+			if (room.puppets[i].charId == id) {
+				puppet.socket = room.puppets[i].socket
+				puppet.charId = room.puppets[i].charId
+				room.puppets[i] = puppet
 				break
 			}
 		}
 	})
 	socket.on('set emote', (id, emote) => {
+		let room = rooms[socket.room]
+		if (!socket.room || !room) return
 		if (logLevel >= 3) console.log(socket.id + " changed to emote " + emote)
-		socket.broadcast.emit('set emote', id, emote)
-		for (var i = 0; i < puppets.length; i++) {
-			if (puppets[i].charId == id) {
-				puppets[i].emote = emote
+		socket.broadcast.to(socket.room).emit('set emote', id, emote)
+		for (var i = 0; i < room.puppets.length; i++) {
+			if (room.puppets[i].charId == id) {
+				room.puppets[i].emote = emote
 				break
 			}
 		}
 	})
 	socket.on('move left', (id) => {
+		let room = rooms[socket.room]
+		if (!socket.room || !room) return
 		if (logLevel >= 3) console.log(socket.id + " moved left")
-		socket.broadcast.emit('move left', id)
-		for (var i = 0; i < puppets.length; i++) {
-			if (puppets[i].charId == id) {
-				if (puppets[i].facingLeft)
-					puppets[i].position--
+		socket.broadcast.to(socket.room).emit('move left', id)
+		for (var i = 0; i < room.puppets.length; i++) {
+			if (room.puppets[i].charId == id) {
+				if (room.puppets[i].facingLeft)
+					room.puppets[i].position--
 				else
-					puppets[i].facingLeft = true
+					room.puppets[i].facingLeft = true
 				break
 			}
 		}
 	})
 	socket.on('move right', (id) => {
+		let room = rooms[socket.room]
+		if (!socket.room || !room) return
 		if (logLevel >= 3) console.log(socket.id + " moved right")
-		socket.broadcast.emit('move right', id)
-		for (var i = 0; i < puppets.length; i++) {
-			if (puppets[i].charId == id) {
-				if (puppets[i].facingLeft)
-					puppets[i].facingLeft = true
+		socket.broadcast.to(socket.room).emit('move right', id)
+		for (var i = 0; i < room.puppets.length; i++) {
+			if (room.puppets[i].charId == id) {
+				if (room.puppets[i].facingLeft)
+					room.puppets[i].facingLeft = true
 				else
-					puppets[i].position++
+					room.puppets[i].position++
 				break
 			}
 		}
 	})
 	socket.on('start babbling', (id) => {
+		let room = rooms[socket.room]
+		if (!socket.room || !room) return
 		if (logLevel >= 3) console.log(socket.id + " started babbling")
-		socket.broadcast.emit('start babbling', id)
+		socket.broadcast.to(socket.room).emit('start babbling', id)
 	})
 	socket.on('stop babbling', (id) => {
+		let room = rooms[socket.room]
+		if (!socket.room || !room) return
 		if (logLevel >= 3) console.log(socket.id + " stopped babbling")
-		socket.broadcast.emit('stop babbling', id)
+		socket.broadcast.to(socket.room).emit('stop babbling', id)
 	})
 	socket.on('jiggle', (id) => {
+		let room = rooms[socket.room]
+		if (!socket.room || !room) return
 		if (logLevel >= 3) console.log(socket.id + " jiggled")
-		socket.broadcast.emit('jiggle', id)
+		socket.broadcast.to(socket.room).emit('jiggle', id)
 	})
 	socket.on('set scale', (scale) => {
+		let room = rooms[socket.room]
+		if (!socket.room || !room || room.host !== socket.id) return
 		if (logLevel >= 3) console.log(socket.id + " changed the puppetScale to " + scale)
-		puppetScale = scale
-		socket.broadcast.emit('set scale', scale)
+		room.puppetScale = scale
+		socket.broadcast.to(socket.room).emit('set scale', scale)
 	})
 	socket.on('set slots', (slots) => {
+		let room = rooms[socket.room]
+		if (!socket.room || !room || room.host !== socket.id) return
 		if (logLevel >= 3) console.log(socket.id + " changed the puppetScale to " + slots)
-		numCharacters = slots
-		socket.broadcast.emit('set slots', slots)
+		room.numCharacters = slots
+		socket.broadcast.to(socket.room).emit('set slots', slots)
 	})
 	socket.on('move asset', (tab, asset, newTab) => {
+		let room = rooms[socket.room]
+		if (!socket.room || !room) return
 		if (logLevel >= 3) console.log(socket.id + " moved asset " + tab + "-" + asset + " to " + newTab)
-		socket.broadcast.emit('move asset', tab, asset, newTab)
+		socket.broadcast.to(socket.room).emit('move asset', tab, asset, newTab)
 	})
 	socket.on('delete asset', (tab, asset) => {
+		let room = rooms[socket.room]
+		if (!socket.room || !room) return
 		if (logLevel >= 3) console.log(socket.id + " deleted asset " + tab + "-" + asset)
-		socket.broadcast.emit('delete asset', tab, asset)
+		socket.broadcast.to(socket.room).emit('delete asset', tab, asset)
 	})
 
+	socket.on('disconnecting', () => {
+		leaveRoom(socket)		
+	})
 	socket.on('disconnect', () => {
 		if (logLevel >= 1) console.log(socket.id + " disconnected.")
-		for (var i = 0; i < puppets.length; i++) {
-			if (puppets[i].socket === socket.id) {
-				server.emit('remove puppet', puppets[i].charId)
-				puppets.splice(i, 1)
-				break
-			}
-		}
 	})
 
 	socket.on('add asset', (id, asset) => {
+		let room = rooms[socket.room]
+		if (!socket.room || !room) return
 		if (logLevel >= 3) console.log("Received new asset " + JSON.stringify(asset) + " from " + socket.id)
-		if (!assets[id] || asset.version > assets[id].version) {
+		if (!room.assets[id] || asset.version > room.assets[id].version) {
 			if (logLevel >= 3) console.log("Downloading new asset from " + socket.id)
-			assetsDownloading++
 			var stream = ss.createStream()
-			fs.ensureDirSync(path.join(assetsPath, id.split(':')[0]))
+			fs.ensureDirSync(path.join(assetsPath, room.host, id.split(':')[0]))
 			ss(socket).emit('request asset', stream, id)
 			stream.on('end', () => {
-				assets[id] = asset
-				socket.broadcast.emit('add asset', id, asset)
-				assetsDownloading--
+				room.assets[id] = asset
+				socket.broadcast.to(socket.room).emit('add asset', id, asset)
 			})
-			stream.pipe(fs.createWriteStream(path.join(assetsPath, id.split(':')[0], id.split(':')[1] + '.png')))
+			stream.pipe(fs.createWriteStream(path.join(assetsPath, room.host, id.split(':')[0], id.split(':')[1] + '.png')))
 		}
 	})
 	ss(socket).on('request asset', function(stream, id) {
-		fs.createReadStream(path.join(assetsPath, assets[id].location)).pipe(stream)
+		let room = rooms[socket.room]
+		if (!socket.room || !room) return
+		fs.createReadStream(path.join(assetsPath, room.host, room.assets[id].location)).pipe(stream)
 	})
 })
 
 if (logLevel >= 1) console.log("Started Server!")
+
+function leaveRoom(socket) {
+	let room = rooms[socket.room]
+	if (!socket.room || !room) return
+	if (logLevel >= 1) console.log(socket.id + " left room:", socket.room)
+	if (room.host === socket.id) {
+		if (logLevel >= 1) console.log("Closing room:", socket.room)
+		server.sockets.in(socket.room).emit('leave room')
+		let sockets = server.sockets.in(socket.room).sockets
+		let keys = Object.keys(sockets)
+		for (let i = 0; i < keys.length; i++) {
+			sockets[keys[i]].leave(socket.room)
+			sockets[keys[i]].room = null
+		}
+		delete rooms[socket.room]
+		fs.remove(path.join(assetsPath, room.host))
+	} else {
+		socket.emit('leave room')
+		socket.room = null
+		for (var i = 0; i < room.puppets.length; i++) {
+			if (room.puppets[i].socket === socket.id) {
+				socket.broadcast.to(socket.room).emit('remove puppet', room.puppets[i].charId)
+				room.puppets.splice(i, 1)
+				break
+			}
+		}
+	}
+}

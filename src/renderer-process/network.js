@@ -12,186 +12,45 @@ const semver = require('semver')
 // Vars
 let project
 let server = null
+let room = null
 let puppets = []
-let numPuppets = 1
-let puppetsToAdd = []
 
 exports.init = function() {
 	project = require('electron').remote.getGlobal('project').project
 }
 
-exports.host = function() {
-	if (server) {
-		if (!server.io) {
-			stopNetworking()
-			return
-		}
-		stopNetworking()
+exports.join = function() {
+	if (room) {
+		server.emit('leave room')
+		return
 	}
 
-	status.log('Starting host...', 2, 1)
-	document.getElementById('host').innerHTML = 'Close Server'
-	puppets = []
-
-	// Create server & socket
-	let serv = http.createServer(function(req, res) {
-		// Send HTML headers and message
-		res.writeHead(404, {'Content-Type': 'text/html'})
-		res.end('<h1>404</h1>')
-	})
-	serv.listen(project.project.port)
-	server = io.listen(serv)
-	controller.host()
-
-	// Add a connect listener
-	server.sockets.on('connection', function(socket) {
-		// Send project settings
-		socket.emit('set scale', project.project.puppetScale)
-		socket.emit('set slots', project.project.numCharacters)
-		socket.emit('serverVersion', project.project.clientVersion)
-
-		// Send list of assets
-		let keys = Object.keys(project.assets)
-		for (let i = 0; i < keys.length; i++) {
-			let asset = JSON.parse(JSON.stringify((project.assets[keys[i]])))
-			socket.emit('add asset', keys[i], asset)
-		}
-
-		// Add Application Listeners
-		socket.on('add puppet', (puppet) => {
-			let ourPuppet = project.getPuppet()
-			ourPuppet.charId = 1
-			socket.emit('add puppet', ourPuppet)
-			for (let i = 0; i < puppets.length; i++) {
-				socket.emit('add puppet', puppets[i])
-			}
-			numPuppets++
-			puppet.socket = socket.id
-			puppet.charId = numPuppets
-			controller.addPuppet(puppet)
-			puppets.push(puppet)
-			socket.emit('assign puppet', numPuppets)
-			socket.broadcast.emit('add puppet', puppet)
-		})
-		socket.on('set puppet', (id, puppet) => {
-			controller.setPuppet(id, puppet)
-			socket.broadcast.emit('set puppet', id, puppet)
-			for (let i = 0; i < puppets.length; i++) {
-				if (puppets[i].charId == id) {
-					puppet.socket = puppets[i].socket
-					puppet.charId = puppets[i].charId
-					puppets[i] = puppet
-					break
-				}
-			}
-		})
-		socket.on('set emote', (id, emote) => {
-			controller.setEmote(id, emote)
-			socket.broadcast.emit('set emote', id, emote)
-			for (let i = 0; i < puppets.length; i++) {
-				if (puppets[i].charId == id) {
-					puppets[i].emote = emote
-					break
-				}
-			}
-		})
-		socket.on('move left', (id) => {
-			let puppet = controller.moveLeft(id)
-			socket.broadcast.emit('move left', id)
-			for (let i = 0; i < puppets.length; i++) {
-				if (puppets[i].charId == id) {
-					puppets[i].position = puppet.target
-					puppets[i].facingLeft = puppet.facingLeft
-					break
-				}
-			}
-		})
-		socket.on('move right', (id) => {
-			controller.moveRight(id)
-			let puppet = socket.broadcast.emit('move right', id)
-			for (let i = 0; i < puppets.length; i++) {
-				if (puppets[i].charId == id) {
-					puppets[i].position = puppet.target
-					puppets[i].facingLeft = puppet.facingLeft
-					break
-				}
-			}
-		})
-		socket.on('start babbling', (id) => {
-			controller.startBabbling(id)
-			socket.broadcast.emit('start babbling', id)
-		})
-		socket.on('stop babbling', (id) => {
-			controller.stopBabbling(id)
-			socket.broadcast.emit('stop babbling', id)
-		})
-		socket.on('jiggle', (id) => {
-			controller.jiggle(id)
-			socket.broadcast.emit('jiggle', id)
-		})
-		socket.on('set scale', (scale) => {
-			project.network.puppetScale = scale
-			controller.resize()
-			socket.broadcast.emit('set scale', scale)
-		})
-		socket.on('set slots', (slots) => {
-			project.network.numCharacters = slots
-			controller.resize()
-			socket.broadcast.emit('set slots', slots)
-		})
-		socket.on('move asset', (asset, newTab) => {
-			controller.changeAssetTabLocal(asset, newTab)
-			socket.broadcast.emit('move asset', asset, newTab)
-		})
-		socket.on('delete asset', (asset) => {
-			controller.deleteAssetLocal(asset)
-			socket.broadcast.emit('delete asset', asset)
-		})
-
-		socket.on('disconnect', () => {
-			for (let i = 0; i < puppets.length; i++) {
-				if (puppets[i].socket === socket.id) {
-					server.emit('remove puppet', puppets[i].charId)
-					controller.removePuppet(puppets[i].charId)
-					puppets.splice(i, 1)
-					break
-				}
-			}
-		})
-
-		socket.on('add asset', (id, asset) => {
-			if (!project.assets[id] || asset.version > project.assets[id].version) {
-				status.increment('Retrieving %x Asset%s')
-				let stream = ss.createStream()
-				fs.ensureDirSync(path.join(project.assetsPath, id.split(':')[0]))
-				ss(socket).emit('request asset', stream, id)
-				stream.on('end', () => {
-					controller.addAssetLocal(id, asset)
-					socket.broadcast.emit('add asset', id, asset)
-					if (status.decrement('Retrieving %x Asset%s')) {
-						status.log('Synced Assets!', 3, 1)
-					}
-				})
-				stream.pipe(fs.createWriteStream(path.join(project.assetsPath, id.split(':')[0], id.split(':')[1] + '.png')))
-			}
-		})
-		ss(socket).on('request asset', requestAsset)
-	})
-
-	server.sockets.on('error', (e) => {
-		status.error('Server Error.', e)
-	})
-
-	status.log('Hosting successful!', 1, 1)
+	let join = () => {
+		server.emit('join room', project.project.roomName, project.project.roomPassword);
+		joinRoom()
+	}
+	if (server) join()
+	else exports.connect(join)
 }
 
-exports.connect = function() {
+exports.create = function() {
+	if (room) {
+		server.emit('leave room')
+		return
+	}
+	
+	let create = () => {
+		server.emit('create room', project.project.roomName, project.project.roomPassword, project.project.roomPuppetScale, project.project.roomNumCharacters);
+		joinRoom()
+	}
+	if (server) create()
+	else exports.connect(create)
+}
+
+exports.connect = function(callback) {
 	if (server) {
-		if (server.io) {
-			stopNetworking()
-			return
-		}
 		stopNetworking()
+		return
 	}
 
 	status.log('Connecting to server...', 2, 1)
@@ -203,16 +62,8 @@ exports.connect = function() {
 
 	// Add a connect listener
 	socket.on('connect', function() {
-		puppets = []
-		// Send list of assets
-		let keys = Object.keys(project.assets)
-		for (let i = 0; i < keys.length; i++) {
-			let asset = JSON.parse(JSON.stringify((project.assets[keys[i]])))
-			socket.emit('add asset', keys[i], asset)
-		}
-	    socket.emit('add puppet', project.getPuppet())
-		controller.connect()
 		status.log('Connected to server!', 1, 1)
+		if (callback) callback()
 	})
 
 	socket.on('disconnect', stopNetworking)
@@ -245,6 +96,31 @@ exports.connect = function() {
 		status.error('Failed to reconnect.', e)
 		stopNetworking()
 	})
+
+	socket.on('info', (message) => {
+		status.log(message, 1, 1)
+	})
+
+	socket.on('joined room', (name) => {
+		status.log("Joined room \"" + name + "\"")
+		room = name
+		document.getElementById('connectedMessage').innerText = "Connected to room \"" + room + "\""
+		document.getElementById('joinRoom').innerText = "Disconnect from room"
+		document.getElementById('createRoom').style.display = 'none'
+		document.getElementById('roomSettings').style.display = 'none'
+	})
+
+	socket.on('created room', (name) => {
+		status.log("Created room \"" + name + "\"")
+		room = name
+		document.getElementById('connectedMessage').innerText = "Connected to room \"" + room + "\""
+		document.getElementById('createRoom').innerText = "Close room"
+		document.getElementById('joinRoom').style.display = 'none'
+		document.getElementById('roomSettings').style.display = 'none'
+		document.getElementById('adminPanel').style.display = ''
+	})
+
+	socket.on('leave room', leaveRoom)
 
 	// Add Application Listeners
 	socket.on('serverVersion', (version) => {
@@ -351,17 +227,41 @@ exports.getPuppets = function() {
 }
 
 exports.isNetworking = function() {
-	return server !== null
+	return server !== null && room !== null
 }
 
 function stopNetworking() {
 	controller.disconnect()
 	server.close()
 	server = null
-	numPuppets = 1
+	leaveRoom()
 	document.getElementById('host').innerHTML = 'Host Server'
 	document.getElementById('connect').innerHTML = 'Connect to Server'
 	status.log('Disconnected.', 2, 1)
+}
+
+function joinRoom() {
+	puppets = []
+	// Send list of assets
+	let keys = Object.keys(project.assets)
+	for (let i = 0; i < keys.length; i++) {
+		let asset = JSON.parse(JSON.stringify((project.assets[keys[i]])))
+		server.emit('add asset', keys[i], asset)
+	}
+    server.emit('add puppet', project.getPuppet())
+	controller.connect()
+}
+
+function leaveRoom() {
+	if (room) status.log("Left room \"" + room + "\"")
+	room = null
+	document.getElementById('connectedMessage').innerText = ""
+	document.getElementById('joinRoom').innerText = "Join room"
+	document.getElementById('createRoom').innerText = "Create room"
+	document.getElementById('joinRoom').style.display = ''
+	document.getElementById('createRoom').style.display = ''
+	document.getElementById('roomSettings').style.display = ''
+	document.getElementById('adminPanel').style.display = 'none'
 }
 
 function requestAsset(stream, id) {
