@@ -469,6 +469,7 @@ exports.saveCharacter = function(character, thumbnail, emoteThumbnails) {
 exports.connect = function() {
     stage.clearPuppets()
     editor.connect()
+    exports.resize()
 	if (popout) popout.webContents.send('connect')
 }
 
@@ -477,6 +478,7 @@ exports.disconnect = function() {
 	editor.disconnect()
 	puppet = stage.addPuppet(project.getPuppet(), 1)
 	character = JSON.parse(JSON.stringify(project.getPuppet()))
+	exports.resize()
 	if (popout) popout.webContents.send('disconnect', project.getPuppet())
 }
 

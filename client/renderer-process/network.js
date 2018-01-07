@@ -230,12 +230,11 @@ exports.isNetworking = function() {
 	return server !== null && room !== null
 }
 
-function stopNetworking() {
-	controller.disconnect()
-	server.close()
+function stopNetworking() {	
+	if (!server) return
+	server.disconnect()
 	server = null
 	leaveRoom()
-	document.getElementById('host').innerHTML = 'Host Server'
 	document.getElementById('connect').innerHTML = 'Connect to Server'
 	status.log('Disconnected.', 2, 1)
 }
@@ -253,7 +252,8 @@ function joinRoom() {
 }
 
 function leaveRoom() {
-	if (room) status.log("Left room \"" + room + "\"")
+	if (!room) return
+	status.log("Left room \"" + room + "\"")
 	room = null
 	document.getElementById('connectedMessage').innerText = ""
 	document.getElementById('joinRoom').innerText = "Join room"
@@ -262,6 +262,7 @@ function leaveRoom() {
 	document.getElementById('createRoom').style.display = ''
 	document.getElementById('roomSettings').style.display = ''
 	document.getElementById('adminPanel').style.display = 'none'
+	controller.disconnect()
 }
 
 function requestAsset(stream, id) {
