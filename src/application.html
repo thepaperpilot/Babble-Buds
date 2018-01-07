@@ -13,8 +13,7 @@
                 <input type="checkbox" id="greenscreen" class="checkbox"><label for="greenscreen" class="checkbox-label">Green Screen</label>
                 <button id="popout">Pop Out Stage</button>
                 <button id="settings" class="button-tab">Settings</button>
-                <button id="join" class="button-tab">Join Room</button>
-                <button id="create" class="button-tab">Create Room</button>
+                <button id="multiplayer" class="button-tab">Multiplayer</button>
             </div>
             <div id="character-panel" style="width: 100%; height: 100%;">
                 <div id="chars" class="s4">
@@ -51,7 +50,6 @@
                 </div>
             </div>
             <div id="settings-panel" class="s8 scroll" style="display: none;">
-                <h4>General Settings</h4>
                 <div style="display: table;width: 100%;margin-bottom: 24px;">
                     <div style="display:table-row;">
                         <div style="width: 50%; display: table-cell; vertical-align: middle;">
@@ -72,59 +70,46 @@
                     Number of Slots:
                     <input type="number" id="numslots" value="5" style="width: calc(100% - 16px)">
                 </div>
-            </div>
-            <div id="join-panel" class="s8 scroll" style="display: none;">
-                <button id="joinRoom" class="fillbutton">Join Room</button>
-                <h4>Room Settings</h4>
-                <div class="s5">
-                    Room Name:
-                    <input type="text" id="joinName" value="lobby" style="width: calc(100% - 16px)">
-                </div>
-                <div class="s5">
-                    Room Password:
-                    <input type="text" id="joinPassword" style="width: calc(100% - 16px)">
-                </div>
                 <br/>
-                <h4>Advanced Settings</h4>
+                <h4>Networking Settings</h4>
                 <div class="s5">
                     Server IP:
-                    <input type="text" id="joinIp" value="namedraw.tech" style="width: calc(100% - 16px)">
+                    <input type="text" id="ip" value="namedraw.tech" style="width: calc(100% - 16px)">
                 </div>
                 <div class="s5">
                     Server Port:
-                    <input type="number" id="joinPort" value="8080" style="width: calc(100% - 16px)">
+                    <input type="number" id="port" value="8080" style="width: calc(100% - 16px)">
                 </div>
+                <button id="connect" class="fillbutton">Connect</button>
             </div>
-            <div id="create-panel" class="s8 scroll" style="display: none;">
-                <button id="createRoom" class="fillbutton">Create Room</button>
-                <h4>Room Settings</h4>
-                <div class="s5">
-                    Room Name:
-                    <input type="text" id="createName" value="lobby" style="width: calc(100% - 16px)">
+            <div id="multiplayer-panel" class="s8 scroll" style="display: none;">
+                <span id="connectedMessage"></span>
+                <button id="joinRoom">Join Room</button>
+                <button id="createRoom">Create Room</button>
+                <div id="roomSettings" class="scroll">
+                    <div class="s5">
+                        Room Name:
+                        <input type="text" id="roomName" value="lobby" style="width: calc(100% - 16px)">
+                    </div>
+                    <div class="s5">
+                        Room Password:
+                        <input type="text" id="roomPassword" style="width: calc(100% - 16px)">
+                    </div>
                 </div>
-                <div class="s5">
-                    Room Password:
-                    <input type="text" id="createPassword" style="width: calc(100% - 16px)">
-                </div>
-                <br/>
-                <h4>Admin Settings</h4>
-                <div class="s5">
-                    Puppet Scale:
-                    <input type="number" id="createPuppetscale" value="1" style="width: calc(100% - 16px)" step="0.1">
-                </div>
-                <div class="s5">
-                    Number of Slots:
-                    <input type="number" id="createNumslots" value="5" style="width: calc(100% - 16px)">
-                </div>
-                <br/>
-                <h4>Advanced Settings</h4>
-                <div class="s5">
-                    Server IP:
-                    <input type="text" id="createIp" value="namedraw.tech" style="width: calc(100% - 16px)">
-                </div>
-                <div class="s5">
-                    Server Port:
-                    <input type="number" id="createPort" value="8080" style="width: calc(100% - 16px)">
+                <div id="adminPanel" class="scroll" style="display: none;">
+                    <h4>Room Settings</h4>
+                    <div class="s5">
+                        Puppet Scale:
+                        <input type="number" id="roomPuppetscale" value="1" style="width: calc(100% - 16px)" step="0.1">
+                    </div>
+                    <div class="s5">
+                        Number of Slots:
+                        <input type="number" id="roomNumslots" value="5" style="width: calc(100% - 16px)">
+                    </div>
+                    <h4>Connected Users</h4>
+                    <div id="connected">
+                    </div>
+                    <button id="banish">Move all puppets off the stage</button>
                 </div>
             </div>
         </div>
