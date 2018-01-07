@@ -197,7 +197,6 @@ exports.connect = function(callback) {
 		project.network.numCharacters = slots
 		controller.resize()
 	})
-	socket.on('move asset', controller.changeAssetTabLocal)
 	socket.on('delete asset', controller.deleteAssetLocal)
 	socket.on('add asset', (id, asset) => {
 		if (!project.assets[id] || asset.version > project.assets[id].version) {

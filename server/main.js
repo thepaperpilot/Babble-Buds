@@ -140,7 +140,7 @@ server.sockets.on('connection', function(socket) {
 		for (var i = 0; i < room.puppets.length; i++) {
 			if (room.puppets[i].charId == id) {
 				if (room.puppets[i].facingLeft)
-					room.puppets[i].position--
+					room.puppets[i].target = --room.puppets[i].position
 				else
 					room.puppets[i].facingLeft = true
 				break
@@ -157,7 +157,7 @@ server.sockets.on('connection', function(socket) {
 				if (room.puppets[i].facingLeft)
 					room.puppets[i].facingLeft = true
 				else
-					room.puppets[i].position++
+					room.puppets[i].target = ++room.puppets[i].position
 				break
 			}
 		}
@@ -188,10 +188,10 @@ server.sockets.on('connection', function(socket) {
         for (let i = 0; i < room.puppets.length; i++) {
             let puppet = room.puppets[i]
             if (puppet.target > room.numCharacters / 2) {
-                puppet.target = room.numCharacters + 1
+                puppet.position = puppet.target = room.numCharacters + 1
                 puppet.facingLeft = false
             } else {
-                puppet.target = 0
+                puppet.position = puppet.target = 0
                 puppet.facingLeft = true
             }
         }
@@ -210,17 +210,12 @@ server.sockets.on('connection', function(socket) {
 		room.numCharacters = slots
 		socket.broadcast.to(socket.room).emit('set slots', slots)
 	})
-	socket.on('move asset', (tab, asset, newTab) => {
+	socket.on('delete asset', (id) => {
 		let room = rooms[socket.room]
 		if (!socket.room || !room) return
-		if (logLevel >= 3) console.log(socket.id + " moved asset " + tab + "-" + asset + " to " + newTab)
-		socket.broadcast.to(socket.room).emit('move asset', tab, asset, newTab)
-	})
-	socket.on('delete asset', (tab, asset) => {
-		let room = rooms[socket.room]
-		if (!socket.room || !room) return
-		if (logLevel >= 3) console.log(socket.id + " deleted asset " + tab + "-" + asset)
-		socket.broadcast.to(socket.room).emit('delete asset', tab, asset)
+		if (logLevel >= 3) console.log(socket.id + " deleted asset " + id)
+		delete room.assets[id]
+		socket.broadcast.to(socket.room).emit('delete asset', id)
 	})
 
 	socket.on('disconnecting', () => {
