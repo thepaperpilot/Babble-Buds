@@ -316,18 +316,6 @@ exports.addAssetLocal = function(id, asset) {
 	}
 }
 
-exports.changeAssetTab = function(id, newTab) {
-	exports.changeAssetTabLocal(id, newTab)
-	network.emit('move asset', id, newTab)
-}
-
-exports.changeAssetTabLocal = function(id, newTab) {
-	editor.migrateAsset(id, newTab)
-	applyToAsset(id, (asset) => {
-		asset.tab = newTab
-	}, false)
-}
-
 exports.deleteAsset = function(id) {
 	exports.deleteAssetLocal(id)
 	network.emit('delete asset', id)

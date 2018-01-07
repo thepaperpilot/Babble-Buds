@@ -238,8 +238,10 @@ exports.init = function() {
 
 exports.addAsset = function(id) {
     let asset = project.assets[id]
-    if (document.getElementById('tab ' + asset.tab).getElementsByClassName(id)[0])
-        return
+    while (document.getElementsByClassName(id)[0]) {
+        let element = document.getElementsByClassName(id)[0]
+        element.parentNode.removeChild(element)
+    }
     let assetElement = document.createElement('div')
     if (!document.getElementById('tab ' + asset.tab)) addAssetListToDom(asset.tab)
     document.getElementById('tab ' + asset.tab).appendChild(assetElement)
@@ -264,14 +266,9 @@ exports.addAsset = function(id) {
         assetElement.className += ' downloaded'
     }
     assetDraggable.addEventListener('mousedown', mouseDown, false)
-}
-
-exports.migrateAsset = function(id, newTab) {
-    let asset = project.assets[id]
-    if (document.getElementById('asset-tab').asset === id) {
-        document.getElementById('asset-tab').value = newTab
+    if (document.getElementById('asset-name').asset === id) {
+        openAssetSettings(id)
     }
-    document.getElementById('tab ' + newTab).appendChild(document.getElementById('tab ' + asset.tab).getElementsByClassName(id)[0])
 }
 
 exports.reloadAssets = function() {
@@ -1662,8 +1659,9 @@ function selectAsset() {
 }
 
 function migrateAsset(e) {
-    controller.changeAssetTab(e.target.asset, e.target.value)
-    e.target.tab = e.target.value
+    let asset = project.assets[e.target.asset]
+    asset.tab = e.target.value
+    controller.updateAsset(e.target.asset)
 }
 
 function renameAsset(e) {
