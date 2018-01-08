@@ -29,7 +29,7 @@ input, .checkbox-label {
 	margin-top: 8px;
 }
 
-input[type="text"], input[type="number"], input[type="search"], select {
+input[type="text"], input[type="password"], input[type="number"], input[type="search"], select {
 	background: none;
 	border: none;
 	border-bottom: solid 2px #969696;
@@ -39,7 +39,7 @@ input[type="text"], input[type="number"], input[type="search"], select {
 	width: 100%;
 }
 
-input[type="text"]:focus, input[type="number"]:focus, input[type="search"]:focus, select:focus {
+input[type="text"]:focus, input[type="password"]:focus, input[type="number"]:focus, input[type="search"]:focus, select:focus {
 	border-bottom: solid 2px #c9c9c9;
 	outline: none;
 }
