@@ -257,6 +257,8 @@ body > .editormain {
 	min-width: 75px;
 	margin-bottom: 0;
 	margin-right: 6px;
+	width: calc( 33% - 10px );
+	border: 2px solid #333c4a;
 }
 
 .charselector.big .char {
@@ -738,10 +740,28 @@ body > .small .justify {
 	top: 24px;
 }
 
+.promoted::after {
+	position: absolute;
+	right: 2px;
+	top: 2px;
+	content: "";
+	width: 20px;
+	height: 20px;
+	background-size: contain;
+	background-image: url(../icons/star.png);
+	pointer-events: none;
+	background-color: #888;
+	border-radius: 10px;
+}
+
+.promoted.host::after {
+	background-color: #ffdf00;
+}
+
 .hidden {
 	visibility: hidden;
-    width: 100px;
-    height: 100px;
+    width: 115px;
+    height: 115px;
     position: absolute;
     top: 0;
 }
@@ -750,6 +770,7 @@ body > .small .justify {
 	transition: .1s all ease-in;
     background-color: rgba(0, 0, 0,.75);
     position: absolute;
+    z-index: 1;
     bottom: 0;
     overflow: hidden;
     width: 100%;

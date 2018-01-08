@@ -517,7 +517,7 @@ module.exports = {
 	        "Duncan",
 	        "Rayney's Unborn Child",
 	        "Karl's Father",
-	        "Crazed Miners",
+	        "Crazed Miner",
 	        "Brian",
 	        "Buckles",
 	        "Dundinborough Royal Guard Trainee",
