@@ -54,6 +54,7 @@ exports.init = function() {
 	document.getElementById('alwaysontop').addEventListener('click', toggleAlwaysOnTop)
 	document.getElementById('puppetscale').addEventListener('change', puppetscaleChange)
 	document.getElementById('numslots').addEventListener('change', numslotsChange)
+	document.getElementById('nickname').addEventListener('change', nicknameChange)
 	document.getElementById('ip').addEventListener('change', (e) => { project.project.ip = e.target.value })
 	document.getElementById('port').addEventListener('change', (e) => { project.project.port = parseInt(e.target.value) })
 	document.getElementById('banish').addEventListener('click', controller.banishLocal)
@@ -111,6 +112,7 @@ exports.init = function() {
 	document.getElementById('alwaysontop').checked = project.project.alwaysOnTop
 	document.getElementById('puppetscale').value = project.project.puppetScale
 	document.getElementById('numslots').value = project.project.numCharacters
+	document.getElementById('nickname').value = project.project.nickname
 	document.getElementById('ip').value = project.project.ip
 	document.getElementById('port').value = project.project.port
 	document.getElementById('roomName').value = project.project.roomName
@@ -442,6 +444,11 @@ function puppetscaleChange(e) {
 function numslotsChange(e) {
 	project.project.numCharacters = parseInt(e.target.value)
 	controller.resize()
+}
+
+function nicknameChange(e) {
+	project.project.nickname = e.target.value
+	network.changeNickname()
 }
 
 function roomPuppetscaleChange(e) {

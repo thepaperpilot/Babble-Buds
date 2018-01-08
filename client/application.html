@@ -72,6 +72,9 @@
                 </div>
                 <br/>
                 <h4>Networking Settings</h4>
+                Nickname:
+                <input type="text" id="nickname" value="Albert" style="width: calc(100% - 16px)">
+                <br/>
                 <div class="s5">
                     Server IP:
                     <input type="text" id="ip" value="namedraw.tech" style="width: calc(100% - 16px)">
@@ -107,7 +110,7 @@
                         <input type="number" id="roomNumslots" value="5" style="width: calc(100% - 16px)">
                     </div>
                     <h4>Connected Users</h4>
-                    <div id="connected">
+                    <div id="connected list" class="charselector big">
                     </div>
                     <button id="banish">Move all puppets off the stage</button>
                 </div>
@@ -135,7 +138,7 @@
                 <div id="editor-screen" class="editormain">
                     <button id="zoom in" style="top: 1px">+</button><button id="zoom out" style="left: 30px">-</button>
                 </div>
-                <div id="editor-open-panel" class="editorpanel charselector" style="display: none">
+                <div id="editor-open-panel" class="editorpanel charselector big" style="display: none">
                     <div id="char open list" class="scroll charlist"></div>
                     <input type="search" id="char open search" placeholder="Search">
                 </div>
