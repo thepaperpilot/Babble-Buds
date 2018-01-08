@@ -55,6 +55,7 @@ exports.init = function() {
 	document.getElementById('puppetscale').addEventListener('change', puppetscaleChange)
 	document.getElementById('numslots').addEventListener('change', numslotsChange)
 	document.getElementById('nickname').addEventListener('change', nicknameChange)
+	document.getElementById('randomNickname').addEventListener('click', randomNickname)
 	document.getElementById('ip').addEventListener('change', (e) => { project.project.ip = e.target.value })
 	document.getElementById('port').addEventListener('change', (e) => { project.project.port = parseInt(e.target.value) })
 	document.getElementById('banish').addEventListener('click', controller.banishLocal)
@@ -448,6 +449,12 @@ function numslotsChange(e) {
 
 function nicknameChange(e) {
 	project.project.nickname = e.target.value
+	network.changeNickname()
+}
+
+function randomNickname() {
+	project.randomNickname()
+	document.getElementById('nickname').value = project.project.nickname
 	network.changeNickname()
 }
 
