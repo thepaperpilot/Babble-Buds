@@ -15,8 +15,10 @@ let project
 let server = null
 let room = null
 let puppets
+let users
 let stage	// used for creating thumbnails of connected users' puppets
 let admin
+let host
 let myId
 
 exports.init = function() {
@@ -118,6 +120,8 @@ exports.connect = function(callback) {
 		document.getElementById('joinRoom').innerText = "Disconnect from room"
 		document.getElementById('createRoom').style.display = 'none'
 		document.getElementById('roomSettings').style.display = 'none'
+		document.getElementById('connectedPanel').style.display = ''
+		document.getElementById('connected list').innerHTML = ''
 	})
 
 	socket.on('created room', (name) => {
@@ -125,11 +129,13 @@ exports.connect = function(callback) {
 		joinRoom()
 		room = name
 		admin = true
+		host = true
 		document.getElementById('connectedMessage').innerText = "Connected to room \"" + room + "\""
 		document.getElementById('createRoom').innerText = "Close room"
 		document.getElementById('joinRoom').style.display = 'none'
 		document.getElementById('roomSettings').style.display = 'none'
 		document.getElementById('adminPanel').style.display = ''
+		document.getElementById('connectedPanel').style.display = ''
 		document.getElementById('connected list').innerHTML = ''
 	})
 
@@ -142,18 +148,49 @@ exports.connect = function(callback) {
 			status.log("Server Version Mismatch! Server required " + version + ", our version: " + project.project.clientVersion, 2, 1)
 		}
 	})
-	socket.on('assign puppet', (id) => {
+	socket.on('assign puppet', (id, isHost) => {
 		myId = id
 		controller.assign(id)
-		if (admin) addUser(id, project.getPuppet(), project.project.nickname)
+		addUser(id, project.getPuppet(), project.project.nickname, isHost, isHost)
 	})
 	socket.on('change nickname', (id, name) => {
-		if (admin) updateUser(id, null, name)
+		updateUser(id, null, name)
 	})
-	socket.on('add puppet', (puppet, name) => {
+	socket.on('demote', (id) => {
+		users[id].selector.classList.remove("promoted")
+		users[id].promote.innerText = 'Promote'
+		users[id].admin = false
+		if (id === myId) {
+			admin = false
+			document.getElementById('adminPanel').style.display = 'none'
+			let keys = Object.keys(users)
+			for (let i = 0; i < keys.length; i++) {
+				let id = keys[i]
+				let user = users[id]
+			    user.kick.disabled = !admin || id === myId || user.host || (user.admin && !host)
+			}
+		}
+	})
+	socket.on('promote', (id) => {
+		users[id].selector.classList.add("promoted")
+		users[id].promote.innerText = 'Demote'
+		users[id].admin = true
+		if (id === myId) {
+			admin = true
+			document.getElementById('adminPanel').style.display = ''
+			let keys = Object.keys(users)
+			for (let i = 0; i < keys.length; i++) {
+				let id = keys[i]
+				let user = users[id]
+			    user.kick.disabled = !admin || id === myId || user.host || (user.admin && !host)
+				console.log(user, user.kick.disabled)
+			}
+		}
+	})
+	socket.on('add puppet', (puppet, name, isAdmin, isHost) => {
 		controller.addPuppet(puppet)
 		puppets.push(puppet)
-		if (admin) addUser(puppet.charId, puppet, name)
+		addUser(puppet.charId, puppet, name, isAdmin, isHost)
 	})
 	socket.on('set puppet', (id, puppet) => {
 		controller.setPuppet(id, puppet)
@@ -165,7 +202,7 @@ exports.connect = function(callback) {
 				break
 			}
 		}
-		if (admin) updateUser(id, puppet)
+		updateUser(id, puppet)
 	})
 	socket.on('set emote', (id, emote) => {
 		controller.setEmote(id, emote)
@@ -208,7 +245,7 @@ exports.connect = function(callback) {
 				break
 			}
 		}
-		if (admin) document.getElementById('connected list').removeChild(document.getElementById('connected user ' + id))
+		document.getElementById('connected list').removeChild(document.getElementById('connected user ' + id))
 	})
 	socket.on('set scale', (scale) => {
 		project.network.puppetScale = scale
@@ -253,7 +290,7 @@ exports.isNetworking = function() {
 
 exports.changeNickname = function() {
 	if (server && myId) {
-		if (admin) updateUser(myId, null, project.project.nickname)
+		updateUser(myId, null, project.project.nickname)
 		server.emit('change nickname', myId, project.project.nickname)
 	}
 }
@@ -269,7 +306,8 @@ function stopNetworking() {
 
 function joinRoom() {
 	puppets = []
-	admin = false
+	users = {}
+	admin = host = false
 	myId = null
 	// Send list of assets
 	let keys = Object.keys(project.assets)
@@ -292,40 +330,67 @@ function leaveRoom() {
 	document.getElementById('createRoom').style.display = ''
 	document.getElementById('roomSettings').style.display = ''
 	document.getElementById('adminPanel').style.display = 'none'
+	document.getElementById('connectedPanel').style.display = 'none'
 	controller.disconnect()
 }
 
-function addUser(id, puppet, name) {
+function addUser(id, puppet, name, isAdmin, isHost) {
     let selector = document.createElement('div')
     selector.id = "connected user " + id
     selector.className = "char"
+    if (isAdmin) selector.classList.add("promoted")
+    if (isHost) selector.classList.add("host")
+    if (id === myId) selector.classList.add("selected")
     stage.setPuppet(1, stage.createPuppet(puppet))
     selector.style.backgroundImage = "url('data:image/png;base64, " + stage.getThumbnail() + "')"
     document.getElementById('connected list').appendChild(selector)
-    selector.innerHTML = '<div class="desc">' + name + '</div>'
+    let desc = document.createElement('div')
+    desc.className = 'desc'
+    desc.innerText = name
+    selector.appendChild(desc)
     let hover = document.createElement('div')
     hover.className = 'hover'
     selector.appendChild(hover)
     let kick = document.createElement('button')
     kick.innerText = 'Kick'
     kick.className = 'hover-button'
-    kick.addEventListener('click', () => {kickUser(id)})
-    if (id === myId) kick.disabled = true
+    kick.addEventListener('click', () => { server.emit('kick user', id) })
+    // We can only kick people if:
+    // 1. We're a host
+    // 2. They're not us
+    // 3. They're not the host
+    // 4. They're an admin, and we're not the host
+    kick.disabled = !admin || id === myId || isHost || (isAdmin && !host)
     hover.appendChild(kick)
-}
+    let promote = document.createElement('button')
+    promote.innerText = isAdmin ? 'Demote' : 'Promote'
+    promote.className = 'hover-button'
+    promote.addEventListener('click', () => { server.emit('promote user', id) })
+    // We can only promote/demote people if:
+    // 1. We're the host
+    // 2. They're not us
+    promote.disabled = !host || id === myId
+    hover.appendChild(promote)
 
-function kickUser(id) {
-	server.emit('kick user', id)
+    let user = {
+		admin: isAdmin,
+		host: isHost,
+		selector: selector,
+		desc: desc,
+		kick: kick,
+		promote: promote
+	}
+	users[id] = user
 }
 
 function updateUser(id, puppet, name) {
-	let selector = document.getElementById('connected user ' + id)
+	let user = users[id]
 	if (puppet) {
 		stage.setPuppet(1, stage.createPuppet(puppet))
-	    selector.style.backgroundImage = "url('data:image/png;base64, " + stage.getThumbnail() + "')"
+	    user.selector.style.backgroundImage = "url('data:image/png;base64, " + stage.getThumbnail() + "')"
 	}
 	if (name)
-    	selector.getElementsByClassName('desc')[0].innerText = name
+		user.desc.innerText = name
 }
 
 function requestAsset(stream, id) {
