@@ -210,6 +210,15 @@ server.sockets.on('connection', function(socket) {
             }
         }
 	})
+	socket.on('kick user', (id) => {
+		let room = rooms[socket.room]
+		if (!socket.room || !room || room.host !== socket.id) return
+		for (var i = 0; i < room.puppets.length; i++) {
+			if (room.puppets[i].charId == id) {
+				leaveRoom(server.sockets.sockets[room.puppets[i].socket])
+			}
+		}
+	})
 	socket.on('set scale', (scale) => {
 		let room = rooms[socket.room]
 		if (!socket.room || !room || room.host !== socket.id) return

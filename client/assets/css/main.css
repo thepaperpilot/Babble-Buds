@@ -748,7 +748,7 @@ body > .small .justify {
 
 .char .hover {
 	transition: .1s all ease-in;
-    background-color: rgba(0, 0, 0,.5);
+    background-color: rgba(0, 0, 0,.75);
     position: absolute;
     bottom: 0;
     overflow: hidden;
@@ -758,6 +758,11 @@ body > .small .justify {
 
 .char:hover .hover {
 	height: 100%;
+}
+
+.hover-button {
+	margin: 10px auto;
+    display: block;
 }
 
 .floating-button {
