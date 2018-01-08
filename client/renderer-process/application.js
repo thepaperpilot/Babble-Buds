@@ -64,6 +64,7 @@ exports.init = function() {
 	document.getElementById('createRoom').addEventListener('click', network.create)
 	document.getElementById('roomName').addEventListener('change', (e) => { project.project.roomName = e.target.value })
 	document.getElementById('roomPassword').addEventListener('change', (e) => { project.project.roomPassword = e.target.value })
+	document.getElementById('roomPasswordVisibility').addEventListener('click', togglePasswordVisibility)
 	document.getElementById('roomPuppetscale').addEventListener('change', roomPuppetscaleChange)
 	document.getElementById('roomNumslots').addEventListener('change', roomNumslotsChange)
 	document.getElementById('autocrop-btn').addEventListener('click', startAutocrop)
@@ -247,7 +248,7 @@ exports.toggleModal = function(string) {
 function keyDown(e) {
 	let key = e.keyCode ? e.keyCode : e.which
 
-	if (e.target && (e.target.type === 'number' || e.target.type === 'text' || e.target.type === 'search' || e.target.type === 'select-one'))
+	if (e.target && (e.target.type === 'number' || e.target.type === 'text' || e.target.type === 'search' || e.target.type === 'select-one' || e.target.type === 'password'))
 		return
 
 	if (key == 32) {
@@ -259,7 +260,7 @@ function keyDown(e) {
 function keyUp(e) {
 	let key = e.keyCode ? e.keyCode : e.which
 
-	if (e.target && (e.target.type === 'number' || e.target.type === 'text' || e.target.type === 'search' || e.target.type === 'select-one'))
+	if (e.target && (e.target.type === 'number' || e.target.type === 'text' || e.target.type === 'search' || e.target.type === 'select-one' || e.target.type === 'password'))
 		return
 
 	if (editor.keyDown(e))
@@ -419,12 +420,22 @@ function toggleMultiplayer() {
 		
 		document.getElementById('settings').classList.remove('open-tab')
 		document.getElementById('multiplayer').classList.add('open-tab')
+
+		document.getElementById('roomPassword').type = 'password'
 	} else {
 		document.getElementById('multiplayer-panel').style.display = 'none'
 		document.getElementById('character-panel').style.display = 'block'
 
 		document.getElementById('multiplayer').classList.remove('open-tab')
 	}
+}
+
+function togglePasswordVisibility() {
+	let password = document.getElementById('roomPassword')
+	if (password.type === 'password')
+		password.type = 'text'
+	else
+		password.type = 'password'
 }
 
 function colorpickerChange(e) {
