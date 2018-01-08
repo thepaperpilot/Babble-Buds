@@ -306,6 +306,16 @@ function addUser(id, puppet, name) {
     let hover = document.createElement('div')
     hover.className = 'hover'
     selector.appendChild(hover)
+    let kick = document.createElement('button')
+    kick.innerText = 'Kick'
+    kick.className = 'hover-button'
+    kick.addEventListener('click', () => {kickUser(id)})
+    if (id === myId) kick.disabled = true
+    hover.appendChild(kick)
+}
+
+function kickUser(id) {
+	server.emit('kick user', id)
 }
 
 function updateUser(id, puppet, name) {
