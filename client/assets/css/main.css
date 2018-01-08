@@ -259,6 +259,12 @@ body > .editormain {
 	margin-right: 6px;
 }
 
+.charselector.big .char {
+	height: 115px;
+	padding: 0;
+	width: 115px;
+}
+
 .editorpanel {
 	width: calc(100% - 16px);
 	height: calc( 100% - 55px );
@@ -268,12 +274,6 @@ body > .editormain {
 
 .v5 {
 	height: calc( 50% - 60px );
-}
-
-.editorpanel .char {
-	height: 115px;
-	padding: 0;
-	width: 115px;
 }
 
 .editorpanel .charlist {
@@ -736,4 +736,26 @@ body > .small .justify {
 
 .animated.downloaded::after, .bundle.downloaded::after {
 	top: 24px;
+}
+
+.hidden {
+	visibility: hidden;
+    width: 100px;
+    height: 100px;
+    position: absolute;
+    top: 0;
+}
+
+.char .hover {
+	transition: .1s all ease-in;
+    background-color: rgba(0, 0, 0,.5);
+    position: absolute;
+    bottom: 0;
+    overflow: hidden;
+    width: 100%;
+    height: 0;
+}
+
+.char:hover .hover {
+	height: 100%;
 }

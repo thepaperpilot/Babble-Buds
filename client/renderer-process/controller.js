@@ -25,7 +25,6 @@ let popoutWindowState
 exports.init = function() {
 	project = remote.getGlobal('project').project
 	application.init()
-	network.init()
 	stage = new babble.Stage('screen', Object.assign({}, project.project), project.assets, project.assetsPath, loadPuppets, status)
 	window.addEventListener("resize", () => {stage.resize(); stage.resize()})
 
@@ -518,6 +517,10 @@ exports.openModal = function(modal) {
 	application.toggleModal(modal)
 }
 
+exports.getPuppet = function(id) {
+	return stage.getPuppet(id)
+}
+
 function loadPuppets(stage) {
 	status.log('Loading puppets...', 2, 1)
 
@@ -531,6 +534,9 @@ function loadPuppets(stage) {
 		editor.setPuppet(JSON.parse(project.duplicateCharacter(e.target.puppet)))
     	editor.resetChanges()
 	})
+
+	// Multiplayer
+	network.init()
 
 	// Create Hotbar Puppets
 	for (let i = 0; i < project.project.hotbar.length; i++) {

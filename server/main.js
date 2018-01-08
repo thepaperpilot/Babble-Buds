@@ -83,6 +83,7 @@ server.sockets.on('connection', function(socket) {
 			puppetScale: puppetScale,
 			numCharacters: numCharacters,
 			puppets: [],
+			names: [],
 			assets: {},
 			numPuppets: 0
 		}
@@ -92,19 +93,32 @@ server.sockets.on('connection', function(socket) {
 	socket.on('leave room', () => {
 		leaveRoom(socket)
 	})
-	socket.on('add puppet', (puppet) => {
+	socket.on('change nickname', (id, name) => {
 		let room = rooms[socket.room]
 		if (!socket.room || !room) return
-		if (logLevel >= 1) console.log("Received puppet from " + socket.id)
+		if (logLevel >= 2) console.log(socket.id + "changed their nickname to " + name)
 		for (var i = 0; i < room.puppets.length; i++) {
-			socket.emit('add puppet', room.puppets[i])
+			if (room.puppets[i].charId == id) {
+				room.names[i] = name
+				break
+			}
+		}
+		socket.broadcast.to(socket.room).emit('change nickname', id, name)
+	})
+	socket.on('add puppet', (puppet, name) => {
+		let room = rooms[socket.room]
+		if (!socket.room || !room) return
+		if (logLevel >= 1) console.log("Received puppet from " + socket.id + " with nickname " + name)
+		for (var i = 0; i < room.puppets.length; i++) {
+			socket.emit('add puppet', room.puppets[i], room.names[i])
 		}
 		room.numPuppets++
 		puppet.socket = socket.id
 		puppet.charId = room.numPuppets
 		room.puppets.push(puppet)
+		room.names.push(name)
 		socket.emit('assign puppet', room.numPuppets)
-		socket.broadcast.to(socket.room).emit('add puppet', puppet)
+		socket.broadcast.to(socket.room).emit('add puppet', puppet, name)
 	})
 	socket.on('set puppet', (id, puppet) => {
 		let room = rooms[socket.room]
