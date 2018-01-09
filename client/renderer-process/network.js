@@ -116,10 +116,10 @@ exports.connect = function(callback) {
 		status.log("Joined room \"" + name + "\"")
 		joinRoom()
 		room = name
-		document.getElementById('connectedMessage').innerText = "Connected to room \"" + room + "\""
 		document.getElementById('joinRoom').innerText = "Disconnect from room"
 		document.getElementById('createRoom').style.display = 'none'
-		document.getElementById('roomSettings').style.display = 'none'
+		document.getElementById('roomName').disabled = true
+		document.getElementById('roomPassword').disabled = true
 		document.getElementById('connectedPanel').style.display = ''
 		document.getElementById('connected list').innerHTML = ''
 	})
@@ -130,13 +130,16 @@ exports.connect = function(callback) {
 		room = name
 		admin = true
 		host = true
-		document.getElementById('connectedMessage').innerText = "Connected to room \"" + room + "\""
 		document.getElementById('createRoom').innerText = "Close room"
 		document.getElementById('joinRoom').style.display = 'none'
-		document.getElementById('roomSettings').style.display = 'none'
+		document.getElementById('roomName').disabled = true
 		document.getElementById('adminPanel').style.display = ''
 		document.getElementById('connectedPanel').style.display = ''
 		document.getElementById('connected list').innerHTML = ''
+
+		project.network.puppetScale = project.project.roomPuppetScale
+		project.network.numCharacters = project.project.roomNumCharacters
+		controller.resize()
 	})
 
 	socket.on('leave room', leaveRoom)
@@ -183,9 +186,11 @@ exports.connect = function(callback) {
 				let id = keys[i]
 				let user = users[id]
 			    user.kick.disabled = !admin || id === myId || user.host || (user.admin && !host)
-				console.log(user, user.kick.disabled)
 			}
 		}
+	})
+	socket.on('change password', (password) => {
+		document.getElementById('roomPassword').value = password
 	})
 	socket.on('add puppet', (puppet, name, isAdmin, isHost) => {
 		controller.addPuppet(puppet)
@@ -249,9 +254,11 @@ exports.connect = function(callback) {
 	})
 	socket.on('set scale', (scale) => {
 		project.network.puppetScale = scale
+		document.getElementById('roomPuppetscale').value = scale
 		controller.resize()
 	})
 	socket.on('set slots', (slots) => {
+		document.getElementById('roomNumslots').value = slots
 		project.network.numCharacters = slots
 		controller.resize()
 	})
@@ -323,12 +330,12 @@ function leaveRoom() {
 	if (!room) return
 	status.log("Left room \"" + room + "\"")
 	room = null
-	document.getElementById('connectedMessage').innerText = ""
 	document.getElementById('joinRoom').innerText = "Join room"
 	document.getElementById('createRoom').innerText = "Create room"
 	document.getElementById('joinRoom').style.display = ''
 	document.getElementById('createRoom').style.display = ''
-	document.getElementById('roomSettings').style.display = ''
+	document.getElementById('roomName').disabled = false
+	document.getElementById('roomPassword').disabled = false
 	document.getElementById('adminPanel').style.display = 'none'
 	document.getElementById('connectedPanel').style.display = 'none'
 	controller.disconnect()
