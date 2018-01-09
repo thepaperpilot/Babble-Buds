@@ -63,7 +63,7 @@ exports.init = function() {
 	document.getElementById('joinRoom').addEventListener('click', network.join)
 	document.getElementById('createRoom').addEventListener('click', network.create)
 	document.getElementById('roomName').addEventListener('change', (e) => { project.project.roomName = e.target.value })
-	document.getElementById('roomPassword').addEventListener('change', (e) => { project.project.roomPassword = e.target.value })
+	document.getElementById('roomPassword').addEventListener('change', roomPasswordChange)
 	document.getElementById('roomPasswordVisibility').addEventListener('click', togglePasswordVisibility)
 	document.getElementById('roomPuppetscale').addEventListener('change', roomPuppetscaleChange)
 	document.getElementById('roomNumslots').addEventListener('change', roomNumslotsChange)
@@ -430,6 +430,11 @@ function toggleMultiplayer() {
 	}
 }
 
+function roomPasswordChange(e) {
+	project.project.roomPassword = e.target.value
+	network.emit('change password', e.target.value)
+}
+
 function togglePasswordVisibility() {
 	let password = document.getElementById('roomPassword')
 	if (password.type === 'password')
@@ -470,15 +475,15 @@ function randomNickname() {
 }
 
 function roomPuppetscaleChange(e) {
-	project.project.createPuppetScale = project.network.puppetScale = parseFloat(e.target.value)
+	project.project.roomPuppetScale = project.network.puppetScale = parseFloat(e.target.value)
 	controller.resize()
-	network.emit('set scale', project.project.puppetScale)
+	network.emit('set scale', project.network.puppetScale)
 }
 
 function roomNumslotsChange(e) {
-	project.project.createNumCharacters = project.network.numCharacters = parseInt(e.target.value)
+	project.project.roomNumCharacters = project.network.numCharacters = parseInt(e.target.value)
 	controller.resize()
-	network.emit('set slots', project.project.numCharacters)
+	network.emit('set slots', project.network.numCharacters)
 }
 
 function removeStageView() {

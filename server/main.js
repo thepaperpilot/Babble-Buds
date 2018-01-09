@@ -214,6 +214,7 @@ server.sockets.on('connection', function(socket) {
 	socket.on('kick user', (id) => {
 		let room = rooms[socket.room]
 		if (!socket.room || !room || !room.admins.includes(socket.id)) return
+		if (logLevel >= 1) console.log(socket.id + " kicked " + id)
 		// Can't kick the host
 		if (room.host === id) return
 		// Can't kick an admin if we aren't the host
@@ -230,25 +231,30 @@ server.sockets.on('connection', function(socket) {
 		if (!socket.room || !room || room.host !== socket.id) return
 		// Can't demote the host
 		if (room.host === id) return
-		if (room.admins.includes(id)) {
-			// Demote
-			room.admins.splice(room.admins.indexOf(id), 1)
-			for (let i = 0; i < room.puppets.length; i++) {
-				if (room.puppets[i].charId == id) {
-					server.sockets.in(socket.room).emit('demote', id)
-					break
-				}
+		let index
+		for (let i = 0; i < room.puppets.length; i++)
+			if (room.puppets[i].charId == id) {
+				index = i
+				break
 			}
+		if (room.admins.includes(room.puppets[index].socket)) {
+			// Demote
+			if (logLevel >= 2) console.log(socket.id + " demoted " + id)
+			room.admins.splice(room.admins.indexOf(id), 1)
+			server.sockets.in(socket.room).emit('demote', id)
 		} else {
 			// Promote
-			for (let i = 0; i < room.puppets.length; i++) {
-				if (room.puppets[i].charId == id) {
-					room.admins.push(room.puppets[i].socket)
-					server.sockets.in(socket.room).emit('promote', id)
-					break
-				}
-			}
+			if (logLevel >= 2) console.log(socket.id + " promoted " + id)
+			room.admins.push(room.puppets[index].socket)
+			server.sockets.in(socket.room).emit('promote', id)
 		}
+	})
+	socket.on('change password', (password) => {
+		let room = rooms[socket.room]
+		if (!socket.room || !room || room.host !== socket.id) return
+		if (logLevel >= 2) console.log(socket.id + " changed the room's password to " + password)
+		room.password = password
+		socket.broadcast.to(socket.room).emit('change password', password)
 	})
 	socket.on('set scale', (scale) => {
 		let room = rooms[socket.room]
@@ -260,7 +266,7 @@ server.sockets.on('connection', function(socket) {
 	socket.on('set slots', (slots) => {
 		let room = rooms[socket.room]
 		if (!socket.room || !room || !room.admins.includes(socket.id)) return
-		if (logLevel >= 3) console.log(socket.id + " changed the puppetScale to " + slots)
+		if (logLevel >= 3) console.log(socket.id + " changed the number of puppet slots to " + slots)
 		room.numCharacters = slots
 		socket.broadcast.to(socket.room).emit('set slots', slots)
 	})
