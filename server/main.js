@@ -304,7 +304,7 @@ server.sockets.on('connection', function(socket) {
 	ss(socket).on('request asset', function(stream, id) {
 		let room = rooms[socket.room]
 		if (!socket.room || !room) return
-		fs.createReadStream(path.join(assetsPath, room.host, id.split[0], id.split[1])).pipe(stream)
+		fs.createReadStream(path.join(assetsPath, room.host, id.split(':')[0], id.split(':')[1])).pipe(stream)
 	})
 })
 
