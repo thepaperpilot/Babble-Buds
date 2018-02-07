@@ -140,7 +140,7 @@ exports.setPuppet = function(i) {
 		document.getElementById(i).getElementsByClassName('desc')[0].innerHTML = character.emotes[i].name
 		if (character.emotes[i].enabled) {
 			document.getElementById(i).className += " available"
-			if (fs.existsSync(path.join(project.assetsPath, '..', 'thumbnails', "new-" + character.id, character.emotes[i] + '.png')))
+			if (fs.existsSync(path.join(project.assetsPath, '..', 'thumbnails', "new-" + character.id, i + '.png')))
 				document.getElementById(i).style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', "new-" + character.id, i + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
 			else
 				document.getElementById(i).style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', "" + character.id, i + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
@@ -179,7 +179,7 @@ exports.updateCharacter = function(character, updateThumbnail) {
 				let emotes = Object.keys(character.emotes)
 				for (let i = 0; i < emotes.length; i++) {
 					if (character.emotes[emotes[i]] && character.emotes[emotes[i]].enabled)
-						document.getElementById(emotes[i]).style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', 'new-' + character.id, emotes[i] + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
+						document.getElementById(emotes[i]).style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', 'new-' + character.id, i + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
 				}
 			}
 		}
