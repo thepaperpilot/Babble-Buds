@@ -1629,7 +1629,7 @@ function newAssetList() {
     addAssetListToDom(name)
     // Select new list
     document.getElementById('asset tabs').value = name
-    for (let i = 0; i < assetTabs; i++)
+    for (let i = 0; i < assetTabs.length; i++)
         document.getElementById('tab ' + assetTabs[i]).style.display = 'none'
     document.getElementById('tab ' + name).style.display = ''
 }
