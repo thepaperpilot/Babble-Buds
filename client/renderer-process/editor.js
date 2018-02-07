@@ -1346,6 +1346,10 @@ function deleteCharacter() {
 }
 
 function addAsset() {
+    if (document.getElementById('asset tabs').value === '') {
+        status.log("Error: You must have an asset list to add assets", 5, 1)
+        return
+    }
     remote.dialog.showOpenDialog(remote.BrowserWindow.getFocusedWindow(), {
         title: 'Add Assets',
         filters: [
@@ -1377,6 +1381,10 @@ function addAsset() {
 }
 
 function addAnimatedAsset() {
+    if (document.getElementById('asset tabs').value === '') {
+        status.log("Error: You must have an asset list to add assets", 5, 1)
+        return
+    }
     remote.dialog.showOpenDialog(remote.BrowserWindow.getFocusedWindow(), {
         title: 'Add Animated Assets',
         filters: [
