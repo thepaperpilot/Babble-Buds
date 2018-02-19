@@ -47,7 +47,8 @@ let topLevel = ["body", "head", "hat", "props"] // The top level containers in p
 exports.init = function() {
     project = remote.getGlobal('project').project
     // Create some basic objects
-    stage = new babble.Stage('editor-screen', {'numCharacters': 1, 'puppetScale': scale = project.project.puppetScale, 'assets': project.project.assets}, project.assets, project.assetsPath, null, status)
+    scale = project.project.puppetScale
+    stage = new babble.Stage('editor-screen', {'numCharacters': 1, 'puppetScale': 1, 'assets': project.project.assets}, project.assets, project.assetsPath, null, status)
     window.addEventListener("resize", () => {stage.resize(); stage.resize();})
     stage.stage.interactive = true
     stage.stage.on('mousedown', editorMousedown)
@@ -234,6 +235,8 @@ exports.init = function() {
     // I realize it's slightly redundant, but I want to update the editor panels
     //  while also adding the initial puppet so stage.setPuppet will work
     exports.setPuppet(character, true)
+    // Set puppet to  the proper scale, since the original resize was before we overrode it
+    stage.resize()
 }
 
 exports.addAsset = function(id) {
