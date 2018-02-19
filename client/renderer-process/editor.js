@@ -687,8 +687,9 @@ function editorMousemove(e) {
 
         // Round to nearest pixel, or 10 pixels
         if (e.data.originalEvent.shiftKey) {
-            selected.x = Math.round(selected.x / 10) * 10
-            selected.y = Math.round(selected.y / 10) * 10
+            let step = 10 / scale
+            selected.x = Math.round(Math.round(selected.x / step) * step)
+            selected.y = Math.round(Math.round(selected.y / step) * step)
         } else {
             selected.x = Math.round(selected.x)
             selected.y = Math.round(selected.y)
