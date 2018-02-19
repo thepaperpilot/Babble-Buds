@@ -6,10 +6,9 @@ const PIXI = require('pixi.js')
 const path = require('path')
 const controller = require('./controller.js')
 const settings = remote.require('./main-process/settings')
-const status = require('./status.js')
+const status = require('./status.js') // jshint ignore: line
 const babble = require('babble.js')
 const fs = require('fs-extra')
-const gifuct = require('./../lib/gifuct-js')
 
 // Aliases
 let BaseTextureCache = PIXI.utils.BaseTextureCache,
@@ -37,7 +36,8 @@ let layer // layer being edited
 let clickableAssets = [] // assets in editor that are clickable
 let selected // selected asset inside of pixi
 let selectedGui // gui that appears around selected
-let history = [] // used for undoing stuff
+// used for undoing stuff:
+let history = [] // jshint ignore: line 
 let reverseHistory = [] // used for redoing stuff
 let importing  // used for importing assets from other projects
 let alwaysDifferent // If this is a new puppet, it should always be considered different from its initial value
@@ -467,16 +467,18 @@ exports.setPuppet = function(newCharacter, override, preserveHistory) {
     document.getElementById(layer).className += " selected"
     updateEmoteDropdown()
 
-    // Close panels if not in editor view
-    if (settings.settings.view !== 'editor') {
-        document.getElementById('editor-open-panel').style.display = 'none'
-        document.getElementById('editor-emotes-panel').style.display = 'none'
-        document.getElementById('editor-settings-panel').style.display = 'none'
-        document.getElementById('editor-open').classList.remove('open-tab')
-        document.getElementById('editor-emotes').classList.remove('open-tab')
-        document.getElementById('editor-settings').classList.remove('open-tab')
+    if (!preserveHistory) {
+        // Close panels if not in editor view
+        if (settings.settings.view !== 'editor') {
+            document.getElementById('editor-open-panel').style.display = 'none'
+            document.getElementById('editor-emotes-panel').style.display = 'none'
+            document.getElementById('editor-settings-panel').style.display = 'none'
+            document.getElementById('editor-open').classList.remove('open-tab')
+            document.getElementById('editor-emotes').classList.remove('open-tab')
+            document.getElementById('editor-settings').classList.remove('open-tab')
+        }
+        toggleEditorScreen(true)
     }
-    toggleEditorScreen(true)
 
     document.getElementById('editor-name').value = character.name
     document.getElementById('deadbonesstyle').checked = character.deadbonesStyle
@@ -1245,7 +1247,7 @@ function toggleEmoteEnabled(e) {
     recordChange()
 }
 
-function toggleBabbleMouth(e) {
+function toggleBabbleMouth() {
     let emote = document.getElementById('emote-name').emote
     let index = character.mouths.indexOf(emote)
     if (index > -1) {
@@ -1256,7 +1258,7 @@ function toggleBabbleMouth(e) {
     recordChange()
 }
 
-function toggleBabbleEyes(e) {
+function toggleBabbleEyes() {
     let emote = document.getElementById('emote-name').emote
     let index = character.eyes.indexOf(emote)
     if (index > -1) {
