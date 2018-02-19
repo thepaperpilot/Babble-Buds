@@ -1,6 +1,6 @@
 {
   "name": "babble-buds",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "description": "An open source version of puppet pals",
   "main": "main.js",
   "scripts": {
