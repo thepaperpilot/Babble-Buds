@@ -50,7 +50,6 @@ exports.create = function() {
 	}
 	
 	let create = () => {
-
 		server.emit('create room', project.project.roomName, project.project.roomPassword, project.project.roomPuppetScale, project.project.roomNumCharacters);
 	}
 	if (server) create()
@@ -74,7 +73,7 @@ exports.connect = function(callback) {
 	// Add a connect listener
 	socket.on('connect', function() {
 		status.log('Connected to server!', 1, 1)
-		if (callback) callback()
+		if (callback && callback instanceof Function) callback()
 	})
 
 	socket.on('disconnect', stopNetworking)
