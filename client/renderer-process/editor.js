@@ -1340,6 +1340,7 @@ function deleteCharacter() {
     }
     project.deleteCharacter(character)
     controller.deleteCharacter(character)
+    exports.reloadPuppetList()
     document.getElementById('editor-screen').style.display = ''
     document.getElementById('editor-settings-panel').style.display = 'none'
     exports.setPuppet(project.characters[project.actor.id], true)
