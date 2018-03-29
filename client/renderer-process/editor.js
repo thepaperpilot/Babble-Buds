@@ -1348,6 +1348,11 @@ function deleteCharacter() {
     exports.reloadPuppetList()
     document.getElementById('editor-screen').style.display = ''
     document.getElementById('editor-settings-panel').style.display = 'none'
+    document.getElementById('editor-settings').classList.remove('open-tab')
+    if (settings.settings.view === 'editor') {
+        document.getElementById('editor-open-panel').style.display = ''
+        document.getElementById('editor-open').classList.add('open-tab')
+    }
     exports.setPuppet(project.characters[project.actor.id], true)
 }
 
