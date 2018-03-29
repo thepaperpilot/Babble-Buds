@@ -574,7 +574,18 @@ module.exports = {
 	        "James",
 	        "Lemon Buckleberry",
 	        "Lyn Azveltara's Husband",
-	        "New Doll"
+	        "New Doll",
+	        "Blind Gobolf",
+	        "Jim Caviezal",
+	        "Leopold Barringster",
+	        "Leopold Barringster's Mother",
+	        "Lootbox Saleswoman",
+	        "Bert Tarcial'Embeart",
+	        "Casino Boss",
+	        "Chandelier",
+	        "Douglass Winechester",
+	        "Old Lady Jingle",
+	        "Tigriel"
 	    ]
 
 	    this.project.nickname = nicknames[Math.floor(Math.random() * nicknames.length)]
