@@ -1,21 +1,23 @@
 // Imports
-const remote = require('electron').remote
+const project = require('./project')
+const application = require('./application')
+const editor = require('./editor')
+const assets = require('./assets')
+const network = require('./network')
+const status = require('./status') // jshint ignore: line
+
 const windowStateKeeper = require('electron-window-state')
-const sizeOf = require('image-size')
+const remote = require('electron').remote
 const BrowserWindow = remote.BrowserWindow
-const application = require('./application.js')
-const editor = require('./editor.js')
-const assets = require('./assets.js')
-const network = require('./network.js')
-const status = require('./status.js')
-const settings = remote.require('./main-process/settings')
+const sizeOf = require('image-size')
 const babble = require('babble.js')
 const fs = require('fs-extra')
 const path = require('path')
 const url = require('url')
 
+const settings = remote.require('./main-process/settings')
+
 // Vars
-let project
 let stage
 let puppet
 let character
@@ -24,7 +26,6 @@ let popout
 let popoutWindowState
 
 exports.init = function() {
-	project = remote.getGlobal('project').project
 	application.init()
 	stage = new babble.Stage('screen', Object.assign({}, project.project), project.assets, project.assetsPath, loadPuppets, status)
 	window.addEventListener("resize", () => {stage.resize(); stage.resize()})

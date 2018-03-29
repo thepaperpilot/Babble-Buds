@@ -1,4 +1,5 @@
 // Imports
+const project = require('./project')
 const controller = require('./controller')
 const editor = require('./editor')
 const network = require('./network')
@@ -6,18 +7,16 @@ const network = require('./network')
 const electron = require('electron')
 const remote = electron.remote
 const path = require('path')
-const sizeOf = require('image-size')
 const fs = require('fs-extra')
+const sizeOf = require('image-size')
 
 const settings = remote.require('./main-process/settings')
 
-let project
 let asset // asset being moved (outside of pixi)
 let assetTabs = [] // list of asset tabs
 let importing  // used for importing assets from other projects
 
 exports.init = function() {
-    project = remote.getGlobal('project').project
     window.addEventListener('mouseup', mouseUp, false)
 
     // Update Editor

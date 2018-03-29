@@ -3,21 +3,21 @@
 // All of the Node.js APIs are available in this process.
 
 // Imports
+const project = require('./project')
+const editor = require('./editor')
+const controller = require('./controller')
+const network = require('./network')
+
 const electron = require('electron')
 const modal = new (require('vanilla-modal').default)()
-const editor = require('./editor.js')
-const controller = require('./controller.js')
-const network = require('./network.js')
-const settings = electron.remote.require('./main-process/settings')
 const path = require('path')
 const fs = require('fs-extra')
 
-let project
+const settings = electron.remote.require('./main-process/settings')
+
 let view
 
 exports.init = function() {
-	project = electron.remote.getGlobal('project').project
-
 	// Window input events
 	window.onkeydown = keyDown
 	window.onkeyup = keyUp

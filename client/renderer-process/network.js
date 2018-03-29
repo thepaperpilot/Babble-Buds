@@ -1,15 +1,16 @@
 // Imports
-const controller = require('./controller.js')
-const status = require('./status.js')
+const project = require('./project')
+const controller = require('./controller')
+const status = require('./status') // jshint ignore: line
+
 const ss = require('socket.io-stream')
 const ioClient = require('socket.io-client')
 const babble = require('babble.js')
+const semver = require('semver')
 const fs = require('fs-extra')
 const path = require('path')
-const semver = require('semver')
 
 // Vars
-let project
 let server = null
 let room = null
 let puppets
@@ -23,7 +24,6 @@ let myId
 Object.defineProperty(exports, "isNetworking", {get: () => server !== null && room !== null})
 
 exports.init = function() {
-	project = require('electron').remote.getGlobal('project').project
 	let stageElement = document.createElement('div')
 	stageElement.id = 'userThumbnailStage'
 	stageElement.className = 'hidden'

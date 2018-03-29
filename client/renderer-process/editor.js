@@ -1,15 +1,19 @@
 // Imports
-const electron = require('electron')
-const remote = electron.remote
-const PIXI = require('pixi.js')
-const path = require('path')
+const project = require('./project')
 const controller = require('./controller.js')
 const assets = require('./assets.js')
 const panels = require('./panels.js')
-const settings = remote.require('./main-process/settings')
 const status = require('./status.js') // jshint ignore: line
+
+const electron = require('electron')
+const remote = electron.remote
+const PIXI = require('pixi.js')
 const babble = require('babble.js')
+const path = require('path')
 const fs = require('fs-extra')
+
+const settings = remote.require('./main-process/settings')
+
 
 // Aliases
 let BaseTextureCache = PIXI.utils.BaseTextureCache,
@@ -24,7 +28,6 @@ let BaseTextureCache = PIXI.utils.BaseTextureCache,
 const ROUND_ROTATION = Math.PI / 4 // When rounding angles, this is the step size to use
 
 // Vars
-let project
 let stage // Stage instance
 let scale = 1 // scale of the editor view
 let puppet // puppet being edited
@@ -47,10 +50,7 @@ Object.defineProperty(exports, "puppet", {get: () => puppet})
 Object.defineProperty(exports, "scale", {get: () => scale})
 Object.defineProperty(exports, "stage", {get: () => stage})
 
-exports.init = function() {
-    project = remote.getGlobal('project').project
-    assets.init()
-    panels.init()
+exports.init = function() {    
     // Create some basic objects
     scale = project.project.puppetScale
     stage = new babble.Stage('editor-screen', {'numCharacters': 1, 'puppetScale': 1, 'assets': project.project.assets}, project.assets, project.assetsPath, null, status)
@@ -59,6 +59,10 @@ exports.init = function() {
     stage.stage.on('mousedown', editorMousedown)
     stage.stage.on('mousemove', editorMousemove)
     window.addEventListener('mouseup', mouseUp, false)
+    
+    // Init other files
+    assets.init()
+    panels.init()
 
     // Override some parts of the stage
     stage.resize = function() {

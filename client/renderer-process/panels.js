@@ -1,4 +1,5 @@
 // Imports
+const project = require('./project')
 const editor = require('./editor')
 const controller = require('./controller')
 const assets = require('./assets')
@@ -15,13 +16,10 @@ const settings = remote.require('./main-process/settings')
 let Container = PIXI.Container
 
 // Vars
-let project
 let importing  // used for importing assets from other projects
 let topLevel = ["body", "head", "hat", "props"] // The top level containers in puppets
 
 exports.init = function() {
-    project = remote.getGlobal('project').project
-
     document.getElementById('editor-save').addEventListener('click', editor.savePuppet)
     document.getElementById('editor-new').addEventListener('click', newPuppet)
     document.getElementById('editor-duplicate').addEventListener('click', dupePuppet)
