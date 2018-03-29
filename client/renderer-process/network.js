@@ -58,8 +58,7 @@ exports.create = function() {
 
 exports.connect = function(callback) {
 	if (server) {
-		stopNetworking()
-		joinRoom()
+		server.disconnect()
 		return
 	}
 
@@ -303,7 +302,6 @@ exports.changeNickname = function() {
 
 function stopNetworking() {	
 	if (!server) return
-	server.disconnect()
 	server = null
 	leaveRoom()
 	document.getElementById('connect').innerHTML = 'Connect to Server'
