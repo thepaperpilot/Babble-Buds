@@ -5,6 +5,7 @@ const sizeOf = require('image-size')
 const BrowserWindow = remote.BrowserWindow
 const application = require('./application.js')
 const editor = require('./editor.js')
+const assets = require('./assets.js')
 const network = require('./network.js')
 const status = require('./status.js')
 const settings = remote.require('./main-process/settings')
@@ -255,8 +256,8 @@ exports.initPopout = function() {
 }
 
 exports.resize = function() {
-	let puppetScale = network.isNetworking() ? project.network.puppetScale : project.project.puppetScale
-	let numCharacters = network.isNetworking() ? project.network.numCharacters : project.project.numCharacters
+	let puppetScale = network.isNetworking ? project.network.puppetScale : project.project.puppetScale
+	let numCharacters = network.isNetworking ? project.network.numCharacters : project.project.numCharacters
 	stage.project.puppetScale = puppetScale
 	stage.project.numCharacters = numCharacters
 	stage.resize()
@@ -302,11 +303,11 @@ exports.addAssetLocal = function(id, asset) {
 		        canvas.getContext('2d').putImageData(data, 0, 0)
 		        fs.writeFile(path.join(project.assetsPath, location), new Buffer(canvas.toDataURL().replace(/^data:image\/\w+;base64,/, ""), 'base64'), (err) => {
 		            if (err) console.log(err)
-		            editor.addAsset(id)
+		            assets.addAsset(id)
 		        })
 		    }
 		    image.src = path.join(project.assetsPath, asset.location)
-		} else editor.addAsset(id)
+		} else assets.addAsset(id)
 		exports.emitPopout('add asset', id, asset)
 	})
 	for (let i = oldVersion; i < asset.version; i++) {
@@ -322,7 +323,7 @@ exports.deleteAsset = function(id) {
 
 exports.deleteAssetLocal = function(id) {
     status.log("Deleting asset...", 2, 1)
-	editor.deleteAsset(id)
+	assets.deleteAsset(id)
 	project.deleteAsset(id)
 
 	applyToAsset(id, (asset, array, index) => {
@@ -344,7 +345,7 @@ exports.renameAssetList = function(tab, newTab) {
 }
 
 exports.renameAssetListLocal = function(tab, newTab) {
-	editor.renameAssetList(tab, newTab)
+	assets.renameAssetList(tab, newTab)
 }
 
 exports.moveAsset = function(id, x, y) {
@@ -359,7 +360,7 @@ exports.moveAsset = function(id, x, y) {
 exports.reloadAsset = function(id) {
 	stage.updateAsset(id)
 	editor.updateAsset(id)
-	editor.reloadAsset(id)
+	assets.reloadAsset(id)
 	exports.emitPopout('reload asset', id, project.assets[id])
     let callback = function(asset, sprite) {
         let parent = sprite.parent
@@ -389,13 +390,13 @@ exports.updateAssetLocal = function(id, asset) {
 	stage.addAsset(id, asset, () => {
 		project.addAsset(id, asset)
 		exports.reloadAsset(id)
-		editor.reloadAsset(id)
+		assets.reloadAsset(id)
 	})
 }
 
 exports.reloadAssets = function(callback) {
 	stage.reloadAssets(() => {
-		editor.reloadAssets()
+		assets.reloadAssets()
 		if(callback) callback()
 		project.saveProject()
 		editor.reloadPuppetList()
@@ -435,7 +436,7 @@ exports.deleteAssetListLocal = function(tab) {
         	project.deleteAsset(keys[i])
     	}
     }
-    editor.deleteAssetList(tab)
+    assets.deleteAssetList(tab)
 }
 
 exports.deleteCharacter = function(character) {

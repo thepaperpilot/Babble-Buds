@@ -2,10 +2,8 @@
 const controller = require('./controller.js')
 const status = require('./status.js')
 const ss = require('socket.io-stream')
-const io = require('socket.io')
 const ioClient = require('socket.io-client')
 const babble = require('babble.js')
-const http = require('http')
 const fs = require('fs-extra')
 const path = require('path')
 const semver = require('semver')
@@ -20,6 +18,9 @@ let stage	// used for creating thumbnails of connected users' puppets
 let admin
 let host
 let myId
+
+// make public static variables
+Object.defineProperty(exports, "isNetworking", {get: () => server !== null && room !== null})
 
 exports.init = function() {
 	project = require('electron').remote.getGlobal('project').project
@@ -287,10 +288,6 @@ exports.emit = function(...args) {
 
 exports.getPuppets = function() {
 	return puppets
-}
-
-exports.isNetworking = function() {
-	return server !== null && room !== null
 }
 
 exports.changeNickname = function() {

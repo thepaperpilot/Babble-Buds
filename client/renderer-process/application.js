@@ -576,7 +576,7 @@ function startAutocrop() {
 
 function openPrune() {
 	exports.toggleModal("#prune")
-	document.getElementById('prune-btn').disabled = network.isNetworking()
+	document.getElementById('prune-btn').disabled = network.isNetworking
 }
 
 function pruneAssets() {

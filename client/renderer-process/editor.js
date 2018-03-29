@@ -1,10 +1,10 @@
 // Imports
 const electron = require('electron')
 const remote = electron.remote
-const sizeOf = require('image-size')
 const PIXI = require('pixi.js')
 const path = require('path')
 const controller = require('./controller.js')
+const assets = require('./assets.js')
 const settings = remote.require('./main-process/settings')
 const status = require('./status.js') // jshint ignore: line
 const babble = require('babble.js')
@@ -25,8 +25,6 @@ const ROUND_ROTATION = Math.PI / 4 // When rounding angles, this is the step siz
 // Vars
 let project
 let stage // Stage instance
-let asset // asset being moved (outside of pixi)
-let assetTabs = [] // list of asset tabs
 let scale = 1 // scale of the editor view
 let puppet // puppet being edited
 let character // character being edited
@@ -34,18 +32,23 @@ let bundle // asset bundle id being edited, if applicable
 let oldcharacter // currently saved version of character
 let layer // layer being edited
 let clickableAssets = [] // assets in editor that are clickable
+let importing  // used for importing assets from other projects
 let selected // selected asset inside of pixi
 let selectedGui // gui that appears around selected
 // used for undoing stuff:
 let history = [] // jshint ignore: line 
 let reverseHistory = [] // used for redoing stuff
-let importing  // used for importing assets from other projects
 let alwaysDifferent // If this is a new puppet, it should always be considered different from its initial value
-let networking = false // whether or not we're currently using online features. Disables deleting downloaded assets while true
 let topLevel = ["body", "head", "hat", "props"] // The top level containers in puppets
+
+// make public static variables
+Object.defineProperty(exports, "character", {get: () => character})
+Object.defineProperty(exports, "puppet", {get: () => puppet})
+Object.defineProperty(exports, "scale", {get: () => scale})
 
 exports.init = function() {
     project = remote.getGlobal('project').project
+    assets.init()
     // Create some basic objects
     scale = project.project.puppetScale
     stage = new babble.Stage('editor-screen', {'numCharacters': 1, 'puppetScale': 1, 'assets': project.project.assets}, project.assets, project.assetsPath, null, status)
@@ -122,37 +125,8 @@ exports.init = function() {
     backdrop.containsPoint = () => true;
     stage.stage.addChild(backdrop)
 
-    // Update Editor
-    let tabs = document.getElementById('asset list')
-    let tabsList = document.getElementById('asset tabs')
-    let keys = Object.keys(project.assets)
-    assetTabs = []
-    for (let i = 0; i < keys.length; i++) {
-        if (assetTabs.indexOf(project.assets[keys[i]].tab) === -1) {
-            assetTabs.push(project.assets[keys[i]].tab)
-        }
-    }
-    for (let i = 0; i < assetTabs.length; i++) {
-        let tabElement = document.createElement('div')
-        let tabOption = document.createElement('option')
-        tabOption.text = assetTabs[i]
-        tabOption.id = "tab option " + assetTabs[i]
-        tabsList.add(tabOption)
-        tabs.appendChild(tabElement)
-        tabElement.style.display = 'none'
-        tabElement.style.height = '100%'
-        tabElement.id = 'tab ' + assetTabs[i]
-        tabElement.className = 'scroll'
-    }
-    for (let i = 0; i < keys.length; i++) {
-        exports.addAsset(keys[i], project.assets[keys[i]])
-    }
-    if (assetTabs[0])
-        document.getElementById('tab ' + assetTabs[0]).style.display = ''
-    exports.reloadPuppetList()
-
     // DOM listeners
-    document.getElementById('editor-save').addEventListener('click', savePuppet)
+    document.getElementById('editor-save').addEventListener('click', exports.savePuppet)
     document.getElementById('editor-new').addEventListener('click', newPuppet)
     document.getElementById('editor-duplicate').addEventListener('click', dupePuppet)
     document.getElementById('editor-import').addEventListener('click', importPuppet)
@@ -177,42 +151,9 @@ exports.init = function() {
     document.getElementById('eyeBabbleDuration').addEventListener('change', eyeDurationChange)
     document.getElementById('mouthBabbleDuration').addEventListener('change', mouthDurationChange)
     document.getElementById('delete-character').addEventListener('click', deleteCharacter)
-    document.getElementById('add-asset').addEventListener('click', addAsset)
-    document.getElementById('add-animated-asset').addEventListener('click', addAnimatedAsset)
-    document.getElementById('import-asset').addEventListener('click', importAssets)
-    document.getElementById('import-all').addEventListener('click', toggleImportAll)
-    document.getElementById('cancel-import-assets').addEventListener('click', controller.openModal)
-    document.getElementById('import-assets-btn').addEventListener('click', confirmImportAssets)
     document.getElementById('import-all-puppets').addEventListener('click', toggleImportAllPuppets)
     document.getElementById('cancel-import-puppets').addEventListener('click', controller.openModal)
     document.getElementById('import-puppets-btn').addEventListener('click', confirmImportPuppets)
-    document.getElementById('new-asset-bundle').addEventListener('click', () => {
-        status.log('Not Yet Implemented!', 1, 1)
-    })
-    document.getElementById('edit-asset-list').addEventListener('click', editAssetList)
-    document.getElementById('asset-list-name').addEventListener('change', renameAssetList)
-    document.getElementById('delete-asset-list').addEventListener('click', deleteAssetList)
-    document.getElementById('new-asset-list').addEventListener('click', newAssetList)
-    document.getElementById('asset selected').addEventListener('click', selectAsset)
-    for (let i = 0; i < assetTabs.length; i++) {
-        let tabOption = document.createElement('option')
-        tabOption.text = assetTabs[i]
-        tabOption.id = 'asset-tab option ' + assetTabs[i]
-        document.getElementById('asset-tab').add(tabOption)
-    }
-    document.getElementById('asset-tab').addEventListener('change', migrateAsset)
-    document.getElementById('asset-name').addEventListener('change', renameAsset)
-    document.getElementById('asset-type').addEventListener('change', assetType)
-    document.getElementById('animation-rows').addEventListener('change', animationRows)
-    document.getElementById('animation-cols').addEventListener('change', animationCols)
-    document.getElementById('animation-numFrames').addEventListener('change', animationFrames)
-    document.getElementById('animation-delay').addEventListener('change', animationDelay)
-    document.getElementById('duplicate-asset').addEventListener('click', duplicateAsset)
-    document.getElementById('replace-asset').addEventListener('click', replaceAsset)
-    document.getElementById('delete-asset').addEventListener('click', deleteAsset)
-    document.getElementById('asset tabs').addEventListener('change', changeAssetTabs)
-    document.getElementById('asset search').addEventListener('keyup', updateAssetSearch)
-    document.getElementById('asset search').addEventListener('search', updateAssetSearch)
     document.getElementById('zoom in').addEventListener('click', zoomIn)
     document.getElementById('zoom out').addEventListener('click', zoomOut)
     document.body.addEventListener('click', deselect)
@@ -237,105 +178,17 @@ exports.init = function() {
     exports.setPuppet(character, true)
     // Set puppet to  the proper scale, since the original resize was before we overrode it
     stage.resize()
+    exports.reloadPuppetList()
 }
 
-exports.addAsset = function(id) {
-    let asset = project.assets[id]
-    while (document.getElementsByClassName(id)[0]) {
-        let element = document.getElementsByClassName(id)[0]
-        element.parentNode.removeChild(element)
-    }
-    let assetElement = document.createElement('div')
-    if (!document.getElementById('tab ' + asset.tab)) addAssetListToDom(asset.tab)
-    document.getElementById('tab ' + asset.tab).appendChild(assetElement)
-    assetElement.id = asset.name.toLowerCase()
-    assetElement.className = "asset " + id
-    assetElement.innerHTML = '<div class="desc">' + asset.name + '</div>'
-    let assetDraggable = document.createElement('img')
-    assetElement.appendChild(assetDraggable)
-    assetDraggable.asset = id
-    assetDraggable.style.height = assetDraggable.style.width = '120px'
-    assetDraggable.className = 'contain'
-    // Asset types with thumbnails
-    if (asset.type === "animated" || asset.type === "bundle") {
-        let location = asset.location
-        location = [location.slice(0, location.length - 4), '.thumb', location.slice(location.length - 4)].join('')
-        assetDraggable.src = path.join(project.assetsPath, location + "?random=" + new Date().getTime())
-        assetElement.className += ' ' + asset.type
-    } else {
-        assetDraggable.src = path.join(project.assetsPath, asset.location + "?random=" + new Date().getTime())
-    }
-    if (id.split(':')[0] !== settings.settings.uuid) {
-        assetElement.className += ' downloaded'
-    }
-    assetDraggable.addEventListener('mousedown', mouseDown, false)
-    if (document.getElementById('asset-name').asset === id) {
-        openAssetSettings(id)
-    }
-}
-
-exports.reloadAssets = function() {
-    // Update Assets
-    let tabs = document.getElementById('asset list')
-    let tabsList = document.getElementById('asset tabs')
-    let keys = Object.keys(project.assets)
-    assetTabs = []
-    tabs.innerHTML = ''
-    tabsList.innerHTML = ''
-    for (let i = 0; i < keys.length; i++) {
-        if (assetTabs.indexOf(project.assets[keys[i]].tab) === -1) {
-            assetTabs.push(project.assets[keys[i]].tab)
-        }
-    }
-    for (let i = 0; i < assetTabs.length; i++) {
-        let tabElement = document.createElement('div')
-        let tabOption = document.createElement('option')
-        tabOption.text = assetTabs[i]
-        tabOption.id = "tab option " + assetTabs[i]
-        tabsList.add(tabOption)
-        tabs.appendChild(tabElement)
-        tabElement.style.display = 'none'
-        tabElement.style.height = '100%'
-        tabElement.id = 'tab ' + assetTabs[i]
-        tabElement.className = 'scroll'
-    }
-    for (let i = 0; i < keys.length; i++) {
-        exports.addAsset(keys[i], project.assets[keys[i]])
-    }
-    if (assetTabs[0])
-        document.getElementById('tab ' + assetTabs[0]).style.display = ''
-
-    // Update Puppet
-    exports.setPuppet(JSON.parse(JSON.stringify(project.characters[character.id])), true)
-    savePuppet()
-}
-
-exports.renameAssetList = function(tab, newTab) {
-    document.getElementById('tab ' + tab).id = 'tab ' + newTab
-    document.getElementById('tab option ' + tab).text = newTab
-    document.getElementById('tab option ' + tab).id = 'tab option ' + newTab
-    document.getElementById('asset-tab option ' + tab).text = newTab
-    document.getElementById('asset-tab option ' + tab).id = 'asset-tab option ' + newTab
-    document.getElementById('asset-list-name').tab = newTab
-    document.getElementById('delete-asset-list').tab = newTab
-    assetTabs[assetTabs.indexOf(tab)] = newTab
-}
-
-exports.deleteAssetList = function(tab) {
-    document.getElementById('asset list').removeChild(document.getElementById('tab ' + tab))
-    document.getElementById('asset tabs').removeChild(document.getElementById('tab option ' + tab))
-    document.getElementById('asset-tab').removeChild(document.getElementById('asset-tab option ' + tab))
-    assetTabs.splice(assetTabs.indexOf(tab), 1)
-    if (assetTabs[0])
-        document.getElementById('tab ' + assetTabs[0]).style.display = ''
-    document.getElementById('assets').style.display = ''
-    document.getElementById('asset list editor').style.display = 'none'
+exports.updateAsset = function(id) {
+    stage.updateAsset(id)
 }
 
 exports.deleteAsset = function(id) {
     let asset = project.assets[id]
     if (document.getElementById('delete-asset').asset === id) {
-        selectAsset()
+        assets.selectAsset()
     }
     let element = document.getElementById('tab ' + asset.tab).getElementsByClassName(id)[0]
     element.parentNode.removeChild(element)
@@ -353,10 +206,6 @@ exports.deleteAsset = function(id) {
                 character.emotes[emotes[j]].mouth.splice(k, 1)
     }
     exports.setPuppet(character, true)
-}
-
-exports.updateAsset = function(id) {
-    stage.updateAsset(id)
 }
 
 exports.moveAsset = function(id, x, y) {
@@ -378,30 +227,6 @@ exports.moveAsset = function(id, x, y) {
         for (let k = 0; k < character.emotes[emotes[j]].mouth.length; k++)
             if (character.emotes[emotes[j]].mouth[k].id === id)
                 callback(character.emotes[emotes[j]].mouth[k], character.emotes[emotes[j]].mouth, k)
-    }
-}
-
-exports.reloadAsset = function(id) {
-    let asset = project.assets[id]
-    let assetElement = document.getElementById('tab ' + asset.tab).getElementsByClassName(id)[0]
-    assetElement.className = 'asset ' + id
-    assetElement.id = asset.name.toLowerCase()
-    assetElement.childNodes[0].innerHTML = asset.name
-    let assetDraggable = assetElement.childNodes[1]
-    if (asset.type === "animated" || asset.type === "bundle") {
-        let location = asset.location
-        location = [location.slice(0, location.length - 4), '.thumb', location.slice(location.length - 4)].join('')
-        assetDraggable.src = path.join(project.assetsPath, location + "?random=" + new Date().getTime())
-        assetElement.className += ' ' + asset.type
-    } else {
-        assetDraggable.src = path.join(project.assetsPath, asset.location + "?random=" + new Date().getTime())
-    }
-    if (id.split(':')[0] !== settings.settings.uuid) {
-        assetElement.className += ' downloaded'
-    }
-
-    if (document.getElementById('asset-name').asset === id) {
-        openAssetSettings(id)
     }
 }
 
@@ -438,7 +263,7 @@ exports.checkChanges = function() {
             case 1:
                 return false
             case 2:
-                savePuppet()
+                exports.savePuppet()
                 break
         }
     }
@@ -533,6 +358,34 @@ exports.keyDown = function(e) {
     return false
 }
 
+exports.placeAsset = function(asset, x, y) {
+    selected = null
+    if (selectedGui) stage.stage.removeChild(selectedGui)
+    let newAsset = {
+        "id": asset.asset,
+        "x": Math.round(x / scale),
+        "y": Math.round(y / scale),
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1
+    }
+    switch (layer) {
+        case "mouth":
+            puppet.emotes[puppet.emote].mouth.addChild(stage.getAsset(newAsset, layer, puppet.emote))
+            character.emotes[puppet.emote].mouth.push(newAsset)
+            break
+        case "eyes":
+            puppet.emotes[puppet.emote].eyes.addChild(stage.getAsset(newAsset, layer, puppet.emote))
+            character.emotes[puppet.emote].eyes.push(newAsset)
+            break
+        default:
+            puppet[layer].addChild(stage.getAsset(newAsset, layer))
+            character[layer === 'headBase' ? 'head' : layer].push(newAsset)
+            break
+    }
+    recordChange()
+}
+
 exports.reloadPuppetList = function() {
     let charList = document.getElementById('char open list')
     charList.innerHTML = ''
@@ -553,23 +406,62 @@ exports.reloadPuppetList = function() {
 }
 
 exports.connect = function() {
-    networking = true
     if (document.getElementById('delete-asset').asset)
         document.getElementById('delete-asset').disabled = document.getElementById('delete-asset').asset.split(':')[0] !== settings.settings.uuid
 }
 
 exports.disconnect = function() {
-    networking = false
     document.getElementById('delete-asset').disabled = false
 }
 
-function setBundle(id) {
+exports.setBundle = function(id) {
     bundle = project.assets[id]
     exports.setPuppet(bundle.bundle)
     bundle.id = id
 
     document.getElementById('editor-emotes').style.display = 'none'
     document.getElementById('editor-screen').classList.add('bundle')
+}
+
+exports.savePuppet = function() {
+    if (bundle) {
+        saveBundle()
+        return
+    }
+
+    status.log('Saving puppet...', 2, 1)
+    selected = null
+    if (selectedGui) stage.stage.removeChild(selectedGui)
+    oldcharacter = JSON.stringify(character)
+
+    // Get thumbnails for the different emotes
+    let emoteThumbnails = {}
+    let emote = puppet.emote
+    // Disable all layers except the head and emotes
+    puppet.body.visible = false
+    puppet.hat.visible = false
+    puppet.props.visible = false
+    let emotes = Object.keys(puppet.emotes)
+    let empty = document.createElement('canvas')
+    empty.width = stage.renderer.view.width
+    empty.height = stage.renderer.view.height
+    for (let i = 0; i < emotes.length; i++) {
+        puppet.changeEmote(i)
+        stage.renderer.render(stage.stage)
+        if (stage.renderer.view.toDataURL() !== empty.toDataURL())
+            emoteThumbnails[i] = stage.getThumbnail()
+    }
+    puppet.changeEmote(emote)
+    puppet.body.visible = true
+    puppet.hat.visible = true
+    puppet.props.visible = true
+
+    // Save character
+    stage.renderer.render(stage.stage)
+    controller.saveCharacter(JSON.parse(oldcharacter), stage.renderer.view.toDataURL() === empty.toDataURL() ? null : stage.getThumbnail(), emoteThumbnails)
+    document.getElementById("editor-save").classList.remove("highlight")
+    status.log('Puppet saved!', 1, 1)
+    exports.reloadPuppetList()
 }
 
 function drawBox(box) {
@@ -804,62 +696,7 @@ function rotateMouseup() {
     recordChange()
 }
 
-function flipVertically(e) {
-    e.stopPropagation()
-    selected.height *= -1
-    selected.asset.scaleY *= -1
-    recordChange()
-}
-
-function flipHorizontally(e) {
-    e.stopPropagation()
-    selected.width *= -1
-    selected.asset.scaleX *= -1
-    recordChange()
-}
-
-function mouseUp(e) {
-    if (asset) {
-        if (asset.dragging || asset.clicked) {
-            let rect = document.getElementById('editor-screen').getBoundingClientRect()
-            if (rect.left < e.clientX && rect.right > e.clientX && rect.top < e.clientY && rect.bottom > e.clientY) {
-                selected = null
-                if (selectedGui) stage.stage.removeChild(selectedGui)
-                let newAsset = {
-                    "id": asset.asset,
-                    "x": Math.round((e.clientX - rect.left - rect.width / 2) / scale),
-                    "y": Math.round((e.clientY - rect.bottom) / scale),
-                    "rotation": 0,
-                    "scaleX": 1,
-                    "scaleY": 1
-                }
-                switch (layer) {
-                    case "mouth":
-                        puppet.emotes[puppet.emote].mouth.addChild(stage.getAsset(newAsset, layer, puppet.emote))
-                        character.emotes[puppet.emote].mouth.push(newAsset)
-                        break
-                    case "eyes":
-                        puppet.emotes[puppet.emote].eyes.addChild(stage.getAsset(newAsset, layer, puppet.emote))
-                        character.emotes[puppet.emote].eyes.push(newAsset)
-                        break
-                    default:
-                        puppet[layer].addChild(stage.getAsset(newAsset, layer))
-                        character[layer === 'headBase' ? 'head' : layer].push(newAsset)
-                        break
-                }
-                recordChange()
-            } 
-            if (!e.shiftKey) {
-                window.removeEventListener('mousemove', moveAsset, true);
-                asset.style.position = 'static'
-                asset.style.cursor = ''
-                asset.style.top = asset.style.left = ""
-                asset.style.width = asset.style.height = 120 + "px"
-                asset.style.zIndex = ''
-                asset = null
-            }
-        } else asset.clicked = true
-    }
+function mouseUp() {
     if (selected && selected.dragging) {
         if (selected.y > selected.height / 2)
             deleteKey()
@@ -872,108 +709,18 @@ function mouseUp(e) {
     }
 }
 
-function mouseDown(e) {
-    if (asset) return
-    if (e.button === 0) {
-        asset = e.target
-        asset.dragging = asset.clicked = false
-        asset.style.zIndex = '2'
-        asset.style.position = 'fixed'
-        asset.style.cursor = 'none'
-        asset.style.width = asset.style.height = 'unset'
-        asset.style.width = asset.width * scale + "px"
-        asset.style.top = (e.clientY - asset.height / 2) + 'px'
-        asset.style.left = (e.clientX - asset.width / 2) + 'px'
-        e.preventDefault()
-        window.addEventListener('mousemove', moveAsset, true);
-    } else if (project.assets[e.target.asset].type === "bundle") {
-        status.info("Opening bundle " + e.target.asset)
-        setBundle(e.target.asset)
-    } else {
-        status.info("Opening asset " + e.target.asset)
-        openAssetSettings(e.target.asset)
-    }
+function flipVertically(e) {
+    e.stopPropagation()
+    selected.height *= -1
+    selected.asset.scaleY *= -1
+    recordChange()
 }
 
-function openAssetSettings(id) {
-    document.getElementById('assets').style.display = 'none'
-    document.getElementById('asset editor').style.display = ''
-    document.getElementById('asset selected').style.display = ''
-    let asset = project.assets[id]
-    let enabled = settings.settings.uuid === id.split(':')[0]
-    let elements = ['asset-tab', 'asset-name', 'asset-type', 'replace-asset']
-    document.getElementById('asset-type').value = asset.type ? asset.type.charAt(0).toUpperCase() + asset.type.slice(1) : "Sprite"
-    if (asset.type === "animated") {
-        let location = asset.location
-        location = [location.slice(0, location.length - 4), '.thumb', location.slice(location.length - 4)].join('')
-        document.getElementById('asset selected').style.background = 'url(' + path.join(project.assetsPath, location + "?random=" + new Date().getTime()).replace(/\\/g, '/') + ') center no-repeat/contain'
-        document.getElementById('animated-settings').style.display = ''
-        document.getElementById('animated-spritesheet').src = path.join(project.assetsPath, asset.location + "?random=" + new Date().getTime()).replace(/\\/g, '/')
-        document.getElementById('animation-rows').value = asset.rows
-        document.getElementById('animation-cols').value = asset.cols
-        document.getElementById('animation-numFrames').value = asset.numFrames
-        document.getElementById('animation-delay').value = asset.delay
-        elements = elements.concat(['animation-rows', 'animation-cols', 'animation-numFrames', 'animation-delay'])
-    } else {
-        document.getElementById('asset selected').style.background = 'url(' + path.join(project.assetsPath, asset.location + "?random=" + new Date().getTime()).replace(/\\/g, '/') + ') center no-repeat/contain'
-        document.getElementById('animated-settings').style.display = 'none'
-    }
-    document.getElementById('asset-tab').value = asset.tab
-    document.getElementById('asset-name').value = asset.name
-    document.getElementById('duplicate-asset').asset = id
-    document.getElementById('delete-asset').asset = id
-    document.getElementById('delete-asset').disabled = !enabled && networking
-    for (let i = 0; i < elements.length; i++) {
-        document.getElementById(elements[i]).asset = id
-        document.getElementById(elements[i]).disabled = !enabled
-    }
-}
-
-function moveAsset(e) {
-    asset.dragging = true
-    asset.style.top = (e.clientY - asset.height / 2) + 'px'
-    asset.style.left = (e.clientX - asset.width / 2) + 'px'
-}
-
-function savePuppet() {
-    if (bundle) {
-        saveBundle()
-        return
-    }
-
-    status.log('Saving puppet...', 2, 1)
-    selected = null
-    if (selectedGui) stage.stage.removeChild(selectedGui)
-    oldcharacter = JSON.stringify(character)
-
-    // Get thumbnails for the different emotes
-    let emoteThumbnails = {}
-    let emote = puppet.emote
-    // Disable all layers except the head and emotes
-    puppet.body.visible = false
-    puppet.hat.visible = false
-    puppet.props.visible = false
-    let emotes = Object.keys(puppet.emotes)
-    let empty = document.createElement('canvas')
-    empty.width = stage.renderer.view.width
-    empty.height = stage.renderer.view.height
-    for (let i = 0; i < emotes.length; i++) {
-        puppet.changeEmote(i)
-        stage.renderer.render(stage.stage)
-        if (stage.renderer.view.toDataURL() !== empty.toDataURL())
-            emoteThumbnails[i] = stage.getThumbnail()
-    }
-    puppet.changeEmote(emote)
-    puppet.body.visible = true
-    puppet.hat.visible = true
-    puppet.props.visible = true
-
-    // Save character
-    stage.renderer.render(stage.stage)
-    controller.saveCharacter(JSON.parse(oldcharacter), stage.renderer.view.toDataURL() === empty.toDataURL() ? null : stage.getThumbnail(), emoteThumbnails)
-    document.getElementById("editor-save").classList.remove("highlight")
-    status.log('Puppet saved!', 1, 1)
-    exports.reloadPuppetList()
+function flipHorizontally(e) {
+    e.stopPropagation()
+    selected.width *= -1
+    selected.asset.scaleX *= -1
+    recordChange()
 }
 
 function newPuppet() {
@@ -1094,12 +841,12 @@ function confirmImportPuppets() {
         let character = JSON.parse(project.duplicateCharacter(importing[chars[i]].character))
 
         for (let j = 0; j < topLevel.length; j++)
-            checkLayer(character[topLevel[j]], importing[chars[i]].assets, importing[chars[i]].location)
+            assets.checkLayer(character[topLevel[j]], importing[chars[i]].assets, importing[chars[i]].location)
 
         let emotes = Object.keys(character.emotes)
         for (let j = 0; j < emotes.length; j++) {
-            checkLayer(character.emotes[emotes[j]].eyes, importing[chars[i]].assets, importing[chars[i]].location)
-            checkLayer(character.emotes[emotes[j]].mouth, importing[chars[i]].assets, importing[chars[i]].location)
+            assets.checkLayer(character.emotes[emotes[j]].eyes, importing[chars[i]].assets, importing[chars[i]].location)
+            assets.checkLayer(character.emotes[emotes[j]].mouth, importing[chars[i]].assets, importing[chars[i]].location)
         }
     }
     // Ensure all assets are loaded so we can save puppets properly
@@ -1109,23 +856,12 @@ function confirmImportPuppets() {
         for (let i = 0; i < chars.length; i++) {
             let character = JSON.parse(project.duplicateCharacter(importing[chars[i]].character))
             exports.setPuppet(character)
-            savePuppet()
+            exports.savePuppet()
         }
         // Restore previous puppet
         exports.setPuppet(oldcharacter)
     })
     controller.openModal()
-}
-
-function checkLayer(layer, assets, characterPath) {
-    for (let k = 0; k < layer.length; k++) {
-        let asset = layer[k]
-        // If we don't have the tab or the asset...
-        if (!project.assets[asset.id]) {
-            // Add it!
-            importAsset({id: asset.id, asset: assets[asset.id], location: path.join(characterPath, '..', '..', 'assets', assets[asset.id].location)})
-        }
-    }
 }
 
 function openPuppet(e) {
@@ -1149,7 +885,7 @@ function updateCharSearch(e) {
 
 function toggleEditorScreen(toggle) {
     if (settings.settings.view === 'editor') return
-    let enabled = (toggle == null ? document.getElementById('editor-screen').style.display === 'none' : toggle)
+    let enabled = (toggle == null ? document.getElementById('editor-screen').style.display === 'none' : toggle) // jshint ignore: line
     document.getElementById('editor-screen').style.display = enabled ? '' : 'none'
     document.getElementById('editor-layers').style.display = enabled ? '' : 'none'
     if (enabled)
@@ -1354,482 +1090,6 @@ function deleteCharacter() {
         document.getElementById('editor-open').classList.add('open-tab')
     }
     exports.setPuppet(project.characters[project.actor.id], true)
-}
-
-function addAsset() {
-    if (document.getElementById('asset tabs').value === '') {
-        status.log("Error: You must have an asset list to add assets", 5, 1)
-        return
-    }
-    remote.dialog.showOpenDialog(remote.BrowserWindow.getFocusedWindow(), {
-        title: 'Add Assets',
-        filters: [
-          {name: 'Image', extensions: ['png']}
-        ],
-        properties: [
-          'openFile',
-          'multiSelections'
-        ] 
-    }, (filepaths) => {
-        if (!filepaths) return
-        for (let i = 0; i < filepaths.length; i++) {
-            let file = fs.readFileSync(filepaths[i])
-            let name = filepaths[i].replace(/^.*[\\\/]/, '').replace(/.png/, '')
-            let id = project.getNewAssetId()
-            let tab = document.getElementById('asset tabs').value
-            fs.ensureDirSync(path.join(project.assetsPath, settings.settings.uuid))
-            fs.writeFileSync(path.join(project.assetsPath, settings.settings.uuid, id + '.png'), file)
-            controller.addAsset(settings.settings.uuid + ":" + id, {
-                "tab": tab, 
-                "type": "sprite", 
-                "version": 0,
-                "panning": [],
-                "name": name, 
-                "location": path.join(settings.settings.uuid, id + '.png')
-            })
-        }
-    })
-}
-
-function addAnimatedAsset() {
-    if (document.getElementById('asset tabs').value === '') {
-        status.log("Error: You must have an asset list to add assets", 5, 1)
-        return
-    }
-    remote.dialog.showOpenDialog(remote.BrowserWindow.getFocusedWindow(), {
-        title: 'Add Animated Assets',
-        filters: [
-          {name: 'Animated Image', extensions: ['gif']},
-          {name: 'Animated Spritesheet', extensions: ['png']}
-        ],
-        properties: [
-          'openFile',
-          'multiSelections'
-        ] 
-    }, (filepaths) => {
-        if (!filepaths) return
-        for (let i = 0; i < filepaths.length; i++) {
-            let file = fs.readFileSync(filepaths[i])
-            let name = filepaths[i].replace(/^.*[\\\/]/, '').replace(/.png/, '').replace(/.gif/, '')
-            let rows = 1
-            let cols = 1
-            let numFrames = 1
-            let delay = 60
-            if (filepaths[i].substr(filepaths[i].length - 4) === ".gif") {
-                // If gif, turn it into animated png spritesheet
-                let gif = new GIF(file)
-                let frames = gif.decompressFrames(true)
-                numFrames = frames.length
-                delay = frames[0].delay
-                // Optimize rows and columns to make an approximately square sheet
-                // (idk if this is useful but figured it wouldn't hurt)
-                rows = Math.ceil(Math.sqrt(frames.length))
-                cols = Math.ceil(frames.length / rows)
-                let width = gif.raw.lsd.width
-                let height = gif.raw.lsd.height
-                // Create canvas to put each frame onto
-                var canvas = document.createElement('canvas')
-                var ctx = canvas.getContext('2d')
-                canvas.width = width * cols
-                canvas.height = height * rows
-                for (let j = 0; j < rows; j++) {
-                    for (let k = 0; k < cols; k++) {
-                        if (numFrames <= j * cols + k) break
-                        let frame = frames[j * cols + k]
-                        let imageData = ctx.createImageData(frame.dims.width, frame.dims.height)
-                        imageData.data.set(frame.patch)
-                        ctx.putImageData(imageData, k * width + frame.dims.left, j * height + frame.dims.top)
-                    }
-                }
-                file = new Buffer(canvas.toDataURL().replace(/^data:image\/\w+;base64,/, ""), 'base64')
-            }
-            let id = project.getNewAssetId()
-            let tab = document.getElementById('asset tabs').value
-            fs.ensureDirSync(path.join(project.assetsPath, settings.settings.uuid))
-            fs.writeFileSync(path.join(project.assetsPath, settings.settings.uuid, id + '.png'), file)
-            if (numFrames === 1) fs.copySync(path.join(project.assetsPath, settings.settings.uuid, id + '.png'), path.join(project.assetsPath, settings.settings.uuid, id + '.thumb.png'))
-            else if (fs.existsSync(path.join(project.assetsPath, settings.settings.uuid, id + '.thumb.png')))
-                fs.remove(path.join(project.assetsPath, settings.settings.uuid, id + '.thumb.png'))
-            controller.addAsset(settings.settings.uuid + ":" + id, {
-                "tab": tab, 
-                "type": "animated", 
-                "version": 0,
-                "padding": [],
-                "name": name, 
-                "rows": rows, 
-                "cols": cols, 
-                "numFrames": numFrames, 
-                "delay": delay, 
-                "location": path.join(settings.settings.uuid, id + '.png')
-            })
-        }
-    })
-}
-
-function importAssets() {
-    remote.dialog.showOpenDialog(remote.BrowserWindow.getFocusedWindow(), {
-        title: 'Select Project',
-        defaultPath: path.join(remote.app.getPath('home'), 'projects'),
-        filters: [
-            {name: 'Babble Buds Project File', extensions: ['babble']},
-            {name: 'All Files', extensions: ['*']}
-        ],
-        properties: [
-            'openFile'
-        ] 
-        }, (filepaths) => {
-            if (filepaths) {
-                fs.readJson(filepaths[0], (err, project) => {
-                    if (err) console.log(err)
-                    importing = {}
-                    controller.openModal("#importAssets")
-                    document.getElementById('import-all').checked = false
-                    let assetsList = document.getElementById('import-assets')
-                    assetsList.innerHTML = ''
-                    let readAssetList = function(name, list) {
-                        if (err) console.log(err)
-                        let tab = document.createElement('div')
-                        let addAll = document.createElement('input')
-                        tab.appendChild(addAll)
-                        addAll.outerHTML = '<hr><input type="checkbox" id="import-all-' + name + '" class="checkbox"><label for="import-all-' + name + '" class="checkbox-label">' + name + '</label><br/>'
-                        let keys = Object.keys(list)
-                        for (let i = 0; i < keys.length; i++) {
-                            let asset = document.createElement('div')
-                            asset.id = 'import-asset-' + keys[i]
-                            asset.asset = keys[i]
-                            asset.assetData = list[keys[i]]
-                            asset.location = path.join(filepaths[0], '..', 'assets', list[keys[i]].location)
-                            asset.className = "asset"
-                            asset.innerHTML = '<div class="desc">' + list[keys[i]].name + '</div>'
-                            if (list[keys[i]].type === "animated") {
-                                let location = list[keys[i]].location
-                                location = [location.slice(0, location.length - 4), '.thumb', location.slice(location.length - 4)].join('')
-                                asset.style.backgroundImage = 'url(' + path.join(filepaths[0], '..', 'assets', location + '?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
-                                asset.className += ' animated'
-                            } else 
-                                asset.style.backgroundImage = 'url(' + path.join(filepaths[0], '..', 'assets', list[keys[i]].location + '?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
-                            asset.addEventListener('click', toggleImportAsset)
-                            tab.appendChild(asset)
-                        }
-                        assetsList.appendChild(tab)
-                        document.getElementById('import-all-' + this).addEventListener('click', toggleImportList)
-                    }
-                    if (project.assets) {
-                        let numAssets = 0
-                        let callback = function(err, list) {
-                            // "this" refers to the name of the asset list
-                            if (err) console.log(err)
-                            let keys = Object.keys(list)
-                            let assets = {}
-                            for (let j = 0; j < keys.length; j++) {
-                                list[keys[j]].tab = this.valueOf()
-                                list[keys[j]].version = 0
-                                list[keys[j]].panning = []
-                                assets["invalid:" + numAssets] = list[keys[j]]
-                                numAssets++
-                            }
-                            readAssetList(this.valueOf(), assets)
-                        }
-                        for (let i = 0; i < project.assets.length; i++) {
-                            fs.readJson(path.join(filepaths[0], '..', 'assets', project.assets[i].location), callback.bind(project.assets[i].name))
-                        }
-                    } else {
-                        fs.readJson(path.join(filepaths[0], '..', 'assets', "assets.json"), (err, list) => {
-                            let assetLists = {}
-                            let keys = Object.keys(list)
-                            for (let i = 0; i < keys.length; i++) {
-                                if (!assetLists[list[keys[i]].tab]) {
-                                    assetLists[list[keys[i]].tab] = {}
-                                }
-                                assetLists[list[keys[i]].tab][keys[i]] = list[keys[i]]
-                            }
-                            leys = Object.keys(assetLists)
-                            for (let i = 0; i < keys.length; i++) {
-                                readAssetList(keys[i], assetLists[keys[i]])
-                            }
-                        })
-                    }
-                })
-            }
-        }
-    )
-}
-
-function toggleImportAll(e) {
-    let importAll = e.target.checked
-    let assetList = document.getElementById('import-assets')
-    for (let i = 0; i < assetList.childNodes.length; i++) {
-        let list = assetList.childNodes[i]
-        list.childNodes[1].checked = importAll
-        // First four are hr, checkbox, label, and br
-        for (let j = 4; j < list.childNodes.length; j++) {
-            let asset = list.childNodes[j]
-            if ((asset.className === "asset selected") != importAll) {
-                toggleImportAsset({target: asset})
-            }
-        }
-    }
-}
-
-function toggleImportList(e) {
-    let importAll = e.target.checked
-    for (let i = 4; i < e.target.parentNode.childNodes.length; i++) {
-        let asset = e.target.parentNode.childNodes[i]
-        if ((asset.className === "asset selected") != importAll) {
-            toggleImportAsset({target: asset})
-        }
-    }
-}
-
-function toggleImportAsset(e) {
-    if (e.target.className === 'asset selected' || e.target.className === 'asset selected animated') {
-        e.target.className = 'asset' + (e.target.asset.type === "animated" ? " animated" : "")
-        delete importing[e.target.id]
-        e.target.parentNode.childNodes[1].checked = false
-        document.getElementById('import-all').checked = false
-    } else {
-        e.target.className = 'asset selected' + (e.target.asset.type === "animated" ? " animated" : "")
-        importing[e.target.id] = {id: e.target.asset, asset: e.target.assetData, location: e.target.location}
-    }
-}
-
-function confirmImportAssets() {
-    let assets = Object.keys(importing)
-    for (let i = 0; i < assets.length; i++) {
-        importAsset(importing[assets[i]])
-    }
-    controller.openModal()
-}
-
-function importAsset(asset) {
-    fs.ensureDirSync(path.join(project.assetsPath, settings.settings.uuid))
-    fs.copySync(asset.location, path.join(project.assetsPath, settings.settings.uuid, asset.id.split(':')[1] + '.png'))
-    if (asset.asset.type === 'animated') {
-        let location = asset.location
-        location = [location.slice(0, location.length - 4), '.thumb', location.slice(location.length - 4)].join('')
-        fs.copySync(location, path.join(project.assetsPath, settings.settings.uuid, asset.id.split(':')[1] + '.thumb.png'))
-    }
-    controller.addAsset(asset.id, asset.asset)
-}
-
-function editAssetList() {
-    if (Object.keys(project.assets).length === 0) return
-    if (document.getElementById('asset list editor').style.display === 'none') {
-        document.getElementById('assets').style.display = 'none'
-        document.getElementById('asset list editor').style.display = ''
-        document.getElementById('asset-list-name').value = document.getElementById('asset tabs').value
-        document.getElementById('asset-list-name').tab = document.getElementById('asset tabs').value
-        document.getElementById('delete-asset-list').tab = document.getElementById('asset tabs').value
-        document.getElementById('edit-asset-list').classList.add('open-tab')
-        document.getElementById('asset editor').style.display = 'none'
-        document.getElementById('asset selected').style.display = 'none'
-    } else {
-        document.getElementById('assets').style.display = ''
-        document.getElementById('asset list editor').style.display = 'none'
-        document.getElementById('edit-asset-list').classList.remove('open-tab')
-    }
-}
-
-function renameAssetList(e) {
-    controller.renameAssetList(e.target.tab, e.target.value)
-}
-
-function deleteAssetList(e) {
-    controller.deleteAssetList(e.target.tab)
-    document.getElementById('edit-asset-list').classList.remove('open-tab')
-}
-
-function newAssetList() {
-    // Calculate name for new asset list
-    let name = "New Asset List", i = 0
-    while (assetTabs.indexOf(name) !== -1)
-        name = "New Asset List (" + (++i) + ")"
-    // Add list to DOM
-    addAssetListToDom(name)
-    // Select new list
-    document.getElementById('asset tabs').value = name
-    for (let i = 0; i < assetTabs.length; i++)
-        document.getElementById('tab ' + assetTabs[i]).style.display = 'none'
-    document.getElementById('tab ' + name).style.display = ''
-}
-
-function addAssetListToDom(name) {
-    assetTabs.push(name)
-    let tabElement = document.createElement('div')
-    tabElement.style.height = '100%'
-    tabElement.id = 'tab ' + name
-    tabElement.style.display = 'none'
-    tabElement.className = 'scroll'
-    document.getElementById('asset list').appendChild(tabElement)
-    let tabOption = document.createElement('option')
-    tabOption.text = name
-    tabOption.id = "asset-tab option " + name
-    document.getElementById('asset-tab').add(tabOption)
-    tabOption = document.createElement('option')
-    tabOption.text = name
-    tabOption.id = "tab option " + name
-    document.getElementById('asset tabs').add(tabOption)
-}
-
-function selectAsset() {
-    document.getElementById('assets').style.display = ''
-    document.getElementById('asset editor').style.display = 'none'
-    document.getElementById('asset selected').style.display = 'none'
-}
-
-function migrateAsset(e) {
-    let asset = project.assets[e.target.asset]
-    asset.tab = e.target.value
-    controller.updateAsset(e.target.asset)
-}
-
-function renameAsset(e) {
-    let asset = project.assets[e.target.asset]
-    asset.name = e.target.value
-    controller.updateAsset(e.target.asset)
-}
-
-function assetType(e) {
-    let asset = project.assets[e.target.asset]
-    asset.type = e.target.value.toLowerCase()
-    if (e.target.value.toLowerCase() === "animated") {
-        asset.rows = asset.rows || 1
-        asset.cols = asset.cols || 1
-        asset.numFrames = asset.numFrames || 1
-        asset.delay = asset.delay || 60
-        let location = asset.location
-        location = [location.slice(0, location.length - 4), '.thumb', location.slice(location.length - 4)].join('')
-        if (!fs.existsSync(path.join(project.assetsPath, location))) {
-            fs.copySync(path.join(project.assetsPath, asset.location), path.join(project.assetsPath, location))
-        }
-        document.getElementById('asset selected').style.background = 'url(' + path.join(project.assetsPath, location + "?random=" + new Date().getTime()).replace(/\\/g, '/') + ') center no-repeat/contain'
-        document.getElementById('animated-settings').style.display = ''
-        document.getElementById('animated-spritesheet').src = path.join(project.assetsPath, asset.location + "?random=" + new Date().getTime()).replace(/\\/g, '/')
-        document.getElementById('animation-rows').value = asset.rows
-        document.getElementById('animation-cols').value = asset.cols
-        document.getElementById('animation-numFrames').value = asset.numFrames
-        document.getElementById('animation-delay').value = asset.delay
-    } else {
-        document.getElementById('asset selected').style.background = 'url(' + path.join(project.assetsPath, asset.location + "?random=" + new Date().getTime()).replace(/\\/g, '/') + ') center no-repeat/contain'
-        document.getElementById('animated-settings').style.display = 'none'
-    }
-    controller.updateAsset(e.target.asset)
-}
-
-function animationRows(e) {
-    let asset = project.assets[e.target.asset]
-    asset.rows = e.target.value
-    controller.updateAsset(e.target.asset)
-    recreateThumb(asset)
-}
-
-function animationCols(e) {
-    let asset = project.assets[e.target.asset]
-    asset.cols = e.target.value
-    controller.updateAsset(e.target.asset)
-    recreateThumb(asset)
-}
-
-function animationFrames(e) {
-    let asset = project.assets[e.target.asset]
-    asset.numFrames = e.target.value
-    controller.updateAsset(e.target.asset)
-}
-
-function animationDelay(e) {
-    let asset = project.assets[e.target.asset]
-    asset.delay = e.target.value
-    controller.updateAsset(e.target.asset)
-}
-
-function recreateThumb(asset) {
-    let location = asset.location
-    location = [location.slice(0, location.length - 4), '.thumb', location.slice(location.length - 4)].join('')
-    let dimensions = sizeOf(path.join(project.assetsPath, asset.location))
-    let width = Math.floor(dimensions.width / asset.cols)
-    let height = Math.floor(dimensions.height / asset.rows)
-    let image = new Image()
-    image.onload = () => {
-        let canvas = document.createElement('canvas')
-        canvas.width = dimensions.width
-        canvas.height = dimensions.height
-        canvas.getContext('2d').drawImage(image, 0, 0)
-        let data = canvas.getContext('2d').getImageData(0, 0, width, height)
-        canvas = document.createElement('canvas')
-        canvas.width = width
-        canvas.height = height
-        canvas.getContext('2d').putImageData(data, 0, 0)
-        fs.writeFile(path.join(project.assetsPath, location), new Buffer(canvas.toDataURL().replace(/^data:image\/\w+;base64,/, ""), 'base64'), (err) => {
-            if (err) console.log(err)
-            document.getElementById('asset selected').style.background = 'url(' + path.join(project.assetsPath, location + "?random=" + new Date().getTime()).replace(/\\/g, '/') + ') center no-repeat/contain'
-            document.getElementById(asset.name.toLowerCase()).children[1].src = path.join(project.assetsPath, location + "?random=" + new Date().getTime()).replace(/\\/g, '/')
-        })
-    }
-    image.src = path.join(project.assetsPath, asset.location)
-}
-
-function duplicateAsset(e) {
-    let newAsset = JSON.parse(JSON.stringify(project.assets[e.target.asset]))
-    let id = project.getNewAssetId()
-    newAsset.location = path.join(settings.settings.uuid, id + ".png")
-    newAsset.version = 0
-    fs.copySync(path.join(project.assetsPath, project.assets[e.target.asset].location), path.join(project.assetsPath, newAsset.location))
-    controller.addAsset(settings.settings.uuid + ":" + id, newAsset)
-    selectAsset()
-}
-
-function replaceAsset(e) {
-    remote.dialog.showOpenDialog(remote.BrowserWindow.getFocusedWindow(), {
-        title: 'Replace Asset',
-        filters: [
-          {name: 'Image', extensions: ['png']}
-        ],
-        properties: [
-          'openFile'
-        ] 
-    }, (filepaths) => {
-        if (!filepaths) return
-        let asset = project.assets[e.target.asset]
-        let file = fs.readFileSync(filepaths[0])
-        fs.writeFileSync(path.join(project.assetsPath, asset.location), file)
-        controller.updateAsset(e.target.asset)
-    })
-}
-
-function deleteAsset(e) {
-    if (remote.dialog.showMessageBox({
-        "type": "question",
-        "buttons": ["Delete Asset", "Cancel"],
-        "defaultId": 1,
-        "title": "Delete Asset?",
-        "message": "Are you sure you want to delete this asset?",
-        "detail": "This action cannot be undone.",
-        "cancelId": 1
-    }) === 0)
-        controller.deleteAsset(e.target.asset)
-}
-
-function changeAssetTabs(e) {
-    for (let i = 0; i < assetTabs.length; i++)
-        document.getElementById('tab ' + assetTabs[i]).style.display = 'none'
-    document.getElementById('tab ' + e.target.value).style.display = ''
-}
-
-function updateAssetSearch(e) {
-    for (let i = 0; i < assetTabs.length; i++) {
-        let list = document.getElementById('tab ' + assetTabs[i])
-        if (e.target.value === '') {
-            for (let j = 0; j < list.children.length; j++)
-                list.children[j].style.display = ''
-        } else {
-            for (let j = 0; j < list.children.length; j++)
-                list.children[j].style.display = 'none'
-            let assetsElements = list.querySelectorAll("[id*='" + e.target.value.toLowerCase() + "']")
-            for (let j = 0; j < assetsElements.length; j++) {
-                assetsElements[j].style.display = ''
-            }
-        }
-    }
 }
 
 function zoomIn() {
