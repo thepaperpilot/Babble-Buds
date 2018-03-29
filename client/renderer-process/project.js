@@ -24,6 +24,8 @@ module.exports = {
 	    "roomPassword": "",
 	    "roomNumCharacters": 5,
 	    "roomPuppetScale": 1,
+	    "charactersPath": "../characters",
+	    "assetsPath": "../assets",
 	    "characters": [
 	        {
 	            "name": "",
@@ -81,8 +83,8 @@ module.exports = {
 			this.oldProject = JSON.stringify(this.project)
 			this.characters = {}
 			this.assets = {}
-			this.charactersPath = path.join(filepath, '..', 'characters')
-			this.assetsPath = path.join(filepath, '..', 'assets')
+			this.charactersPath = path.join(filepath, this.project.charactersPath)
+			this.assetsPath = path.join(filepath, this.project.assetsPath)
 			this.numCharacters = 0
 
 			settings.settings.openProject = filepath
@@ -226,8 +228,8 @@ module.exports = {
 		}
 
 		for (let i = 0; i < this.project.characters.length; i++) {
-			fs.removeSync(path.join(this.assetsPath, '..', 'thumbnails', 'new-' + this.project.characters[i].id + '.png'))
-			fs.removeSync(path.join(this.assetsPath, '..', 'thumbnails', 'new-' + this.project.characters[i].id))
+			fs.removeSync(path.join(this.charactersPath, '..', 'thumbnails', 'new-' + this.project.characters[i].id + '.png'))
+			fs.removeSync(path.join(this.charactersPath, '..', 'thumbnails', 'new-' + this.project.characters[i].id))
 		}
 
         controller.init()
@@ -237,14 +239,14 @@ module.exports = {
 		fs.writeFile(settings.settings.openProject, JSON.stringify(this.project, null, 4))
 		for (let i = 0; i < this.project.characters.length; i++) {
 			fs.writeFile(path.join(settings.settings.openProject, '..', 'characters', this.project.characters[i].location), JSON.stringify(this.characters[this.project.characters[i].id], null, 4))
-			if (fs.existsSync(path.join(this.assetsPath, '..', 'thumbnails', 'new-' + this.project.characters[i].id + '.png')))
-                fs.renameSync(path.join(this.assetsPath, '..', 'thumbnails', 'new-' + this.project.characters[i].id + '.png'), 
-                	path.join(this.assetsPath, '..', 'thumbnails', this.project.characters[i].id + '.png'))
-            if (fs.existsSync(path.join(this.assetsPath, '..', 'thumbnails', 'new-' + this.project.characters[i].id))) {
-            	if (fs.existsSync(path.join(this.assetsPath, '..', 'thumbnails', '' + this.project.characters[i].id)))
-            		fs.removeSync(path.join(this.assetsPath, '..', 'thumbnails', '' + this.project.characters[i].id))
-                fs.renameSync(path.join(this.assetsPath, '..', 'thumbnails', 'new-' + this.project.characters[i].id), 
-                	path.join(this.assetsPath, '..', 'thumbnails', "" + this.project.characters[i].id))
+			if (fs.existsSync(path.join(this.charactersPath, '..', 'thumbnails', 'new-' + this.project.characters[i].id + '.png')))
+                fs.renameSync(path.join(this.charactersPath, '..', 'thumbnails', 'new-' + this.project.characters[i].id + '.png'), 
+                	path.join(this.charactersPath, '..', 'thumbnails', this.project.characters[i].id + '.png'))
+            if (fs.existsSync(path.join(this.charactersPath, '..', 'thumbnails', 'new-' + this.project.characters[i].id))) {
+            	if (fs.existsSync(path.join(this.charactersPath, '..', 'thumbnails', '' + this.project.characters[i].id)))
+            		fs.removeSync(path.join(this.charactersPath, '..', 'thumbnails', '' + this.project.characters[i].id))
+                fs.renameSync(path.join(this.charactersPath, '..', 'thumbnails', 'new-' + this.project.characters[i].id), 
+                	path.join(this.charactersPath, '..', 'thumbnails', "" + this.project.characters[i].id))
             }
 		}
 		settings.addRecentProject(controller.getThumbnail())
@@ -302,11 +304,11 @@ module.exports = {
 	},
 	addAsset: function(id, asset) {
 		this.assets[id] = asset
-		fs.writeFile(path.join(settings.settings.openProject, '..', 'assets', 'assets.json'), JSON.stringify(this.assets, null, 4))
+		fs.writeFile(path.join(settings.settings.openProject, this.project.assetsPath, 'assets.json'), JSON.stringify(this.assets, null, 4))
 	},
     deleteAsset: function(id) {
         delete this.assets[id]
-        fs.writeFile(path.join(settings.settings.openProject, '..', 'assets', 'assets.json'), JSON.stringify(this.assets, null, 4))
+        fs.writeFile(path.join(settings.settings.openProject, this.project.assetsPath, 'assets.json'), JSON.stringify(this.assets, null, 4))
     },
     saveCharacter: function(character) {
         let char = null

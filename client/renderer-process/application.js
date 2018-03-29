@@ -31,7 +31,7 @@ exports.init = function() {
 		element.addEventListener('contextmenu', charContextMenu)
 		if (project.project.hotbar[i]) {
 			element.getElementsByClassName('desc')[0].innerHTML = project.characters[project.project.hotbar[i]].name
-			element.style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', project.project.hotbar[i] + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
+			element.style.backgroundImage = 'url(' + path.join(project.charactersPath, '..', 'thumbnails', project.project.hotbar[i] + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
 		}
 	}
 	document.getElementById('char null').addEventListener('click', updateHotbar)
@@ -140,10 +140,10 @@ exports.setPuppet = function(i) {
 		document.getElementById(i).getElementsByClassName('desc')[0].innerHTML = character.emotes[i].name
 		if (character.emotes[i].enabled) {
 			document.getElementById(i).className += " available"
-			if (fs.existsSync(path.join(project.assetsPath, '..', 'thumbnails', "new-" + character.id, i + '.png')))
-				document.getElementById(i).style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', "new-" + character.id, i + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
+			if (fs.existsSync(path.join(project.charactersPath, '..', 'thumbnails', "new-" + character.id, i + '.png')))
+				document.getElementById(i).style.backgroundImage = 'url(' + path.join(project.charactersPath, '..', 'thumbnails', "new-" + character.id, i + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
 			else
-				document.getElementById(i).style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', "" + character.id, i + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
+				document.getElementById(i).style.backgroundImage = 'url(' + path.join(project.charactersPath, '..', 'thumbnails', "" + character.id, i + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
 		} else document.getElementById(i).style.backgroundImage = ''
 	}
 
@@ -171,7 +171,7 @@ exports.updateCharacter = function(character, updateThumbnail) {
 		document.getElementById('char ' + index).getElementsByClassName('desc')[0].innerHTML = character.name
 		if (updateThumbnail) {
 			controller.updateCharacter(index, character)
-			document.getElementById('char ' + index).style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', 'new-' + character.id + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
+			document.getElementById('char ' + index).style.backgroundImage = 'url(' + path.join(project.charactersPath, '..', 'thumbnails', 'new-' + character.id + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
 		}
 		if (('' + document.getElementById('char ' + index).className).indexOf('selected') > -1) {
 			controller.setPuppetLocal(index)
@@ -179,16 +179,16 @@ exports.updateCharacter = function(character, updateThumbnail) {
 				let emotes = Object.keys(character.emotes)
 				for (let i = 0; i < emotes.length; i++) {
 					if (character.emotes[emotes[i]] && character.emotes[emotes[i]].enabled)
-						document.getElementById(emotes[i]).style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', 'new-' + character.id, i + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
+						document.getElementById(emotes[i]).style.backgroundImage = 'url(' + path.join(project.charactersPath, '..', 'thumbnails', 'new-' + character.id, i + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
 				}
 			}
 		}
 	}
 	if (updateThumbnail) {
 		let charPath
-		if (fs.existsSync(path.join(project.assetsPath, '..', 'thumbnails', "new-" + character.id + '.png')))
-			charPath = path.join(project.assetsPath, '..', 'thumbnails', 'new-' + character.id + '.png?random=' + new Date().getTime()).replace(/\\/g, '/')
-		else charPath = path.join(project.assetsPath, '..', 'thumbnails', character.id + '.png?random=' + new Date().getTime()).replace(/\\/g, '/')
+		if (fs.existsSync(path.join(project.charactersPath, '..', 'thumbnails', "new-" + character.id + '.png')))
+			charPath = path.join(project.charactersPath, '..', 'thumbnails', 'new-' + character.id + '.png?random=' + new Date().getTime()).replace(/\\/g, '/')
+		else charPath = path.join(project.charactersPath, '..', 'thumbnails', character.id + '.png?random=' + new Date().getTime()).replace(/\\/g, '/')
 		
 		let selector = document.getElementById('char selected')
 		let i = selector.i
@@ -304,10 +304,10 @@ function charContextMenu(e) {
 	document.getElementById('charselect').style.display = 'block'
 	document.getElementById('char selected').i = project.project.hotbar[i]
 	if (project.project.hotbar[i]) {
-		if (fs.existsSync(path.join(project.assetsPath, '..', 'thumbnails', 'new-' + project.project.hotbar[i] + '.png')))
-			document.getElementById('char selected').style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', 'new-' + project.project.hotbar[i] + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
+		if (fs.existsSync(path.join(project.charactersPath, '..', 'thumbnails', 'new-' + project.project.hotbar[i] + '.png')))
+			document.getElementById('char selected').style.backgroundImage = 'url(' + path.join(project.charactersPath, '..', 'thumbnails', 'new-' + project.project.hotbar[i] + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
 		else
-			document.getElementById('char selected').style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', project.project.hotbar[i] + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
+			document.getElementById('char selected').style.backgroundImage = 'url(' + path.join(project.charactersPath, '..', 'thumbnails', project.project.hotbar[i] + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
 	} else {
 		document.getElementById('char selected').style.backgroundImage = ''
 	}
@@ -324,10 +324,10 @@ function addCharSelector(character, i) {
 	let selector = document.createElement('div')
 	selector.id = project.characters[character].name.toLowerCase()
 	selector.className = "char"
-	if (fs.existsSync(path.join(project.assetsPath, '..', 'thumbnails', 'new-' + character + '.png')))
-		selector.style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', 'new-' + character + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
+	if (fs.existsSync(path.join(project.charactersPath, '..', 'thumbnails', 'new-' + character + '.png')))
+		selector.style.backgroundImage = 'url(' + path.join(project.charactersPath, '..', 'thumbnails', 'new-' + character + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
 	else
-		selector.style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', character + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
+		selector.style.backgroundImage = 'url(' + path.join(project.charactersPath, '..', 'thumbnails', character + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
 	document.getElementById('char list').appendChild(selector)
 	selector.innerHTML = '<div class="desc">' + project.characters[character].name + '</div>'
 	selector.i = i
@@ -354,10 +354,10 @@ function updateHotbar(e) {
 	}
 	if (project.project.hotbar[i] && project.project.hotbar[i] !== 0) {
 		document.getElementById('char ' + i).getElementsByClassName('desc')[0].innerHTML = project.characters[puppet].name
-		if (fs.existsSync(path.join(project.assetsPath, '..', 'thumbnails', puppet + '.png')))
-			document.getElementById('char ' + i).style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', puppet + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
+		if (fs.existsSync(path.join(project.charactersPath, '..', 'thumbnails', puppet + '.png')))
+			document.getElementById('char ' + i).style.backgroundImage = 'url(' + path.join(project.charactersPath, '..', 'thumbnails', puppet + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
 		else
-			document.getElementById('char ' + i).style.backgroundImage = 'url(' + path.join(project.assetsPath, '..', 'thumbnails', 'new-' + puppet + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
+			document.getElementById('char ' + i).style.backgroundImage = 'url(' + path.join(project.charactersPath, '..', 'thumbnails', 'new-' + puppet + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
 	} else {
 		document.getElementById('char ' + i).getElementsByClassName('desc')[0].innerHTML = ''
 		document.getElementById('char ' + i).style.backgroundImage = ''
