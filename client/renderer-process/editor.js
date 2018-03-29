@@ -1231,7 +1231,6 @@ function toggleEmoteEnabled(e) {
             exports.setPuppet(character, true, true)
             e.target.button.className += " available"
             updateEmoteDropdown()
-            document.getElementById('editor-emote').value = character.emotes[emote].name
         } else {
             character.emotes[emote] = {
                 "enabled": true,
