@@ -21,13 +21,13 @@ function loadPuppets() {
 
 // Send inputs back to parent window
 window.onkeydown = function(e) {
-    let key = e.keyCode ? e.keyCode : e.which;
+    let key = e.keyCode ? e.keyCode : e.which
 
     remote.getCurrentWindow().getParentWindow().webContents.send('keyDown', key)
 }
 
 window.onkeyup = function(e) {
-    let key = e.keyCode ? e.keyCode : e.which;
+    let key = e.keyCode ? e.keyCode : e.which
 
     if (key == 27) { 
         remote.getCurrentWindow().close()
@@ -47,7 +47,7 @@ electron.ipcRenderer.on('setup', (event, project, mypuppet, id) => {
     puppet = mypuppet
     puppet.id = id
     stage = new babble.Stage('screen', project.project, assets = project.assets, project.assetsPath, loadPuppets)
-    window.addEventListener("resize", () => {stage.resize();stage.resize();})
+    window.addEventListener('resize', () => {stage.resize(); stage.resize()})
 })
 
 electron.ipcRenderer.on('init', (event, puppets) => {

@@ -17,7 +17,7 @@ let Container = PIXI.Container
 
 // Vars
 let importing  // used for importing assets from other projects
-let topLevel = ["body", "head", "hat", "props"] // The top level containers in puppets
+let topLevel = ['body', 'head', 'hat', 'props'] // The top level containers in puppets
 
 exports.init = function() {
     document.getElementById('editor-save').addEventListener('click', editor.savePuppet)
@@ -31,7 +31,7 @@ exports.init = function() {
     document.getElementById('char open search').addEventListener('search', updateCharSearch)
     document.getElementById('editor-emotes').addEventListener('click', toggleEmotes)
     for (let i = 0; i < 12; i++) {
-        document.getElementById('emote-' + (i + 1)).addEventListener('click', openEmote)
+        document.getElementById(`emote-${i + 1}`).addEventListener('click', openEmote)
     }
     document.getElementById('emote-name').addEventListener('change', changeEmoteName)
     document.getElementById('emote-enabled').addEventListener('change', toggleEmoteEnabled)
@@ -54,7 +54,7 @@ exports.updateEmoteDropdown = function() {
         if (emote && emote.enabled) {
             let option = document.createElement('div')
             select.append(option)
-            option.outerHTML = '<option>' + emote.name + '</option>'
+            option.outerHTML = `<option>${emote.name}</option>`
         }
     }
     editor.puppet.changeEmote()
@@ -89,73 +89,72 @@ function importPuppet() {
         properties: [
             'openFile'
         ] 
-        }, (filepaths) => {
-            if (filepaths) {
-                fs.readJson(filepaths[0], (err, project) => {
-                    if (err) console.log(err)
-                    importing = {}
-                    controller.openModal("#importPuppets")
-                    document.getElementById('import-all-puppets').checked = false
-                    let puppetsList = document.getElementById('import-puppets')
-                    puppetsList.innerHTML = ''
-                    let projectAssets = {}
-                    let oldAssets = {}
-                    if (project.assets) {
-                        let numAssets = 0
-                        let assets = fs.readJsonSync(path.join(filepaths[0], '..', 'assets', project.assets[i].location))
-                        let keys = Object.keys(assets)
-                        for (let j = 0; j < keys.length; j++) {
-                            assets[keys[j]].tab = project.assets[i].name
-                            projectAssets["invalid:" + numAssets] = assets[keys[j]]
-                            oldAssets[project.assets[i].name][keys[j]] = numAssets
-                            numAssets++
-                        }
-                    } else {
-                        projectAssets = fs.readJsonSync(path.join(filepaths[0], '..', 'assets', "assets.json"))
+    }, (filepaths) => {
+        if (filepaths) {
+            fs.readJson(filepaths[0], (err, project) => {
+                if (err) console.log(err)
+                importing = {}
+                controller.openModal('#importPuppets')
+                document.getElementById('import-all-puppets').checked = false
+                let puppetsList = document.getElementById('import-puppets')
+                puppetsList.innerHTML = ''
+                let projectAssets = {}
+                let oldAssets = {}
+                if (project.assets) {
+                    let numAssets = 0
+                    let assets = fs.readJsonSync(path.join(filepaths[0], '..', 'assets', project.assets[i].location))
+                    let keys = Object.keys(assets)
+                    for (let j = 0; j < keys.length; j++) {
+                        assets[keys[j]].tab = project.assets[i].name
+                        projectAssets[`invalid:${numAssets}`] = assets[keys[j]]
+                        oldAssets[project.assets[i].name][keys[j]] = numAssets
+                        numAssets++
                     }
-                    let callback = function(err, character) {
-                        // this = {name: string, id: number, location: string}
-                        if (err) console.log(err)
-                        let puppet = document.createElement('div')                    
-                        if (project.assets) {
-                            for (let j = 0; j < topLevel.length; j++)
-                                for (let k = 0; k < character[topLevel[j]].length; k++) {
-                                    character[topLevel[j]][k].id = "invalid:" + oldAssets[character[topLevel[j]][k].tab][character[topLevel[j]][k].hash]
-                                    delete character[topLevel[j]][k].tab
-                                    delete character[topLevel[j]][k].hash                                }
+                } else {
+                    projectAssets = fs.readJsonSync(path.join(filepaths[0], '..', 'assets', 'assets.json'))
+                }
+                let callback = function(err, character) {
+                    // this = {name: string, id: number, location: string}
+                    if (err) console.log(err)
+                    let puppet = document.createElement('div')                    
+                    if (project.assets) {
+                        for (let j = 0; j < topLevel.length; j++)
+                            for (let k = 0; k < character[topLevel[j]].length; k++) {
+                                character[topLevel[j]][k].id = `invalid:${oldAssets[character[topLevel[j]][k].tab][character[topLevel[j]][k].hash]}`
+                                delete character[topLevel[j]][k].tab
+                                delete character[topLevel[j]][k].hash                                }
 
-                            let emotes = Object.keys(character.emotes)
-                            for (let j = 0; j < emotes.length; j++) {
-                                for (let k = 0; k < character.emotes[emotes[j]].eyes.length; k++) {
-                                    character.emotes[emotes[j]].eyes[k].id = "invalid:" + oldAssets[character.emotes[emotes[j]].eyes[k].tab][character.emotes[emotes[j]].eyes[k].hash]
-                                    delete character.emotes[emotes[j]].eyes[k].tab
-                                    delete character.emotes[emotes[j]].eyes[k].hash
-                                }
-                                for (let k = 0; k < character.emotes[emotes[j]].mouth.length; k++) {
-                                    character.emotes[emotes[j]].mouth[k].id = "invalid:" + oldAssets[character.emotes[emotes[j]].mouth[k].tab][character.emotes[emotes[j]].mouth[k].hash]
-                                    delete character.emotes[emotes[j]].mouth[k].tab
-                                    delete character.emotes[emotes[j]].mouth[k].hash
-                                }
+                        let emotes = Object.keys(character.emotes)
+                        for (let j = 0; j < emotes.length; j++) {
+                            for (let k = 0; k < character.emotes[emotes[j]].eyes.length; k++) {
+                                character.emotes[emotes[j]].eyes[k].id = `invalid:${oldAssets[character.emotes[emotes[j]].eyes[k].tab][character.emotes[emotes[j]].eyes[k].hash]}`
+                                delete character.emotes[emotes[j]].eyes[k].tab
+                                delete character.emotes[emotes[j]].eyes[k].hash
+                            }
+                            for (let k = 0; k < character.emotes[emotes[j]].mouth.length; k++) {
+                                character.emotes[emotes[j]].mouth[k].id = `invalid:${oldAssets[character.emotes[emotes[j]].mouth[k].tab][character.emotes[emotes[j]].mouth[k].hash]}`
+                                delete character.emotes[emotes[j]].mouth[k].tab
+                                delete character.emotes[emotes[j]].mouth[k].hash
                             }
                         }
-                        puppet.id = 'import-puppet-' + this.id
-                        puppet.character = character
-                        puppet.name = this.name
-                        puppet.location = path.join(filepaths[0], '..', 'characters', this.location)
-                        puppet.assets = projectAssets
-                        puppet.className = "char"
-                        puppet.style.backgroundImage = 'url(' + path.join(filepaths[0], '..', 'thumbnails', this.id + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
-                        puppet.innerHTML = '<div class="desc">' + this.name + '</div>'
-                        puppet.addEventListener('click', toggleImportPuppet)
-                        puppetsList.appendChild(puppet)
                     }
-                    for (let i = 0; i < project.characters.length; i++) {
-                        fs.readJson(path.join(filepaths[0], '..', 'characters', project.characters[i].location), callback.bind(project.characters[i]))
-                    }
-                })
-            }
+                    puppet.id = `import-puppet-${this.id}`
+                    puppet.character = character
+                    puppet.name = this.name
+                    puppet.location = path.join(filepaths[0], '..', 'characters', this.location)
+                    puppet.assets = projectAssets
+                    puppet.className = 'char'
+                    puppet.style.backgroundImage = `url(filepaths[0].replace(/\\/g, '/')/../thumbnails/${this.id}.png?random=${new Date().getTime()})`
+                    puppet.innerHTML = `<div class="desc">${this.name}</div>`
+                    puppet.addEventListener('click', toggleImportPuppet)
+                    puppetsList.appendChild(puppet)
+                }
+                for (let i = 0; i < project.characters.length; i++) {
+                    fs.readJson(path.join(filepaths[0], '..', 'characters', project.characters[i].location), callback.bind(project.characters[i]))
+                }
+            })
         }
-    )
+    })
 }
 
 function toggleImportAllPuppets(e) {
@@ -163,7 +162,7 @@ function toggleImportAllPuppets(e) {
     let puppetsList = document.getElementById('import-puppets')
     for (let i = 0; i < puppetsList.childNodes.length; i++) {
         let char = puppetsList.childNodes[i]
-        if ((char.className === "char selected") != importAll) {
+        if ((char.className === 'char selected') != importAll) {
             toggleImportPuppet({target: char})
         }
     }
@@ -218,7 +217,7 @@ function updateCharSearch(e) {
     } else {
         for (let i = 0; i < list.children.length; i++)
             list.children[i].style.display = 'none'
-        let chars = list.querySelectorAll("[id*='" + e.target.value.toLowerCase() + "']")
+        let chars = list.querySelectorAll(`[id*='${e.target.value.toLowerCase()}']`)
         for (let i = 0; i < chars.length; i++) {
             chars[i].style.display = 'inline-block'
         }
@@ -253,11 +252,11 @@ function toggleEmotes() {
         panel.style.display = ''
         document.getElementById('editor-emotes').classList.add('open-tab')
         for (let i = 0; i < editor.character.emotes.length; i++) {
-            document.getElementById('emote-' + (i + 1)).emote = i
+            document.getElementById(`emote-${i + 1}`).emote = i
             if (editor.character.emotes[i].enabled) {
-                document.getElementById('emote-' + (i + 1)).className = "emote available"
+                document.getElementById(`emote-${i + 1}`).className = 'emote available'
             } else {
-                document.getElementById('emote-' + (i + 1)).className = "emote"
+                document.getElementById(`emote-${i + 1}`).className = 'emote'
             }
         }
         openEmote({target: document.getElementById('emote-1')})
@@ -284,7 +283,7 @@ function changeEmoteName(e) {
     let emote = e.target.emote
     editor.character.emotes[emote].name = e.target.value
     exports.updateEmoteDropdown()
-    document.getElementById('emote-' + (emote + 1)).innerText = e.target.value
+    document.getElementById(`emote-${emote + 1}`).innerText = e.target.value
     editor.recordChange()
 }
 
@@ -298,21 +297,21 @@ function toggleEmoteEnabled(e) {
         if (editor.character.emotes[emote]) {
             editor.character.emotes[emote].enabled = true
             editor.setPuppet(editor.character, true, true)
-            e.target.button.className += " available"
+            e.target.button.className += ' available'
             exports.updateEmoteDropdown()
         } else {
             editor.character.emotes[emote] = {
-                "enabled": true,
-                "mouth": [],
-                "eyes": []
+                enabled: true,
+                mouth: [],
+                eyes: []
             }
             editor.puppet.emotes[emote] = {
-                "mouth": new Container(),
-                "eyes": new Container()
+                mouth: new Container(),
+                eyes: new Container()
             }
             editor.puppet.mouthsContainer.addChild(editor.puppet.emotes[emote].mouth)
             editor.puppet.eyesContainer.addChild(editor.puppet.emotes[emote].eyes)
-            e.target.button.className += " available"
+            e.target.button.className += ' available'
             exports.updateEmoteDropdown()
         }
     }
@@ -380,7 +379,7 @@ function mouthDurationChange(e) {
 
 function deleteCharacter() {
     if (editor.character.id == project.actor.id) {
-        status.error("You can't delete your active character. Please switch characters and try again.")
+        status.error('You can\'t delete your active character. Please switch characters and try again.')
         return
     }
     project.deleteCharacter(editor.character)

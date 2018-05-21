@@ -42,19 +42,19 @@ let selectedGui // gui that appears around selected
 let history = [] // jshint ignore: line 
 let reverseHistory = [] // used for redoing stuff
 let alwaysDifferent // If this is a new puppet, it should always be considered different from its initial value
-let topLevel = ["body", "head", "hat", "props"] // The top level containers in puppets
+let topLevel = ['body', 'head', 'hat', 'props'] // The top level containers in puppets
 
 // make public static variables
-Object.defineProperty(exports, "character", {get: () => character})
-Object.defineProperty(exports, "puppet", {get: () => puppet})
-Object.defineProperty(exports, "scale", {get: () => scale})
-Object.defineProperty(exports, "stage", {get: () => stage})
+Object.defineProperty(exports, 'character', {get: () => character})
+Object.defineProperty(exports, 'puppet', {get: () => puppet})
+Object.defineProperty(exports, 'scale', {get: () => scale})
+Object.defineProperty(exports, 'stage', {get: () => stage})
 
-exports.init = function() {    
+exports.init = function() {
     // Create some basic objects
     scale = project.project.puppetScale
     stage = new babble.Stage('editor-screen', {'numCharacters': 1, 'puppetScale': 1, 'assets': project.project.assets}, project.assets, project.assetsPath, null, status)
-    window.addEventListener("resize", () => {stage.resize(); stage.resize();})
+    window.addEventListener('resize', () => {stage.resize(); stage.resize()})
     stage.stage.interactive = true
     stage.stage.on('mousedown', editorMousedown)
     stage.stage.on('mousemove', editorMousemove)
@@ -92,7 +92,7 @@ exports.init = function() {
         let sprite
         let assetData = this.assets[asset.id]
         if (assetData) {
-            if (assetData.type === "animated") {
+            if (assetData.type === 'animated') {
                 let base = BaseTextureCache[path.join(this.assetsPath, assetData.location)]
                 let textures = []
                 let width = base.width / assetData.cols
@@ -108,7 +108,7 @@ exports.init = function() {
             } else sprite = new Sprite(TextureCache[path.join(this.assetsPath, assetData.location)])
         } else {
             sprite = new Sprite()
-            if (this.log) this.log("Unable to load asset \"" + asset.id + "\"", 5, 2)
+            if (this.log) this.log(`Unable to load asset "${asset.id}"`, 5, 2)
         }
         sprite.anchor.set(0.5)
         sprite.x = asset.x
@@ -116,7 +116,7 @@ exports.init = function() {
         sprite.rotation = asset.rotation
         sprite.scale.x = asset.scaleX
         sprite.scale.y = asset.scaleY
-        if (!assetData || assetData.type !== "bundle") {
+        if (!assetData || assetData.type !== 'bundle') {
             sprite.asset = asset
             sprite.layer = layer
             sprite.emote = emote
@@ -126,9 +126,9 @@ exports.init = function() {
     }
 
     // Make mousedown work on entire stage
-    let backdrop = new Container();
-    backdrop.interactive = true;
-    backdrop.containsPoint = () => true;
+    let backdrop = new Container()
+    backdrop.interactive = true
+    backdrop.containsPoint = () => true
     stage.stage.addChild(backdrop)
 
     // DOM listeners
@@ -173,7 +173,7 @@ exports.deleteAsset = function(id) {
     if (document.getElementById('delete-asset').asset === id) {
         assets.selectAsset()
     }
-    let element = document.getElementById('tab ' + asset.tab).getElementsByClassName(id)[0]
+    let element = document.getElementById(`tab ${asset.tab}`).getElementsByClassName(id)[0]
     element.parentNode.removeChild(element)
     for (let j = 0; j < topLevel.length; j++)
         for (let k = 0; k < character[topLevel[j]].length; k++)
@@ -220,7 +220,7 @@ exports.clear = function() {
 
 exports.resetChanges = function() {
     alwaysDifferent = true
-    document.getElementById("editor-save").classList.add("highlight")
+    document.getElementById('editor-save').classList.add('highlight')
 }
 
 exports.resize = function() {
@@ -231,23 +231,23 @@ exports.resize = function() {
 exports.checkChanges = function() {
     if (character && (JSON.stringify(character) !== oldcharacter || alwaysDifferent)) {
         let response = remote.dialog.showMessageBox({
-            "type": "question",
-            "buttons": ["Don't Save", "Cancel", "Save"],
-            "defaultId": 2,
-            "title": "Save Project?",
-            "message": "Do you want to save the changes to " + character.name + "?",
-            "detail": "If you don't save, your changes will be lost.",
-            "cancelId": 1
+            type: 'question',
+            buttons: ['Don\'t Save', 'Cancel', 'Save'],
+            defaultId: 2,
+            title: 'Save Project?',
+            message: `Do you want to save the changes to ${character.name}?`,
+            detail: 'If you don\'t save, your changes will be lost.',
+            cancelId: 1
         })
 
         switch (response) {
-            default:
-                break
-            case 1:
-                return false
-            case 2:
-                exports.savePuppet()
-                break
+        default:
+            break
+        case 1:
+            return false
+        case 2:
+            exports.savePuppet()
+            break
         }
     }
     return true
@@ -265,17 +265,17 @@ exports.setPuppet = function(newCharacter, override, preserveHistory) {
     if (!preserveHistory) {
         oldcharacter = JSON.stringify(character)
         history = reverseHistory = []
-        document.getElementById("editor-save").classList.remove("highlight")
+        document.getElementById('editor-save').classList.remove('highlight')
         alwaysDifferent = false
     }
     puppet = stage.createPuppet(character)
     stage.setPuppet(1, puppet)
 
     // Update Editor Panels
-    let selectedElements = document.getElementById('editor-layers').getElementsByClassName("selected")
+    let selectedElements = document.getElementById('editor-layers').getElementsByClassName('selected')
     while (selectedElements.length)
-        selectedElements[0].classList.remove("selected")
-    document.getElementById(layer).className += " selected"
+        selectedElements[0].classList.remove('selected')
+    document.getElementById(layer).className += ' selected'
     panels.updateEmoteDropdown()
 
     if (!preserveHistory) {
@@ -345,26 +345,26 @@ exports.placeAsset = function(asset, x, y) {
     selected = null
     if (selectedGui) stage.stage.removeChild(selectedGui)
     let newAsset = {
-        "id": asset.asset,
-        "x": Math.round(x / scale),
-        "y": Math.round(y / scale),
-        "rotation": 0,
-        "scaleX": 1,
-        "scaleY": 1
+        id: asset.asset,
+        x: Math.round(x / scale),
+        y: Math.round(y / scale),
+        rotation: 0,
+        scaleX: 1,
+        scaleY: 1
     }
     switch (layer) {
-        case "mouth":
-            puppet.emotes[puppet.emote].mouth.addChild(stage.getAsset(newAsset, layer, puppet.emote))
-            character.emotes[puppet.emote].mouth.push(newAsset)
-            break
-        case "eyes":
-            puppet.emotes[puppet.emote].eyes.addChild(stage.getAsset(newAsset, layer, puppet.emote))
-            character.emotes[puppet.emote].eyes.push(newAsset)
-            break
-        default:
-            puppet[layer].addChild(stage.getAsset(newAsset, layer))
-            character[layer === 'headBase' ? 'head' : layer].push(newAsset)
-            break
+    case 'mouth':
+        puppet.emotes[puppet.emote].mouth.addChild(stage.getAsset(newAsset, layer, puppet.emote))
+        character.emotes[puppet.emote].mouth.push(newAsset)
+        break
+    case 'eyes':
+        puppet.emotes[puppet.emote].eyes.addChild(stage.getAsset(newAsset, layer, puppet.emote))
+        character.emotes[puppet.emote].eyes.push(newAsset)
+        break
+    default:
+        puppet[layer].addChild(stage.getAsset(newAsset, layer))
+        character[layer === 'headBase' ? 'head' : layer].push(newAsset)
+        break
     }
     exports.recordChange()
 }
@@ -376,13 +376,13 @@ exports.reloadPuppetList = function() {
     for (let j = 0; j < characters.length; j++) {
         let selector = document.createElement('div')
         selector.id = project.characters[characters[j]].name.toLowerCase()
-        selector.className = "char"
-        if (fs.existsSync(path.join(project.charactersPath, '..', 'thumbnails', 'new-' + characters[j] + '.png')))
-            selector.style.backgroundImage = 'url(' + path.join(project.charactersPath, '..', 'thumbnails', 'new-' + characters[j] + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
+        selector.className = 'char'
+        if (fs.existsSync(path.join(project.charactersPath, '..', 'thumbnails', `new-${characters[j]}.png`)))
+            selector.style.backgroundImage = `url(${project.charactersPath.replace(/\\/g, '/')}/../thumbnails/new-${characters[j]}.png?random=${new Date().getTime()})`
         else
-            selector.style.backgroundImage = 'url(' + path.join(project.charactersPath, '..', 'thumbnails', characters[j] + '.png?random=' + new Date().getTime()).replace(/\\/g, '/') + ')'
+            selector.style.backgroundImage = `url(${project.charactersPath.replace(/\\/g, '/')}/../thumbnails/${characters[j]}.png?random=${new Date().getTime()})`
         charList.appendChild(selector)
-        selector.innerHTML = '<div class="desc">' + project.characters[characters[j]].name + '</div>'
+        selector.innerHTML = `<div class="desc">${project.characters[characters[j]].name}</div>`
         selector.charid = characters[j]
         selector.addEventListener('click', openPuppet)
     }
@@ -442,7 +442,7 @@ exports.savePuppet = function() {
     // Save character
     stage.renderer.render(stage.stage)
     controller.saveCharacter(JSON.parse(oldcharacter), stage.renderer.view.toDataURL() === empty.toDataURL() ? null : stage.getThumbnail(), emoteThumbnails)
-    document.getElementById("editor-save").classList.remove("highlight")
+    document.getElementById('editor-save').classList.remove('highlight')
     status.log('Puppet saved!', 1, 1)
     exports.reloadPuppetList()
 }
@@ -452,9 +452,9 @@ exports.recordChange = function() {
     let action = JSON.stringify(character)
     history.push(action)
     if (action === oldcharacter) {
-        document.getElementById("editor-save").classList.remove("highlight")
+        document.getElementById('editor-save').classList.remove('highlight')
     } else {
-        document.getElementById("editor-save").classList.add("highlight")
+        document.getElementById('editor-save').classList.add('highlight')
     }
 }
 
@@ -532,23 +532,23 @@ function editorMousedown(e) {
     let closest = null
     let distance = -1
     for(let i = 0; i < clickableAssets.length; i++){
-        let bounds = clickableAssets[i].getBounds();
-        let centerX = bounds.x + bounds.width/2;
-        let centerY = bounds.y + bounds.height/2;
-        let dx = centerX - e.data.global.x;
-        let dy = centerY - e.data.global.y;
-        let dist = dx*dx + dy*dy; //Distance is not squared as it's not needed.
+        let bounds = clickableAssets[i].getBounds()
+        let centerX = bounds.x + bounds.width/2
+        let centerY = bounds.y + bounds.height/2
+        let dx = centerX - e.data.global.x
+        let dy = centerY - e.data.global.y
+        let dist = dx*dx + dy*dy // Distance is not squared as it's just being used to compare distances
         if((dist < distance || distance == -1) && clickableAssets[i].visible && clickableAssets[i].containsPoint(e.data.global) && clickableAssets[i].layer === layer) {
             if ((layer === 'mouth' || layer === 'eyes') && clickableAssets[i].emote != (puppet.emote || 'default'))
                 continue
-            closest = clickableAssets[i];
-            distance = dist;
+            closest = clickableAssets[i]
+            distance = dist
         }
     }
     if (closest) {
         setSelected(closest)
         closest.dragging = true
-        closest.start = {"x": e.data.getLocalPosition(closest.parent).x - selected.position.x, "y": e.data.getLocalPosition(closest.parent).y - selected.position.y}
+        closest.start = {x: e.data.getLocalPosition(closest.parent).x - selected.position.x, y: e.data.getLocalPosition(closest.parent).y - selected.position.y}
         selectedGui.startX = e.data.global.x
         selectedGui.startY = e.data.global.y
     } else if (selected) {
@@ -597,8 +597,8 @@ function resizeMousedown(e) {
     selectedGui.i = e.currentTarget.i
     let i = 1 - (selectedGui.i % 2) + 2 - 2 * Math.floor(selectedGui.i / 2)
     selectedGui.corner = {
-        "x": selectedGui.corners[i].worldTransform.tx / scale - stage.screen.clientWidth / 2 / scale - (i % 2 == 1 ? 1 : -1) * Math.cos(selected.rotation - Math.PI / 4) * 17 - Math.sin(selected.rotation - Math.PI / 4) * 11,
-        "y": selectedGui.corners[i].worldTransform.ty / scale - stage.screen.clientHeight / scale + (Math.floor(i / 2) == 1 ? 1 : -1) * Math.sin(selected.rotation - Math.PI / 4) * 17 + Math.cos(selected.rotation - Math.PI / 4) * 11
+        x: selectedGui.corners[i].worldTransform.tx / scale - stage.screen.clientWidth / 2 / scale - (i % 2 == 1 ? 1 : -1) * Math.cos(selected.rotation - Math.PI / 4) * 17 - Math.sin(selected.rotation - Math.PI / 4) * 11,
+        y: selectedGui.corners[i].worldTransform.ty / scale - stage.screen.clientHeight / scale + (Math.floor(i / 2) == 1 ? 1 : -1) * Math.sin(selected.rotation - Math.PI / 4) * 17 + Math.cos(selected.rotation - Math.PI / 4) * 11
     }
     if (i === 0) {
         selectedGui.corner.x -= Math.sin(selected.rotation) * 24
@@ -733,10 +733,10 @@ function openPuppet(e) {
 
 function setLayer(e) {
     layer = e.target.id
-    let selected = document.getElementById('editor-layers').getElementsByClassName("selected")
+    let selected = document.getElementById('editor-layers').getElementsByClassName('selected')
     while (selected.length)
-        selected[0].classList.remove("selected")
-    e.target.classList.add("selected")
+        selected[0].classList.remove('selected')
+    e.target.classList.add('selected')
     selected = null
     if (selectedGui) stage.stage.removeChild(selectedGui)
 }
@@ -749,24 +749,24 @@ function cut() {
     if (selected) {
         electron.clipboard.writeText(JSON.stringify(selected.asset))
         switch (layer) {
-            case "bundle":
-                puppet.container.removeChild(selected)
-                for (var i = 0; i < selected.children.length; i++) {
-                    selected.children[i].remove()
-                }
-                break
-            case "mouth":
-                puppet.emotes[puppet.emote].mouth.removeChild(selected)
-                character.emotes[puppet.emote].mouth.splice(character.emotes[puppet.emote].mouth.indexOf(selected.asset), 1)
-                break
-            case "eyes":
-                puppet.emotes[puppet.emote].eyes.removeChild(selected)
-                character.emotes[puppet.emote].eyes.splice(character.emotes[puppet.emote].eyes.indexOf(selected.asset), 1)
-                break
-            default:
-                puppet[layer].removeChild(selected)
-                character[layer === 'headBase' ? 'head' : layer].splice(character[layer === 'headBase' ? 'head' : layer].indexOf(selected.asset), 1)
-                break
+        case 'bundle':
+            puppet.container.removeChild(selected)
+            for (var i = 0; i < selected.children.length; i++) {
+                selected.children[i].remove()
+            }
+            break
+        case 'mouth':
+            puppet.emotes[puppet.emote].mouth.removeChild(selected)
+            character.emotes[puppet.emote].mouth.splice(character.emotes[puppet.emote].mouth.indexOf(selected.asset), 1)
+            break
+        case 'eyes':
+            puppet.emotes[puppet.emote].eyes.removeChild(selected)
+            character.emotes[puppet.emote].eyes.splice(character.emotes[puppet.emote].eyes.indexOf(selected.asset), 1)
+            break
+        default:
+            puppet[layer].removeChild(selected)
+            character[layer === 'headBase' ? 'head' : layer].splice(character[layer === 'headBase' ? 'head' : layer].indexOf(selected.asset), 1)
+            break
         }
         selected = null
         stage.stage.removeChild(selectedGui)
@@ -787,26 +787,26 @@ function paste() {
     }
     let asset = stage.getAsset(newAsset, layer)
     switch (layer) {
-        case "bundle":
-            if (project.assets[asset.asset].type !== "bundle") {
-                status.log("Error: You cannot add a non-asset bundle to the asset bundles layer")
-                 break
-            }
-            character.bundles.push(newAsset)
-            exports.setPuppet(character, true, true)
+    case 'bundle':
+        if (project.assets[asset.asset].type !== 'bundle') {
+            status.log('Error: You cannot add a non-asset bundle to the asset bundles layer')
             break
-        case "mouth":
-            puppet.emotes[puppet.emote].mouth.addChild(stage.getAsset(newAsset, layer))
-            character.emotes[puppet.emote].mouth.push(newAsset)
-            break
-        case "eyes":
-            puppet.emotes[puppet.emote].eyes.addChild(stage.getAsset(newAsset, layer))
-            character.emotes[puppet.emote].eyes.push(newAsset)
-            break
-        default:
-            puppet[layer].addChild(stage.getAsset(newAsset, layer))
-            character[layer === 'headBase' ? 'head' : layer].push(newAsset)
-            break
+        }
+        character.bundles.push(newAsset)
+        exports.setPuppet(character, true, true)
+        break
+    case 'mouth':
+        puppet.emotes[puppet.emote].mouth.addChild(stage.getAsset(newAsset, layer))
+        character.emotes[puppet.emote].mouth.push(newAsset)
+        break
+    case 'eyes':
+        puppet.emotes[puppet.emote].eyes.addChild(stage.getAsset(newAsset, layer))
+        character.emotes[puppet.emote].eyes.push(newAsset)
+        break
+    default:
+        puppet[layer].addChild(stage.getAsset(newAsset, layer))
+        character[layer === 'headBase' ? 'head' : layer].push(newAsset)
+        break
     }
     setSelected(asset)
     exports.recordChange()
@@ -815,24 +815,24 @@ function paste() {
 function deleteKey() {
     if (selected) {
         switch (layer) {
-            case "bundle":
-                puppet.container.removeChild(selected)
-                for (var i = 0; i < selected.children.length; i++) {
-                    selected.children[i].remove()
-                }
-                break
-            case "mouth":
-                puppet.emotes[puppet.emote].mouth.removeChild(selected)
-                character.emotes[puppet.emote].mouth.splice(character.emotes[puppet.emote].mouth.indexOf(selected.asset), 1)
-                break
-            case "eyes":
-                puppet.emotes[puppet.emote].eyes.removeChild(selected)
-                character.emotes[puppet.emote].eyes.splice(character.emotes[puppet.emote].eyes.indexOf(selected.asset), 1)
-                break
-            default:
-                puppet[layer].removeChild(selected)
-                character[layer === 'headBase' ? 'head' : layer].splice(character[layer === 'headBase' ? 'head' : layer].indexOf(selected.asset), 1)
-                break
+        case 'bundle':
+            puppet.container.removeChild(selected)
+            for (var i = 0; i < selected.children.length; i++) {
+                selected.children[i].remove()
+            }
+            break
+        case 'mouth':
+            puppet.emotes[puppet.emote].mouth.removeChild(selected)
+            character.emotes[puppet.emote].mouth.splice(character.emotes[puppet.emote].mouth.indexOf(selected.asset), 1)
+            break
+        case 'eyes':
+            puppet.emotes[puppet.emote].eyes.removeChild(selected)
+            character.emotes[puppet.emote].eyes.splice(character.emotes[puppet.emote].eyes.indexOf(selected.asset), 1)
+            break
+        default:
+            puppet[layer].removeChild(selected)
+            character[layer === 'headBase' ? 'head' : layer].splice(character[layer === 'headBase' ? 'head' : layer].indexOf(selected.asset), 1)
+            break
         }
         selected = null
         stage.stage.removeChild(selectedGui)
@@ -849,9 +849,9 @@ function undo() {
     document.getElementById('editor-emote').value = puppet.emotes[emote].name
     puppet.changeEmote(emote)
     if (action === oldcharacter && !alwaysDifferent) {
-        document.getElementById("editor-save").classList.remove("highlight")
+        document.getElementById('editor-save').classList.remove('highlight')
     } else {
-        document.getElementById("editor-save").classList.add("highlight")
+        document.getElementById('editor-save').classList.add('highlight')
     }
 }
 
@@ -861,9 +861,9 @@ function redo() {
     history.push(action)
     exports.setPuppet(JSON.parse(action), true, true)
     if (action === oldcharacter && !alwaysDifferent) {
-        document.getElementById("editor-save").classList.remove("highlight")
+        document.getElementById('editor-save').classList.remove('highlight')
     } else {
-        document.getElementById("editor-save").classList.add("highlight")
+        document.getElementById('editor-save').classList.add('highlight')
     }
 }
 
@@ -872,10 +872,10 @@ function deselect(e) {
         selected = null
         stage.stage.removeChild(selectedGui)
     }
-    if (e.target.id !== "add-asset-dropdown") {
-        document.getElementById("add-asset-dropdown").checked = false
+    if (e.target.id !== 'add-asset-dropdown') {
+        document.getElementById('add-asset-dropdown').checked = false
     }
-    if (e.target.id !== "add-puppet-dropdown") {
-        document.getElementById("add-puppet-dropdown").checked = false
+    if (e.target.id !== 'add-puppet-dropdown') {
+        document.getElementById('add-puppet-dropdown').checked = false
     }
 }
