@@ -9,7 +9,6 @@ const controller = require('./controller')
 const network = require('./network')
 
 const electron = require('electron')
-const modal = new (require('vanilla-modal').default)()
 const path = require('path')
 const fs = require('fs-extra')
 
@@ -92,12 +91,6 @@ exports.init = function() {
     electron.ipcRenderer.on('togglePopout', () => {
         controller.togglePopout()
     })
-    electron.ipcRenderer.on('toggleInstructions', () => {
-        exports.toggleModal('#instructions')
-    })
-    electron.ipcRenderer.on('toggleAbout', () => {
-        exports.toggleModal('#about')
-    })
     electron.ipcRenderer.on('autocrop', () => {
         openAutocrop()
     })
@@ -157,11 +150,6 @@ exports.setEmote = function(emote) {
         selected[0].classList.remove('selected')
 
     document.getElementById(emote).className += ' selected'
-}
-
-// Change whether the babble button is highlighted in the UI
-exports.setBabble = function(babbling) {
-    document.getElementById('babble').className = `babble${babbling ? ' selected' : ''}`
 }
 
 // Update the hotbar button for a character
@@ -236,13 +224,6 @@ exports.setView = function(newView) {
         addEditorView()
     view = newView
     controller.resize()
-}
-
-exports.toggleModal = function(string) {
-    if (modal.isOpen)
-        modal.close()
-    else
-        modal.open(string)
 }
 
 function keyDown(e) {

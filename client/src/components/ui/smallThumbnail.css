@@ -1,0 +1,18 @@
+.smallThumbnail-wrapper {
+    display: flex;
+}
+
+.smallThumbnail-img {
+    flex: 0 0 auto;
+}
+
+.smallThumbnail-img img {
+    object-fit: contain;
+    width: 100%;
+    height: 100%;
+}
+
+.smallThumbnail-label {
+    margin: auto 8px;
+    flex: 1 auto;
+}

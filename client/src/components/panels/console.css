@@ -1,0 +1,12 @@
+.toggle {
+    cursor: pointer;
+}
+
+.console pre {
+    padding: 8px 16px 8px 40px;
+    position: relative;
+    margin: 0;
+    user-select: initial;
+    white-space: pre-wrap;
+    border-bottom: solid 1px white;
+}

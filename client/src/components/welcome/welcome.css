@@ -1,0 +1,62 @@
+.welcome {
+    font-size: 20px;
+    background-color: #242a33;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+}
+
+.greeting {
+    color: #54647a;
+    height: 400px;
+    left: 50%;
+    margin-left: -25%;
+    margin-top: -200px;
+    position: absolute;
+    text-align: center;
+    text-shadow: 0 1px 1px #222;
+    top: 50%;
+    width: 50%;
+}
+
+.greeting-header {
+    color: #15191f;
+    font-size: 90px;
+    margin-bottom: 30px;
+    text-shadow: 0 1px 1px #666;
+}
+
+.recent-projects {
+    height: 160px;
+    display: flex;
+}
+
+.recent-project {
+    background-color: #242a33;
+    background-position: bottom;
+    color: #fff;
+    cursor: pointer;
+    height: calc( 100% - 16px );
+    margin: 4px;
+    padding: 2px;
+    position: relative;
+    width: calc( 33% - 16px);
+    display: flex;
+    flex-direction: column;
+    overflow-y: hidden;
+    border: 3px solid #333c4a;
+}
+
+.recent-project img {
+    object-fit: contain;
+    width: calc(100% - 4px);
+    box-sizing: border-box;
+    margin: auto 4px;
+}
+
+.version {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    color: white;
+}

@@ -1,0 +1,144 @@
+import React, {Component} from 'react'
+import { connect } from 'react-redux'
+import { Stage } from 'react-pixi-fiber'
+import Viewport from './Viewport'
+import Layer from './Layer'
+import Cross from './Cross'
+import './editor.css'
+
+const DISTANCE = 10000
+
+class Editor extends Component {
+    constructor(props) {
+        super(props)
+
+        this.viewport = React.createRef()
+        this.selectedRef = React.createRef()
+
+        this.state = {
+            scale: 1,
+            grid: props.grid,
+            bounds: {
+                top: 0,
+                right: 0,
+                bottom: 0,
+                left: 0
+            }
+        }
+
+        this.updateViewportBounds = this.updateViewportBounds.bind(this)
+        this.onScroll = this.onScroll.bind(this)
+        this.onMouseDown = this.onMouseDown.bind(this)
+        this.changeZoom = this.changeZoom.bind(this)
+
+        window.PIXI.SCALE_MODES.DEFAULT = window.PIXI.SCALE_MODES.NEAREST
+    }
+
+    componentDidMount() {
+        this.viewport.current.on('moved', this.updateViewportBounds)
+    }
+
+    componentDidUpdate(prevProps) {
+        if (this.props.bounds !== prevProps.bounds)
+            this.updateViewportBounds()
+    }
+
+    updateViewportBounds() {
+        const {top, right, bottom, left} = this.viewport.current
+        this.setState({
+            bounds: {top, right, bottom, left}
+        })
+    }
+
+    onScroll(e) {
+        // For some reason the wheel plugin doesn't seem to get these events by default
+        // Additionally, it expects clientX and clientY to be relative
+        // to the canvas, which is not true
+        const rect = e.target.getBoundingClientRect()
+        e.clientX -= rect.left
+        e.clientY -= rect.top
+        this.viewport.current.plugins.wheel.wheel(e)
+
+        this.setState({
+            scale: 1 / this.viewport.current.scale.x
+        })
+        this.updateViewportBounds()
+    }
+
+    onMouseDown(e) {
+        e.preventDefault()
+    }
+
+    changeZoom(e) {
+        this.props.onZoomChange(parseInt(e.target.value, 10))
+        this.setState({
+            grid: parseInt(e.target.value, 10)
+        })
+    }
+
+    render() {
+        // TODO (re-)load assets since babble.js isn't here to do it for us
+        const {rect, character} = this.props
+        const {scale, grid, bounds} = this.state
+
+        const gridLines = []
+        if (grid !== -1) {
+            const gridSize = Math.pow(10, 4 - grid)
+            const startX = Math.ceil(bounds.left / gridSize) * gridSize
+            const startY = Math.ceil(bounds.top / gridSize) * gridSize
+
+            for (let i = startX; i < bounds.right; i += gridSize) {
+                gridLines.push(<Cross key={`h${i}`}
+                    x={i}
+                    y={bounds.top}
+                    scale={scale}
+                    color={0x222222}
+                    distance={bounds.bottom - bounds.top} />)
+            }
+
+            for (let i = startY; i < bounds.bottom; i += gridSize) {
+                gridLines.push(<Cross key={`v${i}`}
+                    x={bounds.left}
+                    y={i}
+                    scale={scale}
+                    color={0x222222}
+                    distance={bounds.right - bounds.left} />)
+            }
+        }
+
+        return (
+            <div className="panel editor">
+                <div className="bar flex-row">
+                    <div className="flex-item">Zoom: {Math.round(1 / scale * 100)}%</div>
+                    <div className="flex-item">Pos: {Math.round((bounds.right + bounds.left) / 2)},
+                        {-Math.round((bounds.bottom + bounds.top) / 2)}</div>
+                    <input
+                        type="range"
+                        min="-1"
+                        max="4"
+                        value={this.state.grid}
+                        onChange={this.changeZoom} />
+                    <div className="flex-grow"></div>
+                </div>
+                <Stage width={rect.width} height={rect.height - 21} options={{
+                    transparent: true,
+                    antialias: true
+                }} onWheel={this.onScroll} onMouseDown={this.onMouseDown}>
+                    <Viewport width={rect.width} height={rect.height - 21} ref={this.viewport}>
+                        {gridLines}
+                        <Cross x={0} y={0} scale={scale} color={0x888888} distance={DISTANCE * scale} />
+                        <Layer layer={character} x={0} y={0} selectedRef={this.selectedRef} scale={scale} />
+                    </Viewport>
+                </Stage>
+            </div>
+        )
+    }
+}
+
+function mapStateToProps(state) {
+    return {
+        character: state.editor.character ? state.editor.character.layers : []
+    }
+}
+
+export default connect(mapStateToProps)(Editor)

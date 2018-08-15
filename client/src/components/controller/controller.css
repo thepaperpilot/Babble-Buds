@@ -1,0 +1,45 @@
+.controller-container {
+    height: calc(100% + 14px);
+    width: calc(100% + 4px);
+    display: flex; 
+    margin: -8px;
+    margin-left: -6px;
+    padding: 8px;
+    padding-right: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.controller-container > div {
+    flex: 1;
+    width: 50%;
+    margin: 2px;
+}
+
+.selector {
+    position: relative;
+    overflow: hidden;
+    border: 3px solid #333c4a;
+}
+
+.hotkey {
+    left: 0;
+    bottom: -4px;
+    padding-right: 2px;
+    position: absolute;
+    pointer-events: none;
+    font-size: 20px;
+    background: #333c4a;
+}
+
+.controller-container .react-contextmenu-wrapper {
+    height: 100%;
+}
+
+.selector.canDrop.isOver {
+    background-color: rgba(0, 255, 0, .2);
+}
+
+.selector.canDrop {
+    background-color: rgba(0, 255, 0, .05);
+}

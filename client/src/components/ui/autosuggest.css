@@ -1,0 +1,60 @@
+.autosuggest {
+    position: relative;
+}
+
+.autosuggest .react-autosuggest__container {
+    margin-top: 4px;
+    border: solid 1px transparent;
+    transition: border-color .5s;
+}
+
+.autosuggest .react-autosuggest__container.react-autosuggest__container--open {
+    border: solid 1px white;
+    margin-bottom: 8px;
+}
+
+.autosuggest .react-autosuggest__input {
+    padding-top: 4px;
+    padding-left: 8px;
+    padding-right: 20px;
+    margin-top: 0;
+    box-sizing: border-box;
+    transition: background-color .5s;
+    border-bottom-width: 1px;    
+}
+
+.autosuggest .react-autosuggest__input:focus {
+    border-bottom-width: 1px;
+}
+
+.autosuggest .react-autosuggest__container--open .react-autosuggest__input {
+    background-color: #333c4a;
+    border-bottom: solid 1px #111924;
+    margin-bottom: 0;
+}
+
+.autosuggest .react-autosuggest__suggestions-list {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+}
+
+.autosuggest .react-autosuggest__suggestion {
+    padding: 4px 8px;
+    border-bottom: solid 1px grey;
+}
+
+.autosuggest .react-autosuggest__suggestion--highlighted {
+    background-color: #2a323d;
+}
+
+.autosuggest-clear::after {
+    content: '';
+    height: 10px;
+    width: 10px;
+    background: -webkit-linear-gradient(-45deg, transparent 0%, transparent 45%, white 45%,  white 56%,transparent 55%, transparent 100%), -webkit-linear-gradient(45deg, transparent 0%, transparent 45%, white 45%,  white 56%,transparent 56%, transparent 100%);
+    cursor: pointer;
+    position: absolute;
+    right: 6px;
+    top: 6px;
+}

@@ -1,0 +1,81 @@
+.assets .list {
+    padding-left: 8px;
+    box-sizing: border-box;
+}
+
+.assets .foldable {
+    margin-left: -6px;
+}
+
+.assets .foldable:before {
+    top: -3px;
+    left: 10px;
+}
+
+.assets .foldable:first-child h4 {
+    border-top: none;
+}
+
+.assets .foldable:last-child {
+    margin-bottom: 8px;
+}
+
+.assets .foldable h4 {
+    padding: 0 32px;
+    margin: 0 -8px;
+    width: unset;
+    height: 20px;
+}
+
+.assets .foldable h4:hover {
+    background-color: #2a323d;
+}
+
+.assets .foldable.open .foldable:not(.open) h4 {
+    margin-top: -1px;
+}
+
+.assets .header {
+    height: 20px;
+}
+
+.assets .line-item {
+    border: none;
+    padding: 0;
+    padding-left: 24px;
+}
+
+.assets .smallThumbnail-img {
+    margin-right: 4px;
+}
+
+.assets .list-item > div,
+.assets .list-item > div > div {
+    height: 100%;
+}
+
+.assets div[draggable] {
+    height: 100%;
+}
+
+.assets .list-item .char {
+    flex-direction: column-reverse;
+}
+
+.assets .list-item .char div:not(.selected) {
+    background-color: #333c4a;
+    color: #fff;
+    font-size: 12px;
+    overflow: hidden;
+    pointer-events: none;
+    text-align: center;
+    word-wrap: break-word;
+    flex: 0 0 auto;
+    margin: -2px;
+    margin-bottom: 4px;
+}
+
+.assets .list-item img {
+    flex-basis: 100%;
+    height: 0;
+}

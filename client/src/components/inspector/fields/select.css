@@ -1,0 +1,86 @@
+.autosuggest .react-autosuggest__container {
+    margin-top: 4px;
+    border: solid 1px transparent;
+    transition: border-color .5s;
+}
+
+.autosuggest .react-autosuggest__container.react-autosuggest__container--open {
+    border: solid 1px white;
+    margin-bottom: 8px;
+}
+
+.autosuggest .react-autosuggest__input, .emote-field .input-wrapper {
+    padding-top: 4px;
+    padding-left: 8px;
+    margin-top: 0;
+    box-sizing: border-box;
+    transition: background-color .5s;
+    border-bottom-width: 1px;
+}
+
+.autosuggest .react-autosuggest__input:focus {
+    border-bottom-width: 1px;
+}
+
+.autosuggest .react-autosuggest__container--open .react-autosuggest__input {
+    background-color: #333c4a;
+    border-bottom: solid 1px #111924;
+    margin-bottom: 0;
+}
+
+.autosuggest .react-autosuggest__suggestions-list {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+}
+
+.autosuggest .react-autosuggest__suggestion {
+    padding: 4px 8px;
+    border-bottom: solid 1px grey;
+}
+
+.autosuggest .react-autosuggest__suggestion--highlighted {
+    background-color: #2a323d;
+}
+
+.select-field .react-autosuggest__container {
+    margin-bottom: 8px;    
+}
+
+.select-field .react-autosuggest__input {
+    position: absolute;
+    top: 0;
+    opacity: 0;
+    cursor: pointer;
+    margin-bottom: 0;
+    padding-bottom: 9px;
+}
+
+.select-field .react-autosuggest__container--open .input-wrapper {
+    background-color: #333c4a;
+}
+
+.select-field .input-thumbnail {
+    position: relative;
+}
+
+.select-field .input-wrapper {
+    padding: 4px 8px;
+    padding-right: 20px;
+    border-bottom: solid 1px grey;
+}
+
+.select-field .input-wrapper:after {
+    content: "🡓";
+    position: absolute;
+    right: 6px;
+    top: 8px;
+    font-size: 12px;
+}
+
+.emote-field .smallThumbnail-img {
+    padding: 2px;
+    margin: -2px;
+    border-radius: 2px;
+    background-color: #384d60;
+}

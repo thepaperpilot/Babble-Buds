@@ -1,0 +1,5 @@
+.editor > canvas {
+    margin: -8px;
+    margin-top: 0;
+    user-select: none;
+}

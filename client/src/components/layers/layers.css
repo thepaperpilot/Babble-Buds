@@ -1,0 +1,101 @@
+.m-tree {
+    position: relative;
+    margin-top: -36px;
+    margin-bottom: 8px;
+}
+
+.m-node.placeholder .layer img {
+    visibility: hidden;
+}
+
+.m-node.placeholder {
+    border: 1px dashed #1385e5;
+    color: transparent;
+}
+
+.m-node .inner {
+    cursor: pointer;
+    padding-left: 4px;
+}
+
+.m-node .node {
+    display: inline-block;
+    width: 100%;
+    padding: 4px 5px;
+}
+
+.m-node .node.is-active {
+    background-color: #31363F;
+}
+
+.m-draggable {
+    position: absolute;
+}
+
+.caret-right, .caret-down {
+    position: relative;
+}
+
+.caret-right:before {
+    content: '\25B8';
+    position: absolute;
+    left: -25px;
+    top: -2px;
+    display: block;
+    font-size: xx-large;
+    padding: 0 4px;
+}
+
+.caret-down:before {
+    content: '\25BE';
+    position: absolute;
+    left: -25px;
+    top: -2px;
+    display: block;
+    font-size: xx-large;
+    padding: 0 4px;
+}
+
+.children {
+    margin-left: -10px;
+    padding-left: 30px !important;
+    border-left: dashed 1px rgba(255,255,255,.25);
+}
+
+.m-tree > .m-node > .children {
+    border: none;
+}
+
+.layer {
+    padding: 10px 0 10px 5px;
+    display: block;
+    position: relative;
+}
+
+.layer img {
+    position: absolute;
+    left: -25px;
+    width: 25px;
+    height: 25px;
+    top: 0;
+    height: 100%;
+    object-fit: contain;
+    background-color: inherit;
+}
+
+.layer.selected div {
+    background-color: inherit;
+}
+
+.emote-layer:after {
+    position: absolute;
+    content: '😶';
+    right: 0;
+    top: 0;
+    bottom: 0;
+    padding: 10px;
+}
+
+.emote-layer:not(.visible):after {
+    color: grey;
+}

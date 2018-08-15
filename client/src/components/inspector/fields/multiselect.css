@@ -1,0 +1,88 @@
+.field .react-select-container {
+    padding: 4px 8px;
+    border-bottom: solid 1px grey;
+    height: 100%;
+}
+
+.field .react-select-container .react-select__control {
+    background: none;
+    border: none;
+    min-height: unset;
+}
+
+.field .react-select-container .react-select__control-is-focused {
+    box-shadow: none;
+}
+
+.field .react-select-container .react-select__input {
+    color: white;
+}
+
+.field .react-select-container .react-select__input input {
+    margin: 0;
+}
+
+/* This element didn't get a class, so I need to do this bs */
+.field .react-select-container .react-select__value-container > :not(.react-select__placeholder) {
+    margin: 0;
+}
+
+.field .react-select-container .react-select__value-container,
+.field .react-select-container .react-select__value-container > div {
+    padding: 0;
+}
+
+.field .react-select-container .react-select__dropdown-indicator, .field .react-select-container .react-select__indicator-separator {
+    display: none;
+}
+
+.field .react-select-container .react-select__indicators {
+    position: absolute;
+    top: -6px;
+    right: 0;
+}
+
+.field .react-select-container .react-select__clear-indicator {
+    padding: 8px;
+}
+
+.field .react-select-container .react-select__clear-indicator svg {
+    display: none;
+}
+
+.field .react-select-container .react-select__clear-indicator::after {
+    content: '';
+    height: 10px;
+    width: 10px;
+    background: -webkit-linear-gradient(-45deg, transparent 0%, transparent 45%, white 45%, white 56%,transparent 55%, transparent 100%), -webkit-linear-gradient(45deg, transparent 0%, transparent 45%, white 45%, white 56%,transparent 56%, transparent 100%);
+    cursor: pointer;
+    position: absolute;
+    right: -2px;
+    top: 6px;
+}
+
+.field .react-select-container .react-select__value-container--is-multi .react-select__multi-value {
+    background-color: #2a323d;
+    padding: 0;
+    margin: 2.5px 5px 2.5px 0;
+}
+
+.field .react-select-container .react-select__value-container--is-multi.react-select__value-container--has-value {
+    margin-left: -3px;
+    margin-top: -8px;
+}
+
+.field .react-select-container .react-select__multi-value__label {
+    color: white;
+    padding-right: 0;
+}
+
+.field .react-select-container .react-select__menu {
+    display: none;
+}
+
+.field .react-select-container .react-select__multi-value__remove:hover {
+    background-color: unset;
+    color: unset;
+    cursor: pointer;
+}

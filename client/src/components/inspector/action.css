@@ -1,0 +1,185 @@
+.action {
+    transition: max-height .5s;
+    position: relative;
+    border-bottom: solid 2px white;
+    margin-bottom: 8px;
+}
+
+.action p {
+    margin: 0;
+    padding: 8px;
+}
+
+.warning:after {
+    width: 10px;
+    height: 10px;
+    background: yellow;
+    z-index: 5;
+}
+
+.inspector .info, .inspector .error, .inspector .preview {
+    background: #2a323d;
+    border-radius: 4px;
+    padding: 8px 16px 8px 40px;
+    position: relative; 
+    margin: 0;
+    margin-bottom: 8px;
+    user-select: initial;
+    white-space: pre-wrap;
+}
+
+.info:not(.frame):before, .error:not(.frame):before {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 8px;
+    font-size: 20px;
+}
+
+.info:not(.frame):before {
+    content: "🛈";
+}
+
+.error:not(.frame):before {
+    content: "⚠";
+    color: yellow;
+}
+
+.inspector .preview {
+    padding-left: 16px;
+    padding-bottom: 4px;
+    margin-top: 4px;
+}
+
+.start, .inprogress, .complete {
+    position: absolute;
+    top: 0;
+    left: 32px;
+    width: 32px;
+    height: 32px;
+    background-size: contain;
+}
+
+.inprogress:before, .complete:before {
+    content: attr(data-start);
+    font-size: medium;
+    vertical-align: middle;
+    line-height: 32px;
+    position: absolute;
+    right: 36px;
+}
+
+.start:after, .inprogress:after {
+    content: attr(data-end);
+    font-size: medium;
+    vertical-align: middle;
+    line-height: 32px;
+    position: absolute;
+    left: 32px;
+}
+
+.start {
+    background-image: url(/icons/start.png);
+}
+
+.inprogress {
+    background-image: url(/icons/progress.png);
+}
+
+.complete {
+    background-image: url(/icons/complete.png);
+}
+
+.field {
+    display: flex;
+    margin-bottom: 4px;
+}
+
+.field > p, .field > div, .field > input, .field > input[type="number"], .field > input[type="text"] {
+    width: 50%;
+}
+
+.action button {
+    width: calc(100% - 20px);
+    text-align: center;
+}
+
+.field-title {
+    padding: 8px;
+    box-sizing: border-box;
+}
+
+.field-flex {
+    display: flex;
+    justify-content: space-around;
+}
+
+.field-flex > :not(.field-label) {
+    margin: 4px;
+}
+
+.field-label {
+    margin-top: 8px;
+    padding-right: 4px;
+    padding-left: 8px;
+}
+
+.inspector .field.text .react-autosuggest__container {
+    margin-top: 4px;
+}
+
+.inspector .field .react-autosuggest__container,
+.inspector .field .checkbox-label {
+    margin: 0;
+}
+
+.field textarea, .field input {
+    border-bottom-width: 1px;
+    margin-bottom: 0;
+}
+
+.field input[type="number"] {
+    border-bottom-width: 1px;
+    padding-top: 4px;
+    padding-left: 8px;
+    box-sizing: border-box;
+    height: 18px;
+}
+
+.field input[type="number"]:focus {
+    border-bottom-width: 1px;
+}
+
+.field input[type="color"] {
+    margin-top: 0;
+}
+
+.field .checkbox-label {
+    flex-basis: 50%;
+    flex-shrink: 1000000;
+}
+
+.field .flex-help {
+    flex: 0;
+    position: relative;
+    flex-basis: 32px;
+}
+
+.field .flex-help::before {
+    content: "🛈";
+    position: absolute;
+    top: 4px;
+    right: 8px;
+    cursor: pointer;
+}
+
+.field .flex-help:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 0px;
+    right: 100%;
+    background: #242a33;
+    border: 3px solid #333c4a;
+    width: 200px;
+    padding: 8px;
+}

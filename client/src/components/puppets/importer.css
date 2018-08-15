@@ -1,0 +1,45 @@
+.puppet-importer .foldable:before {
+    top: 28px;
+    left: 12px;
+}
+
+.puppet-importer .foldable h4 {
+    padding: 4px 24px;
+    padding-left: 36px;
+    border-top: 1px solid white;
+    border-bottom: 1px solid grey;
+    margin-top: -1px;
+}
+
+.puppet-importer .foldable h4 .checkbox-label {
+    margin: 14px 0;
+}
+
+.puppet-importer .foldable h4 .checkbox-label:before {
+    margin-right: 0;
+}
+
+.puppet-importer .char:hover:not(.selected) {
+    background: none;
+}
+
+.puppet-importer .smallThumbnail-label {
+    display: inline-grid;
+}
+
+.puppet-importer .smallThumbnail-label p {
+    margin: 0;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.puppet-importer .action {
+    padding-top: 8px;
+    border-bottom: 0;
+    margin-bottom: 0;
+}
+
+.puppet-importer .action .field .checkbox-label {
+    margin: 0;
+}

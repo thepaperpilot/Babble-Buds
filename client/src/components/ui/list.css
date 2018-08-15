@@ -1,0 +1,24 @@
+.list {
+    display: flex;
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    padding-bottom: 8px;
+}
+
+.list-item {
+    margin: 5px;
+    flex: 0 0 auto;
+}
+
+/*  Used to make the last line left-align
+    We spawn one for each child, so that
+    no matter how many we have in one row,
+    it'll have a left-aligned last row,
+    assuming same-width children (which we
+    achieve through flex-basis)             */
+.list-pad {
+    height: 0;
+    flex: 0 0 auto;
+    margin: 0 5px;
+}
