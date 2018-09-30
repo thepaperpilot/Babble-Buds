@@ -22,3 +22,29 @@
     flex: 0 0 auto;
     margin: 0 5px;
 }
+
+.list-item .char {
+    flex-direction: column-reverse;
+}
+
+.list-item .char div:not(.selected) {
+    background-color: #333c4a;
+    color: #fff;
+    font-size: 12px;
+    overflow: hidden;
+    pointer-events: none;
+    text-align: center;
+    word-wrap: break-word;
+    flex: 0 0 auto;
+    margin: -2px;
+    margin-bottom: 4px;
+}
+
+.list-item img {
+    flex-basis: 100%;
+    height: 0;
+}
+
+.puppet-selector .list-item img {
+    height: unset;
+}

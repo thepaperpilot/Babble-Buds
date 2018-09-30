@@ -40,7 +40,6 @@ class Character extends Component {
     }
 
     render() {
-        const thumbnailsPath = path.join(this.props.charactersPath, '..', 'thumbnails')
         const character = this.props.characters[this.props.hotbar[this.props.index]]
         const className = {
             'char': true,
@@ -61,9 +60,7 @@ class Character extends Component {
             )
         }
         className.selected = this.props.id === this.props.hotbar[this.props.index]
-        const imageSource = `file://${path.join(thumbnailsPath, fs.existsSync(path.join(thumbnailsPath, `new-${character.id}.png`)) ?
-            `new-${character.id}.png` :
-            `${character.id}.png`)}`
+        const imageSource = this.props.characterThumbnails[this.props.hotbar[this.props.index]]
         return (
             <div>
                 <ContextMenuTrigger id={`contextmenu-character-${this.props.index}`} holdToDisplay={-1}>
@@ -88,7 +85,7 @@ function mapStateToProps(state) {
     return {
         hotbar: state.project.settings.hotbar,
         characters: state.project.characters,
-        charactersPath: state.project.charactersPath,
+        characterThumbnails: state.project.characterThumbnails,
         id: state.project.settings.actor.id
     }
 }

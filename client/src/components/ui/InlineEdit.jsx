@@ -39,10 +39,6 @@ class InlineEdit extends Component {
         const {targetType, selected, target, dispatch, disabled, selectable} = this.props
 
         if (this.state.isEditing) return
-        if (e.detail !== 1) {
-            if (!selectable) this.edit()
-            return
-        }
 
         if (selected && !disabled)
             this.edit()
@@ -70,7 +66,7 @@ class InlineEdit extends Component {
     edit() {
         this.setState({
             isEditing: true,
-            text: this.props.target,
+            text: this.props.label || this.props.target,
             editClick: true
         }, () => {
             this.input.current.focus()
@@ -78,7 +74,7 @@ class InlineEdit extends Component {
     }
 
     render() {
-        const {className, selected, target, style, disabled} = this.props
+        const {className, selected, target, style, disabled, label} = this.props
 
         return <div
             className={classNames(className, {
@@ -100,7 +96,7 @@ class InlineEdit extends Component {
                     ref={this.input} /> :
                 <div
                     style={style}>
-                    {target}
+                    {label || target}
                 </div>
             }
         </div>

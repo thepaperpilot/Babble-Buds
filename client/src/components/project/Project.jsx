@@ -3,6 +3,8 @@ import { connect } from 'react-redux'
 import { ActionCreators as UndoActionCreators } from 'redux-undo'
 import Panels from './../panels/Panels'
 import Clipboard from './Clipboard'
+import BabbleToggle from './BabbleToggle'
+import BackgroundInterface from './BackgroundInterface'
 
 const electron = window.require('electron')
 
@@ -16,6 +18,7 @@ class Project extends Component {
 
         this.keyDown = this.keyDown.bind(this)
         this.keyUp = this.keyUp.bind(this)
+        this.dispatchPassthrough = this.dispatchPassthrough.bind(this)
         this.addJiggleListener = this.addJiggleListener.bind(this)
         this.removeJiggleListener = this.removeJiggleListener.bind(this)
     }
@@ -38,11 +41,13 @@ class Project extends Component {
 
         window.addEventListener('keydown', this.keyDown)
         window.addEventListener('keyup', this.keyUp)
+        electron.ipcRenderer.on('dispatch', this.dispatchPassthrough)
     }
 
     componentWillUnmount() {
         window.removeEventListener('keydown', this.keyDown)
         window.removeEventListener('keyup', this.keyUp)
+        electron.ipcRenderer.removeListener('dispatch', this.dispatchPassthrough)
     }
 
     keyDown(e) {
@@ -61,11 +66,6 @@ class Project extends Component {
     keyUp(e) {
         if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA'))
             return
-
-        /*if (editor.keyDown(e))
-            return*/
-
-        // if (key == 123) electron.remote.webContents.getFocusedWebContents().toggleDevTools()
         
         if (e.keyCode > 48 && e.keyCode < 58) {
             this.props.dispatch({
@@ -95,6 +95,12 @@ class Project extends Component {
         }
     }
 
+    dispatchPassthrough(e, action) {
+        this.props.dispatch(action)
+        if (action.type === 'JIGGLE_SELF')
+            this.state.jiggleListeners.forEach(cb => cb())
+    }
+
     addJiggleListener(cb) {
         const jiggleListeners = this.state.jiggleListeners.slice()
         jiggleListeners.push(cb)
@@ -120,6 +126,8 @@ class Project extends Component {
             <div>
                 <Panels addJiggleListener={this.addJiggleListener} removeJiggleListener={this.removeJiggleListener} />
                 <Clipboard/>
+                <BabbleToggle />
+                <BackgroundInterface />
             </div>
         )
     }

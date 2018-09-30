@@ -1,0 +1,19 @@
+.shortcut {
+    display: flex;
+}
+
+.shortcut input[type="text"] {
+    color: transparent;
+    text-shadow: 0 0 0 white;
+    cursor: pointer;
+}
+
+.shortcut input[type="text"]::placeholder {
+    color: transparent;
+    text-shadow: 0 0 0 grey;
+}
+
+.action .shortcut button {
+    width: unset;
+    margin: auto;
+}

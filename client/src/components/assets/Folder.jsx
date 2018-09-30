@@ -198,7 +198,7 @@ class Folder extends Component {
     }
 
     render() {
-        return <div>
+        return <div onDragOver={console.log}>
             <ContextMenuTrigger
                 id={`contextmenu-tab-${this.props.name}`}
                 holdToDisplay={-1}>
@@ -251,4 +251,4 @@ function mapStateToProps(state) {
     }
 }
 
-export default DropTarget('asset', assetTarget, collect)(connect(mapStateToProps)(Folder))
+export default DropTarget('asset', assetTarget, collect)(connect(mapStateToProps, null, null, { withRef: true })(Folder))

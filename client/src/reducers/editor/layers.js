@@ -1,6 +1,6 @@
 const util = require('./../util')
 
-function updatePaths(layers, l) {
+export function updatePaths(layers, l) {
     let selected = l
     const parseLayer = function(layer, inherit = {}, path = []) {
         Object.keys(inherit).forEach(k => inherit[k] == null && delete inherit[k])
@@ -18,23 +18,15 @@ function updatePaths(layers, l) {
     return {layers: parseLayer(layers), layer: selected}
 }
 
-function editPuppet(state, action) {
-    const {layers} = updatePaths(action.character.layers)
-    const character = util.updateObject(action.character, { layers })
-    return util.updateObject(state, {
-        id: action.id,
-        character,
-        layer: null,
-        emote: 0
-    })
-}
-
 function selectLayer(state, action) {
     let curr = state.character.layers
+    let emote = null
     action.path.forEach(index => {
         curr = curr.children[index]
+        if (curr.emote != null)
+            emote = curr.emote
     })
-    const emote = curr.emote != null ? curr.emote : state.emote
+    emote = emote == null ? state.emote : emote
     return util.updateObject(state, { layer: action.path, emote })
 }
 
@@ -75,13 +67,17 @@ function editScale(state, action) {
     })
     curr.scaleX = action.scale[0]
     curr.scaleY = action.scale[1]
+    if (action.pos) {
+        curr.x = action.pos[0]
+        curr.y = action.pos[1]
+    }
     const character = util.updateObject(state.character, { layers })
     return util.updateObject(state, { character })
 }
 
 function deleteLayer(state, action) {
     const layers = JSON.parse(JSON.stringify(state.character.layers))
-    const curr = action.path.slice(0, -1).reduce((layer, index) => curr.children[index], layers)
+    const curr = action.path.slice(0, -1).reduce((layer, index) => layer.children[index], layers)
     curr.children.splice(action.path[action.path.length - 1], 1)
     const {layers: newLayers, layer} = updatePaths(layers, state.layer)
     const character = util.updateObject(state.character, { layers: newLayers })
@@ -90,6 +86,7 @@ function deleteLayer(state, action) {
 
 function deleteAsset(state, action) {
     const character = JSON.parse(JSON.stringify(state.character))
+    if (!character) return state
     const assetFilter = layer => layer.id !== action.asset
     const parseLayer = layer => {
         if (layer.children) {
@@ -151,7 +148,6 @@ function rotateLayer(state, action) {
 }
 
 export default {
-    'EDIT_PUPPET': editPuppet,
     'SELECT_LAYER': selectLayer,
     'SET_LAYERS': setLayers,
     'EDIT_LAYER': editLayer,

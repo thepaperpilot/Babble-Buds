@@ -24,7 +24,7 @@
     margin: auto;
     left: 50%;
     transform: translate(-50%, -50%);
-    top: calc(100% + 500px);
+    top: calc(100% + 600px);
     transition: top .5s ease;
     border-radius: 5px;
 }

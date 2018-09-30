@@ -1,4 +1,4 @@
-import names from './../../data/names.json'   // taken from https://wiki.urealms.com/wiki/List_of_Minor_Characters - Updated 2018-01-08
+import { DEFAULTS, DEFAULT_CHARACTER } from './defaults'
 
 const path = require('path')
 const fs = window.require('fs-extra')
@@ -8,64 +8,6 @@ const settingsManager = remote.require('./main-process/settings')
 const menu = remote.require('./main-process/menus/application-menu')
 
 const util = require('./../util')
-
-
-export const DEFAULTS = {
-    settings: {
-        'clientVersion': remote.app.getVersion(),
-        'numCharacters': 5,
-        'puppetScale': 1,
-        'greenScreen': '#00FF00',
-        'greenScreenEnabled': false,
-        'alwaysOnTop': false,
-        'ip': 'babblebuds.xyz',
-        'port': 8080,
-        'roomName': 'lobby',
-        'roomPassword': '',
-        'roomNumCharacters': 5,
-        'roomPuppetScale': 1,
-        'nickname': names[Math.floor(Math.random() * names.length)],
-        'charactersPath': '../characters',
-        'assetsPath': '../assets',
-        'characters': [
-            {
-                'name': '',
-                'id': 1,
-                'location': '1.json'
-            }
-        ],
-        'hotbar': [
-            1,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0
-        ],
-        'actor': {
-            'id': 1,
-            'position': 1,
-            'facingLeft': false,
-            'emote': 0
-        }
-    },
-    project: null,
-    oldSettings: '',
-    characters: {},
-    characterThumbnails: {},
-    assets: {},
-    charactersPath: '',
-    assetsPath: '',
-    numCharacters: 0
-}
-
-export const DEFAULT_CHARACTER = {
-    'deadbonesStyle': false,
-    'name': 'New Puppet'
-}
 
 export function loadCharacters(settings, charactersPath) {
     const characters = {}
@@ -124,7 +66,7 @@ export function loadCharacters(settings, charactersPath) {
 
         const layers = ['body', 'head', 'hat', 'props']
         // Backwards compatibility: Convert from old layers system
-        if (!('layers' in character)) {
+        if ('body' in character) {
             converted = true
             const layer = character.layers = { children: [] }
             layers.forEach(l => layer.children.push({
@@ -245,6 +187,13 @@ function loadProject(state, action) {
     const playerSettings = fs.readJsonSync(filepath)
     Object.assign(settings, playerSettings)
 
+    // Register global shortcuts
+    window.require('electron').ipcRenderer.send('global', 
+        [], Object.keys(settings.shortcuts).map(k => ({
+            accel: settings.shortcuts[k],
+            shortcut: k
+        })))
+
     // Confirm loading project if mismatched versions
     let compare = playerSettings.clientVersion ?
         semver.compare(playerSettings.clientVersion, remote.app.getVersion()) :
@@ -314,15 +263,7 @@ function loadProject(state, action) {
     }
 }
 
-function randomizeName(state) {
-    const settings = util.updateObject(state.settings, {
-        nickname: names[Math.floor(Math.random() * names.length)]
-    })
-    return util.updateObject(state, { settings })
-}
-
 export default {
     'LOAD_PROJECT': loadProject,
-    'CLOSE_PROJECT': close,
-    'RANDOMIZE_NICKNAME': randomizeName
+    'CLOSE_PROJECT': close
 }

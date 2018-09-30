@@ -1,7 +1,7 @@
 const fs = window.require('fs-extra')
 const path = require('path')
 
-const remote = window.require('electron').remote
+const {remote, ipcRenderer} = window.require('electron')
 const settingsManager = remote.require('./main-process/settings')
 const util = require('./../util')
 
@@ -87,11 +87,44 @@ function addAssets(state, action) {
     return util.updateObject(state, { assets })
 }
 
+function newAssetBundle(state, action) {
+    const {id, name, tab, layers, creator} = action
+    const thumbnailPath = path.join(state.project, state.settings.assetsPath,
+        creator, `${id}`)
+    ipcRenderer.send('background', 'generate thumbnails', thumbnailPath,
+        { layers }, 'asset', id)
+
+    return addAssets(state, { assets: {
+        [id]: {
+            name,
+            tab,
+            layers,
+            location: `${creator}/${id}.png`,
+            panning: [],
+            type: 'bundle',
+            version: 1
+        }
+    } })
+}
+
+function updateThumbnails(state, action) {
+    const asset = util.updateObject(state.assets[action.id], {
+        location: `${action.thumbnailsPath.split('/').slice(-2).join('/')}.png`
+    })
+
+    const assets = util.updateObject(state.assets, {
+        [action.id]: asset
+    })
+    return util.updateObject(state, { assets })
+}
+
 export default {
     'DELETE_ASSET': deleteAsset,
     'RENAME_ASSET': renameAsset,
     'MOVE_ASSET': moveAsset,
     'DUPLICATE_ASSET': duplicateAsset,
     'DELETE_TAB': deleteTab,
-    'ADD_ASSETS': addAssets
+    'ADD_ASSETS': addAssets,
+    'NEW_ASSET_BUNDLE': newAssetBundle,
+    'UPDATE_ASSET_THUMBNAILS': updateThumbnails
 }

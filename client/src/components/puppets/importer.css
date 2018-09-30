@@ -19,15 +19,27 @@
     margin-right: 0;
 }
 
+.puppet-importer .puppet-importer-img {
+    display: inline;
+    width: unset;
+}
+
 .puppet-importer .char:hover:not(.selected) {
     background: none;
 }
 
-.puppet-importer .smallThumbnail-label {
-    display: inline-grid;
+.puppet-importer-title {
+    display: flex;
 }
 
-.puppet-importer .smallThumbnail-label p {
+.puppet-importer-label {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex-grow: 1;
+}
+
+.puppet-importer-label p {
     margin: 0;
     white-space: nowrap;
     text-overflow: ellipsis;

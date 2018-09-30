@@ -30,6 +30,7 @@ class Editor extends Component {
         this.onScroll = this.onScroll.bind(this)
         this.onMouseDown = this.onMouseDown.bind(this)
         this.changeZoom = this.changeZoom.bind(this)
+        this.savePuppet = this.savePuppet.bind(this)
 
         window.PIXI.SCALE_MODES.DEFAULT = window.PIXI.SCALE_MODES.NEAREST
     }
@@ -76,6 +77,10 @@ class Editor extends Component {
         })
     }
 
+    savePuppet() {
+        this.props.dispatch({ type: 'SAVE_EDITOR' })
+    }
+
     render() {
         // TODO (re-)load assets since babble.js isn't here to do it for us
         const {rect, character} = this.props
@@ -109,6 +114,7 @@ class Editor extends Component {
         return (
             <div className="panel editor">
                 <div className="bar flex-row">
+                    <button onClick={this.savePuppet}>Apply</button>
                     <div className="flex-item">Zoom: {Math.round(1 / scale * 100)}%</div>
                     <div className="flex-item">Pos: {Math.round((bounds.right + bounds.left) / 2)},
                         {-Math.round((bounds.bottom + bounds.top) / 2)}</div>

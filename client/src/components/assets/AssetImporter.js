@@ -166,8 +166,7 @@ class AssetImporter extends Component {
                 return <div key={id}
                     onClick={this.toggleAsset(id)}
                     className={selected ? 'char selected' : 'char'}>
-                    {this.state.size === 60 ?
-                        <div className="smallThumbnail-img">
+                    {this.state.size === 60 && <div className="smallThumbnail-img">
                             <img
                                 alt={asset.name}
                                 src={`file:///${path.join(this.state.assetsPath,
@@ -176,16 +175,14 @@ class AssetImporter extends Component {
                                         asset.location)}`}
                                 style={{width: '20px', height: '20px'}} />
                             {asset.name}
-                        </div> :
-                        <div>
-                            <div className="desc">{asset.name}</div>
-                            <img
+                        </div>}
+                    {this.state.size === 60 || <img
                                 alt={asset.name}
                                 src={`file:///${path.join(this.state.assetsPath,
                                     asset.type === 'animated' ?
                                         asset.thumbnail :
-                                        asset.location)}`} />
-                        </div>}
+                                        asset.location)}`} />}
+                    {this.state.size === 60 || <div className="desc">{asset.name}</div>}
                 </div>
             })
 

@@ -20,7 +20,6 @@ class Puppets extends Component {
         this.newPuppet = this.newPuppet.bind(this)
         this.onChange = this.onChange.bind(this)
         this.changeZoom = this.changeZoom.bind(this)
-        this.openPuppet = this.openPuppet.bind(this)
     }
 
     newPuppet() {
@@ -38,16 +37,6 @@ class Puppets extends Component {
         this.setState({
             size: parseInt(e.target.value, 10)
         })
-    }
-
-    openPuppet(puppet) {
-        return () => {
-            this.props.dispatch({
-                type: 'INSPECT',
-                target: puppet,
-                targetType: 'puppet'
-            })
-        }
     }
 
     componentWillReceiveProps(props) {
@@ -94,8 +83,7 @@ class Puppets extends Component {
                                 <DraggablePuppet
                                     key={puppet}
                                     small={true}
-                                    puppet={puppet}
-                                    openPuppet={this.openPuppet(puppet)} />
+                                    puppet={puppet} />
                             ))}
                         </Scrollbar>
                     </div> :
@@ -104,8 +92,7 @@ class Puppets extends Component {
                             <DraggablePuppet
                                 key={puppet}
                                 small={false}
-                                puppet={puppet}
-                                openPuppet={this.openPuppet(puppet)} />
+                                puppet={puppet} />
                         ))}
                     </List>
                 }            

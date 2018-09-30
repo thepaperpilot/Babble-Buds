@@ -183,3 +183,18 @@
     width: 200px;
     padding: 8px;
 }
+
+.field.angle {
+    position: relative;
+}
+
+.field.angle input {
+    padding-right: 16px;
+}
+
+.field.angle:after {
+    content: "π";
+    position: absolute;
+    right: 0;
+    top: 8px;
+}

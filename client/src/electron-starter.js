@@ -1,4 +1,4 @@
-const {app, BrowserWindow} = require('electron')
+const {app, BrowserWindow, ipcMain} = require('electron')
 const windowStateKeeper = require('electron-window-state')
 const settings = require('./main-process/settings')
 
@@ -8,10 +8,11 @@ const url = require('url')
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
+let backgroundWindow
 
 function createWindow() {
     // Load application settings
-    settings.load()
+    settings.load(process.env.TESTING)
 
     // Load window state
     let mainWindowState = windowStateKeeper({
@@ -34,8 +35,6 @@ function createWindow() {
         }
     })
 
-    mainWindow.openDevTools()
-
     mainWindowState.manage(mainWindow)
 
     // and load the index.html of the app.
@@ -51,10 +50,24 @@ function createWindow() {
         // in an array if your app supports multi windows, this is the time
         // when you should delete the corresponding element.
         mainWindow = null
+        backgroundWindow = null
     })
+
+    // Create background window
+    backgroundWindow = new BrowserWindow({ show: false })
+    backgroundWindow.loadURL(url.format({
+        pathname: path.join(__dirname, 'background', 'index.html'),
+        protocol: 'file:',
+        slashes: true
+    }))
+
+    // Setup passthroughs between the foreground and background windows
+    ipcMain.on('background', (e, ...event) => backgroundWindow.webContents.send(...event))
+    ipcMain.on('foreground', (e, ...event) => mainWindow.webContents.send(...event))
 
     // Create the application menu
     require('./main-process/menus/application-menu.js')
+    require('./main-process/shortcuts')
 }
 
 // This method will be called when Electron has finished

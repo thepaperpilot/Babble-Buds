@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 import Scrollbar from 'react-custom-scroll'
 import Header from './Header'
 import Checkbox from './fields/Checkbox'
+import Angle from './fields/Angle'
 import Number from './fields/Number'
 import Vector2 from './fields/Vector2'
 import Text from './fields/Text'
@@ -72,6 +73,7 @@ class Layer extends Component {
         ]
 
         let layer = this.props.character.layers
+
         this.props.target.forEach(index => {
             if (layer == null || layer.children == null) return
             layer = layer.children[index]
@@ -108,24 +110,27 @@ class Layer extends Component {
                                     onChange={this.changeLayer('name')} />
                             </Foldable>
                         </div>
-                        {asset == null || <div className="action">
+                        <div className="action">
                             <Foldable title="Transform">
+                                {asset == null && <div className="info">
+                                    Be cautious when transforming non-asset layers!
+                                </div>}
                                 <Vector2
                                     title="Position"
-                                    value={[layer.x, -layer.y]}
+                                    value={[layer.x || 0, -layer.y || 0]}
                                     onChange={this.changePosition} />
                                 <Vector2
                                     title="Scale"
-                                    value={[layer.scaleX, layer.scaleY]}
-                                    onChange={this.changeScale} />
-                                <Number
-                                    title="Rotation"
-                                    value={layer.rotation || 0}
+                                    value={[layer.scaleX || 1, layer.scaleY || 1]}
+                                    onChange={this.changeScale}
                                     float={true}
-                                    step={0.1}
+                                    step={.01} />
+                                <Angle
+                                    title="Rotation"
+                                    value={layer.rotation}
                                     onChange={this.changeLayer('rotation')} />
                             </Foldable>
-                        </div>}
+                        </div>
                         <div className="action">
                             <Foldable title="Emote">
                                 {asset != null && inherit.emote == null && layer.emote != null &&

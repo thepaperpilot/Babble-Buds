@@ -1,4 +1,4 @@
-import { DEFAULT_CHARACTER } from './loader'
+import { DEFAULT_CHARACTER } from './defaults'
 import assets from './assets'
 
 const path = window.require('path')
@@ -102,11 +102,10 @@ function newPuppet(state) {
 }
 
 function addPuppets(state, action) {
-    console.log(action.puppets)
     let numCharacters = state.numCharacters
     const puppets = {}
     const puppetThumbnails = {}
-    const puppetSettings = []
+    const puppetSettings = state.settings.characters.slice()
 
     Object.values(action.puppets).forEach(puppet => {
         if (numCharacters < puppet.id) numCharacters = puppet.id
@@ -134,10 +133,19 @@ function addPuppets(state, action) {
     }), action)
 }
 
+function updateThumbnails(state, action) {
+    const characterThumbnails = util.updateObject(state.characterThumbnails, {
+        [action.id]: `file:///${action.thumbnailsPath}.png?random=${new Date().getTime()}`.replace(/\\/g, '/')
+    })
+
+    return util.updateObject(state, { characterThumbnails })
+}
+
 export default {
     'CHANGE_PUPPET': changePuppet,
     'DUPLICATE_PUPPET': duplicatePuppet,
     'DELETE_PUPPET': deletePuppet,
     'NEW_PUPPET': newPuppet,
-    'ADD_PUPPETS': addPuppets
+    'ADD_PUPPETS': addPuppets,
+    'UPDATE_PUPPET_THUMBNAILS': updateThumbnails
 }

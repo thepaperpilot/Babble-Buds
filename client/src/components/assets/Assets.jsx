@@ -52,9 +52,19 @@ class Assets extends Component {
 
     componentDidUpdate() {        
         if (this.toFocus) {
+            // Do a lot of work to get the folder, behind the DnD and connect wrappers
             const folder = this.tabs[this.toFocus].current
-            if (folder) folder.focus()
-            this.toFocus = null
+            if (folder) {
+                const connect = folder.getDecoratedComponentInstance()
+                if (connect) {
+                    connect.getWrappedInstance().focus()
+                    this.toFocus = null
+                    return
+                }
+            }
+            // Oh yeah, also its not actually available the first frame,
+            // so call this again next frame
+            requestAnimationFrame(this.componentDidUpdate.bind(this))
         }
     }
 

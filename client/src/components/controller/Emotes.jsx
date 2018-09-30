@@ -26,7 +26,6 @@ class Emotes extends Component {
     }
 
     render() {
-        const thumbnailsPath = path.join(this.props.charactersPath, '..', 'thumbnails')
         const reducer = (acc, curr) => {
             if (curr.emote != null) {
                 return acc.concat({
@@ -53,13 +52,12 @@ class Emotes extends Component {
                             let emoteClass = 'emote selector'
                             if (emote) emoteClass += ' available'
                             if (this.props.actor.emote === index) emoteClass += ' selected'
-                            const imageSource = emote ? 
-                                `file://${path.join(thumbnailsPath,
-                                    fs.existsSync(path.join(thumbnailsPath, `new-${character.id}`, `${index}.png`)) ?
-                                        `new-${character.id}` :
-                                        `${character.id}`,
-                                    `${index}.png`)}` :
-                                ''
+                            let imageSource = this.props.characterThumbnails[this.props.actor.id]
+                            if (emote) {
+                                const lastIndex = imageSource.lastIndexOf('.png')
+                                imageSource = path.join(imageSource.slice(0, lastIndex),
+                                    `${index}.png${imageSource.slice(lastIndex + 4)}`)
+                            } else imageSource = ''
                             return (
                                 <div
                                     key={iIndex}
@@ -80,7 +78,7 @@ function mapStateToProps(state) {
     return {
         characters: state.project.characters,
         actor: state.project.settings.actor,
-        charactersPath: state.project.charactersPath
+        characterThumbnails: state.project.characterThumbnails
     }
 }
 

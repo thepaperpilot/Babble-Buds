@@ -59,7 +59,6 @@ class AssetImporter extends Component {
         await Promise.all(this.state.selected.map(async id => {
             // Copy thumbnails over to this project
             const thumbnail = this.state.characterThumbnails[id].slice(8)
-            console.log(thumbnail, await fs.exists(thumbnail), thumbnailsPath)
             if (await fs.exists(thumbnail))
                 await fs.copy(thumbnail, 
                     `${path.join(thumbnailsPath, `new-${id}.png`)}`)
@@ -177,27 +176,36 @@ class AssetImporter extends Component {
             const puppet = this.state.characters[id]
             const selected = this.state.selected.includes(id)
             const thumbnails = this.state.characterThumbnails[id].split('.').slice(0, -1).join('.')
+            const reducer = (acc, curr) => {
+                if (curr.emote) {
+                    return acc.concat({
+                        emote: curr.emote,
+                        name: curr.name
+                    })
+                } else if (curr.children) {
+                    return curr.children.reduce(reducer, acc)
+                } else return acc
+            }
+            const emotes = puppet.layers.children.reduce(reducer, [])
             return <Foldable
                 key={id}
                 defaultFolded={true}
-                title={<div className="char">
-                    <div className="smallThumbnail-wrapper">
-                        <div className="smallThumbnail-img">
-                            <img
-                                alt={puppet.name}
-                                src={this.state.characterThumbnails[id]}
-                                style={{width: '60px', height: '60px'}} />
-                        </div>
-                        <div className="smallThumbnail-label">
-                            <p>{puppet.name}</p>
-                            <p>Creator: {puppet.creator === this.props.self ? this.props.nick : puppet.creator}</p>
-                            <p>OC: {puppet.oc === this.props.self ? this.props.nick : puppet.oc}</p>
-                        </div>
-                        <Checkbox
-                            inline={true}
-                            value={selected}
-                            onChange={this.togglePuppet(id)}/>
+                title={<div className="puppet-importer-title">
+                    <div className="puppet-importer-img char">
+                        <img
+                            alt={puppet.name}
+                            src={this.state.characterThumbnails[id]}
+                            style={{width: '60px', height: '60px'}} />
                     </div>
+                    <div className="puppet-importer-label">
+                        <p>{puppet.name}</p>
+                        <p>Creator: {puppet.creator === this.props.self ? this.props.nick : puppet.creator}</p>
+                        <p>OC: {puppet.oc === this.props.self ? this.props.nick : puppet.oc}</p>
+                    </div>
+                    <Checkbox
+                        inline={true}
+                        value={selected}
+                        onChange={this.togglePuppet(id)}/>
                 </div>}>
                 <div className="action">
                     <Checkbox
@@ -214,16 +222,15 @@ class AssetImporter extends Component {
                         disabled={true} />
                 </div>
                 <div className="list">
-                    {Object.keys(puppet.emotes).filter(e => puppet.emotes[e].enabled).map(e => {
-                        const emote = puppet.emotes[e]
+                    {emotes.map(emote => {
                         return (
                             <div
                                 className="list-item"
                                 style={{height: '120px', width: '120px'}}
                                 key={emote.name} >
                                 <div className="char" key={emote.name}>
+                                    <img alt={emote.name} src={`${thumbnails}/${emote.emote}.png`}/>
                                     <div className="desc">{emote.name}</div>
-                                    <img alt={emote.name} src={`${thumbnails}/${e}.png`}/>
                                 </div>
                             </div>
                         )

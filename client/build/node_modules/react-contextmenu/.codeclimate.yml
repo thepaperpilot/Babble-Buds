@@ -1,0 +1,19 @@
+engines:
+  duplication:
+    enabled: true
+    config:
+      languages:
+      - javascript:
+  eslint:
+    enabled: true
+  fixme:
+    enabled: true
+exclude_paths:
+  - examples/**/*
+  - tests/**/*
+  - examples.config.js
+  - webpack.config.js
+  - *.md
+ratings:
+  paths:
+  - src/**/*

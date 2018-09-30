@@ -1,50 +1,118 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { DragSource } from 'react-dnd'
-import SmallThumbnail from './../ui/SmallThumbnail'
+import InlineEdit from './../ui/InlineEdit'
+import { ContextMenu, MenuItem, ContextMenuTrigger, SubMenu } from 'react-contextmenu'
 
 class DraggablePuppet extends Component {
     constructor(props) {
         super(props)
 
+        this.inlineEdit = React.createRef()
+
+        this.edit = this.edit.bind(this)
+        this.renamePuppet = this.renamePuppet.bind(this)
         this.editPuppet = this.editPuppet.bind(this)
+        this.duplicatePuppet = this.duplicatePuppet.bind(this)
+        this.deletePuppet = this.deletePuppet.bind(this)
+    }
+
+    edit() {
+        if (this.inlineEdit.current)
+            this.inlineEdit.current.getWrappedInstance().edit()
+    }
+
+    renamePuppet(name) {
+        this.props.dispatch({
+            type: 'CHANGE_PUPPET',
+            puppet: parseInt(this.props.puppet, 10),
+            key: 'name',
+            value: name
+        })
     }
 
     editPuppet() {
         this.props.dispatch({
             type: 'EDIT_PUPPET',
             id: parseInt(this.props.puppet, 10),
-            character: this.props.puppets[this.props.puppet]
+            character: this.props.character
         })
     }
 
-    render() {
-        return <div>
-            {this.props.connectDragSource(this.props.small ?
-                <div
-                    className="line-item"
-                    onClick={this.props.openPuppet}
-                    onDoubleClick={this.props.editPuppet}>
-                    <SmallThumbnail
-                        label={this.props.puppets[this.props.puppet].name}
-                        image={this.props.puppetThumbnails[this.props.puppet]} />
-                </div> :
-                <div
-                    className="char"
-                    onClick={this.props.openPuppet}
-                    onDoubleClick={this.editPuppet}>
-                    <div className="desc">{this.props.puppets[this.props.puppet].name}</div>
-                    <img alt={this.props.puppet} src={this.props.puppetThumbnails[this.props.puppet]}/>
-                </div>)}
+    duplicatePuppet() {
+        this.props.dispatch({
+            type: 'DUPLICATE_PUPPET',
+            puppet: parseInt(this.props.puppet, 10)
+        })
+    }
 
-        </div>
+    deletePuppet() {
+        if (this.props.id === parseInt(this.props.puppet, 10)) {
+            this.props.dispatch({
+                type: 'ERROR',
+                content: 'You can\'t delete your active puppet. Please switch puppets and try again.'
+            })
+        } else {
+            this.props.dispatch({
+                type: 'DELETE_PUPPET',
+                puppet: parseInt(this.props.puppet, 10)
+            })
+        }
+    }
+
+    render() {
+        return this.props.connectDragSource(
+            <div className="fillParent">
+                <ContextMenuTrigger id={`contextmenu-puppet-${this.props.puppet}`} holdToDisplay={-1}>
+                    {this.props.small ?
+                        <div>
+                            <InlineEdit
+                                ref={this.inlineEdit}
+                                disabled={true}
+                                target={this.props.puppet}
+                                targetType="puppet"
+                                label={this.props.character.name}
+                                className="line-item smallThumbnail-wrapper"
+                                onChange={this.renamePuppet}
+                                onDoubleClick={this.editPuppet}>
+                                <div className="smallThumbnail-img" style={{width: '20px', height: '20px'}}>
+                                    <img
+                                        alt={this.props.character.name}
+                                        src={this.props.thumbnail}/>
+                                </div>
+                            </InlineEdit>
+                        </div> :
+                        <div>
+                            <InlineEdit
+                                ref={this.inlineEdit}
+                                disabled={true}
+                                target={this.props.puppet}
+                                targetType="puppet"
+                                label={this.props.character.name}
+                                className="char"
+                                onChange={this.renamePuppet}
+                                onDoubleClick={this.editPuppet}>
+                                <img
+                                    alt={this.props.character.name}
+                                    src={this.props.thumbnail} />
+                            </InlineEdit>
+                        </div>
+                    }
+                </ContextMenuTrigger>
+                <ContextMenu id={`contextmenu-puppet-${this.props.puppet}`}>
+                    <MenuItem onClick={this.duplicatePuppet}>Duplicate</MenuItem>
+                    <MenuItem onClick={this.edit}>Rename</MenuItem>
+                    <MenuItem onClick={this.deletePuppet}>Delete</MenuItem>
+                </ContextMenu>
+            </div>)
     }
 }
 
-function mapStateToProps(state) {
+function mapStateToProps(state, props) {
     return {
-        puppets: state.project.characters,
-        puppetThumbnails: state.project.characterThumbnails
+        character: state.project.characters[props.puppet],
+        thumbnail: state.project.characterThumbnails[props.puppet],
+        id: state.project.settings.actor.id
     }
 }
 

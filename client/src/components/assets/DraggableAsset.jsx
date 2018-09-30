@@ -50,11 +50,12 @@ class DraggableAsset extends Component {
     }
 
     editAsset() {
-        this.props.dispatch({
-            type: 'EDIT_PUPPET',
-            id: this.props.id,
-            character: this.props.asset
-        })
+        if (this.props.asset.type === 'bundle')
+            this.props.dispatch({
+                type: 'EDIT_PUPPET',
+                id: this.props.id,
+                character: this.props.asset
+            })
     }
 
     moveAsset(tab) {
@@ -76,6 +77,7 @@ class DraggableAsset extends Component {
 
     render() {
         // TODO When dragging, use image of asset, using current zoom
+        // TODO disable delete option when in multiplayer
         const disabled = this.props.id.split(':')[0] !== this.props.self
         const thumbnail = path.join(this.props.assetsPath, this.props.asset.type === 'animated' ?
             this.props.asset.thumbnail :
@@ -86,7 +88,7 @@ class DraggableAsset extends Component {
                     <div>
                         <InlineEdit
                             ref={this.inlineEdit}
-                            disabled={disabled}
+                            disabled={true}
                             target={this.props.asset.name}
                             targetType="asset"
                             className="line-item smallThumbnail-wrapper"
@@ -102,7 +104,7 @@ class DraggableAsset extends Component {
                     <div>
                         <InlineEdit
                             ref={this.inlineEdit}
-                            disabled={disabled}
+                            disabled={true}
                             target={this.props.asset.name}
                             targetType="asset"
                             className="char"
@@ -130,8 +132,8 @@ class DraggableAsset extends Component {
                         <MenuItem onClick={this.props.newAssetTab}>New Folder</MenuItem>
                     </SubMenu>
                     <MenuItem onClick={this.edit}>Rename</MenuItem>
-                    <MenuItem onClick={this.deleteAsset}>Delete</MenuItem>
                 </div>}
+                {disabled || <MenuItem onClick={this.deleteAsset}>Delete</MenuItem>}
             </ContextMenu>
         </div>
     }

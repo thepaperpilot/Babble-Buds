@@ -13,6 +13,7 @@ class Puppet extends Component {
         this.duplicatePuppet = this.duplicatePuppet.bind(this)
         this.deletePuppet = this.deletePuppet.bind(this)
         this.changePuppet = this.changePuppet.bind(this)
+        this.selectEmote = this.selectEmote.bind(this)
     }
 
     duplicatePuppet() {
@@ -47,6 +48,15 @@ class Puppet extends Component {
         }
     }
 
+    selectEmote(emote) {
+        return () => {
+            this.props.dispatch({
+                type: 'SET_EDITOR_EMOTE',
+                emote
+            })
+        }
+    }
+
     render() {
         // TODO target is either the id of a puppet of ours, or an owner id for a puppet being controlled by a connected client
         const puppet = this.props.puppets[this.props.target]
@@ -64,9 +74,8 @@ class Puppet extends Component {
             })
         }
 
-
         const reducer = (acc, curr) => {
-            if (curr.emote) {
+            if (curr.emote != null) {
                 return acc.concat({
                     emote: curr.emote,
                     name: curr.name
@@ -110,10 +119,11 @@ class Puppet extends Component {
                                     <div
                                         className="list-item"
                                         style={{height: '120px', width: '120px'}}
+                                        onClick={this.selectEmote(emote.emote)}
                                         key={emote.name} >
-                                        <div className="char" key={emote.name}>
-                                            <div className="desc">{emote.name}</div>
+                                        <div className={emote.emote === this.props.emote ? "char selected" : "char"} key={emote.name}>
                                             <img alt={emote.name} src={`${thumbnails}/${emote.emote}.png`}/>
+                                            <div className="desc">{emote.name}</div>
                                         </div>
                                     </div>
                                 )
@@ -126,13 +136,14 @@ class Puppet extends Component {
     }
 }
 
-function mapStateToProps(state) {
+function mapStateToProps(state, props) {
     return {
         puppets: state.project.characters,
         puppetThumbnails: state.project.characterThumbnails,
         self: state.self,
         nick: state.project.settings.nickname,
-        id: state.project.settings.actor.id
+        id: state.project.settings.actor.id,
+        emote: props.target == state.editor.id ? state.editor.emote : null
     }
 }
 

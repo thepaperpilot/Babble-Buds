@@ -8,8 +8,13 @@
     overflow:hidden;
 }
 
+.flexlayout__splitter {
+    transition: background-color .2s;
+}
+
 .flexlayout__splitter:hover {
     background-color: #333c4a;
+    transition-delay: 0;
 }
 
 .flexlayout__splitter_drag {

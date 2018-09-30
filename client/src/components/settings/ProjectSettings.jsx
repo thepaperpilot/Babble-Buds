@@ -7,6 +7,7 @@ import Checkbox from '../inspector/fields/Checkbox'
 import Color from '../inspector/fields/Color'
 import Number from '../inspector/fields/Number'
 import Text from '../inspector/fields/Text'
+import Shortcuts from './Shortcuts'
 
 class ProjectSettings extends Component {
     constructor(props) {
@@ -65,6 +66,14 @@ class ProjectSettings extends Component {
                                     <Text title="Server IP" value={this.props.ip} onChange={this.handleChange('ip')} />
                                     <Number title="Server Port" value={this.props.port} onChange={this.handleChange('port')} />
                                     <button onClick={this.connect}>Connect</button>
+                                </Foldable>
+                            </div>
+                            <div className="action">
+                                <Foldable title="Global Shortcuts">
+                                    <div className="info">
+                                        These are shortcuts that will activate even when the window is not in focus, and override any function they already had (except for OS level shortcuts). For that reason, its recommended to use either macro keys or use 1+ modifier keys (ctrl, alt, etc.)
+                                    </div>
+                                    <Shortcuts />
                                 </Foldable>
                             </div>
                         </Scrollbar>
