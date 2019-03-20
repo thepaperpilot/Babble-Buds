@@ -13,10 +13,11 @@ class Foldable extends Component {
         this.toggleFolded = this.toggleFolded.bind(this)
     }
 
-    toggleFolded() {
-        this.setState({
-            folded: !this.state.folded
-        })
+    toggleFolded(e) {
+        if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'LABEL')
+            this.setState({
+                folded: !this.state.folded
+            })
     }
 
     render() {

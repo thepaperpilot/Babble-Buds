@@ -95,7 +95,8 @@
                 "name": "Editor",
                 "component": "editor",
                 "config": {
-                    "grid": 2
+                    "grid": 2,
+                    "highlight": false
                 }
               }
             ]

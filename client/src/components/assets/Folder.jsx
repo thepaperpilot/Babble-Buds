@@ -8,9 +8,8 @@ import { getNewAssetID } from './../../reducers/project/assets'
 
 const fs = window.require('fs-extra')
 const path = require('path')
-const remote = window.require('electron').remote
+const {remote, ipcRenderer} = window.require('electron')
 const settingsManager = remote.require('./main-process/settings')
-const { GIF } = window.require('gif-engine-js')
 
 class Folder extends Component {
     static id = 0
@@ -33,108 +32,47 @@ class Folder extends Component {
             this.inlineEdit.current.getWrappedInstance().edit()
     }
 
-    // My first real asynchronous function :)
-    // Although it still blocks the rendering thread (except for when its updating the progress bar) since node only has a single thread :(
-    // TODO spawn hidden window and use IPC to tell it to do this, and respond back when done
-    async loadAssets(filepaths, animated) {
+    loadAssets(assets, animated) {
         const statusId = `asset-${Folder.id++}`
         this.props.dispatch({
             type: 'IN_PROGRESS',
-            count: filepaths.length,
+            count: assets.length,
             content: 'Adding new assets...',
             id: statusId
         })
 
-        const assets = {}
-        let completedAssets = 0
-        const assetsPath = path.join(this.props.project, this.props.assetsPath,
-            settingsManager.settings.uuid)
-        await fs.ensureDir(assetsPath)
-        // This'll let each filepath start loading in parallel,
-        // and the code will wait for all of them to finish before
-        // moving on
-        await Promise.all(filepaths.map(async filepath => {
-            let file = await fs.readFile(filepath)
-            const name = filepath.replace(/^.*[\\/]/, '')
+        assets = assets.reduce((acc, curr) => {
+            const name = curr.replace(/^.*[\\/]/, '')
                 .replace(/.png/, '')
                 .replace(/.gif/, '')
             const id = getNewAssetID()
+
             const asset = {
                 type: animated ? 'animated' : 'sprite',
                 tab: this.props.name,
                 name,
                 version: 0,
                 panning: [],
-                location: path.join(settingsManager.settings.uuid, `${id}.png`)
+                location: path.join(settingsManager.settings.uuid, `${id}.png`),
+                // The following is temporary for use by the background process
+                // and will be deleted before being added to the assets lists
+                filepath: curr
             }
 
-            if (animated) {
-                // Default values (overriden if importing a gif)
-                let rows = 1
-                let cols = 1
-                let numFrames = 1
-                let delay = 60
-
-                if (filepath.substr(filepath.length - 4) === '.gif') {
-                    // If gif, turn it into animated png spritesheet
-                    let gif = await GIF(new Uint8Array(file).buffer)
-                    numFrames = gif.frames.length
-                    delay = gif.frames[0].graphicExtension.delay
-                    
-                    // Optimize rows and columns to make an approximately square sheet
-                    // (idk if this is useful but figured it wouldn't hurt)
-                    rows = Math.ceil(Math.sqrt(gif.frames.length))
-                    cols = Math.ceil(gif.frames.length / rows)
-                    const width = gif.descriptor.width
-                    const height = gif.descriptor.height
-                    
-                    // Create canvas to put each frame onto
-                    var canvas = document.createElement('canvas')
-                    var ctx = canvas.getContext('2d')
-                    
-                    // Create thumbnail first
-                    canvas.width = width
-                    canvas.height = height
-                    ctx.putImageData(...(await gif.toImageData(0)))
-                    await fs.writeFile(path.join(assetsPath, `${id}.thumb.png`),
-                        new Buffer(canvas.toDataURL()
-                            .replace(/^data:image\/\w+;base64,/, ''), 'base64'))
-                    
-                    // Stitch frames together
-                    canvas.width = width * cols
-                    canvas.height = height * rows
-                    await Promise.all(gif.frames.map(async (frame, i) => {
-                        const [imageData, offsetLeft, offsetTop] =
-                            await gif.toImageData(i)
-                        ctx.putImageData(imageData,
-                            (i % cols) * width + offsetLeft,
-                            Math.floor(i / cols) * height + offsetTop)
-                    }))
-                    file = new Buffer(canvas.toDataURL()
-                        .replace(/^data:image\/\w+;base64,/, ''), 'base64')
-                } else {
-                    await fs.writeFile(path.join(assetsPath, `${id}.thumb.png`), file)
-                }
-
-                Object.assign(asset, { rows, cols, numFrames, delay })
+            if (animated)
                 asset.thumbnail = path.join(settingsManager.settings.uuid,
                     `${id}.thumb.png`)
-            }
-            
-            await fs.writeFile(path.join(assetsPath, `${id}.png`), file)
-            assets[`${settingsManager.settings.uuid}:${id}`] = asset
-            const count = completedAssets++
-            this.props.dispatch({
-                type: 'IN_PROGRESS',
-                count,
-                id: statusId
-            })
-        }))
 
-        this.props.dispatch({
-            type: 'ADD_ASSETS',
-            assets
-        })
+            acc[`${settingsManager.settings.uuid}:${id}`] = asset
+            return acc
+        }, {})
+        const assetsPath = path.join(this.props.project, this.props.assetsPath)
+
+        ipcRenderer.send('background', 'add assets',
+            assets,
+            assetsPath,
+            statusId
+        )
     }
 
     addAsset() {

@@ -54,7 +54,8 @@ function createWindow() {
     })
 
     // Create background window
-    backgroundWindow = new BrowserWindow({ show: false })
+    backgroundWindow = new BrowserWindow({ show: true })
+    backgroundWindow.openDevTools()
     backgroundWindow.loadURL(url.format({
         pathname: path.join(__dirname, 'background', 'index.html'),
         protocol: 'file:',
@@ -69,6 +70,9 @@ function createWindow() {
     require('./main-process/menus/application-menu.js')
     require('./main-process/shortcuts')
 }
+
+// Holy shit this one line of code fixed all my performance issues
+app.disableHardwareAcceleration()
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.

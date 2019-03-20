@@ -1,4 +1,4 @@
-import undoable from 'redux-undo'
+import undoable, { excludeAction, groupByActionTypes } from 'redux-undo'
 import util from './util'
 import project from './project/project'
 import { DEFAULTS as PROJECT_DEFAULTS } from './project/defaults'
@@ -21,25 +21,30 @@ const babbling = util.createReducer(false, {
 
 function saveEditor(state) {
     let project = state.project
+    const editor = state.editor.present
 
-    switch (state.editor.type) {
+    switch (editor.type) {
     case 'puppet': {
         const characters = util.updateObject(state.project.characters, {
-            [state.editor.id]: state.editor.character
+            [editor.id]: editor.character
         })
         const thumbnailPath = path.join(state.project.project, state.project.settings.charactersPath,
-            '..', 'thumbnails', `new-${state.editor.id}`)
+            '..', 'thumbnails', `new-${editor.id}`)
         ipcRenderer.send('background', 'generate thumbnails', thumbnailPath,
-            state.editor.character, 'puppet', state.editor.id)
+            editor.character, 'puppet', editor.id)
         project = util.updateObject(project, { characters })
         break
     }
     }
     
-    const editor = util.updateObject(state.editor, {
-        oldCharacter: JSON.stringify(state.editor.character)
+    return util.updateObject(state, {
+        project,
+        editor: util.updateObject(state.editor, {
+            present: util.updateObject(state.editor.present, {
+                oldCharacter: JSON.stringify(editor.character)
+            })
+        })
     })
-    return util.updateObject(state, { project, editor })
 }
 
 const reducer = combineReducers({
@@ -49,7 +54,10 @@ const reducer = combineReducers({
     inspector,
     settings,
     status,
-    editor
+    editor: undoable(editor, {
+        groupBy: groupByActionTypes(['EDIT_LAYER_POSITION', 'EDIT_LAYER_SCALE', 'ROTATE_LAYER']),
+        filter: excludeAction('SET_LAYERS', 'EDIT_PUPPET')
+    })
 })
 
 export default (state = {

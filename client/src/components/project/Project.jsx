@@ -19,6 +19,10 @@ class Project extends Component {
         this.keyDown = this.keyDown.bind(this)
         this.keyUp = this.keyUp.bind(this)
         this.dispatchPassthrough = this.dispatchPassthrough.bind(this)
+        this.undo = this.undo.bind(this)
+        this.redo = this.redo.bind(this)
+        this.importAssets = this.importAssets.bind(this)
+        this.importPuppet = this.importPuppet.bind(this)
         this.addJiggleListener = this.addJiggleListener.bind(this)
         this.removeJiggleListener = this.removeJiggleListener.bind(this)
     }
@@ -42,12 +46,20 @@ class Project extends Component {
         window.addEventListener('keydown', this.keyDown)
         window.addEventListener('keyup', this.keyUp)
         electron.ipcRenderer.on('dispatch', this.dispatchPassthrough)
+        electron.ipcRenderer.on('undo', this.undo)
+        electron.ipcRenderer.on('redo', this.redo)
+        electron.ipcRenderer.on('import assets', this.importAssets)
+        electron.ipcRenderer.on('import puppet', this.importPuppet)
     }
 
     componentWillUnmount() {
         window.removeEventListener('keydown', this.keyDown)
         window.removeEventListener('keyup', this.keyUp)
         electron.ipcRenderer.removeListener('dispatch', this.dispatchPassthrough)
+        electron.ipcRenderer.off('dispatch', this.undo)
+        electron.ipcRenderer.off('dispatch', this.redo)
+        electron.ipcRenderer.off('import assets', this.importAssets)
+        electron.ipcRenderer.off('import puppet', this.importPuppet)
     }
 
     keyDown(e) {
@@ -99,6 +111,39 @@ class Project extends Component {
         this.props.dispatch(action)
         if (action.type === 'JIGGLE_SELF')
             this.state.jiggleListeners.forEach(cb => cb())
+    }
+
+    undo() {
+        this.props.dispatch(UndoActionCreators.undo())
+    }
+
+    redo() {
+        this.props.dispatch(UndoActionCreators.redo())
+    }
+
+    importAssets(e, assets, statusId) {
+        this.props.dispatch({
+            type: 'ADD_ASSETS',
+            assets
+        })
+        this.props.dispatch({
+            type: 'IN_PROGRESS_INCREMENT',
+            count: Object.keys(assets).length,
+            id: statusId
+        })
+    }
+
+    importPuppet(e, id, puppet, statusId) {
+        this.props.dispatch({
+            type: 'ADD_PUPPETS',
+            puppets: {
+                [id]: puppet
+            }
+        })
+        this.props.dispatch({
+            type: 'IN_PROGRESS_INCREMENT',
+            id: statusId
+        })
     }
 
     addJiggleListener(cb) {

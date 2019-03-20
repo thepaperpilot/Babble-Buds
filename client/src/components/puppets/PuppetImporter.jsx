@@ -11,9 +11,11 @@ import { loadCharacters, loadAssets } from './../../reducers/project/loader'
 
 const fs = window.require('fs-extra')
 const path = require('path')
-const remote = window.require('electron').remote
+const {remote, ipcRenderer} = window.require('electron')
 
-class AssetImporter extends Component {
+class PuppetImporter extends Component {
+    static id = 0
+
     constructor(props) {
         super(props)
 
@@ -30,57 +32,46 @@ class AssetImporter extends Component {
         this.importPuppets = this.importPuppets.bind(this)
     }
 
-    async import() {
+    import() {
         const assets = {}
-        const topLevel = ['body', 'head', 'hat', 'props']
         const assetsPath = path.join(this.props.project, this.props.assetsPath)
         const thumbnailsPath = path.join(this.props.project, 
             this.props.charactersPath, '..', 'thumbnails')
-        const checkLayer = async layer => {
-            await Promise.all(layer.map(async assetInfo => {
-                if (assetInfo.id in this.props.assets) return
-                if (assetInfo.id in assets) return
-                const asset = this.state.assets[assetInfo.id]
-                const location = path.join(this.props.self,
-                    `${assetInfo.id.split(':')[1]}.png`)
-                assets[assetInfo.id] = asset
+        const puppetsStatusId = `import-puppet-${PuppetImporter.id++}`
+        const assetsStatusId = `${puppetsStatusId}-assets`
 
-                // Copy assets to this project
-                await fs.copy(
-                    path.join(this.state.assetsPath, asset.location),
-                    path.join(assetsPath, location))
-                asset.location = location
-                if (asset.thumbnail)
-                    await fs.copy(
-                        path.join(this.state.assetsPath, asset.thumbnail),
-                        path.join(assetsPath, asset.thumbnail))
-            }))
+        const checkLayer = (puppet, layer) => {
+            layer.children.forEach(layer => {
+                // Continue searching through the layers
+                if (layer.children)
+                    checkLayer(puppet, layer)
+
+                // Ensure this is a new asset
+                if (!('id' in layer)) return
+                if (layer.id in this.props.assets) return
+                if (layer.id in assets) return
+
+                // Add asset to the appropiate lists
+                assets[layer.id] = this.state.assets[layer.id]
+                puppet.assets.push(layer.id)
+            })
         }
-        await Promise.all(this.state.selected.map(async id => {
-            // Copy thumbnails over to this project
-            const thumbnail = this.state.characterThumbnails[id].slice(8)
-            if (await fs.exists(thumbnail))
-                await fs.copy(thumbnail, 
-                    `${path.join(thumbnailsPath, `new-${id}.png`)}`)
-
-            const thumbFolder = thumbnail.split('.').slice(0, -1).join('.')
-            if (await fs.exists(thumbFolder))
-                await fs.copy(thumbFolder,
-                    `${path.join(thumbnailsPath, `new-${id}`)}`)
-
-            // Import any assets this character has that we don't have
-            const puppet = this.state.characters[id]
-            await Promise.all(topLevel.map(async layer => 
-                checkLayer(puppet[layer])
-            ))
-            await Promise.all(Object.values(puppet.emotes).map(async emote => {
-                await checkLayer(emote.eyes)
-                await checkLayer(emote.mouth)
-            }))
-        }))
 
         const puppets = this.state.selected.reduce((acc, curr) => {
+            const thumbnail = this.state.characterThumbnails[curr].slice(8)
+            const thumbFolder = thumbnail.split('.').slice(0, -1).join('.')
+
             acc[curr] = this.state.characters[curr]
+            // These are temporary variables for use in the background
+            // process that will be removed before adding them to the
+            // puppet list
+            acc[curr].thumbnail = thumbnail
+            acc[curr].thumbFolder = thumbFolder
+            acc[curr].assets = []
+
+            // Import any assets this character has that we don't have
+            checkLayer(acc[curr], this.state.characters[curr].layers)
+
             return acc
         }, {})
 
@@ -89,10 +80,28 @@ class AssetImporter extends Component {
         })
 
         this.props.dispatch({
-            type: 'ADD_PUPPETS',
-            puppets,
-            assets
+            type: 'IN_PROGRESS',
+            count: Object.keys(puppets).length,
+            content: 'Importing puppets...',
+            id: puppetsStatusId
         })
+
+        this.props.dispatch({
+            type: 'IN_PROGRESS',
+            count: Object.keys(assets).length,
+            content: 'Importing assets...',
+            id: assetsStatusId
+        })
+
+        ipcRenderer.send('background', 'add puppets',
+            puppets,
+            assets,
+            this.state.assetsPath,
+            assetsPath,
+            thumbnailsPath,
+            puppetsStatusId,
+            assetsStatusId
+        )
     }
 
     cancel() {
@@ -121,8 +130,7 @@ class AssetImporter extends Component {
         }
     }
 
-    // TODO do in hidden browserWindow so you don't block UI thread
-    async importPuppets() {
+    importPuppets() {
         remote.dialog.showOpenDialog(remote.BrowserWindow.getFocusedWindow(), {
             title: 'Select Project',
             defaultPath: path.join(remote.app.getPath('home'), 'projects'),
@@ -133,9 +141,9 @@ class AssetImporter extends Component {
             properties: [
                 'openFile'
             ] 
-        }, async filepaths => {
+        }, filepaths => {
             if (!filepaths) return
-            const project = await fs.readJson(filepaths[0])
+            const project = fs.readJsonSync(filepaths[0])
             
             const puppetsPath = path.join(filepaths[0],
                 project.charactersPath || '../characters')
@@ -277,4 +285,4 @@ function mapStateToProps(state) {
     }
 }
 
-export default connect(mapStateToProps)(AssetImporter)
+export default connect(mapStateToProps)(PuppetImporter)

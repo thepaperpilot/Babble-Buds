@@ -178,7 +178,7 @@ class Layer extends Component {
 function mapStateToProps(state) {
     return {
         assets: state.project.assets,
-        character: state.editor.character
+        character: state.editor.present.character
     }
 }
 

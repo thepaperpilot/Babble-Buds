@@ -12,9 +12,11 @@ import { loadAssets } from './../../reducers/project/loader'
 
 const fs = window.require('fs-extra')
 const path = require('path')
-const remote = window.require('electron').remote
+const {remote, ipcRenderer} = window.require('electron')
 
 class AssetImporter extends Component {
+    static id = 0
+
     constructor(props) {
         super(props)
 
@@ -34,21 +36,15 @@ class AssetImporter extends Component {
         this.toggleAll = this.toggleAll.bind(this)
         this.toggleTab = this.toggleTab.bind(this)
         this.toggleAsset = this.toggleAsset.bind(this)
-        this.importAssets = this.importAssets.bind(this)
+        this.selectProject = this.selectProject.bind(this)
     }
 
-    async import() {
+    import() {
         const assetsPath = path.join(this.props.project, this.props.assetsPath)
         const selected = this.state.duplicate ? this.state.selected :
             this.state.selected.filter(id => !this.props.assets.includes(id))
-            
-        await Promise.all(selected.map(async id => {
-            await fs.copy(path.join(this.state.assetsPath, this.state.assets[id].location),
-                path.join(assetsPath, this.state.assets[id].location))
-            if (this.state.assets[id].thumbnail)
-                await fs.copy(path.join(this.state.assetsPath, this.state.assets[id].thumbnail),
-                    path.join(assetsPath, this.state.assets[id].thumbnail))
-        }))
+        const statusId = `import-${AssetImporter.id++}`
+
         const assets = selected.reduce((acc, curr) => {
             const id = this.state.duplicate ?
                 `${this.props.self}:${getNewAssetID()}` : curr
@@ -62,9 +58,19 @@ class AssetImporter extends Component {
         })
 
         this.props.dispatch({
-            type: 'ADD_ASSETS',
-            assets
+            type: 'IN_PROGRESS',
+            count: selected.length,
+            content: 'Importing assets...',
+            id: statusId
         })
+
+        ipcRenderer.send('background', 'import',
+            this.state.duplicate,
+            assets,
+            this.state.assetsPath,
+            assetsPath,
+            statusId
+        )
     }
 
     changeZoom(e) {
@@ -118,8 +124,7 @@ class AssetImporter extends Component {
         }
     }
 
-    // TODO do in hidden browserWindow so you don't block UI thread
-    async importAssets() {
+    selectProject() {
         remote.dialog.showOpenDialog(remote.BrowserWindow.getFocusedWindow(), {
             title: 'Select Project',
             defaultPath: path.join(remote.app.getPath('home'), 'projects'),
@@ -130,9 +135,9 @@ class AssetImporter extends Component {
             properties: [
                 'openFile'
             ] 
-        }, async filepaths => {
+        }, filepaths => {
             if (!filepaths) return
-            const project = await fs.readJson(filepaths[0])
+            const project = fs.readJsonSync(filepaths[0])
             const assetsPath = path.join(filepaths[0],
                 project.assetsPath || '../assets')
             const assets = loadAssets(project, assetsPath, [])
@@ -167,21 +172,21 @@ class AssetImporter extends Component {
                     onClick={this.toggleAsset(id)}
                     className={selected ? 'char selected' : 'char'}>
                     {this.state.size === 60 && <div className="smallThumbnail-img">
-                            <img
-                                alt={asset.name}
-                                src={`file:///${path.join(this.state.assetsPath,
-                                    asset.type === 'animated' ?
-                                        asset.thumbnail :
-                                        asset.location)}`}
-                                style={{width: '20px', height: '20px'}} />
-                            {asset.name}
-                        </div>}
+                        <img
+                            alt={asset.name}
+                            src={`file:///${path.join(this.state.assetsPath,
+                                asset.type === 'animated' ?
+                                    asset.thumbnail :
+                                    asset.location)}`}
+                            style={{width: '20px', height: '20px'}} />
+                        {asset.name}
+                    </div>}
                     {this.state.size === 60 || <img
-                                alt={asset.name}
-                                src={`file:///${path.join(this.state.assetsPath,
-                                    asset.type === 'animated' ?
-                                        asset.thumbnail :
-                                        asset.location)}`} />}
+                        alt={asset.name}
+                        src={`file:///${path.join(this.state.assetsPath,
+                            asset.type === 'animated' ?
+                                asset.thumbnail :
+                                asset.location)}`} />}
                     {this.state.size === 60 || <div className="desc">{asset.name}</div>}
                 </div>
             })
@@ -209,7 +214,7 @@ class AssetImporter extends Component {
 
         // TODO tooltip on duplicate assets checkbox explaining what it does
         return <div>
-            <button onClick={this.importAssets}>Import</button>
+            <button onClick={this.selectProject}>Import</button>
             <Modal
                 title={`Import Assets - ${path.basename(this.state.project)}`}
                 open={this.state.open}

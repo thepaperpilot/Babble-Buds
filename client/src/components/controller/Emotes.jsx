@@ -3,7 +3,6 @@ import { connect } from 'react-redux'
 import Babble from './Babble'
 
 const path = window.require('path')
-const fs = window.require('fs-extra')
 
 const hotkeys = [
     ['u', 'i', 'o', 'p'],

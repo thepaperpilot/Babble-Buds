@@ -102,6 +102,7 @@ class Console extends Component {
                         {statuses.map((status, i) => (
                             <pre key={i} className={status.type}>
                                 {status.message}
+                                {status.total == null ? null : <div className="progress" style={{width: `${100 * status.count / status.total}%`}}></div>}
                             </pre>
                         ))}
                     </Scrollbar>

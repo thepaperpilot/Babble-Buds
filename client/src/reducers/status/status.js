@@ -42,10 +42,20 @@ function inProgress(state, action) {
     return logs
 }
 
+function inProgressIncrement(state, action) {
+    const logs = state.slice()
+    let log = logs.find(log => log.id === action.id)
+
+    return inProgress(state, util.updateObject(action, {
+        count: log.count + (action.count || 1)
+    }))
+}
+
 export default util.createReducer(DEFAULTS, {
     'INFO': log('info'),
     'LOG': log('log'),
     'WARN': log('warn'),
     'ERROR': error,
-    'IN_PROGRESS': inProgress
+    'IN_PROGRESS': inProgress,
+    'IN_PROGRESS_INCREMENT': inProgressIncrement
 })

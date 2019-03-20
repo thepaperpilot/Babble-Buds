@@ -18,6 +18,7 @@ class Editor extends Component {
         this.state = {
             scale: 1,
             grid: props.grid,
+            highlight: props.highlight,
             bounds: {
                 top: 0,
                 right: 0,
@@ -30,6 +31,7 @@ class Editor extends Component {
         this.onScroll = this.onScroll.bind(this)
         this.onMouseDown = this.onMouseDown.bind(this)
         this.changeZoom = this.changeZoom.bind(this)
+        this.toggleHighlight = this.toggleHighlight.bind(this)
         this.savePuppet = this.savePuppet.bind(this)
 
         window.PIXI.SCALE_MODES.DEFAULT = window.PIXI.SCALE_MODES.NEAREST
@@ -77,13 +79,20 @@ class Editor extends Component {
         })
     }
 
+    toggleHighlight() {
+        this.props.onHighlightChange(!this.state.highlight)
+        this.setState({
+            highlight: !this.state.highlight
+        })
+    }
+
     savePuppet() {
         this.props.dispatch({ type: 'SAVE_EDITOR' })
     }
 
     render() {
         // TODO (re-)load assets since babble.js isn't here to do it for us
-        const {rect, character} = this.props
+        const {rect, character, selected} = this.props
         const {scale, grid, bounds} = this.state
 
         const gridLines = []
@@ -115,6 +124,9 @@ class Editor extends Component {
             <div className="panel editor">
                 <div className="bar flex-row">
                     <button onClick={this.savePuppet}>Apply</button>
+                    <div className="toggle" style={{ backgroundColor: this.state.highlight ? '#333c4a' : '#242a33'}} onClick={this.toggleHighlight}>
+                        Highlight Current Layer
+                    </div>
                     <div className="flex-item">Zoom: {Math.round(1 / scale * 100)}%</div>
                     <div className="flex-item">Pos: {Math.round((bounds.right + bounds.left) / 2)},
                         {-Math.round((bounds.bottom + bounds.top) / 2)}</div>
@@ -133,7 +145,7 @@ class Editor extends Component {
                     <Viewport width={rect.width} height={rect.height - 21} ref={this.viewport}>
                         {gridLines}
                         <Cross x={0} y={0} scale={scale} color={0x888888} distance={DISTANCE * scale} />
-                        <Layer layer={character} x={0} y={0} selectedRef={this.selectedRef} scale={scale} />
+                        <Layer layer={character} x={0} y={0} selectedRef={this.selectedRef} scale={scale} highlight={this.state.highlight ? selected : character.path} />
                     </Viewport>
                 </Stage>
             </div>
@@ -143,7 +155,8 @@ class Editor extends Component {
 
 function mapStateToProps(state) {
     return {
-        character: state.editor.character ? state.editor.character.layers : []
+        character: state.editor.present.character ? state.editor.present.character.layers : [],
+        selected: state.editor.present.layer
     }
 }
 

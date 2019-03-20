@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { DragSource } from 'react-dnd'
+import { ActionCreators as UndoActionCreators } from 'redux-undo'
 import InlineEdit from './../ui/InlineEdit'
 import { ContextMenu, MenuItem, ContextMenuTrigger, SubMenu } from 'react-contextmenu'
 
@@ -50,12 +51,14 @@ class DraggableAsset extends Component {
     }
 
     editAsset() {
-        if (this.props.asset.type === 'bundle')
+        if (this.props.asset.type === 'bundle') {
             this.props.dispatch({
                 type: 'EDIT_PUPPET',
                 id: this.props.id,
                 character: this.props.asset
             })
+            this.props.dispatch(UndoActionCreators.clearHistory())
+        }
     }
 
     moveAsset(tab) {
@@ -119,7 +122,7 @@ class DraggableAsset extends Component {
             </ContextMenuTrigger>
             <ContextMenu id={`contextmenu-asset-${this.props.id}`}>
                 <MenuItem onClick={this.duplicateAsset}>Duplicate</MenuItem>
-                {disabled || <div>
+                {disabled ? null : <React.Fragment>
                     <SubMenu title="Move">
                         {this.props.tabs.map(tab =>
                             <MenuItem
@@ -132,8 +135,8 @@ class DraggableAsset extends Component {
                         <MenuItem onClick={this.props.newAssetTab}>New Folder</MenuItem>
                     </SubMenu>
                     <MenuItem onClick={this.edit}>Rename</MenuItem>
-                </div>}
-                {disabled || <MenuItem onClick={this.deleteAsset}>Delete</MenuItem>}
+                </React.Fragment>}
+                {disabled ? null : <MenuItem onClick={this.deleteAsset}>Delete</MenuItem>}
             </ContextMenu>
         </div>
     }

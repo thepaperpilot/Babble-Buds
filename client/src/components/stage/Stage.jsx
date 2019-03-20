@@ -14,7 +14,7 @@ class Stage extends Component {
     }
 
     componentDidMount() {
-        this.stage = new babble.Stage('screen', this.props.settings, this.props.assets, this.props.assetsPath, this.loadPuppets)
+        this.stage = new babble.Stage('screen', this.props.settings, this.props.assets, this.props.assetsPath, this.loadPuppets, console.log)
         this.props.addJiggleListener(this.jiggle)
     }
 

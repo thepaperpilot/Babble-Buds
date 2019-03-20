@@ -35,7 +35,9 @@ class Panels extends Component {
     }
 
     factory(node) {
-        var component = node.getComponent()
+        const component = node.getComponent()
+        const {grid, highlight} = node.getConfig() ? node.getConfig() : {}
+
         switch(component) {
         case 'text':
             return <div className="panel">{node.getName()}</div>
@@ -44,7 +46,8 @@ class Panels extends Component {
             return <Stage
                 ref={this.props.stage}
                 addJiggleListener={this.props.addJiggleListener}
-                removeJiggleListener={this.props.removeJiggleListener} />
+                removeJiggleListener={this.props.removeJiggleListener}
+                rect={node._rect} />
         case 'inspector':
             return <Inspector/>
         case 'console':
@@ -58,7 +61,7 @@ class Panels extends Component {
         case 'controller':
             return <Controller/>
         case 'editor':
-            return <Editor rect={node._rect} grid={node.getConfig().grid} onZoomChange={this.updateConfig(node, 'grid')} />
+            return <Editor rect={node._rect} grid={grid} highlight={highlight} onZoomChange={this.updateConfig(node, 'grid')} onHighlightChange={this.updateConfig(node, 'highlight')} />
         case 'layers':
             return <Layers/>
         default:

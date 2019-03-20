@@ -37,6 +37,7 @@ function newAssetBundle(state, action) {
         id: action.id,
         type: 'bundle'
     })
+    console.log(state.character.layers, layers)
 
     const character = util.updateObject(state.character, { layers })
     return util.updateObject(state, { character })

@@ -33,6 +33,8 @@ function jiggleSelf(state, action) {
 }
 
 function changePuppet(state, action) {
+    if (state.settings.hotbar[action.index] === 0)
+        return state
     const id = state.settings.hotbar[action.index]
     const actor = util.updateObject(state.settings.actor, { id })
     const settings = util.updateObject(state.settings, { actor })

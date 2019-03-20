@@ -143,7 +143,7 @@ function mapStateToProps(state, props) {
         self: state.self,
         nick: state.project.settings.nickname,
         id: state.project.settings.actor.id,
-        emote: props.target == state.editor.id ? state.editor.emote : null
+        emote: props.target == state.editor.present.id ? state.editor.present.emote : null
     }
 }
 

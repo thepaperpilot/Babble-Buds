@@ -23,9 +23,12 @@ function duplicatePuppet(state, action) {
     const id = state.numCharacters + 1
     const thumbnail = state.characterThumbnails[action.puppet]
     const characterThumbnail = `file:///${thumbnail.split('/').slice(0, -1).join('/')}/new-${id}.png`
+
     fs.removeSync(`${thumbnail.slice(8).split('/').slice(0, -1).join('/')}/new-${id}`)
-    fs.copySync(thumbnail.slice(8), `${thumbnail.slice(8).split('/').slice(0, -1).join('/')}/new-${id}.png`)
-    fs.copySync(thumbnail.slice(8, -4), `${thumbnail.slice(8).split('/').slice(0, -1).join('/')}/new-${id}`)
+    if (fs.existsSync(thumbnail.slice(8)))
+        fs.copySync(thumbnail.slice(8), `${thumbnail.slice(8).split('/').slice(0, -1).join('/')}/new-${id}.png`)
+    if (fs.existsSync(thumbnail.slice(8, -4)))
+        fs.copySync(thumbnail.slice(8, -4), `${thumbnail.slice(8).split('/').slice(0, -1).join('/')}/new-${id}`)
 
     character.name = `${character.name} (Copy)`
     character.id = id

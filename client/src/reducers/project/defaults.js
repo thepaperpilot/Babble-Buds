@@ -85,5 +85,7 @@ export const DEFAULTS = {
 export const DEFAULT_CHARACTER = {
     'deadbonesStyle': false,
     'name': 'New Puppet',
-    'layers': []
+    'layers': {
+        children: []
+    }
 }

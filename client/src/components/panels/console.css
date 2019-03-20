@@ -9,4 +9,15 @@
     user-select: initial;
     white-space: pre-wrap;
     border-bottom: solid 1px white;
+    z-index: 0;
+}
+
+.console pre .progress {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    background: rgba(0, 127, 255, 0.5);
+    transition: width .5s ease;
+    z-index: -1;
 }

@@ -37,7 +37,7 @@ class Layer extends Component {
         return () => {
             this.props.dispatch({
                 type: 'NEW_ASSET_BUNDLE',
-                id: getNewAssetID(),
+                id: `${this.props.self}:${getNewAssetID()}`,
                 name: this.props.name,
                 path: this.props.path,
                 tab,
@@ -97,9 +97,9 @@ class Layer extends Component {
 
 function mapStateToProps(state, props) {
     return {
-        selected: state.editor.layer,
+        selected: state.editor.present.layer,
         asset: state.project.assets[props.id],
-        emote: state.editor.emote,
+        emote: state.editor.present.emote,
         assetsPath: state.project.assetsPath,
         self: state.self
     }

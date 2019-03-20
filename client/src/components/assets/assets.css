@@ -8,8 +8,8 @@
 }
 
 .assets .foldable:before {
-    top: -3px;
-    left: 10px;
+    top: 10px;
+    left: 13px;
 }
 
 .assets .foldable:first-child h4 {
@@ -22,9 +22,9 @@
 
 .assets .foldable h4 {
     padding: 0 32px;
-    margin: 0 -8px;
+    margin: 0 -32px 0 -25px;
     width: unset;
-    height: 20px;
+    height: 40px;
 }
 
 .assets .foldable h4:hover {
@@ -36,7 +36,10 @@
 }
 
 .assets .header {
-    height: 20px;
+    height: 40px;
+    margin-left: 30px;
+    display: flex;
+    align-items: center;
 }
 
 .assets .line-item {

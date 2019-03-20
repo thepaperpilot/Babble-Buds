@@ -1,7 +1,9 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { DragSource } from 'react-dnd'
+import { ActionCreators as UndoActionCreators } from 'redux-undo'
 import InlineEdit from './../ui/InlineEdit'
+import SmallThumbnail from './../ui/SmallThumbnail'
 import { ContextMenu, MenuItem, ContextMenuTrigger, SubMenu } from 'react-contextmenu'
 
 class DraggablePuppet extends Component {
@@ -37,6 +39,7 @@ class DraggablePuppet extends Component {
             id: parseInt(this.props.puppet, 10),
             character: this.props.character
         })
+        this.props.dispatch(UndoActionCreators.clearHistory())
     }
 
     duplicatePuppet() {
@@ -75,11 +78,9 @@ class DraggablePuppet extends Component {
                                 className="line-item smallThumbnail-wrapper"
                                 onChange={this.renamePuppet}
                                 onDoubleClick={this.editPuppet}>
-                                <div className="smallThumbnail-img" style={{width: '20px', height: '20px'}}>
-                                    <img
-                                        alt={this.props.character.name}
-                                        src={this.props.thumbnail}/>
-                                </div>
+                                <SmallThumbnail
+                                    label={this.props.character.name}
+                                    image={this.props.thumbnail}/>
                             </InlineEdit>
                         </div> :
                         <div>

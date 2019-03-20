@@ -2,6 +2,7 @@ import React, {Component} from 'react'
 import { connect } from 'react-redux'
 import Scrollbar from 'react-custom-scroll'
 import Tree from '@robertlong/react-ui-tree'
+import { ActionCreators as UndoActionCreators } from 'redux-undo'
 import Layer from './Layer'
 import './layers.css'
 
@@ -31,6 +32,7 @@ class Layers extends Component {
             type: 'SET_LAYERS',
             tree
         })
+        this.props.dispatch(UndoActionCreators.clearHistory())
         if (this.props.targetType === 'layer')
             this.props.dispatch({
                 type: 'INSPECT',
@@ -78,7 +80,7 @@ class Layers extends Component {
 function mapStateToProps(state) {
     return {
         targetType: state.inspector.targetType,
-        tree: state.editor.character ? state.editor.character.layers : [],
+        tree: state.editor.present.character ? state.editor.present.character.layers : {},
         selected: state.editor.layer,
         assets: state.project.assets
     }
