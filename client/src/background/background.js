@@ -5,7 +5,7 @@ const path = require('path')
 
 const { GIF } = window.require('gif-engine-js')
 
-const stage = new Stage('stage', {'numCharacters': 1, 'puppetScale': .2}, {}, '')
+const stage = new Stage('stage', {'numCharacters': 1, 'puppetScale': .2}, {}, '', null, console)
 
 async function addAssets(assets, statusId, callback) {
     // This is a bit complicated because we want to batch our requests. I found that even just limiting it to 1/ms is fine, though
@@ -50,8 +50,14 @@ ipcRenderer.on('generate thumbnails', (e, thumbnailsPath, character, type, id) =
 
     // Take puppet screenshot
     let empty = document.createElement('canvas')
-    empty.width = stage.renderer.view.width
-    empty.height = stage.renderer.view.height
+    // We need to access width and height so that bounds gets set, even though we won't need them
+    const {width, height, _bounds} = stage.stage
+    
+    //ipcRenderer.send('change background visibility', true)
+    
+    stage.renderer.resize(_bounds.maxX, _bounds.maxY)
+    empty.width = _bounds.maxX
+    empty.height = _bounds.maxY
     stage.renderer.render(stage.stage)
     const data = stage.renderer.view.toDataURL() === empty.toDataURL() ? null : stage.getThumbnail()
 
@@ -87,6 +93,8 @@ ipcRenderer.on('generate thumbnails', (e, thumbnailsPath, character, type, id) =
 
     // Send info back
     ipcRenderer.send('foreground', 'update thumbnails', type, id, thumbnailsPath)
+
+    //ipcRenderer.send('change background visibility', false)
 })
 
 ipcRenderer.on('import', async (e, duplicate, selected, oldAssetsPath, newAssetsPath, statusId) => {

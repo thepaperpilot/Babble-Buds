@@ -54,7 +54,7 @@ function createWindow() {
     })
 
     // Create background window
-    backgroundWindow = new BrowserWindow({ show: true })
+    backgroundWindow = new BrowserWindow({ show: false })
     backgroundWindow.openDevTools()
     backgroundWindow.loadURL(url.format({
         pathname: path.join(__dirname, 'background', 'index.html'),
@@ -65,6 +65,7 @@ function createWindow() {
     // Setup passthroughs between the foreground and background windows
     ipcMain.on('background', (e, ...event) => backgroundWindow.webContents.send(...event))
     ipcMain.on('foreground', (e, ...event) => mainWindow.webContents.send(...event))
+    ipcMain.on('change background visibility', (e, visible) => backgroundWindow[visible ? 'show' : 'hide']())
 
     // Create the application menu
     require('./main-process/menus/application-menu.js')
