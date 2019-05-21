@@ -81,7 +81,8 @@ class InlineEdit extends Component {
         return <div
             className={classNames(className, {
                 selected,
-                disabled
+                disabled,
+                isEditing: this.state.isEditing
             })}
             onClick={this.onClick}
             onDoubleClick={this.props.onDoubleClick}>

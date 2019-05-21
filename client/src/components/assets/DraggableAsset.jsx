@@ -38,7 +38,6 @@ class DraggableAsset extends Component {
 
     render() {
         // TODO When dragging, use image of asset, using current zoom
-        // TODO disable delete option when in multiplayer
         const disabled = this.props.id.split(':')[0] !== this.props.self
         const thumbnail = path.join(this.props.assetsPath, this.props.asset.type === 'animated' ?
             this.props.asset.thumbnail :
@@ -96,9 +95,7 @@ function mapStateToProps(state) {
 }
 
 const assetSource = {
-    beginDrag(props) {
-        return { asset: props.id }
-    }
+    beginDrag: ({ id, asset, self }) => ({ id, asset, isOwned: id.split(':')[0] === self })
 }
 
 function collect(connect) {

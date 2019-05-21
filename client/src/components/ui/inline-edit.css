@@ -7,6 +7,7 @@
     color: white;
     padding-top: 0;
     padding-bottom: 0;
+    max-width: 100%;
 }
 
 .small .inline-edit {
@@ -15,6 +16,10 @@
 
 .disabled {
     color: #888;
+}
+
+.isEditing {
+    max-width: 100%;
 }
 
 .react-contextmenu {

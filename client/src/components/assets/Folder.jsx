@@ -1,6 +1,5 @@
 import React, {Component} from 'react'
 import { connect } from 'react-redux'
-import { DropTarget } from 'react-dnd'
 import InlineEdit from './../ui/InlineEdit'
 import { ContextMenuTrigger } from 'react-contextmenu'
 
@@ -46,35 +45,12 @@ class Folder extends Component {
             inlineEdit={this.inlineEdit}
             id="contextmenu-tab"
             holdToDisplay={-1}>
-            {this.props.connectDropTarget(<div style={{
-                backgroundColor: this.props.isOver ? 'rgba(0, 255, 0, .2)' :
-                    this.props.canDrop ? 'rgba(0, 255, 0, .05)' : ''
-            }}>
-                <InlineEdit
-                    ref={this.inlineEdit}
-                    target={this.props.tab}
-                    selectable={false}
-                    onChange={this.renameFolder} />
-            </div>)}
+            <InlineEdit
+                ref={this.inlineEdit}
+                target={this.props.tab}
+                selectable={false}
+                onChange={this.renameFolder} />
         </ContextMenuTrigger>
-    }
-}
-
-const assetTarget = {
-    drop(props, monitor) {
-        props.dispatch({
-            type: 'MOVE_ASSET',
-            asset: monitor.getItem().asset,
-            tab: props.tab
-        })
-    }
-}
-
-function collect(connect, monitor) {
-    return {
-        connectDropTarget: connect.dropTarget(),
-        isOver: monitor.isOver(),
-        canDrop: monitor.canDrop()
     }
 }
 
@@ -85,4 +61,4 @@ function mapStateToProps(state) {
     }
 }
 
-export default DropTarget('asset', assetTarget, collect)(connect(mapStateToProps, null, null, { withRef: true })(Folder))
+export default connect(mapStateToProps, null, null, { withRef: true })(Folder)

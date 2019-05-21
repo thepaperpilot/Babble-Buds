@@ -1,0 +1,16 @@
+.folder-list {
+    width: calc(25% - 5px);
+    display: inline-block;
+    min-height: 100%;
+    border-right: solid 1px white;
+    margin-right: 4px;
+    vertical-align: top;
+    overflow-x: hidden;
+    word-break: break-all;
+}
+
+.folder-list-item {
+    padding-top: 4px;
+    border-bottom: solid 1px;
+    cursor: pointer;
+}

@@ -29,3 +29,8 @@
 .assets div[draggable] {
     height: 100%;
 }
+
+.assets .rcs-custom-scroll {
+    width: 75%;
+    display: inline-block;
+}
