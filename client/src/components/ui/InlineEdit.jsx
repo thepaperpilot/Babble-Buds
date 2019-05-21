@@ -29,7 +29,9 @@ class InlineEdit extends Component {
     }
 
     onBlur() {
-        this.props.onChange(this.state.text)
+        if (this.state.text !== (this.props.label || this.props.target))
+            this.props.onChange(this.state.text)
+        
         this.setState({
             isEditing: false
         })

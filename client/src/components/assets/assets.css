@@ -1,51 +1,20 @@
-.assets .list {
-    padding-left: 8px;
-    box-sizing: border-box;
-}
-
-.assets .foldable {
-    margin-left: -6px;
-}
-
-.assets .foldable:before {
-    top: 10px;
-    left: 13px;
-}
-
-.assets .foldable:first-child h4 {
-    border-top: none;
-}
-
-.assets .foldable:last-child {
-    margin-bottom: 8px;
-}
-
-.assets .foldable h4 {
-    padding: 0 32px;
-    margin: 0 -32px 0 -25px;
-    width: unset;
-    height: 40px;
-}
-
-.assets .foldable h4:hover {
-    background-color: #2a323d;
-}
-
-.assets .foldable.open .foldable:not(.open) h4 {
-    margin-top: -1px;
-}
-
-.assets .header {
-    height: 40px;
-    margin-left: 30px;
+.assets .header-wrapper {
     display: flex;
     align-items: center;
+    justify-content: center;
+    text-align: center;
+    height: 100%;
+}
+
+.assets .list.small .list-item {
+    border: none;
+    margin: 0;
 }
 
 .assets .line-item {
     border: none;
     padding: 0;
-    padding-left: 24px;
+    padding-left: 6px;
 }
 
 .assets .smallThumbnail-img {

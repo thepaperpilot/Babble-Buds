@@ -27,16 +27,16 @@ class Stage extends Component {
             this.stage.project = newProps.settings
             this.stage.resize()
         }
+        if (this.props.characters[this.props.actor.id] !==
+            newProps.characters[newProps.actor.id]) {
+            this.stage.removePuppet(this.props.self)
+            this.addPuppet(newProps)
+        }
         if (this.props.assets !== newProps.assets ||
             this.props.assetsPath !== newProps.assetsPath) {
             this.stage.assets = newProps.assets
             this.stage.assetsPath = newProps.assetsPath
             this.stage.reloadAssets()
-        }
-        if (this.props.characters[this.props.actor.id] !==
-            newProps.characters[newProps.actor.id]) {
-            this.stage.removePuppet(this.props.self)
-            this.addPuppet(newProps)
         }
 
         // Check for anything that requires this.puppet

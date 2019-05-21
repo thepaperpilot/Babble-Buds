@@ -1,0 +1,56 @@
+.rcs-outer-container {
+    overflow: hidden;
+}
+
+.rcs-custom-scrollbar {
+    position: absolute;
+    height: 100%;
+    width: 8px;
+    right: 3px;
+    opacity: 0;
+    z-index: 1;
+    transition: opacity 0.3s ease-out;
+    padding: 6px 0;
+    box-sizing: border-box;
+    will-change: opacity;
+    pointer-events: none;
+}
+
+.rcs-scroll-handle-dragged .rcs-custom-scrollbar {
+    opacity: 1;
+}
+
+.rcs-outer-container:hover .rcs-custom-scrollbar {
+    opacity: 1;
+    transition-duration: 0.2s;
+}
+
+.rcs-scrollbar-parent .rcs-custom-scroll {
+    overflow-y: auto;
+}
+
+.rcs-positioning {
+    position: relative;
+}
+
+.rcs-custom-scroll-handle {
+    position: absolute;
+    width: 100%;
+    top: 0;
+}
+
+.rcs-inner-handle {
+    height: calc(100% - 12px);
+    margin-top: 6px;
+    background-color: rgba(1, 1, 1, 0.6);
+    border-radius: 5px;
+}
+
+.rcs-inner-container {
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+
+.rcs-scroll-handle-dragged .rcs-inner-container {
+    user-select: none;
+}

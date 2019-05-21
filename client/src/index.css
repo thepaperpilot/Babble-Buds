@@ -152,63 +152,6 @@ textarea:focus {
     text-align: center;
 }
 
-.outer-container {
-    overflow: hidden;
-}
-
-.custom-scrollbar {
-    position: absolute;
-    height: 100%;
-    width: 8px;
-    right: 3px;
-    opacity: 0;
-    z-index: 1;
-    transition: opacity 0.3s ease-out;
-    padding: 6px 0;
-    box-sizing: border-box;
-    will-change: opacity;
-    pointer-events: none;
-}
-
-.scroll-handle-dragged .custom-scrollbar {
-    opacity: 1;
-}
-
-.outer-container:hover .custom-scrollbar {
-    opacity: 1;
-    transition-duration: 0.2s;
-}
-
-.scrollbar-parent .custom-scroll {
-    overflow-y: auto;
-}
-
-.positioning {
-    position: relative;
-}
-
-.custom-scroll-handle {
-    position: absolute;
-    width: 100%;
-    top: 0;
-}
-
-.inner-handle {
-    height: calc(100% - 12px);
-    margin-top: 6px;
-    background-color: rgba(1, 1, 1, 0.6);
-    border-radius: 5px;
-}
-
-.inner-container {
-    overflow-x: hidden;
-    overflow-y: scroll;
-}
-
-.scroll-handle-dragged .inner-container {
-    user-select: none;
-}
-
 .char, .emote, .babble {
     background-color: #242a33;
     color: #fff;

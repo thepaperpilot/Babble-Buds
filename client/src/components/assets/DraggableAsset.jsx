@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import { DragSource } from 'react-dnd'
 import { ActionCreators as UndoActionCreators } from 'redux-undo'
 import InlineEdit from './../ui/InlineEdit'
-import { ContextMenu, MenuItem, ContextMenuTrigger, SubMenu } from 'react-contextmenu'
+import { ContextMenuTrigger } from 'react-contextmenu'
 
 const path = window.require('path')
 
@@ -13,25 +13,8 @@ class DraggableAsset extends Component {
 
         this.inlineEdit = React.createRef()
 
-        this.edit = this.edit.bind(this)
-        this.deleteAsset = this.deleteAsset.bind(this)
         this.renameAsset = this.renameAsset.bind(this)
-        this.openAsset = this.openAsset.bind(this)
         this.editAsset = this.editAsset.bind(this)
-        this.moveAsset = this.moveAsset.bind(this)
-        this.duplicateAsset = this.duplicateAsset.bind(this)
-    }
-
-    edit() {
-        if (this.inlineEdit.current)
-            this.inlineEdit.current.getWrappedInstance().edit()
-    }
-
-    deleteAsset() {
-        this.props.dispatch({
-            type: 'DELETE_ASSET',
-            asset: this.props.id
-        })
     }
 
     renameAsset(name) {
@@ -39,14 +22,6 @@ class DraggableAsset extends Component {
             type: 'RENAME_ASSET',
             asset: this.props.id,
             name
-        })
-    }
-
-    openAsset() {
-        this.props.dispatch({
-            type: 'INSPECT',
-            targetType: 'asset',
-            target: this.props.id
         })
     }
 
@@ -61,23 +36,6 @@ class DraggableAsset extends Component {
         }
     }
 
-    moveAsset(tab) {
-        return () => {
-            this.props.dispatch({
-                type: 'MOVE_ASSET',
-                asset: this.props.id,
-                tab
-            })
-        }
-    }
-
-    duplicateAsset() {
-        this.props.dispatch({
-            type: 'DUPLICATE_ASSET',
-            asset: this.props.id
-        })
-    }
-
     render() {
         // TODO When dragging, use image of asset, using current zoom
         // TODO disable delete option when in multiplayer
@@ -86,7 +44,13 @@ class DraggableAsset extends Component {
             this.props.asset.thumbnail :
             this.props.asset.location)
         return <div>
-            <ContextMenuTrigger id={`contextmenu-asset-${this.props.id}`} holdToDisplay={-1}>
+            <ContextMenuTrigger
+                id="contextmenu-asset"
+                holdToDisplay={-1}
+                collect={({ asset, inlineEdit, disabled }) => ({ asset, inlineEdit, disabled })}
+                asset={this.props.id}
+                inlineEdit={this.inlineEdit}
+                disabled={disabled} >
                 {this.props.connectDragSource(this.props.small ?
                     <div>
                         <InlineEdit
@@ -120,24 +84,6 @@ class DraggableAsset extends Component {
                     </div>
                 )}
             </ContextMenuTrigger>
-            <ContextMenu id={`contextmenu-asset-${this.props.id}`}>
-                <MenuItem onClick={this.duplicateAsset}>Duplicate</MenuItem>
-                {disabled ? null : <React.Fragment>
-                    <SubMenu title="Move">
-                        {this.props.tabs.map(tab =>
-                            <MenuItem
-                                onClick={this.moveAsset(tab)}
-                                key={tab}>
-                                {tab}
-                            </MenuItem>
-                        )}
-                        <MenuItem divider />
-                        <MenuItem onClick={this.props.newAssetTab}>New Folder</MenuItem>
-                    </SubMenu>
-                    <MenuItem onClick={this.edit}>Rename</MenuItem>
-                </React.Fragment>}
-                {disabled ? null : <MenuItem onClick={this.deleteAsset}>Delete</MenuItem>}
-            </ContextMenu>
         </div>
     }
 }

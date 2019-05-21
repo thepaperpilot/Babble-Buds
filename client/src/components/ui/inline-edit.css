@@ -9,6 +9,10 @@
     padding-bottom: 0;
 }
 
+.small .inline-edit {
+    width: calc(100% - 24px);
+}
+
 .disabled {
     color: #888;
 }

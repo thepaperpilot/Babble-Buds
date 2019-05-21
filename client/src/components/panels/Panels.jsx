@@ -57,7 +57,7 @@ class Panels extends Component {
         case 'project-settings':
             return <ProjectSettings/>
         case 'assets':
-            return <Assets size={node.getConfig().size} onZoomChange={this.updateConfig(node, 'size')} />
+            return <Assets rect={node._rect} size={node.getConfig().size} onZoomChange={this.updateConfig(node, 'size')} />
         case 'controller':
             return <Controller/>
         case 'editor':
