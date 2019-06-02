@@ -10,6 +10,23 @@ const hotkeys = [
     ['m', ',', '.', '/']
 ]
 
+export function reducer(assets) {
+    const reducer = (acc, curr) => {
+        if (curr.emote != null) {
+            return acc.concat({
+                emote: curr.emote,
+                name: curr.name
+            })
+        } else if (curr.children) {
+            return curr.children.reduce(reducer, acc)
+        } else if (assets[curr.id].type === 'bundle') {
+            return assets[curr.id].layers.children.reduce(reducer, acc)
+        } else return acc
+    }
+
+    return reducer
+}
+
 class Emotes extends Component {
     constructor(props) {
         super(props)
@@ -25,17 +42,7 @@ class Emotes extends Component {
     }
 
     render() {
-        const reducer = (acc, curr) => {
-            if (curr.emote != null) {
-                return acc.concat({
-                    emote: curr.emote,
-                    name: curr.name
-                })
-            } else if (curr.children) {
-                return curr.children.reduce(reducer, acc)
-            } else return acc
-        }
-        const emotes = this.props.characters[this.props.actor.id].layers.children.reduce(reducer, [])
+        const emotes = this.props.characters[this.props.actor.id].layers.children.reduce(reducer(this.props.assets), [])
         const character = this.props.characters[this.props.actor.id]
         return (
             <div className="flex-column">
@@ -77,7 +84,8 @@ function mapStateToProps(state) {
     return {
         characters: state.project.characters,
         actor: state.project.settings.actor,
-        characterThumbnails: state.project.characterThumbnails
+        characterThumbnails: state.project.characterThumbnails,
+        assets: state.project.assets
     }
 }
 

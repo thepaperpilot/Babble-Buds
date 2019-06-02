@@ -12,7 +12,9 @@ const behavior = {
             .wheel()
             .clampZoom({
                 minWidth: 1,
-                minHeight: 1
+                minHeight: 1,
+                maxWidth: 800000,
+                maxHeight: 800000
             })
 
         v.off('pointerdown', v.down)

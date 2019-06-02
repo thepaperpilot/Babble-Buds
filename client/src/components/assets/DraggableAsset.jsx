@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { DragSource } from 'react-dnd'
+import { DragSource, DragPreviewImage } from 'react-dnd'
 import { ActionCreators as UndoActionCreators } from 'redux-undo'
 import InlineEdit from './../ui/InlineEdit'
 import { ContextMenuTrigger } from 'react-contextmenu'
@@ -30,60 +30,56 @@ class DraggableAsset extends Component {
             this.props.dispatch({
                 type: 'EDIT_PUPPET',
                 id: this.props.id,
-                character: this.props.asset
+                character: this.props.asset,
+                objectType: 'asset'
             })
             this.props.dispatch(UndoActionCreators.clearHistory())
         }
     }
 
     render() {
-        // TODO When dragging, use image of asset, using current zoom
         const disabled = this.props.id.split(':')[0] !== this.props.self
-        const thumbnail = path.join(this.props.assetsPath, this.props.asset.type === 'animated' ?
+        const thumbnail = `${path.join(this.props.assetsPath, this.props.asset.type === 'animated' ?
             this.props.asset.thumbnail :
-            this.props.asset.location)
-        return <div>
-            <ContextMenuTrigger
-                id="contextmenu-asset"
-                holdToDisplay={-1}
-                collect={({ asset, inlineEdit, disabled }) => ({ asset, inlineEdit, disabled })}
-                asset={this.props.id}
-                inlineEdit={this.inlineEdit}
-                disabled={disabled} >
-                {this.props.connectDragSource(this.props.small ?
-                    <div>
-                        <InlineEdit
-                            ref={this.inlineEdit}
-                            disabled={true}
-                            target={this.props.asset.name}
-                            targetType="asset"
-                            className="line-item smallThumbnail-wrapper"
-                            onChange={this.renameAsset}
-                            onDoubleClick={this.editAsset}>
-                            <div className="smallThumbnail-img" style={{width: '20px', height: '20px'}}>
-                                <img
-                                    alt={this.props.asset.name}
-                                    src={thumbnail}/>
-                            </div>
-                        </InlineEdit>
-                    </div> :
-                    <div>
-                        <InlineEdit
-                            ref={this.inlineEdit}
-                            disabled={true}
-                            target={this.props.asset.name}
-                            targetType="asset"
-                            className="char"
-                            onChange={this.renameAsset}
-                            onDoubleClick={this.editAsset}>
+            this.props.asset.location)}?version=${this.props.asset.version}`
+        return <ContextMenuTrigger
+            id="contextmenu-asset"
+            holdToDisplay={-1}
+            collect={() => ({ asset: this.props.id, inlineEdit: this.inlineEdit, disabled })}>
+            <DragPreviewImage src={thumbnail} connect={this.props.connectDragPreview} />
+            {this.props.connectDragSource(this.props.small ?
+                <div>
+                    <InlineEdit
+                        ref={this.inlineEdit}
+                        disabled={disabled}
+                        target={this.props.asset.name}
+                        targetType="asset"
+                        className="line-item smallThumbnail-wrapper"
+                        onChange={this.renameAsset}
+                        onDoubleClick={this.editAsset}>
+                        <div className="smallThumbnail-img" style={{width: '20px', height: '20px'}}>
                             <img
                                 alt={this.props.asset.name}
-                                src={thumbnail} />
-                        </InlineEdit>
-                    </div>
-                )}
-            </ContextMenuTrigger>
-        </div>
+                                src={thumbnail}/>
+                        </div>
+                    </InlineEdit>
+                </div> :
+                <div>
+                    <InlineEdit
+                        ref={this.inlineEdit}
+                        disabled={disabled}
+                        target={this.props.asset.name}
+                        targetType="asset"
+                        className="char"
+                        onChange={this.renameAsset}
+                        onDoubleClick={this.editAsset}>
+                        <img
+                            alt={this.props.asset.name}
+                            src={thumbnail} />
+                    </InlineEdit>
+                </div>
+            )}
+        </ContextMenuTrigger>
     }
 }
 
@@ -100,7 +96,8 @@ const assetSource = {
 
 function collect(connect) {
     return {
-        connectDragSource: connect.dragSource()
+        connectDragSource: connect.dragSource(),
+        connectDragPreview: connect.dragPreview()
     }
 }
 

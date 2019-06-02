@@ -31,9 +31,11 @@ function createWindow() {
         webPreferences: {
             // Used to use images stored on person's computer
             // if you can find a way to do that without this option, do it!
-            webSecurity: false
+            webSecurity: false,
+            nodeIntegration: true
         }
     })
+    mainWindow.openDevTools()
 
     mainWindowState.manage(mainWindow)
 
@@ -54,7 +56,12 @@ function createWindow() {
     })
 
     // Create background window
-    backgroundWindow = new BrowserWindow({ show: false })
+    backgroundWindow = new BrowserWindow({
+        show: false,
+        webPreferences: {
+            nodeIntegration: true
+        }
+    })
     backgroundWindow.openDevTools()
     backgroundWindow.loadURL(url.format({
         pathname: path.join(__dirname, 'background', 'index.html'),

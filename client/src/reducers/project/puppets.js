@@ -5,7 +5,7 @@ const path = window.require('path')
 const fs = window.require('fs-extra')
 const util = require('./../util')
 
-const remote = window.require('electron').remote
+const { remote, ipcRenderer } = window.require('electron')
 const settingsManager = remote.require('./main-process/settings')
 
 function changePuppet(state, action) {
@@ -50,6 +50,9 @@ function duplicatePuppet(state, action) {
     })
     const numCharacters = state.numCharacters + 1
     const settings = util.updateObject(state.settings, { characters: characterSettings })
+
+    ipcRenderer.send('background', 'generate thumbnails', `${thumbnail.slice(8).split('/').slice(0, -1).join('/')}/new-${id}`,
+        character, 'puppet', character.id)
     
     return util.updateObject(state, { characters, characterThumbnails, numCharacters, settings })
 }

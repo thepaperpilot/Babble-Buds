@@ -5,6 +5,8 @@ const {Sprite, Graphics} = window.PIXI
 
 const TYPE = 'Selector'
 
+let prevGraphics
+
 function getIcon (instance, image) {
     const icon = new Sprite.fromImage(path.join('icons', image))
     icon.anchor.set(.5, .5)
@@ -261,12 +263,23 @@ function drawGraphics(instance, props) {
     }
 }
 
-const behavior = {
+export const behavior = {
     customDisplayObject: () => new Graphics(),
     customApplyProps: (instance, oldProps, newProps) => {
         drawGraphics(instance, newProps)
     },
     customDidAttach: instance => {
+        // When moving a selected layer into another layer the old selector would stay there
+        // without being removed, and also would never be re-drawn
+        // We'll add this to clean those up whenever that happens
+        requestAnimationFrame(() => {
+            if (prevGraphics && prevGraphics.parent) {
+                behavior.customWillDetach(prevGraphics)
+                prevGraphics.parent.removeChild(prevGraphics)
+            }
+            prevGraphics = instance
+        })        
+
         instance.rotate = getIcon(instance, 'rotate.png')
             .on('mousemove', onRotate(instance, instance.props.dispatch))
             .on('touchmove', onRotate(instance, instance.props.dispatch))
@@ -293,32 +306,7 @@ const behavior = {
             g.layer = instance.parent
             return g
         })
-
-        let root = instance
-        while (root.parent && root.parent.parent)
-            root = root.parent
-
-        // root should be the viewport
-        // instance.layer will be used for calculating bounds
-        instance.layer = instance.parent
-        //instance.setParent(root)
-        instance.setParent(instance.parent.parent)
-
-        drawGraphics(instance, instance.props, instance.props)
-
-        // Setup input listeners for panning
-        instance.mousemove = onMove(instance)
-        root.on('mousedown', instance.mousedown = e => {
-            const {x, y} = e.data.global
-            const layer = instance.layer
-            const target = e.currentTarget
-            target.startMouse = {x, y}
-            target.startPosition = {x: layer.layer.x || 0, y: layer.layer.y || 0}
-            root.on('mousemove', instance.mousemove)
-        })
-        root.on('mouseup', instance.mouseup = () => {
-            root.off('mousemove', instance.mousemove)
-        })
+        behavior.setupSelector(instance)
     },
     customWillDetach: instance => {
         let root = instance
@@ -328,6 +316,38 @@ const behavior = {
         root.off('mousemove', instance.mousemove)
         root.off('mouseup', instance.mouseup)
         root.off('mousedown', instance.mousedown)
+    },
+    setupSelector: instance => {
+        if (instance.parent.parent) {
+            let root = instance
+            while (root.parent && root.parent.parent)
+                root = root.parent
+
+            // root should be the viewport
+            // instance.layer will be used for calculating bounds
+            instance.layer = instance.parent
+            //instance.setParent(root)
+
+            instance.setParent(instance.parent.parent)
+
+            drawGraphics(instance, instance.props, instance.props)
+
+            // Setup input listeners for panning
+            instance.mousemove = onMove(instance)
+            root.on('mousedown', instance.mousedown = e => {
+                const {x, y} = e.data.global
+                const layer = instance.layer
+                const target = e.currentTarget
+                target.startMouse = {x, y}
+                target.startPosition = {x: layer.layer.x || 0, y: layer.layer.y || 0}
+                root.on('mousemove', instance.mousemove)
+            })
+            root.on('mouseup', instance.mouseup = () => {
+                root.off('mousemove', instance.mousemove)
+            })
+        } else {
+            requestAnimationFrame(() => behavior.setupSelector(instance))
+        }
     }
 }
 

@@ -2,6 +2,7 @@ import React, {Component} from 'react'
 import { connect } from 'react-redux'
 import { ActionCreators as UndoActionCreators } from 'redux-undo'
 import Panels from './../panels/Panels'
+import AssetUpdater from './AssetUpdater'
 import Clipboard from './Clipboard'
 import BabbleToggle from './BabbleToggle'
 import BackgroundInterface from './BackgroundInterface'
@@ -15,6 +16,8 @@ class Project extends Component {
         this.state = {
             jiggleListeners: []
         }
+
+        this.assetUpdater = React.createRef()
 
         this.keyDown = this.keyDown.bind(this)
         this.keyUp = this.keyUp.bind(this)
@@ -167,9 +170,11 @@ class Project extends Component {
 
     render() {
         // I still need to pass down a jiggle listener, because redux doesn't have an event/messaging system for this kind of thing
+        // The asset updater needs to be updated before any Stage panels, so we put it above the panels component
         return (
             <div>
-                <Panels addJiggleListener={this.addJiggleListener} removeJiggleListener={this.removeJiggleListener} />
+                <AssetUpdater ref={this.assetUpdater} />
+                <Panels addJiggleListener={this.addJiggleListener} removeJiggleListener={this.removeJiggleListener} assetUpdater={this.assetUpdater.current} />
                 <Clipboard/>
                 <BabbleToggle />
                 <BackgroundInterface />

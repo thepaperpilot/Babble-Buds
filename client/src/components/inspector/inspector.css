@@ -38,3 +38,7 @@
     padding-left: 8px;
     padding-right: 8px;
 }
+
+.inspector .foldable.warning h4 {
+    color: red;
+}

@@ -38,7 +38,7 @@ class Dropdown extends Component {
                         ⚙
                     </button>}
                     <div className="dropdown-content">
-                        <AnimateHeight duration={0} height={this.state.folded ? '0' : 'auto'}>
+                        <AnimateHeight duration={0} height={this.state.folded ? '0%' : 'auto'}>
                             <ul>
                                 {this.props.items.map((item, index) => (
                                     <li key={index} onClick={item.onClick}>{item.label}</li>

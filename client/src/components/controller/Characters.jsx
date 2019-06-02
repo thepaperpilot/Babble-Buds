@@ -1,9 +1,11 @@
 import React, {Component} from 'react'
 import Character from './Character'
+import CharacterContextMenu from './CharacterContextMenu'
 
 class Characters extends Component {
     render() {
-        return (
+        return <React.Fragment>
+            <CharacterContextMenu />
             <div className="flex-column">
                 {[0,1,2].map(n => (
                     <div key={n} className="flex-row">
@@ -11,7 +13,7 @@ class Characters extends Component {
                     </div>
                 ))}
             </div>
-        )
+        </React.Fragment>
     }
 }
 

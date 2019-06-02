@@ -35,6 +35,16 @@ function saveEditor(state) {
         project = util.updateObject(project, { characters })
         break
     }
+    case 'asset': {
+        const assets = util.updateObject(state.project.assets, {
+            [editor.id]: editor.character
+        })
+        const thumbnailsPath = path.join(state.project.project, state.project.settings.assetsPath, editor.character.location.slice(0, -4))
+        ipcRenderer.send('background', 'generate thumbnails', thumbnailsPath,
+            editor.character, 'asset', editor.id)
+        project = util.updateObject(project, { assets })
+        break
+    }
     }
     
     return util.updateObject(state, {

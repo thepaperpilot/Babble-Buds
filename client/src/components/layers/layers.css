@@ -30,6 +30,7 @@
 
 .m-draggable {
     position: absolute;
+    z-index: 100000;
 }
 
 .caret-right, .caret-down {
@@ -87,6 +88,10 @@
     background-color: inherit;
 }
 
+.layer.warning div:first-child {
+    color: red;
+}
+
 .emote-layer:after {
     position: absolute;
     content: '😶';
@@ -94,6 +99,16 @@
     top: 0;
     bottom: 0;
     padding: 10px;
+}
+
+.asset-bundle::after {
+    position: absolute;
+    content: '⸫';
+    right: 25px;
+    top: 0;
+    bottom: 0;
+    padding: 10px;
+    font-weight: bolder;
 }
 
 .emote-layer:not(.visible):after {

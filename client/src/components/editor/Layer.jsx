@@ -1,12 +1,25 @@
 import React, {Component} from 'react'
 import { connect } from 'react-redux'
 import { Sprite, Container } from 'react-pixi-fiber'
-import Selector from './Selector'
+import Selector, { behavior } from './Selector'
 
 const path = require('path')
 const TextureCache = window.PIXI.utils.TextureCache
 
 class RawLayer extends Component {
+    constructor(props) {
+        super(props)
+
+        this.selector = React.createRef()
+    }
+
+    componentWillUnmount() {
+        // This is necessary because removing a layer with a selector on it
+        // won't call the customWillDetach function on the Selector for some reason
+        if (this.selector.current)
+            behavior.customWillDetach(this.selector.current)
+    }
+
     render() {
         const {
             layer,
@@ -27,10 +40,20 @@ class RawLayer extends Component {
 
         let element
         if (layer.id) {
-            switch (layer.type) {
-            case 'bundle': return <Container scale={[layer.scaleX || 1, layer.scaleY || 1]}>
-                {(assets[layer.id].children || []).map((l, i) =>
-                    <Layer key={i} layer={l} scale={scale} highlight={isHighlighted ? l.path : highlight} />)}
+            switch (assets[layer.id].type) {
+            case 'bundle': return <Container
+                alpha={layer.emote != null && (emote == null || layer.emote !== emote) ? 0 : 1}
+                layer={layer}
+                x={layer.x || 0}
+                y={layer.y || 0}
+                rotation={layer.rotation || 0}
+                {...props} >
+                <Container scale={[layer.scaleX || 1, layer.scaleY || 1]}>
+                    {assets[layer.id].layers.children.map((l, i) =>
+                        <Layer key={i} layer={l} scale={scale} highlight={isHighlighted ? l.path : highlight} />)}
+                </Container>
+                {selected && selectedJSON === pathJSON &&
+                    <Selector ref={this.selector} scale={scale} layer={layer} dispatch={this.props.dispatch} />}
             </Container>
             default: element = <Sprite
                 anchor={[.5,.5]}
@@ -53,9 +76,8 @@ class RawLayer extends Component {
             {...props} >
             {element}
             {selected && selectedJSON === pathJSON &&
-                <Selector scale={scale} layer={layer} dispatch={this.props.dispatch} />}
+                <Selector ref={this.selector} scale={scale} layer={layer} dispatch={this.props.dispatch} />}
         </Container>
-        
     }
 }
 

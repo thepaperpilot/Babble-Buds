@@ -15,9 +15,9 @@ class AssetContextMenu extends Component {
         this.deleteAsset = this.deleteAsset.bind(this)
     }
 
-    newAssetTab(id) {
+    newAssetTab() {
         let name = 'New Asset Folder', i = 2
-        while (this.state.tabs.includes(name))
+        while (this.props.tabs.includes(name))
             name = `New Asset Folder (${i})`
 
         this.toFocus = name

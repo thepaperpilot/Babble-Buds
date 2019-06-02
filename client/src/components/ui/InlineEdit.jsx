@@ -97,7 +97,7 @@ class InlineEdit extends Component {
                     onKeyPress={e => { if (e.key === 'Enter') this.onBlur() }}
                     onClick={this.onInputClick}
                     ref={this.input} /> :
-                <div
+                <div className="inner-line-item"
                     style={style}>
                     {label || target}
                 </div>

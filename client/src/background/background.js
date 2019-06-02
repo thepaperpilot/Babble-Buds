@@ -1,7 +1,7 @@
-const { ipcRenderer } = require('electron')
-const { Stage } = require('babble.js')
-const fs = require('fs-extra')
-const path = require('path')
+const { ipcRenderer } = window.require('electron')
+const { Stage } = window.require('babble.js')
+const fs = window.require('fs-extra')
+const path = window.require('path')
 
 const { GIF } = window.require('gif-engine-js')
 
@@ -34,6 +34,16 @@ async function addAssets(assets, statusId, callback) {
         sendMessage()
 }
 
+const handleLayer = visible => layer => {
+    layer.visible = visible
+    layer.children.forEach(handleLayer(visible))
+}
+const bubbleVisibility = layer => {
+    if (!layer.parent) return
+    layer.parent.visible = layer.visible
+    bubbleVisibility(layer.parent)
+}
+
 ipcRenderer.on('update assets', (e, assets, assetsPath) => {
     stage.assets = assets
     stage.assetsPath = assetsPath
@@ -48,13 +58,18 @@ ipcRenderer.on('generate thumbnails', (e, thumbnailsPath, character, type, id) =
     character.emote = 0
     const puppet = stage.addPuppet(character)
 
+    // If its an asset bundle, ignore emotes
+    if (type === 'asset') {
+        handleLayer(true)(puppet.container)
+    }
+
     // Take puppet screenshot
     let empty = document.createElement('canvas')
     // We need to access width and height so that bounds gets set, even though we won't need them
     const {width, height, _bounds} = stage.stage
     
     //ipcRenderer.send('change background visibility', true)
-    
+
     stage.renderer.resize(_bounds.maxX, _bounds.maxY)
     empty.width = _bounds.maxX
     empty.height = _bounds.maxY
@@ -62,34 +77,28 @@ ipcRenderer.on('generate thumbnails', (e, thumbnailsPath, character, type, id) =
     const data = stage.renderer.view.toDataURL() === empty.toDataURL() ? null : stage.getThumbnail()
 
     // Write thumbnail to files
-    fs.ensureDirSync(thumbnailsPath)
     if (data)
         fs.writeFileSync(`${thumbnailsPath}.png`, new Buffer(data, 'base64'))
-        
-    // Generate emote screenshots
-    // Make only the heads visible
-    // (yeah, I realize I don't really have a good way of doing that)
-    const handleLayer = visible => layer => {
-        layer.visible = visible
-        layer.children.forEach(handleLayer(visible))
-    }
-    const bubbleVisibility = layer => {
-        if (!layer.parent) return
-        layer.parent.visible = layer.visible
-        bubbleVisibility(layer.parent)
-    }
-    handleLayer(false)(puppet.container)
-    puppet.head.forEach(handleLayer(true))
-    puppet.head.forEach(bubbleVisibility)
 
-    // Make a thumbnail for each emote
-    Object.keys(puppet.emotes).forEach(emote => {
-        puppet.changeEmote(emote)
-        stage.renderer.render(stage.stage)
-        const data = stage.renderer.view.toDataURL() === empty.toDataURL() ? null : stage.getThumbnail()
-        if (data)
-            fs.writeFileSync(path.join(thumbnailsPath, `${emote}.png`), new Buffer(data, 'base64'))
-    })
+    if (type !== 'asset') {
+        // Generate emote screenshots
+        fs.ensureDirSync(thumbnailsPath)
+
+        // Make only the heads visible
+        // (yeah, I realize I don't really have a good way of doing that)
+        handleLayer(false)(puppet.container)
+        puppet.head.forEach(handleLayer(true))
+        puppet.head.forEach(bubbleVisibility)
+
+        // Make a thumbnail for each emote
+        Object.keys(puppet.emotes).forEach(emote => {
+            puppet.changeEmote(emote)
+            stage.renderer.render(stage.stage)
+            const data = stage.renderer.view.toDataURL() === empty.toDataURL() ? null : stage.getThumbnail()
+            if (data)
+                fs.writeFileSync(path.join(thumbnailsPath, `${emote}.png`), new Buffer(data, 'base64'))
+        })
+    }
 
     // Send info back
     ipcRenderer.send('foreground', 'update thumbnails', type, id, thumbnailsPath)

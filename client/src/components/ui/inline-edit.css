@@ -14,6 +14,12 @@
     width: calc(100% - 24px);
 }
 
+.small .inner-line-item {
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .disabled {
     color: #888;
 }

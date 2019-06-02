@@ -90,7 +90,7 @@ function addAssets(state, action) {
 function newAssetBundle(state, action) {
     const {id, name, tab, layers, creator} = action
     const thumbnailPath = path.join(state.project, state.settings.assetsPath,
-        creator, `${id}`)
+        creator, `${id.split(':')[1]}`)
     ipcRenderer.send('background', 'generate thumbnails', thumbnailPath,
         { layers }, 'asset', id)
 
@@ -99,17 +99,18 @@ function newAssetBundle(state, action) {
             name,
             tab,
             layers,
-            location: `${creator}/${id}.png`,
+            location: `${creator}/${id.split(':')[1]}.png`,
             panning: [],
             type: 'bundle',
-            version: 1
+            version: 0
         }
     } })
 }
 
 function updateThumbnails(state, action) {
     const asset = util.updateObject(state.assets[action.id], {
-        location: `${action.thumbnailsPath.split('/').slice(-2).join('/')}.png`
+        location: `${action.thumbnailsPath.split('/').slice(-2).join('/')}.png`,
+        version: state.assets[action.id].version + 1
     })
 
     const assets = util.updateObject(state.assets, {

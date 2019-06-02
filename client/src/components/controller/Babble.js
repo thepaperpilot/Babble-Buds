@@ -1,7 +1,7 @@
 import React, {Component} from 'react'
 import { connect } from 'react-redux'
 
-class Emotes extends Component {
+class Babble extends Component {
     constructor(props) {
         super(props)
 
@@ -36,4 +36,4 @@ function mapStateToProps(state) {
     }
 }
 
-export default connect(mapStateToProps)(Emotes)
+export default connect(mapStateToProps)(Babble)

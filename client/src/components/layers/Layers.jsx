@@ -1,9 +1,10 @@
 import React, {Component} from 'react'
 import { connect } from 'react-redux'
 import Scrollbar from 'react-custom-scroll'
-import Tree from '@robertlong/react-ui-tree'
+import Tree from 'react-ui-tree'
 import { ActionCreators as UndoActionCreators } from 'redux-undo'
 import Layer from './Layer'
+import LayerContextMenu from './LayerContextMenu'
 import './layers.css'
 
 class Layers extends Component {
@@ -11,13 +12,16 @@ class Layers extends Component {
         super(props)
 
         this.state = {
-            tabs: this.calculateTabs(props)
+            tabs: this.calculateTabs(props),
+            emotes: this.calculateEmotes(props)
         }
 
         this.handleChange = this.handleChange.bind(this)
         this.addLayer = this.addLayer.bind(this)
+        this.canBecomeParent = this.canBecomeParent.bind(this)
         this.renderNode = this.renderNode.bind(this)
         this.calculateTabs = this.calculateTabs.bind(this)
+        this.calculateEmotes = this.calculateEmotes.bind(this)
     }
 
     componentWillReceiveProps(props) {
@@ -25,20 +29,27 @@ class Layers extends Component {
             this.setState({
                 tabs: this.calculateTabs(props)
             })
+        
+        const emotes = this.calculateEmotes(props)
+        if (emotes !== this.state.emotes)
+            this.setState({ emotes })
     }
 
     handleChange(tree) {
+        // The callback is used to allow us to trigger another action after this one completes
+        // Specifically, we want to take the newly calculated path SET_LAYERS generates for
+        // the currently selected layer, and select it
         this.props.dispatch({
             type: 'SET_LAYERS',
-            tree
+            tree,
+            callback: path => {
+                if (this.props.targetType === 'layer' && path)
+                    this.props.dispatch({
+                        type: 'SELECT_LAYER',
+                        path
+                    })
+            }
         })
-        this.props.dispatch(UndoActionCreators.clearHistory())
-        if (this.props.targetType === 'layer')
-            this.props.dispatch({
-                type: 'INSPECT',
-                targetType: 'layer',
-                target: this.props.selected
-            })
     }
 
     addLayer() {
@@ -49,17 +60,59 @@ class Layers extends Component {
     }
 
     renderNode(node) {
-        return <Layer {...node} nodeEmote={node.emote} tabs={this.state.tabs} />
+        return <Layer {...node} nodeEmote={node.emote} tabs={this.state.tabs} emotes={this.state.emotes} />
     }
 
+    canBecomeParent(parent, child) {
+        const { emote, head, emoteLayer } = child
+        const inh = Object.assign({}, parent.inherit)
 
+        if (parent.emote != null) inh.emote = parent.emote
+        if (parent.head != null) inh.head = parent.head
+        if (parent.emoteLayer != null) inh.emoteLayer = parent.emoteLayer
+
+        /*
+        console.log(parent, inh, emote, head, emoteLayer)
+        console.log(!(
+            (inh.emote != null && emote != null) ||
+            (inh.head != null && head != null) ||
+            (inh.emoteLayer != null && emoteLayer != null)
+        ))
+        */
+
+        if (inh.emote != null && emote != null)
+            return false
+        if (inh.head != null && head != null)
+            return false
+        if (inh.emoteLayer != null && emoteLayer != null)
+            return false
+
+        return true
+    }
 
     calculateTabs(props) {
         return Object.values(props.assets).reduce((acc, curr) =>
             acc.includes(curr.tab) ? acc : acc.concat(curr.tab), [])
     }
 
+    calculateEmotes(props) {
+        const emotes = {}
+        const reducer = layer => {
+            if (layer.emote != null && !(layer.emote in emotes))
+                emotes[layer.emote] = layer
+            if (layer.children)
+                layer.children.forEach(reducer)
+            else if (props.assets[layer.id].type === 'bundle')
+                props.assets[layer.id].layers.children.forEach(reducer)
+        }
+        if (props.tree.children)
+            props.tree.children.forEach(reducer)
+        return emotes
+    }
+
     render() {
+        // We don't want the ui tree modifying the tree object stored in redux because then it won't re-render everything properly
+        // So we have to clone it using JSON parse and stringify
         return (
             <div className="panel console">
                 <div className="bar flex-row">
@@ -68,10 +121,12 @@ class Layers extends Component {
                 </div>
                 <Scrollbar allowOuterScroll={true} heightRelativeToParent="100%">
                     <Tree
-                        tree={this.props.tree}
+                        tree={JSON.parse(JSON.stringify(this.props.tree))}
                         onChange={this.handleChange}
-                        renderNode={this.renderNode} />
+                        renderNode={this.renderNode}
+                        canBecomeParent={this.canBecomeParent} />
                 </Scrollbar>
+                <LayerContextMenu />
             </div>
         )
     }
@@ -81,7 +136,7 @@ function mapStateToProps(state) {
     return {
         targetType: state.inspector.targetType,
         tree: state.editor.present.character ? state.editor.present.character.layers : {},
-        selected: state.editor.layer,
+        selected: state.editor.present.layer,
         assets: state.project.assets
     }
 }

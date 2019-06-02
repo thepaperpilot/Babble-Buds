@@ -47,6 +47,7 @@ class Panels extends Component {
                 ref={this.props.stage}
                 addJiggleListener={this.props.addJiggleListener}
                 removeJiggleListener={this.props.removeJiggleListener}
+                assetUpdater={this.props.assetUpdater}
                 rect={node._rect} />
         case 'inspector':
             return <Inspector/>

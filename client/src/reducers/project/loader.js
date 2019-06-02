@@ -69,14 +69,18 @@ export function loadCharacters(settings, charactersPath) {
         if ('body' in character) {
             converted = true
             const layer = character.layers = { children: [] }
-            layers.forEach(l => layer.children.push({
-                name: l,
-                head: l === 'hat' || l === 'head',
-                children: character[l].map(e => {
-                    e.leaf = 'true'
-                    return e
-                })
-            }))
+            layers.forEach(l => {
+                const child = {
+                    name: l,
+                    children: character[l].map(e => {
+                        e.leaf = 'true'
+                        return e
+                    })
+                }
+                if (l === 'hat' || l === 'head')
+                    child.head = true
+                layer.children.push(child)
+            })
             const emotes = []
             character.emotes.forEach((e, i) => {
                 if (!e.enabled) return

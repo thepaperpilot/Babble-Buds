@@ -40,6 +40,10 @@
     margin-bottom: 4px;
 }
 
+.list-item .char.disabled div:not(.selected) {
+    color: rgba(255, 255, 255, .5);
+}
+
 .list-item img {
     flex-basis: 100%;
     height: 0;

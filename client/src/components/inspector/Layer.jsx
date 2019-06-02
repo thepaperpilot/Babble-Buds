@@ -18,6 +18,7 @@ class Layer extends Component {
         this.changePosition = this.changePosition.bind(this)
         this.changeScale = this.changeScale.bind(this)
         this.changeLayer = this.changeLayer.bind(this)
+        this.changeEmote = this.changeEmote.bind(this)
         this.changeEmoteLayer = this.changeEmoteLayer.bind(this)
         this.deleteLayer = this.deleteLayer.bind(this)
     }
@@ -35,6 +36,14 @@ class Layer extends Component {
             type: 'EDIT_LAYER_SCALE',
             layer: this.props.target,
             scale
+        })
+    }
+
+    changeEmote(emote) {
+        this.props.dispatch({
+            type: 'EDIT_LAYER_EMOTE',
+            layer: this.props.target,
+            emote
         })
     }
 
@@ -63,7 +72,7 @@ class Layer extends Component {
     deleteLayer() {
         this.props.dispatch({
             type: 'DELETE_LAYER',
-            layer: this.props.target
+            path: this.props.target
         })
     }
 
@@ -83,18 +92,51 @@ class Layer extends Component {
         const asset = layer.id ? this.props.assets[layer.id] : null
         const emoteLayer = inherit.emoteLayer || layer.emoteLayer
 
-        const emotes = []
+        const emotes = {}
         const reducer = layer => {
-            if (layer.emote != null)
-                emotes.push(layer.emote)
+            if (layer.emote != null && !(layer.emote in emotes))
+                emotes[layer.emote] = layer
             if (layer.children)
                 layer.children.forEach(reducer)
+            else if (this.props.assets[layer.id].type === 'bundle')
+                this.props.assets[layer.id].layers.children.forEach(reducer)
         }
         this.props.character.layers.children.forEach(reducer)
 
+        const finder = (key, first) => layer => {
+            if (layer[key] != null && !first)
+                return true
+            if (layer.children && layer.children.find(finder(key)))
+                return true
+            if (layer.id && this.props.assets[layer.id].type === 'bundle' && this.props.assets[layer.id].layers.children.find(finder(key)))
+                return true
+            return false
+        }
+
+        let nestedEmoteWarning = 'emote' in inherit && layer.emote != null ?
+            <pre className="error">
+                {`Attempting to place emote '${layer.name}' (${layer.emote}) inside emote '${emotes[inherit.emote].name}' (${inherit.emote})!`}
+            </pre> : null
+        let emoteExistsWarning = layer.emote != null && layer.emote in emotes && emotes[layer.emote] !== layer ?
+            <pre className="error">
+                {`Attempting to create emote '${layer.name}' (${layer.emote}) but emote with same id '${emotes[layer.emote].name}' already exists!`}
+            </pre> : null
+
         const emote = inherit.emote == null ? layer.emote : inherit.emote
         const emoteSlotDisabled = slot => 'emote' in inherit ||
-            (emotes.includes(slot) && slot !== emote)
+            (slot in emotes && slot !== emote) ||
+            finder('emote', true)(layer)
+
+        let nestedHeadWarning = 'head' in inherit && layer.head != null ?
+            <pre className="error">
+                Attempting to make this layer a head layer but it is already inside one.
+            </pre> : null
+        let nestedEmoteLayerWarning = 'emoteLayer' in inherit && layer.emoteLayer != null ?
+            <pre className="error">
+                {`Attempting to make this layer a${layer.emoteLayer === 'mouth' ? ' mouth' : 'n eyes'} layer but it is already inside a${inherit.emoteLayer === 'mouth' ? ' mouth' : 'n eyes'} layer.`}
+            </pre> : null
+
+        const emoteLayerDisabled = ('emoteLayer' in inherit || finder('emoteLayer', true)(layer)) && layer.emoteLayer == null
 
         return (
             <div className="inspector">
@@ -111,7 +153,7 @@ class Layer extends Component {
                             </Foldable>
                         </div>
                         <div className="action">
-                            <Foldable title="Transform">
+                            <Foldable title="Transform" defaultFolded={asset == null} state={asset == null}>
                                 {asset == null && <div className="info">
                                     Be cautious when transforming non-asset layers!
                                 </div>}
@@ -132,40 +174,44 @@ class Layer extends Component {
                             </Foldable>
                         </div>
                         <div className="action">
-                            <Foldable title="Emote">
+                            <Foldable title="Emote" classNames={{ warning: nestedEmoteWarning != null || emoteExistsWarning != null }} defaultFolded={asset != null} state={asset != null}>
                                 {asset != null && inherit.emote == null && layer.emote != null &&
                                     <pre className="info">
                                         It's not recommended to make individual assets emotes
                                     </pre>}
+                                {nestedEmoteWarning}
+                                {emoteExistsWarning}
                                 <Slots
                                     title="Emote"
                                     rows={3}
                                     cols={4}
-                                    value={inherit.emote == null ? layer.emote : inherit.emote}
-                                    onChange={this.changeLayer('emote')}
+                                    value={layer.emote == null ? inherit.emote : layer.emote}
+                                    onChange={this.changeEmote}
                                     disabled={emoteSlotDisabled} />
                             </Foldable>
                         </div>
                         <div className="action">
-                            <Foldable title="Babble">
+                            <Foldable title="Babble" classNames={{ warning: nestedHeadWarning != null || nestedEmoteLayerWarning != null }}>
+                                {nestedHeadWarning}
+                                {nestedEmoteLayerWarning}
                                 <Checkbox
                                     title="Head"
                                     value={layer.head || inherit.head}
                                     onChange={this.changeLayer('head')}
-                                    disabled={'head' in inherit}
+                                    disabled={('head' in inherit || finder('head', true)(layer)) && !layer.head}
                                     help="Toggles whether or not this layer will bobble, if the bobble head option on the puppet is enabled" />
                                 <Checkbox
                                     title="Eyes"
                                     value={emoteLayer === 'eyes'}
                                     onChange={this.changeEmoteLayer('eyes')}
-                                    disabled={'emoteLayer' in inherit}
-                                    help="Toggles whether or not this layer will appear as the puppet's eyes whilst the puppet is babbling" />
+                                    disabled={emoteLayerDisabled}
+                                    help="Toggles whether or not this layer may appear as the puppet's eyes whilst the puppet is babbling" />
                                 <Checkbox
                                     title="Mouth"
                                     value={emoteLayer === 'mouth'}
                                     onChange={this.changeEmoteLayer('mouth')}
-                                    disabled={'emoteLayer' in inherit}
-                                    help="Toggles whether or not this layer will appear as the puppet's mouth whilst the puppet is babbling" />
+                                    disabled={emoteLayerDisabled}
+                                    help="Toggles whether or not this layer may appear as the puppet's mouth whilst the puppet is babbling" />
                             </Foldable>
                         </div>
                     </Scrollbar>

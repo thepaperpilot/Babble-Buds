@@ -5,6 +5,7 @@ import * as JsSearch from 'js-search'
 import List from './../ui/List'
 import DraggablePuppet from './DraggablePuppet'
 import PuppetImporter from './PuppetImporter'
+import PuppetContextMenu from './PuppetContextMenu'
 
 class Puppets extends Component {
     constructor(props) {
@@ -95,7 +96,8 @@ class Puppets extends Component {
                                 puppet={puppet} />
                         ))}
                     </List>
-                }            
+                }
+                <PuppetContextMenu />
             </div>
         )
     }

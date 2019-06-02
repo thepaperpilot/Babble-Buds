@@ -8,14 +8,26 @@ class Stage extends Component {
     constructor(props) {
         super(props)
 
+        this.info = this.info.bind(this)
+        this.warn = this.warn.bind(this)
+        this.log = this.log.bind(this)
+        this.error = this.error.bind(this)
+
+        this.registerPuppetLoader = this.registerPuppetLoader.bind(this)
         this.onResize = this.onResize.bind(this)
         this.loadPuppets = this.loadPuppets.bind(this)
         this.jiggle = this.jiggle.bind(this)
     }
 
     componentDidMount() {
-        this.stage = new babble.Stage('screen', this.props.settings, this.props.assets, this.props.assetsPath, this.loadPuppets, console.log)
+        this.stage = new babble.Stage('screen', this.props.settings, this.props.assets, this.props.assetsPath, null, Object.assign({}, console, {
+            info: this.info,
+            warn: this.warn,
+            log: this.log,
+            error: this.error
+        }))
         this.props.addJiggleListener(this.jiggle)
+        this.registerPuppetLoader()
     }
 
     componentWillUnmount() {
@@ -36,7 +48,7 @@ class Stage extends Component {
             this.props.assetsPath !== newProps.assetsPath) {
             this.stage.assets = newProps.assets
             this.stage.assetsPath = newProps.assetsPath
-            this.stage.reloadAssets()
+            this.stage.reloadPuppets()
         }
 
         // Check for anything that requires this.puppet
@@ -55,6 +67,42 @@ class Stage extends Component {
         if (this.props.babbling !== newProps.babbling) {
             this.puppet.setBabbling(newProps.babbling)
         }
+    }
+
+    info(content) {
+        this.props.dispatch({
+            type: 'INFO',
+            content
+        })
+    }
+
+    warn(content) {
+        this.props.dispatch({
+            type: 'WARN',
+            content
+        })
+    }
+
+    log(content) {
+        this.props.dispatch({
+            type: 'LOG',
+            content
+        })
+    }
+
+    error(error) {
+        this.props.dispatch({
+            type: 'ERROR',
+            content: 'Error occured in babble.js',
+            error
+        })
+    }
+
+    registerPuppetLoader() {
+        if (this.props.assetUpdater)
+            this.props.assetUpdater.getWrappedInstance().addPuppetLoader(this.loadPuppets)
+        else
+            requestAnimationFrame(this.registerPuppetLoader)
     }
 
     onResize() {

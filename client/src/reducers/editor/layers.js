@@ -33,6 +33,7 @@ function selectLayer(state, action) {
 function setLayers(state, action) {
     const {layers, layer} = updatePaths(action.tree, state.layer)
     const character = util.updateObject(state.character, { layers })
+    requestAnimationFrame(() => action.callback(layer))
     return util.updateObject(state, { character, layer })
 }
 
@@ -42,8 +43,12 @@ function editLayer(state, action) {
     action.layer.forEach(index => {
         curr = curr.children[index]
     })
-    curr[action.key] = action.value
-    const character = util.updateObject(state.character, { layers })
+    if ((action.key === 'head' && action.value === false) ||
+        (action.key === 'emoteLayer' && action.value === 'base'))
+        delete curr[action.key]
+    else
+        curr[action.key] = action.value
+    const character = util.updateObject(state.character, { layers: updatePaths(layers).layers })
     return util.updateObject(state, { character })
 }
 
@@ -72,6 +77,17 @@ function editScale(state, action) {
         curr.y = action.pos[1]
     }
     const character = util.updateObject(state.character, { layers })
+    return util.updateObject(state, { character })
+}
+
+function editEmote(state, action) {
+    const layers = JSON.parse(JSON.stringify(state.character.layers))
+    let curr = layers
+    action.layer.forEach(index => {
+        curr = curr.children[index]
+    })
+    curr.emote = action.emote
+    const character = util.updateObject(state.character, { layers: updatePaths(layers).layers })
     return util.updateObject(state, { character })
 }
 
@@ -119,7 +135,7 @@ function addLayer(state, action) {
 
 function wrapLayer(state, action) {
     const layers = JSON.parse(JSON.stringify(state.character.layers))
-    const curr = action.path.slice(0, -1).reduce((layer, index) => curr.children[index], layers)
+    const curr = action.path.slice(0, -1).reduce((layer, index) => layer.children[index], layers)
     const child = curr.children[action.path[action.path.length - 1]]
     const newLayer = Object.assign((({ head, emote, emoteLayer }) =>
         ({ head, emote, emoteLayer }))(child), {
@@ -153,6 +169,7 @@ export default {
     'EDIT_LAYER': editLayer,
     'EDIT_LAYER_POSITION': editPosition,
     'EDIT_LAYER_SCALE': editScale,
+    'EDIT_LAYER_EMOTE': editEmote,
     'DELETE_LAYER': deleteLayer,
     'DELETE_ASSET': deleteAsset,
     'ADD_LAYER': addLayer,

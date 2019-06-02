@@ -18,7 +18,6 @@
 
 .selector {
     position: relative;
-    overflow: hidden;
     border: 3px solid #333c4a;
 }
 
@@ -32,8 +31,10 @@
     background: #333c4a;
 }
 
-.controller-container .react-contextmenu-wrapper {
+.controller-container .react-contextmenu-wrapper,
+.controller-container .emote {
     height: 100%;
+    width: 0;
 }
 
 .selector.canDrop.isOver {

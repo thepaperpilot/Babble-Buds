@@ -186,6 +186,10 @@ textarea:focus {
     margin: auto 2px;
 }
 
+.emote img {
+    overflow: hidden;
+}
+
 .line-item {
     border-bottom: solid 1px grey;
     padding: 4px 8px;
@@ -251,6 +255,7 @@ textarea:focus {
 
 .flex-column > div.flex-row {
     margin: 2px -2px;
+    height: 0;
 }
 
 .flex-row > div {
@@ -269,6 +274,10 @@ textarea:focus {
 .flex-column > .flex-item, .flex-row > .flex-item {
     flex: 0 1 auto;
     color: grey;
+}
+
+.controller-container .flex-row {
+    overflow: hidden;
 }
 
 .bar {

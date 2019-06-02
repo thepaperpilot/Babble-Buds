@@ -1,9 +1,8 @@
 import React, {Component} from 'react'
 import { connect } from 'react-redux'
 import classNames from 'classnames'
-import { ContextMenu, MenuItem, ContextMenuTrigger, SubMenu } from 'react-contextmenu'
-
-import { getNewAssetID } from './../../reducers/project/assets'
+import { ContextMenuTrigger } from 'react-contextmenu'
+import { ActionCreators as UndoActionCreators } from 'redux-undo'
 
 const join = require('path').join
 
@@ -13,8 +12,7 @@ class Layer extends Component {
         super(props)
 
         this.onNodeClick = this.onNodeClick.bind(this)
-        this.editLayer = this.editLayer.bind(this)
-        this.createAsset = this.createAsset.bind(this)
+        this.editBundle = this.editBundle.bind(this)
     }
 
     onNodeClick() {
@@ -24,32 +22,21 @@ class Layer extends Component {
         })
     }
 
-    editLayer(type) {
-        return () => {
+    editBundle() {
+        if (this.props.asset && this.props.asset.type === 'bundle') {
             this.props.dispatch({
-                type,
-                path: this.props.path
+                type: 'EDIT_PUPPET',
+                id: this.props.id,
+                character: this.props.asset,
+                objectType: 'asset'
             })
-        }
-    }
-
-    createAsset(tab) {
-        return () => {
-            this.props.dispatch({
-                type: 'NEW_ASSET_BUNDLE',
-                id: `${this.props.self}:${getNewAssetID()}`,
-                name: this.props.name,
-                path: this.props.path,
-                tab,
-                layers: { children: this.props.children },
-                creator: this.props.self
-            })
+            this.props.dispatch(UndoActionCreators.clearHistory())
         }
     }
 
     render() {
         const {selected, asset, assetsPath} = this.props
-        const {path, id, name, children, nodeEmote, inherit, tabs} = this.props
+        const {path, id, name, children, nodeEmote, emotes, head, emoteLayer, inherit, tabs, self} = this.props
         
         // TODO menu item to "recenter layer", which will only work on a layer with children, and will move the parent layer's position
         // so that its at the center of where all its children are, and offset each child the opposite direction to compensate
@@ -57,41 +44,35 @@ class Layer extends Component {
         const className = ['layer']
         if (JSON.stringify(selected) === JSON.stringify(path))
             className.push('selected')
-        const key = children == null ? id : name
-        const emote = nodeEmote != null && inherit.emote == null ?
+        if ((inherit && 'emote' in inherit && nodeEmote != null) ||
+            (nodeEmote != null && nodeEmote in emotes && JSON.stringify(emotes[nodeEmote].path) !== JSON.stringify(path)) ||
+            (head != null && inherit && inherit.head != null) ||
+            (emoteLayer != null && inherit && inherit.emoteLayer != null))
+            className.push('warning')
+        const emote = nodeEmote != null ?
             <div className={this.props.emote === nodeEmote ?
                 'emote-layer visible' : 'emote-layer'} /> : null
-        return <div>
-            <ContextMenuTrigger id={`contextmenu-layer-${JSON.stringify(path)}`} holdToDisplay={-1}>
-                <div key={key}
-                    className={classNames(className)}
-                    onClick={this.onNodeClick}>
-                    {children == null ?
-                        asset ?
-                            <div>
-                                <img src={join(assetsPath, asset.location)}
-                                    alt={asset.name} />
-                                {name}
-                            </div> : null :
-                        name ? <div>{name}</div> : <div>root</div>}
-                    {emote}
-                </div>
-            </ContextMenuTrigger>
-            <ContextMenu id={`contextmenu-layer-${JSON.stringify(path)}`}>
-                <MenuItem onClick={this.editLayer('DELETE_LAYER')}>Delete Layer</MenuItem>
-                <MenuItem onClick={this.editLayer('WRAP_LAYER')}>Wrap Layer</MenuItem>
-                {id == null && <MenuItem onClick={this.editLayer('ADD_LAYER')}>Add Layer</MenuItem>}
-                {id == null && <SubMenu title="Convert to prefab">
-                    {tabs.map(tab =>
-                        <MenuItem
-                            onClick={this.createAsset(tab)}
-                            key={tab}>
-                            {tab}
-                        </MenuItem>
-                    )}
-                </SubMenu>}
-            </ContextMenu>
-        </div>
+        const bundle = asset && asset.type === 'bundle' ?
+            <div className="asset-bundle" /> : null
+        return <ContextMenuTrigger
+            id="contextmenu-layer"
+            holdToDisplay={-1}
+            collect={() => ({ path, self, name, layerChildren: children, tabs, assetId: id, asset })}>
+            <div className={classNames(className)}
+                onClick={this.onNodeClick}
+                onDoubleClick={this.editBundle}>
+                {children == null ?
+                    asset ?
+                        <div>
+                            <img src={join(assetsPath, `${asset.location}?version=${asset.version}`)}
+                                alt={asset.name} />
+                            {name}
+                        </div> : null :
+                    name ? <div>{name}</div> : <div>root</div>}
+                {emote}
+                {bundle}
+            </div>
+        </ContextMenuTrigger>
     }
 }
 

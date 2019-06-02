@@ -5,6 +5,9 @@ import Header from './Header'
 import Checkbox from './fields/Checkbox'
 import Number from './fields/Number'
 import Dropdown from './../ui/Dropdown'
+import {reducer} from './../controller/Emotes'
+
+const path = window.require('path')
 
 class Puppet extends Component {
     constructor(props) {
@@ -50,17 +53,27 @@ class Puppet extends Component {
 
     selectEmote(emote) {
         return () => {
-            this.props.dispatch({
-                type: 'SET_EDITOR_EMOTE',
-                emote
-            })
+            if (this.props.isBeingEdited) {
+                this.props.dispatch({
+                    type: 'SET_EDITOR_EMOTE',
+                    emote
+                })
+            } else {
+                const puppet = this.props.puppets[this.props.target]
+                this.props.dispatch({
+                    type: 'EDIT_PUPPET',
+                    id: this.props.target,
+                    character: puppet,
+                    emote
+                })
+            }
         }
     }
 
     render() {
         // TODO target is either the id of a puppet of ours, or an owner id for a puppet being controlled by a connected client
         const puppet = this.props.puppets[this.props.target]
-        const thumbnails = this.props.puppetThumbnails[this.props.target].slice(0, -4)
+        const thumbnails = this.props.puppetThumbnails[this.props.target]
         const disabled = puppet.creator !== this.props.self
 
         const dropdownItems = [
@@ -74,17 +87,7 @@ class Puppet extends Component {
             })
         }
 
-        const reducer = (acc, curr) => {
-            if (curr.emote != null) {
-                return acc.concat({
-                    emote: curr.emote,
-                    name: curr.name
-                })
-            } else if (curr.children) {
-                return curr.children.reduce(reducer, acc)
-            } else return acc
-        }
-        const emotes = puppet.layers.children.reduce(reducer, [])
+        const emotes = puppet.layers.children.reduce(reducer(this.props.assets), [])
 
         return (
             <div className="inspector">
@@ -115,6 +118,9 @@ class Puppet extends Component {
                         </div>
                         <div className="list">
                             {emotes.map(emote => {
+                                const lastIndex = thumbnails.lastIndexOf('.png')
+                                const imageSource = path.join(thumbnails.slice(0, lastIndex),
+                                    `${emote.emote}.png${thumbnails.slice(lastIndex + 4)}`)
                                 return (
                                     <div
                                         className="list-item"
@@ -122,7 +128,7 @@ class Puppet extends Component {
                                         onClick={this.selectEmote(emote.emote)}
                                         key={emote.name} >
                                         <div className={emote.emote === this.props.emote ? "char selected" : "char"} key={emote.name}>
-                                            <img alt={emote.name} src={`${thumbnails}/${emote.emote}.png`}/>
+                                            <img alt={emote.name} src={imageSource}/>
                                             <div className="desc">{emote.name}</div>
                                         </div>
                                     </div>
@@ -137,13 +143,16 @@ class Puppet extends Component {
 }
 
 function mapStateToProps(state, props) {
+    const isBeingEdited = props.target == state.editor.present.id
     return {
         puppets: state.project.characters,
         puppetThumbnails: state.project.characterThumbnails,
         self: state.self,
         nick: state.project.settings.nickname,
         id: state.project.settings.actor.id,
-        emote: props.target == state.editor.present.id ? state.editor.present.emote : null
+        isBeingEdited,
+        assets: state.project.assets,
+        emote: isBeingEdited ? state.editor.present.emote : null
     }
 }
 
