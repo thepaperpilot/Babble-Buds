@@ -71,15 +71,6 @@ class Layers extends Component {
         if (parent.head != null) inh.head = parent.head
         if (parent.emoteLayer != null) inh.emoteLayer = parent.emoteLayer
 
-        /*
-        console.log(parent, inh, emote, head, emoteLayer)
-        console.log(!(
-            (inh.emote != null && emote != null) ||
-            (inh.head != null && head != null) ||
-            (inh.emoteLayer != null && emoteLayer != null)
-        ))
-        */
-
         if (inh.emote != null && emote != null)
             return false
         if (inh.head != null && head != null)

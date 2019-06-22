@@ -35,7 +35,7 @@ class Layer extends Component {
     }
 
     render() {
-        const {selected, asset, assetsPath} = this.props
+        const {selected, asset, assetsPath, characterId} = this.props
         const {path, id, name, children, nodeEmote, emotes, head, emoteLayer, inherit, tabs, self} = this.props
         
         // TODO menu item to "recenter layer", which will only work on a layer with children, and will move the parent layer's position
@@ -47,7 +47,8 @@ class Layer extends Component {
         if ((inherit && 'emote' in inherit && nodeEmote != null) ||
             (nodeEmote != null && nodeEmote in emotes && JSON.stringify(emotes[nodeEmote].path) !== JSON.stringify(path)) ||
             (head != null && inherit && inherit.head != null) ||
-            (emoteLayer != null && inherit && inherit.emoteLayer != null))
+            (emoteLayer != null && inherit && inherit.emoteLayer != null) ||
+            (asset && asset.type === 'bundle' && id === characterId))
             className.push('warning')
         const emote = nodeEmote != null ?
             <div className={this.props.emote === nodeEmote ?
@@ -78,6 +79,7 @@ class Layer extends Component {
 
 function mapStateToProps(state, props) {
     return {
+        characterId: state.editor.present.id,
         selected: state.editor.present.layer,
         asset: state.project.assets[props.id],
         emote: state.editor.present.emote,
