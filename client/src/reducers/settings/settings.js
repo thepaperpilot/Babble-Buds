@@ -10,11 +10,7 @@ export const DEFAULTS = {
 function updateLayout(state, action) {
     settings.setLayout(action.layout)
     settings.save()
-    // We do NOT update state here because updateLayout is called when the user changes
-    // the layout, so we don't need to reload the model, just save it to the user's
-    // settings
-    //return util.updateObject(state, { layout: action.layout })
-    return state
+    return util.updateObject(state, { layout: action.layout })
 }
 
 function loadLayout(state, action) {

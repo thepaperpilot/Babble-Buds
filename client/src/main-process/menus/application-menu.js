@@ -129,6 +129,12 @@ const template = [
                 type: 'separator'
             },
             {
+                label: 'Stage',
+                click (item, focusedWindow) {
+                    focusedWindow.webContents.send('toggle panel', 'stage')
+                }
+            },
+            {
                 type: 'separator'
             },
             {

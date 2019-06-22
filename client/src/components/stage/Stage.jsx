@@ -20,18 +20,19 @@ class Stage extends Component {
     }
 
     componentDidMount() {
-        this.stage = new babble.Stage('screen', this.props.settings, this.props.assets, this.props.assetsPath, null, Object.assign({}, console, {
+        this.stage = new babble.Stage(`screen${this.props.id}`, this.props.settings, this.props.assets, this.props.assetsPath, null, Object.assign({}, console, {
             info: this.info,
             warn: this.warn,
             log: this.log,
             error: this.error
         }))
-        this.props.addJiggleListener(this.jiggle)
         this.registerPuppetLoader()
     }
 
     componentWillUnmount() {
         this.props.removeJiggleListener(this.jiggle)
+        if (this.regPuppetLoader)
+            clearTimeout(this.regPuppetLoader)
     }
 
     componentWillReceiveProps(newProps) {
@@ -99,10 +100,11 @@ class Stage extends Component {
     }
 
     registerPuppetLoader() {
-        if (this.props.assetUpdater)
+        if (this.props.assetUpdater) {
             this.props.assetUpdater.getWrappedInstance().addPuppetLoader(this.loadPuppets)
-        else
-            requestAnimationFrame(this.registerPuppetLoader)
+            this.regPuppetLoader = null
+        } else
+            this.regPuppetLoader = requestAnimationFrame(this.registerPuppetLoader)
     }
 
     onResize() {
@@ -120,6 +122,7 @@ class Stage extends Component {
         })
 
         this.addPuppet(this.props)
+        this.props.addJiggleListener(this.jiggle)
     }
 
     addPuppet(props) {
@@ -139,7 +142,11 @@ class Stage extends Component {
 
     render() {
         return (
-            <div id="screen" style={{width: '100%', height: '100%', backgroundColor: this.props.settings.greenScreenEnabled ? this.props.settings.greenScreen : ''}}>
+            <div id={`screen${this.props.id}`} style={{
+                width: '100%',
+                height: '100%',
+                backgroundColor: this.props.settings.greenScreenEnabled ? this.props.settings.greenScreen : ''}
+            }>
                 <ReactResizeDetector handleWidth handleHeight onResize={this.onResize} />
             </div>
         )

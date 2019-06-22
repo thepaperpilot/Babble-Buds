@@ -28,7 +28,6 @@ class Panels extends Component {
         }
 
         this.updateConfig = this.updateConfig.bind(this)
-        this.onAction = this.onAction.bind(this)
         this.onModelChange = this.onModelChange.bind(this)
         this.loadLayout = this.loadLayout.bind(this)
         this.togglePanel = this.togglePanel.bind(this)
@@ -42,13 +41,13 @@ class Panels extends Component {
         case 'text':
             return <div className="panel">{node.getName()}</div>
         case 'stage':
-            this.stage = node._parent.getId()
             return <Stage
                 ref={this.props.stage}
                 addJiggleListener={this.props.addJiggleListener}
                 removeJiggleListener={this.props.removeJiggleListener}
                 assetUpdater={this.props.assetUpdater}
-                rect={node._rect} />
+                rect={node._rect}
+                id={node.getId()} />
         case 'inspector':
             return <Inspector/>
         case 'console':
@@ -77,13 +76,6 @@ class Panels extends Component {
                 type: 'UPDATE_LAYOUT',
                 layout: this.state.model.toJson()
             })
-        }
-    }
-
-    onAction(action) {
-        // This is just temporary until we allow the stage to be off-screen
-        if (!(action.type === 'FlexLayout_SetActiveTabset' && action.tabsetNode === this.stage)) {
-            this.state.model.doAction(action)
         }
     }
 
@@ -134,7 +126,12 @@ class Panels extends Component {
                 'grid': 2
             }
         }
-        this.layout.current.addTabToActiveTabSet(tab)
+
+        this.layout.current.addTabWithDragAndDrop(tab.name, tab)
+    }
+
+    shouldComponentUpdate(newProps) {
+        return this.props.layoutUpdate === newProps.layoutUpdate
     }
 
     render() {
@@ -144,7 +141,6 @@ class Panels extends Component {
                     ref={this.layout}
                     model={this.state.model}
                     factory={this.factory.bind(this)}
-                    onAction={this.onAction}
                     onModelChange={this.onModelChange} />
             </div>
         )

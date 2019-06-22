@@ -1,8 +1,7 @@
 {
   "global": {
     "tabEnableRename": false,
-    "splitterSize": 4,
-    "tabSetEnableMaximize": false
+    "splitterSize": 4
   },
   "borders": [],
   "layout": {

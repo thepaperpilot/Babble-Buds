@@ -53,6 +53,9 @@ class Project extends Component {
         electron.ipcRenderer.on('redo', this.redo)
         electron.ipcRenderer.on('import assets', this.importAssets)
         electron.ipcRenderer.on('import puppet', this.importPuppet)
+
+        // rerender now that our AssetUpdater prop will be working
+        this.setState({})
     }
 
     componentWillUnmount() {
