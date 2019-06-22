@@ -3,3 +3,7 @@
     margin-top: 0;
     user-select: none;
 }
+
+.editor.changed {
+    border: solid red;
+}

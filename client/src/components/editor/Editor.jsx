@@ -33,16 +33,18 @@ class Editor extends Component {
         this.changeZoom = this.changeZoom.bind(this)
         this.toggleHighlight = this.toggleHighlight.bind(this)
         this.savePuppet = this.savePuppet.bind(this)
+        this.resetPos = this.resetPos.bind(this)
 
         window.PIXI.SCALE_MODES.DEFAULT = window.PIXI.SCALE_MODES.NEAREST
     }
 
     componentDidMount() {
         this.viewport.current.on('moved', this.updateViewportBounds)
+        this.viewport.current.on('zoomed', this.updateViewportBounds)
     }
 
     componentDidUpdate(prevProps) {
-        if (this.props.bounds !== prevProps.bounds)
+        if (this.props.bounds !== prevProps.bounds || this.props.rect !== prevProps.rect)
             this.updateViewportBounds()
     }
 
@@ -90,9 +92,15 @@ class Editor extends Component {
         this.props.dispatch({ type: 'SAVE_EDITOR' })
     }
 
+    resetPos() {
+        const {rect, changed} = this.props
+        this.viewport.current.moveCenter(0, -(rect.height - 21 - (changed ? 6 : 0)) / 2)
+        this.updateViewportBounds()
+    }
+
     render() {
         // TODO (re-)load assets since babble.js isn't here to do it for us
-        const {rect, character, selected} = this.props
+        const {rect, character, selected, changed} = this.props
         const {scale, grid, bounds} = this.state
 
         const gridLines = []
@@ -121,14 +129,14 @@ class Editor extends Component {
         }
 
         return (
-            <div className="panel editor">
+            <div className={`panel editor${changed ? ' changed' : ''}`}>
                 <div className="bar flex-row">
                     <button onClick={this.savePuppet}>Apply</button>
                     <div className="toggle" style={{ backgroundColor: this.state.highlight ? '#333c4a' : '#242a33'}} onClick={this.toggleHighlight}>
                         Highlight Current Layer
                     </div>
                     <div className="flex-item">Zoom: {Math.round(1 / scale * 100)}%</div>
-                    <div className="flex-item">Pos: {Math.round((bounds.right + bounds.left) / 2)},
+                    <div className="flex-item" onClick={this.resetPos}>Pos: {Math.round((bounds.right + bounds.left) / 2)},
                         {-Math.round((bounds.bottom + bounds.top) / 2)}</div>
                     <input
                         type="range"
@@ -138,11 +146,11 @@ class Editor extends Component {
                         onChange={this.changeZoom} />
                     <div className="flex-grow"></div>
                 </div>
-                <Stage width={rect.width} height={rect.height - 21} options={{
+                <Stage width={rect.width - (changed ? 6 : 0)} height={rect.height - 21 - (changed ? 6 : 0)} options={{
                     transparent: true,
                     antialias: true
                 }} onWheel={this.onScroll} onMouseDown={this.onMouseDown}>
-                    <Viewport width={rect.width} height={rect.height - 21} ref={this.viewport}>
+                    <Viewport width={rect.width - (changed ? 6 : 0)} height={rect.height - 21 - (changed ? 6 : 0)} ref={this.viewport}>
                         {gridLines}
                         <Cross x={0} y={0} scale={scale} color={0x888888} distance={DISTANCE * scale} />
                         <Layer layer={character} x={0} y={0} selectedRef={this.selectedRef} scale={scale} highlight={this.state.highlight ? selected : character.path} />
@@ -154,9 +162,14 @@ class Editor extends Component {
 }
 
 function mapStateToProps(state) {
+    const {character, type, id, layer} = state.editor.present
+    const layers = character ? character.layers : []
+
     return {
-        character: state.editor.present.character ? state.editor.present.character.layers : [],
-        selected: state.editor.present.layer
+        character: layers,
+        changed: id && type &&
+            JSON.stringify(character) !== JSON.stringify(state.project[type === 'asset' ? type : 'characters'][id]),
+        selected: layer
     }
 }
 

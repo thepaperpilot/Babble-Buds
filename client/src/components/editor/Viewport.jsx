@@ -32,11 +32,12 @@ const behavior = {
         v.on('rightup', v.up)
         v.on('rightclick', () => v.plugins.drag.last = false)
 
+        v.moveCenter(0, -props.height / 2)
+
         return v
     },
     customApplyProps: (instance, oldProps, newProps) => {
         instance.resize(newProps.width, newProps.height)
-        instance.moveCenter(0, -newProps.height / 2)
     },
     customDidAttach: instance => {
         instance.scale.set(1, 1)
