@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { DragSource } from 'react-dnd'
-import { ActionCreators as UndoActionCreators } from 'redux-undo'
 import InlineEdit from './../ui/InlineEdit'
 import SmallThumbnail from './../ui/SmallThumbnail'
 import { ContextMenuTrigger } from 'react-contextmenu'
@@ -31,7 +30,6 @@ class DraggablePuppet extends Component {
             id: parseInt(this.props.puppet, 10),
             character: this.props.character
         })
-        this.props.dispatch(UndoActionCreators.clearHistory())
     }
 
     render() {

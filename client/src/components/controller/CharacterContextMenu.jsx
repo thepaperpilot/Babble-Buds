@@ -34,7 +34,6 @@ class CharacterContextMenu extends Component {
             id: this.props.trigger.puppet,
             character: this.props.trigger.character
         })
-        this.props.dispatch(UndoActionCreators.clearHistory())
     }
 
     render() {

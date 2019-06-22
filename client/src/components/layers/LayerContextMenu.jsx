@@ -34,7 +34,6 @@ class LayerContextMenu extends Component {
             character: asset,
             objectType: 'asset'
         })
-        this.props.dispatch(UndoActionCreators.clearHistory())
     }
 
     createAsset(tab) {

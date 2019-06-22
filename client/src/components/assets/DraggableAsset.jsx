@@ -33,7 +33,6 @@ class DraggableAsset extends Component {
                 character: this.props.asset,
                 objectType: 'asset'
             })
-            this.props.dispatch(UndoActionCreators.clearHistory())
         }
     }
 
