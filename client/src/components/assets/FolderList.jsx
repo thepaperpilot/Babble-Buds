@@ -1,6 +1,7 @@
 import React, {PureComponent} from 'react'
 import { connect } from 'react-redux'
 import { DropTarget } from 'react-dnd'
+import Scrollbar from 'react-custom-scroll'
 import Folder from './Folder'
 import './folderlist.css'
 
@@ -55,8 +56,10 @@ const ConnectedFolderTarget = connect()(DropTarget('asset', assetTarget, collect
 
 // The actual component we export is a list of all those folder targets
 export default ({ tabs, jumpToFolder, tabToRow }) => <div className="folder-list">
-    {tabs.map(tab => <ConnectedFolderTarget
-        key={tab} tab={tab}
-        row={tabToRow[tab]}
-        jumpToFolder={jumpToFolder} />)}
+    <Scrollbar allowOuterScroll={true} heightRelativeToParent="100%">
+        {tabs.map(tab => <ConnectedFolderTarget
+            key={tab} tab={tab}
+            row={tabToRow[tab]}
+            jumpToFolder={jumpToFolder} />)}
+    </Scrollbar>
 </div>
