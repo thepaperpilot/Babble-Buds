@@ -4,6 +4,7 @@
 
 .smallThumbnail-img {
     flex: 0 0 auto;
+    margin-right: 4px;
 }
 
 .smallThumbnail-img img {

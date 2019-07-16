@@ -2,10 +2,12 @@ import React, {Component} from 'react'
 import { connect } from 'react-redux'
 import Scrollbar from 'react-custom-scroll'
 import * as JsSearch from 'js-search'
-import List from './../ui/List'
+import { FixedSizeList as List } from 'react-window'
 import DraggablePuppet from './DraggablePuppet'
 import PuppetImporter from './PuppetImporter'
 import PuppetContextMenu from './PuppetContextMenu'
+import CustomScrollbarsVirtualList from './../ui/CustomScrollbarsVirtualList'
+import './puppets.css'
 
 class Puppets extends Component {
     constructor(props) {
@@ -52,10 +54,20 @@ class Puppets extends Component {
     }
 
     render() {
+        const size = this.state.size
         const puppets = (this.state.filter === '' ?
             Object.keys(this.props.puppets) :
             this.search.search(this.state.filter).map(puppet => puppet.id)
         )
+
+        console.log(size)
+        // Calculate how many will be shown in each row
+        let puppetsPerRow = Math.floor((this.props.rect.width - 14) / (size + 16))
+        if (puppetsPerRow < 1) puppetsPerRow = 1
+        if (size === 60) puppetsPerRow = 1
+
+        const rows = Math.ceil(puppets.length / puppetsPerRow)
+
         return (
             <div className="panel puppet-selector">
                 <div className="bar flex-row">
@@ -65,7 +77,7 @@ class Puppets extends Component {
                         type="range"
                         min="60"
                         max="200"
-                        value={this.state.size}
+                        value={size}
                         step="20"
                         onChange={this.changeZoom} />
                     <div className="flex-grow" />
@@ -77,26 +89,30 @@ class Puppets extends Component {
                             onChange={this.onChange} />
                     </div>
                 </div>
-                {this.state.size === 60 ?
-                    <div className="full-panel">
-                        <Scrollbar allowOuterScroll={true} heightRelativeToParent="100%">
-                            {puppets.map(puppet => (
-                                <DraggablePuppet
-                                    key={puppet}
-                                    small={true}
-                                    puppet={puppet} />
+                <List
+                    height={Math.max(this.props.rect.height, 0)}
+                    itemCount={rows}
+                    itemSize={size === 60 ? 29 : size}
+                    outerElementType={CustomScrollbarsVirtualList}>
+                    {({ index, style }) => {
+                        const start = puppetsPerRow * index
+                        const length = Math.min(puppetsPerRow * (index + 1), puppets.length) - puppetsPerRow * index
+
+                        return <div className={size === 60 ? '' : 'list'} style={style}>
+                            {Array(length).fill(0).map((x, y) => x + y).map(i => {
+                                return <div key={i} className={size === 60 ? '' : 'list-item'} style={{width: size === 60 ? '100%' : size - 30, height: size - 30}}>
+                                    <DraggablePuppet 
+                                        key={i}
+                                        small={size === 60}
+                                        puppet={puppets[start + i]} />
+                                </div>
+                            })}
+                            {new Array(puppetsPerRow - length).fill(0).map((child, i) => (
+                                <div className="list-pad" key={`${i}-pad`} style={{width: size - 30}}></div>
                             ))}
-                        </Scrollbar>
-                    </div> :
-                    <List width={`${this.state.size}px`} height={`${this.state.size}px`}>
-                        {puppets.map(puppet => (
-                            <DraggablePuppet
-                                key={puppet}
-                                small={false}
-                                puppet={puppet} />
-                        ))}
-                    </List>
-                }
+                        </div>
+                    }}
+                </List>
                 <PuppetContextMenu />
             </div>
         )

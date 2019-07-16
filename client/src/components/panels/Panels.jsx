@@ -53,7 +53,7 @@ class Panels extends Component {
         case 'console':
             return <Console/>
         case 'puppets':
-            return <Puppets size={node.getConfig().size} onZoomChange={this.updateConfig(node, 'size')} />
+            return <Puppets rect={node._rect} size={node.getConfig().size} onZoomChange={this.updateConfig(node, 'size')} />
         case 'project-settings':
             return <ProjectSettings/>
         case 'assets':

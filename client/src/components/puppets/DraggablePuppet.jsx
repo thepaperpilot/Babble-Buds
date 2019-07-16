@@ -34,7 +34,7 @@ class DraggablePuppet extends Component {
 
     render() {
         return this.props.connectDragSource(
-            <div className="fillParent">
+            <div>
                 <ContextMenuTrigger
                     id="contextmenu-puppet"
                     holdToDisplay={-1}
@@ -50,9 +50,11 @@ class DraggablePuppet extends Component {
                                 className="line-item smallThumbnail-wrapper"
                                 onChange={this.renamePuppet}
                                 onDoubleClick={this.editPuppet}>
-                                <SmallThumbnail
-                                    label={this.props.character.name}
-                                    image={this.props.thumbnail}/>
+                                <div className="smallThumbnail-img" style={{width: '20px', height: '20px'}}>
+                                    <img
+                                        alt={this.props.character.name}
+                                        src={this.props.thumbnail}/>
+                                </div>
                             </InlineEdit>
                         </div> :
                         <div>

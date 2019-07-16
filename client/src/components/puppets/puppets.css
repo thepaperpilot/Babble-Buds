@@ -1,0 +1,13 @@
+.puppet-selector .line-item {
+    white-space: nowrap;
+}
+
+.puppet-selector .inner-line-item {
+    line-height: 22px;
+    margin-bottom: -2px;
+}
+
+.puppet-selector .rcs-custom-scroll {
+    margin-left: -10px;
+    margin-right: -10px;
+}

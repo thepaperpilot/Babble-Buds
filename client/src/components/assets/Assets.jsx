@@ -1,7 +1,6 @@
 import React, {Component} from 'react'
 import ReactDOM from 'react-dom'
 import { connect } from 'react-redux'
-import Scrollbar from 'react-custom-scroll'
 import * as JsSearch from 'js-search'
 import { FixedSizeList as List } from 'react-window'
 import DraggableAsset from './DraggableAsset'
@@ -10,44 +9,8 @@ import AssetImporter from './AssetImporter'
 import AssetContextMenu from './AssetContextMenu'
 import FolderContextMenu from './FolderContextMenu'
 import FolderList from './FolderList'
+import CustomScrollbarsVirtualList from './../ui/CustomScrollbarsVirtualList'
 import './assets.css'
-import './../ui/scrollbar.css'
-
-class CustomScrollbarsVirtualList extends Component {
-    constructor(props) {
-        super(props)
-
-        this.state = {
-            scrollTo: undefined
-        }
-
-        this.onScroll = this.onScroll.bind(this)
-        this.scrollTo = this.scrollTo.bind(this)
-    }
-
-    onScroll(event) {
-        this.setState({
-            scrollTo: undefined
-        })
-        this.props.onScroll(event)
-    }
-
-    scrollTo(scrollTo) {
-        this.setState({ scrollTo })
-    }
-
-    render() {
-        return <Scrollbar
-            onScroll={this.onScroll}
-            scrollTo={this.state.scrollTo}
-            allowOuterScroll={true}
-            heightRelativeToParent="100%" >
-            <div style={{ position: 'relative' }} >
-                {this.props.children}
-            </div>
-        </Scrollbar>
-    }
-}
 
 class Assets extends Component {
     constructor(props) {
@@ -65,7 +28,6 @@ class Assets extends Component {
 
         this.onChange = this.onChange.bind(this)
         this.changeZoom = this.changeZoom.bind(this)
-        this.handleScroll = this.handleScroll.bind(this)
         this.jumpToFolder = this.jumpToFolder.bind(this)
     }
 
@@ -94,12 +56,6 @@ class Assets extends Component {
         this.setState({
             size: parseInt(e.target.value, 10)
         })
-    }
-
-    handleScroll({ target }) {
-        const { scrollTop } = target
-
-        this.list.current.scrollTo(scrollTop)
     }
 
     jumpToFolder(tab) {
@@ -148,71 +104,69 @@ class Assets extends Component {
 
         const size = this.state.size === 60 ? 20 : this.state.size + 30
 
-        return (
-            <div className="panel console assets">
-                <div className="flex-row bar">
-                    <AssetImporter />
+        return <div className="panel console assets">
+            <div className="flex-row bar">
+                <AssetImporter />
+                <input
+                    type="range"
+                    min="60"
+                    max="140"
+                    value={this.state.size}
+                    step="20"
+                    onChange={this.changeZoom} />
+                <div className="flex-grow" />
+                <div className="search">
                     <input
-                        type="range"
-                        min="60"
-                        max="140"
-                        value={this.state.size}
-                        step="20"
-                        onChange={this.changeZoom} />
-                    <div className="flex-grow" />
-                    <div className="search">
-                        <input
-                            type="search"
-                            placeholder="All"
-                            value={this.state.filter}
-                            onChange={this.onChange} />
-                    </div>
+                        type="search"
+                        placeholder="All"
+                        value={this.state.filter}
+                        onChange={this.onChange} />
                 </div>
-                <div className="full-panel" >
-                    <FolderList tabs={tabs} tabToRow={tabToRow} jumpToFolder={this.jumpToFolder} />
-                    <List
-                        height={Math.max(this.props.rect.height, 0)}
-                        width="75%"
-                        itemCount={numAssets}
-                        itemSize={size}
-                        outerElementType={CustomScrollbarsVirtualList}
-                        outerRef={this.scrollbar}
-                        ref={this.list} >
-                        {({ index, style }) => {
-                            if (Object.values(tabToRow).includes(index)) {
-                                const tab = Object.keys(tabToRow).find(tab => tabToRow[tab] === index)
-                                return <div style={{...style, 'fontSize': size === 20 ? 15 : size / 3}}>
-                                    <Folder tab={tab} />
-                                </div>
-                            } else {
-                                const nextTabIndex = tabs.findIndex(tab => tabToRow[tab] >= index) - 1
-                                const tab = tabs[nextTabIndex === -2 ? tabs.length - 1 : nextTabIndex]
-                                const start = assetsPerRow * (index - tabToRow[tab] - 1)
-                                const end = Math.min(assetsPerRow * (index - tabToRow[tab]), assetsByTab[tab].length)
-
-                                return <div className={`list${size === 20 ? ' small' : ''}`} style={style}>
-                                    {Array(end - start).fill(start).map((x, y) => x + y).map(i => {
-                                        const id = assetsByTab[tab][i]
-                                        return <div key={i} className="list-item" style={{width: size === 20 ? '100%' : size - 30, height: size - 30}}>
-                                            <DraggableAsset
-                                                key={id}
-                                                id={id}
-                                                asset={this.props.assets[id]}
-                                                small={size === 20} />
-                                        </div>
-                                    })}
-                                    {new Array(assetsPerRow - (end - start)).fill(0).map((child, i) => (
-                                        <div className="list-pad" key={`${i}-pad`} style={{width: size - 30}}></div>
-                                    ))}
-                                </div>
-                            }
-                        }}
-                    </List>
-                </div>
-                <AssetContextMenu tabs={tabs} />
-                <FolderContextMenu />
             </div>
-        )
+            <div className="full-panel" >
+                <FolderList tabs={tabs} tabToRow={tabToRow} jumpToFolder={this.jumpToFolder} />
+                <List
+                    height={Math.max(this.props.rect.height, 0)}
+                    width="75%"
+                    itemCount={numAssets}
+                    itemSize={size}
+                    outerElementType={CustomScrollbarsVirtualList}
+                    outerRef={this.scrollbar}
+                    ref={this.list} >
+                    {({ index, style }) => {
+                        if (Object.values(tabToRow).includes(index)) {
+                            const tab = Object.keys(tabToRow).find(tab => tabToRow[tab] === index)
+                            return <div style={{...style, 'fontSize': size === 20 ? 15 : size / 3}}>
+                                <Folder tab={tab} />
+                            </div>
+                        } else {
+                            const nextTabIndex = tabs.findIndex(tab => tabToRow[tab] >= index) - 1
+                            const tab = tabs[nextTabIndex === -2 ? tabs.length - 1 : nextTabIndex]
+                            const start = assetsPerRow * (index - tabToRow[tab] - 1)
+                            const end = Math.min(assetsPerRow * (index - tabToRow[tab]), assetsByTab[tab].length)
+
+                            return <div className={`list${size === 20 ? ' small' : ''}`} style={style}>
+                                {Array(end - start).fill(start).map((x, y) => x + y).map(i => {
+                                    const id = assetsByTab[tab][i]
+                                    return <div key={i} className="list-item" style={{width: size === 20 ? '100%' : size - 30, height: size - 30}}>
+                                        <DraggableAsset
+                                            key={id}
+                                            id={id}
+                                            asset={this.props.assets[id]}
+                                            small={size === 20} />
+                                    </div>
+                                })}
+                                {new Array(assetsPerRow - (end - start)).fill(0).map((child, i) => (
+                                    <div className="list-pad" key={`${i}-pad`} style={{width: size - 30}}></div>
+                                ))}
+                            </div>
+                        }
+                    }}
+                </List>
+            </div>
+            <AssetContextMenu tabs={tabs} />
+            <FolderContextMenu />
+        </div>
     }
 }
 
