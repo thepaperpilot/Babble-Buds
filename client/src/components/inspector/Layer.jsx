@@ -137,6 +137,7 @@ class Layer extends Component {
             </pre> : null
 
         const emoteLayerDisabled = ('emoteLayer' in inherit || finder('emoteLayer', true)(layer)) && layer.emoteLayer == null
+        const allEmotesDisabled = [...Array(12).keys()].map(emoteSlotDisabled).every(b => b)
 
         return (
             <div className="inspector">
@@ -174,7 +175,10 @@ class Layer extends Component {
                             </Foldable>
                         </div>
                         <div className="action">
-                            <Foldable title="Emote" classNames={{ warning: nestedEmoteWarning != null || emoteExistsWarning != null }} defaultFolded={asset != null} state={asset != null}>
+                            <Foldable title="Emote"
+                                classNames={{ warning: nestedEmoteWarning != null || emoteExistsWarning != null }}
+                                defaultFolded={asset != null || allEmotesDisabled}
+                                state={[asset != null, allEmotesDisabled]}>
                                 {asset != null && inherit.emote == null && layer.emote != null &&
                                     <pre className="info">
                                         It's not recommended to make individual assets emotes

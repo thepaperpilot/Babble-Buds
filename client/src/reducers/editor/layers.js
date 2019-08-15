@@ -87,6 +87,14 @@ function editEmote(state, action) {
         curr = curr.children[index]
     })
     curr.emote = action.emote
+    const parseLayer = function(layer) {
+        if (layer.children) {
+            layer.children.forEach(parseLayer)
+        }
+        layer.emote = null
+        return layer
+    }
+    if (curr.children) curr.children.forEach(parseLayer)
     const character = util.updateObject(state.character, { layers: updatePaths(layers).layers })
     return util.updateObject(state, { character, emote: action.emote || 0 })
 }
