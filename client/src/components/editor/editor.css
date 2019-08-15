@@ -7,3 +7,9 @@
 .editor.changed {
     border: solid red;
 }
+
+.editor.changed .bar button {
+    background-color: red;
+    border-top: solid red 1px;
+    margin-top: -1px;
+}
