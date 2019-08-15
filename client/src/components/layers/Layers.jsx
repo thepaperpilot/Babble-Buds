@@ -103,19 +103,22 @@ class Layers extends Component {
     render() {
         // We don't want the ui tree modifying the tree object stored in redux because then it won't re-render everything properly
         // So we have to clone it using JSON parse and stringify
+        console.log()
         return (
             <div className="panel console">
                 <div className="bar flex-row">
                     <button onClick={this.addLayer}>New Layer</button>
                     <div className="flex-grow" />
                 </div>
-                <Scrollbar allowOuterScroll={true} heightRelativeToParent="100%">
-                    <Tree
-                        tree={JSON.parse(JSON.stringify(this.props.tree))}
-                        onChange={this.handleChange}
-                        renderNode={this.renderNode}
-                        canBecomeParent={this.canBecomeParent} />
-                </Scrollbar>
+                {JSON.stringify(this.props.tree) === '{}' ?
+                    <div className="default">Open puppet to edit layers</div> :
+                    <Scrollbar allowOuterScroll={true} heightRelativeToParent="100%">
+                        <Tree
+                            tree={JSON.parse(JSON.stringify(this.props.tree))}
+                            onChange={this.handleChange}
+                            renderNode={this.renderNode}
+                            canBecomeParent={this.canBecomeParent} />
+                    </Scrollbar>}
                 <LayerContextMenu />
             </div>
         )
