@@ -19,9 +19,7 @@ export default connect(mapStateToProps)(props => {
     switch (props.targetType) {
     case 'puppet': content = <Puppet target={props.target} />; break
     case 'layer': content = <Layer target={props.target} />; break
-    default:
-        // TODO render a "not inspecting anything" screen
-        break
+    default: content = <div className="default">Select something to inspect</div>; break
     }
     return (
         <div className="panel">

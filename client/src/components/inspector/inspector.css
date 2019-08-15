@@ -42,3 +42,12 @@
 .inspector .foldable.warning h4 {
     color: red;
 }
+
+.default {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    height: 100%;
+    font-size: x-large;
+}
