@@ -76,7 +76,7 @@ class InlineEdit extends Component {
     }
 
     render() {
-        const {className, selected, target, style, disabled, label} = this.props
+        const {className, selected, target, style, disabled, label, height} = this.props
 
         return <div
             className={classNames(className, {
@@ -84,6 +84,7 @@ class InlineEdit extends Component {
                 disabled,
                 isEditing: this.state.isEditing
             })}
+            style={height ? {height} : null}
             onClick={this.onClick}
             onDoubleClick={this.props.onDoubleClick}>
             {this.props.children}

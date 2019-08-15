@@ -65,6 +65,7 @@ class DraggablePuppet extends Component {
                                 targetType="puppet"
                                 label={this.props.character.name}
                                 className="char"
+                                height={this.props.height}
                                 onChange={this.renamePuppet}
                                 onDoubleClick={this.editPuppet}>
                                 <img

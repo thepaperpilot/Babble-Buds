@@ -104,6 +104,7 @@ class Puppets extends Component {
                                     <DraggablePuppet 
                                         key={i}
                                         small={size === 60}
+                                        height={2 * size - 30}
                                         puppet={puppets[start + i]} />
                                 </div>
                             })}
