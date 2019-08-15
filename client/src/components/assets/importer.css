@@ -22,3 +22,44 @@
     border-bottom: 1px solid grey;
     margin-top: -1px;
 }
+
+.asset-importer {
+    display: flex;
+    flex-direction: column;
+}
+
+.asset-importer .small.list .list-item .char .inner-line-item {
+    margin: 0;
+    background-color: unset;
+    line-height: 20px;
+}
+
+.asset-importer .list-item .char .desc {
+    height: unset;
+}
+
+.asset-importer .char {
+    padding: 0;
+}
+
+.asset-importer .folder-list-item .header-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    text-align: center;
+    height: 100%;
+}
+
+.asset-importer .header-wrapper .inner-line-item {
+    flex: 1;
+    padding: 0 2px;
+}
+
+.asset-importer .toggle-button {
+    padding: 0 3px;
+    padding-top: 3px;
+    margin-top: -3px;
+    border: solid #333c4a 3px;
+    display: flex;
+    align-items: center;
+}

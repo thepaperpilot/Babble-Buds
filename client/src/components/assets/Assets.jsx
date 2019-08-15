@@ -11,6 +11,7 @@ import FolderContextMenu from './FolderContextMenu'
 import FolderList from './FolderList'
 import CustomScrollbarsVirtualList from './../ui/CustomScrollbarsVirtualList'
 import './assets.css'
+import './../ui/list.css'
 
 class Assets extends Component {
     constructor(props) {
@@ -19,7 +20,7 @@ class Assets extends Component {
         this.componentWillReceiveProps(props)
 
         this.state = {
-            size: props.size,
+            size: props.size || 100,
             filter: ''
         }
 
@@ -52,7 +53,8 @@ class Assets extends Component {
     }
 
     changeZoom(e) {
-        this.props.onZoomChange(parseInt(e.target.value, 10))
+        if (this.props.onZoomChange)
+            this.props.onZoomChange(parseInt(e.target.value, 10))
         this.setState({
             size: parseInt(e.target.value, 10)
         })
@@ -74,16 +76,20 @@ class Assets extends Component {
 
     render() {
         // Apply our filter to our list of assets
-        const filteredAssets = this.state.filter === '' ? Object.keys(this.props.assets) :
+        const filteredAssets = this.state.filter === '' ?
+            Object.keys(this.props.assets) :
             Object.keys(this.props.assets).filter(id =>
-                this.props.assets[id].name.toLowerCase().includes(this.state.filter.toLowerCase()))
+                this.props.assets[id].name.toLowerCase()
+                    .includes(this.state.filter.toLowerCase()))
         
         // Calculate how many will be shown in each row
-        let assetsPerRow = Math.floor((this.props.rect.width * .75 - 14) / (this.state.size + 16))
+        const width = this.props.rect.width * .75 - 14
+        let assetsPerRow = Math.floor(width / (this.state.size + 16))
         if (assetsPerRow < 1) assetsPerRow = 1
         if (this.state.size === 60) assetsPerRow = 1
 
-        // Calculate how many assets we'll have in each tab, and on which row each tab starts
+        // Calculate how many assets we'll have in each tab,
+        // and on which row each tab starts
         const tabs = Object.values(this.props.assets).reduce((acc, curr) =>
             acc.includes(curr.tab) ? acc : acc.concat(curr.tab), [])
         const tabToRow = {}
@@ -103,10 +109,11 @@ class Assets extends Component {
         }, 0)
 
         const size = this.state.size === 60 ? 20 : this.state.size + 30
+        const {CustomAsset, CustomFolder, CustomTitle} = this.props
 
         return <div className="panel console assets">
             <div className="flex-row bar">
-                <AssetImporter />
+                {this.props.isAssetImporter || <AssetImporter rect={this.props.rect} />}
                 <input
                     type="range"
                     min="60"
@@ -124,7 +131,8 @@ class Assets extends Component {
                 </div>
             </div>
             <div className="full-panel" >
-                <FolderList tabs={tabs} tabToRow={tabToRow} jumpToFolder={this.jumpToFolder} />
+                <FolderList CustomFolder={CustomFolder} tabs={tabs}
+                    tabToRow={tabToRow} jumpToFolder={this.jumpToFolder} />
                 <List
                     height={Math.max(this.props.rect.height, 0)}
                     width="75%"
@@ -135,30 +143,49 @@ class Assets extends Component {
                     ref={this.list} >
                     {({ index, style }) => {
                         if (Object.values(tabToRow).includes(index)) {
-                            const tab = Object.keys(tabToRow).find(tab => tabToRow[tab] === index)
-                            return <div style={{...style, 'fontSize': size === 20 ? 15 : size / 3}}>
-                                <Folder tab={tab} />
+                            const tab = Object.keys(tabToRow).find(tab =>
+                                tabToRow[tab] === index)
+                            return <div style={{...style,
+                                'fontSize': size === 20 ? 15 : size / 3}}>
+                                {CustomTitle ?
+                                    <CustomTitle tab={tab} /> :
+                                    <Folder tab={tab} />}
                             </div>
                         } else {
-                            const nextTabIndex = tabs.findIndex(tab => tabToRow[tab] >= index) - 1
-                            const tab = tabs[nextTabIndex === -2 ? tabs.length - 1 : nextTabIndex]
+                            const nextTabIndex = tabs.findIndex(tab =>
+                                tabToRow[tab] >= index) - 1
+                            const tab = tabs[nextTabIndex === -2 ?
+                                tabs.length - 1 :
+                                nextTabIndex]
                             const start = assetsPerRow * (index - tabToRow[tab] - 1)
-                            const end = Math.min(assetsPerRow * (index - tabToRow[tab]), assetsByTab[tab].length)
+                            const theoreticalEnd = assetsPerRow * (index - tabToRow[tab])
+                            const end = Math.min(theoreticalEnd, assetsByTab[tab].length)
 
-                            return <div className={`list${size === 20 ? ' small' : ''}`} style={style}>
-                                {Array(end - start).fill(start).map((x, y) => x + y).map(i => {
-                                    const id = assetsByTab[tab][i]
-                                    return <div key={i} className="list-item" style={{width: size === 20 ? '100%' : size - 30, height: size - 30}}>
-                                        <DraggableAsset
-                                            key={id}
-                                            id={id}
-                                            asset={this.props.assets[id]}
-                                            small={size === 20} />
-                                    </div>
-                                })}
-                                {new Array(assetsPerRow - (end - start)).fill(0).map((child, i) => (
-                                    <div className="list-pad" key={`${i}-pad`} style={{width: size - 30}}></div>
-                                ))}
+                            return <div className={`list${size === 20 ? ' small' : ''}`} 
+                                style={style}>
+                                {Array(end - start).fill(start).map((x, y) => x + y)
+                                    .map(i => {
+                                        const id = assetsByTab[tab][i]
+                                        const props = {
+                                            key: id,
+                                            id,
+                                            asset: this.props.assets[id],
+                                            small: size === 20
+                                        }
+                                        return <div key={i} className="list-item"
+                                            style={{
+                                                width: size === 20 ? '100%' : size - 30,
+                                                height: size - 30}}>
+                                            {CustomAsset ? <CustomAsset {...props} /> :
+                                                <DraggableAsset {...props} />}
+                                        </div>
+                                    })}
+                                {new Array(assetsPerRow - (end - start)).fill(0)
+                                    .map((child, i) => (
+                                        <div className="list-pad" key={`${i}-pad`}
+                                            style={{width: size - 30}}>
+                                        </div>
+                                    ))}
                             </div>
                         }
                     }}
@@ -170,9 +197,9 @@ class Assets extends Component {
     }
 }
 
-function mapStateToProps(state) {
+function mapStateToProps(state, props) {
     return {
-        assets: state.project.assets
+        assets: props.assets || state.project.assets
     }
 }
 

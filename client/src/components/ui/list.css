@@ -27,7 +27,7 @@
     flex-direction: column-reverse;
 }
 
-.list-item .char div:not(.selected) {
+.list-item .char .inner-line-item {
     background-color: #333c4a;
     color: #fff;
     font-size: 12px;
@@ -40,7 +40,7 @@
     margin-bottom: 4px;
 }
 
-.list-item .char.disabled div:not(.selected) {
+.list-item .char.disabled .inner-line-item {
     color: rgba(255, 255, 255, .5);
 }
 

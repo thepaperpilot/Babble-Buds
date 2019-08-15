@@ -18,7 +18,7 @@
     box-sizing: border-box;
     position: absolute;
     background-color: #242a33;
-    max-width: 500px;
+    max-width: 900px;
     max-height: 1000px;
     width: 90%;
     margin: auto;
@@ -34,6 +34,8 @@
     border-radius: 5px;
     box-sizing: border-box;
     height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .title {
@@ -56,8 +58,4 @@
 
 .footer.flex-row > .flex-grow {
     border-right: none;
-}
-
-.modal-content .bar.flex-row {
-    margin: 0;
 }

@@ -2,9 +2,8 @@ import React, {Component} from 'react'
 import { connect } from 'react-redux'
 import Scrollbar from 'react-custom-scroll'
 import Checkbox from '../inspector/fields/Checkbox'
+import Assets from './Assets'
 import Modal from '../ui/Modal'
-import List from '../ui/List'
-import Foldable from '../ui/Foldable'
 import './importer.css'
 
 import { getNewAssetID } from './../../reducers/project/assets'
@@ -105,7 +104,7 @@ class AssetImporter extends Component {
             ).forEach(id => {
                 if (allSelected)
                     selected.splice(selected.indexOf(id), 1)
-                else
+                else if (!selected.includes(id))
                     selected.push(id)
             })
             this.setState({ selected })
@@ -160,57 +159,53 @@ class AssetImporter extends Component {
         let allSelected = Object.keys(this.state.assets).sort().join(',') ===
             this.state.selected.sort().join(',')
 
-        const tabs = this.state.tabs.map(tab => {
-            let assets = Object.keys(this.state.assets)
-                .filter(id => this.state.assets[id].tab === tab)
-            const allSelected = assets.every(a =>
-                this.state.selected.includes(a))
-            assets = assets.map(id => {
-                const asset = this.state.assets[id]
-                const selected = this.state.selected.includes(id)
-                return <div key={id}
-                    onClick={this.toggleAsset(id)}
-                    className={selected ? 'char selected' : 'char'}>
-                    {this.state.size === 60 && <div className="smallThumbnail-img">
-                        <img
-                            alt={asset.name}
-                            src={`file:///${path.join(this.state.assetsPath,
-                                asset.type === 'animated' ?
-                                    asset.thumbnail :
-                                    asset.location)}`}
-                            style={{width: '20px', height: '20px'}} />
-                        {asset.name}
-                    </div>}
-                    {this.state.size === 60 || <img
+        const CustomAsset = ({asset, id, small}) => <div
+            onClick={this.toggleAsset(id)}
+            className={this.state.selected.includes(id) ? 'char selected' : 'char'}>
+            {small && <div className="line-item smallThumbnail-wrapper">
+                <div className="smallThumbnail-img"
+                    style={{width: '20px', height: '20px'}}>
+                    <img
                         alt={asset.name}
                         src={`file:///${path.join(this.state.assetsPath,
                             asset.type === 'animated' ?
                                 asset.thumbnail :
-                                asset.location)}`} />}
-                    {this.state.size === 60 || <div className="desc">{asset.name}</div>}
+                                asset.location)}`}
+                        style={{width: '20px', height: '20px'}} />
                 </div>
-            })
+                <div className="inner-line-item">{asset.name}</div>
+            </div>}
+            {small || <img
+                alt={asset.name}
+                src={`file:///${path.join(this.state.assetsPath,
+                    asset.type === 'animated' ?
+                        asset.thumbnail :
+                        asset.location)}`} />}
+            {small || <div className="desc">{asset.name}</div>}
+        </div>
 
-            return assets.length ? <Foldable
-                key={tab}
-                title={<div className="flex-row">
-                    {tab}
-                    <div className="flex-grow" />
-                    <Checkbox
-                        inline={true}
-                        value={allSelected}
-                        onChange={this.toggleTab(tab, allSelected)}/>
-                </div>}
-                defaultFolded={true}>
-                {this.state.size === 60 ? assets :
-                    <List
-                        scrollbar={false}
-                        width={`${this.state.size}px`}
-                        height={`${this.state.size}px`}>
-                        {assets}
-                    </List>}
-            </Foldable> : null
-        })
+        const CustomFolder = ({tab, row, jumpToFolder}) => {
+            const allSelected = Object.keys(this.state.assets)
+                .filter(id => this.state.assets[id].tab === tab)
+                .every(a => this.state.selected.includes(a))
+            return <div className="folder-list-item">
+                <div
+                    className="header-wrapper"
+                    onClick={() => jumpToFolder(row)}>
+                    <div className="inner-line-item">{tab}</div>
+                    <div className={allSelected ?
+                        'toggle-button selected' :
+                        'toggle-button'}
+                    onClick={this.toggleTab(tab, allSelected)}>
+                        toggle
+                    </div>
+                </div>
+            </div>
+        }
+
+        const CustomTitle = ({tab}) => <div className="header-wrapper">
+            <div className="inner-line-item">{tab}</div>
+        </div>
 
         // TODO tooltip on duplicate assets checkbox explaining what it does
         return <div>
@@ -235,20 +230,19 @@ class AssetImporter extends Component {
                         onChange={this.toggleDupplicate}/>,
                     <div className="flex-grow" key="3"/>,
                     <button onClick={this.import} key="4">Import</button>]}>
-                <div className="flex-row bar">
-                    <input
-                        type="range"
-                        min="60"
-                        max="140"
-                        value={this.state.size}
-                        step="20"
-                        onChange={this.changeZoom} />
+                <div className="asset-importer">
+                    <Assets
+                        isAssetImporter={true}
+                        assets={this.state.assets}
+                        rect={{
+                            width: Math.min(900, .9 * window.innerWidth),
+                            // Magic number alert: height of the footer and bar
+                            height: Math.min(1000, .8 * window.innerHeight) - 67
+                        }}
+                        CustomAsset={CustomAsset}
+                        CustomFolder={CustomFolder}
+                        CustomTitle={CustomTitle} />
                 </div>
-                <Scrollbar allowOuterScroll={true} heightRelativeToParent="calc(100% - 64px)">
-                    <div className="importer">
-                        {tabs}
-                    </div>
-                </Scrollbar>
             </Modal>
         </div>
     }

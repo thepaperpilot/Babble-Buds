@@ -24,7 +24,7 @@ function collect(connect, monitor) {
     }
 }
 
-class FolderTarget extends PureComponent {
+export class FolderTarget extends PureComponent {
     constructor(props) {
         super(props)
 
@@ -55,11 +55,17 @@ class FolderTarget extends PureComponent {
 const ConnectedFolderTarget = connect()(DropTarget('asset', assetTarget, collect)(FolderTarget))
 
 // The actual component we export is a list of all those folder targets
-export default ({ tabs, jumpToFolder, tabToRow }) => <div className="folder-list">
+export default ({ tabs, jumpToFolder, tabToRow, CustomFolder }) => <div className="folder-list">
     <Scrollbar allowOuterScroll={true} heightRelativeToParent="100%">
-        {tabs.map(tab => <ConnectedFolderTarget
-            key={tab} tab={tab}
-            row={tabToRow[tab]}
-            jumpToFolder={jumpToFolder} />)}
+        {tabs.map(tab => {
+            const props = {
+                key: tab,
+                tab,
+                row: tabToRow[tab],
+                jumpToFolder
+            }
+
+            return CustomFolder ? <CustomFolder {...props} /> :
+                <ConnectedFolderTarget {...props} />})}
     </Scrollbar>
 </div>

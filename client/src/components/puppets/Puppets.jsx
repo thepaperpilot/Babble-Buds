@@ -8,6 +8,7 @@ import PuppetImporter from './PuppetImporter'
 import PuppetContextMenu from './PuppetContextMenu'
 import CustomScrollbarsVirtualList from './../ui/CustomScrollbarsVirtualList'
 import './puppets.css'
+import './../ui/list.css'
 
 class Puppets extends Component {
     constructor(props) {
@@ -60,7 +61,6 @@ class Puppets extends Component {
             this.search.search(this.state.filter).map(puppet => puppet.id)
         )
 
-        console.log(size)
         // Calculate how many will be shown in each row
         let puppetsPerRow = Math.floor((this.props.rect.width - 14) / (size + 16))
         if (puppetsPerRow < 1) puppetsPerRow = 1
@@ -92,7 +92,7 @@ class Puppets extends Component {
                 <List
                     height={Math.max(this.props.rect.height, 0)}
                     itemCount={rows}
-                    itemSize={size === 60 ? 29 : size}
+                    itemSize={size === 60 ? 29 : 2 * size}
                     outerElementType={CustomScrollbarsVirtualList}>
                     {({ index, style }) => {
                         const start = puppetsPerRow * index
@@ -100,7 +100,7 @@ class Puppets extends Component {
 
                         return <div className={size === 60 ? '' : 'list'} style={style}>
                             {Array(length).fill(0).map((x, y) => x + y).map(i => {
-                                return <div key={i} className={size === 60 ? '' : 'list-item'} style={{width: size === 60 ? '100%' : size - 30, height: size - 30}}>
+                                return <div key={i} className={size === 60 ? '' : 'list-item'} style={{width: size === 60 ? '100%' : size - 30, height: 2 * size - 30}}>
                                     <DraggablePuppet 
                                         key={i}
                                         small={size === 60}
