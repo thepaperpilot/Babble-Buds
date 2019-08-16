@@ -8,8 +8,6 @@ const path = require('path')
 const {remote, ipcRenderer} = window.require('electron')
 const settingsManager = remote.require('./main-process/settings')
 
-const MENU_TYPE = 'contextmenu-tab'
-
 class FolderContextMenu extends Component {
     static id = 0
 
@@ -42,7 +40,6 @@ class FolderContextMenu extends Component {
                 .replace(/.png/, '')
                 .replace(/.gif/, '')
             const id = getNewAssetID()
-            console.log(this.props)
 
             const asset = {
                 type: animated ? 'animated' : 'sprite',
@@ -118,7 +115,7 @@ class FolderContextMenu extends Component {
     }
 
     render() {
-        return <ContextMenu id={MENU_TYPE}>
+        return <ContextMenu id={this.props.id}>
             <MenuItem onClick={this.focus}>Rename</MenuItem>
             <MenuItem onClick={this.deleteFolder}>Delete</MenuItem>
             <MenuItem onClick={this.addAsset}>Add Asset</MenuItem>
@@ -134,4 +131,4 @@ function mapStateToProps(state) {
     }
 }
 
-export default connect(mapStateToProps, null, null, { withRef: true })(connectMenu(MENU_TYPE)(FolderContextMenu))
+export default id => connect(mapStateToProps, null, null, { withRef: true })(connectMenu(`contextmenu-tab-${id}`)(FolderContextMenu))

@@ -53,15 +53,22 @@ class Panels extends Component {
         case 'console':
             return <Console/>
         case 'puppets':
-            return <Puppets rect={node._rect} size={node.getConfig().size} onZoomChange={this.updateConfig(node, 'size')} />
+            return <Puppets rect={node._rect}
+                size={node.getConfig().size}
+                onZoomChange={this.updateConfig(node, 'size')}
+                id={node.getId()} />
         case 'project-settings':
             return <ProjectSettings/>
         case 'assets':
-            return <Assets rect={node._rect} size={node.getConfig().size} onZoomChange={this.updateConfig(node, 'size')} />
+            return <Assets rect={node._rect} size={node.getConfig().size}
+                onZoomChange={this.updateConfig(node, 'size')}
+                id={node.getId()} />
         case 'controller':
             return <Controller/>
         case 'editor':
-            return <Editor rect={node._rect} grid={grid} highlight={highlight} onZoomChange={this.updateConfig(node, 'grid')} onHighlightChange={this.updateConfig(node, 'highlight')} />
+            return <Editor rect={node._rect} grid={grid} highlight={highlight} 
+                onZoomChange={this.updateConfig(node, 'grid')}
+                onHighlightChange={this.updateConfig(node, 'highlight')} />
         case 'layers':
             return <Layers/>
         default:

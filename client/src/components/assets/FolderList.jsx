@@ -46,7 +46,7 @@ export class FolderTarget extends PureComponent {
             }}>
             {/* For the actual object to render,
                 we'll just copy our Folder component from the asset list */}
-            <Folder tab={tab} />
+            <Folder contextmenu={this.props.contextmenu} tab={tab} />
         </div>)
     }
 }
@@ -55,17 +55,19 @@ export class FolderTarget extends PureComponent {
 const ConnectedFolderTarget = connect()(DropTarget('asset', assetTarget, collect)(FolderTarget))
 
 // The actual component we export is a list of all those folder targets
-export default ({ tabs, jumpToFolder, tabToRow, CustomFolder }) => <div className="folder-list">
-    <Scrollbar allowOuterScroll={true} heightRelativeToParent="100%">
-        {tabs.map(tab => {
-            const props = {
-                key: tab,
-                tab,
-                row: tabToRow[tab],
-                jumpToFolder
-            }
+export default ({ tabs, jumpToFolder, tabToRow, CustomFolder, contextmenu }) =>
+    <div className="folder-list">
+        <Scrollbar allowOuterScroll={true} heightRelativeToParent="100%">
+            {tabs.map(tab => {
+                const props = {
+                    key: tab,
+                    tab,
+                    contextmenu,
+                    row: tabToRow[tab],
+                    jumpToFolder
+                }
 
-            return CustomFolder ? <CustomFolder {...props} /> :
-                <ConnectedFolderTarget {...props} />})}
-    </Scrollbar>
-</div>
+                return CustomFolder ? <CustomFolder {...props} /> :
+                    <ConnectedFolderTarget {...props} />})}
+        </Scrollbar>
+    </div>

@@ -2,8 +2,6 @@ import React, {Component} from 'react'
 import { connect } from 'react-redux'
 import { ContextMenu, MenuItem, SubMenu, connectMenu } from 'react-contextmenu'
 
-const MENU_TYPE = 'contextmenu-asset'
-
 class AssetContextMenu extends Component {
     constructor(props) {
         super(props)
@@ -58,7 +56,7 @@ class AssetContextMenu extends Component {
     }
 
     render() {
-        return <ContextMenu id={MENU_TYPE}>
+        return <ContextMenu id={this.props.id}>
             <MenuItem onClick={this.duplicateAsset}>Duplicate</MenuItem>
             {this.props.trigger && this.props.trigger.disabled ? null : <React.Fragment>
                 <SubMenu title="Move">
@@ -80,4 +78,4 @@ class AssetContextMenu extends Component {
     }
 }
 
-export default connect()(connectMenu(MENU_TYPE)(AssetContextMenu))
+export default id => connect()(connectMenu(`contextmenu-asset-${id}`)(AssetContextMenu))

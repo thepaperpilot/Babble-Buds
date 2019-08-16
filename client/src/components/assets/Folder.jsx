@@ -41,7 +41,7 @@ class Folder extends Component {
         return <ContextMenuTrigger
             attributes={{className: 'header-wrapper'}}
             collect={() => ({ tab: this.props.tab, inlineEdit: this.inlineEdit })}
-            id="contextmenu-tab"
+            id={`contextmenu-tab-${this.props.contextmenu}`}
             holdToDisplay={-1}>
             <InlineEdit
                 ref={this.inlineEdit}

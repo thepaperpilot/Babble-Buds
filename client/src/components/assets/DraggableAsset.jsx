@@ -42,7 +42,7 @@ class DraggableAsset extends Component {
             this.props.asset.thumbnail :
             this.props.asset.location)}?version=${this.props.asset.version}`
         return <ContextMenuTrigger
-            id="contextmenu-asset"
+            id={`contextmenu-asset-${this.props.contextmenu}`}
             holdToDisplay={-1}
             collect={() => ({ asset: this.props.id, inlineEdit: this.inlineEdit, disabled })}>
             <DragPreviewImage src={thumbnail} connect={this.props.connectDragPreview} />

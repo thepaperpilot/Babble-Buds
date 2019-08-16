@@ -111,6 +111,9 @@ class Assets extends Component {
         const size = this.state.size === 60 ? 20 : this.state.size + 30
         const {CustomAsset, CustomFolder, CustomTitle} = this.props
 
+        const LinkedAssetContextMenu = AssetContextMenu(this.props.id)
+        const LinkedFolderContextMenu = FolderContextMenu(this.props.id)
+
         return <div className="panel console assets">
             <div className="flex-row bar">
                 {this.props.isAssetImporter || <AssetImporter rect={this.props.rect} />}
@@ -131,8 +134,9 @@ class Assets extends Component {
                 </div>
             </div>
             <div className="full-panel" >
-                <FolderList CustomFolder={CustomFolder} tabs={tabs}
-                    tabToRow={tabToRow} jumpToFolder={this.jumpToFolder} />
+                <FolderList contextmenu={this.props.id}
+                    CustomFolder={CustomFolder} tabs={tabs} tabToRow={tabToRow}
+                    jumpToFolder={this.jumpToFolder} />
                 <List
                     height={Math.max(this.props.rect.height, 0)}
                     width="75%"
@@ -148,8 +152,8 @@ class Assets extends Component {
                             return <div style={{...style,
                                 'fontSize': size === 20 ? 15 : size / 3}}>
                                 {CustomTitle ?
-                                    <CustomTitle tab={tab} /> :
-                                    <Folder tab={tab} />}
+                                    <CustomTitle contextmenu={this.props.id} tab={tab} /> :
+                                    <Folder contextmenu={this.props.id} tab={tab} />}
                             </div>
                         } else {
                             const nextTabIndex = tabs.findIndex(tab =>
@@ -169,6 +173,7 @@ class Assets extends Component {
                                         const props = {
                                             key: id,
                                             id,
+                                            contextmenu: this.props.id,
                                             asset: this.props.assets[id],
                                             small: size === 20
                                         }
@@ -191,8 +196,8 @@ class Assets extends Component {
                     }}
                 </List>
             </div>
-            <AssetContextMenu tabs={tabs} />
-            <FolderContextMenu />
+            {this.props.isAssetImporter || <LinkedAssetContextMenu tabs={tabs} />}
+            {this.props.isAssetImporter || <LinkedFolderContextMenu />}
         </div>
     }
 }
