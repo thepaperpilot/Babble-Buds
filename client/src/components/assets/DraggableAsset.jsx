@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 import { DragSource, DragPreviewImage } from 'react-dnd'
 import { ActionCreators as UndoActionCreators } from 'redux-undo'
 import InlineEdit from './../ui/InlineEdit'
+import cx from 'classnames'
 import { ContextMenuTrigger } from 'react-contextmenu'
 
 const path = window.require('path')
@@ -41,6 +42,13 @@ class DraggableAsset extends Component {
         const thumbnail = `${path.join(this.props.assetsPath, this.props.asset.type === 'animated' ?
             this.props.asset.thumbnail :
             this.props.asset.location)}?version=${this.props.asset.version}`
+        const className = cx({
+            char: !this.props.small,
+            'line-item': this.props.small,
+            'smallThumbnail-wrapper': this.props.small,
+            animated: this.props.asset.type === 'animated',
+            bundle: this.props.asset.type === 'bundle'
+        })
         return <ContextMenuTrigger
             id={`contextmenu-asset-${this.props.contextmenu}`}
             holdToDisplay={-1}
@@ -53,7 +61,7 @@ class DraggableAsset extends Component {
                         disabled={disabled}
                         target={this.props.asset.name}
                         targetType="asset"
-                        className="line-item smallThumbnail-wrapper"
+                        className={className}
                         onChange={this.renameAsset}
                         onDoubleClick={this.editAsset}>
                         <div className="smallThumbnail-img" style={{width: '20px', height: '20px'}}>
@@ -69,7 +77,7 @@ class DraggableAsset extends Component {
                         disabled={disabled}
                         target={this.props.asset.name}
                         targetType="asset"
-                        className="char"
+                        className={className}
                         onChange={this.renameAsset}
                         onDoubleClick={this.editAsset}>
                         <img

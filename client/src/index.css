@@ -186,6 +186,33 @@ textarea:focus {
     margin: auto 2px;
 }
 
+.animated.char::before,
+.animated.line-item::before,
+.bundle.char::before,
+.bundle.line-item::before {
+    position: absolute;
+    width: 20px;
+    text-align: center;
+    opacity: .75;
+}
+
+.animated.char::before,
+.animated.line-item::before {
+    content: "▶️";
+    background: darkred;
+}
+
+.bundle.char::before,
+.bundle.line-item::before {
+    content: "⸫";
+    background: darkblue;
+}
+
+.animated.line-item::before,
+.bundle.line-item::before {
+    right: 0;
+}
+
 .emote img {
     overflow: hidden;
 }
