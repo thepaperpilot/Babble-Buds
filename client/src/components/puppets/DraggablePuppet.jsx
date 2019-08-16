@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { DragSource } from 'react-dnd'
+import { DragSource, DragPreviewImage } from 'react-dnd'
 import InlineEdit from './../ui/InlineEdit'
 import SmallThumbnail from './../ui/SmallThumbnail'
 import { ContextMenuTrigger } from 'react-contextmenu'
@@ -39,6 +39,7 @@ class DraggablePuppet extends Component {
                     id="contextmenu-puppet"
                     holdToDisplay={-1}
                     collect={() => ({ puppet: parseInt(this.props.puppet, 10), inlineEdit: this.inlineEdit })}>
+                    <DragPreviewImage src={this.props.thumbnail} connect={this.props.connectDragPreview} />
                     {this.props.small ?
                         <div>
                             <InlineEdit
@@ -94,7 +95,8 @@ const puppetSource = {
 
 function collect(connect) {
     return {
-        connectDragSource: connect.dragSource()
+        connectDragSource: connect.dragSource(),
+        connectDragPreview: connect.dragPreview()
     }
 }
 
