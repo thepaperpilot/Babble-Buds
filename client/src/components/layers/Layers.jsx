@@ -115,6 +115,7 @@ class Layers extends Component {
                             tree={JSON.parse(JSON.stringify(this.props.tree))}
                             onChange={this.handleChange}
                             renderNode={this.renderNode}
+                            autoscroll={50}
                             canBecomeParent={this.canBecomeParent} />
                     </Scrollbar> :
                     <div className="default">Open puppet to edit layers</div>}
