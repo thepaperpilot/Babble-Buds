@@ -5,8 +5,6 @@ import { ActionCreators as UndoActionCreators } from 'redux-undo'
 
 import { getNewAssetID } from './../../reducers/project/assets'
 
-const MENU_TYPE = 'contextmenu-layer'
-
 class LayerContextMenu extends Component {
     constructor(props) {
         super(props)
@@ -51,18 +49,21 @@ class LayerContextMenu extends Component {
     }
 
     render() {
-        if (!this.props.trigger) return <ContextMenu id={MENU_TYPE}>
+        if (!this.props.trigger) return <ContextMenu id={this.props.id}
+            onShow={this.props.onShow} onHide={this.props.onHide}>
             <MenuItem onClick={this.editLayer('DELETE_LAYER')}>Delete Layer</MenuItem>
             <MenuItem onClick={this.editLayer('WRAP_LAYER')}>Wrap Layer</MenuItem>
         </ContextMenu>
 
         const {assetId, tabs, asset} = this.props.trigger
-        
-        return <ContextMenu id={MENU_TYPE}>
+        return <ContextMenu
+            id={this.props.id} onShow={this.props.onShow} onHide={this.props.onHide}>
             <MenuItem onClick={this.editLayer('DELETE_LAYER')}>Delete Layer</MenuItem>
             <MenuItem onClick={this.editLayer('WRAP_LAYER')}>Wrap Layer</MenuItem>
-            {assetId && asset.type === 'bundle' && <MenuItem onClick={this.editBundle}>Edit Bundle</MenuItem>}
-            {assetId == null && <MenuItem onClick={this.editLayer('ADD_LAYER')}>Add Layer</MenuItem>}
+            {assetId && asset.type === 'bundle' &&
+                <MenuItem onClick={this.editBundle}>Edit Bundle</MenuItem>}
+            {assetId == null &&
+                <MenuItem onClick={this.editLayer('ADD_LAYER')}>Add Layer</MenuItem>}
             {assetId == null && <SubMenu title="Convert to prefab">
                 {tabs.map(tab =>
                     <MenuItem
@@ -76,4 +77,4 @@ class LayerContextMenu extends Component {
     }
 }
 
-export default connect()(connectMenu(MENU_TYPE)(LayerContextMenu))
+export default id => connect()(connectMenu(`contextmenu-layer-${id}`)(LayerContextMenu))

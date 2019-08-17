@@ -8,13 +8,20 @@
     display: none;
 }
 
-.dropdown + label {
+.dropdown + label,
+.inspector .dropdown-wrapper {
     cursor: pointer;
     position: absolute;
     top: 0;
     right: 0;
     width: 30px;
     height: 25px;
+}
+
+.dropdown-wrapper .dropdown-image {
+    z-index: 10000;
+    position: absolute;
+    background-color: #242a33;
 }
 
 .dropdown-image {
@@ -31,6 +38,10 @@
     background-color: #2a323d;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     pointer-events: unset;
+}
+
+.dropdown-image.active {
+    background-color: #2a323d;
 }
 
 .dropdown-content {

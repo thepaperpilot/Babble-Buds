@@ -49,7 +49,7 @@ class Panels extends Component {
                 rect={node._rect}
                 id={node.getId()} />
         case 'inspector':
-            return <Inspector/>
+            return <Inspector id={node.getId()} />
         case 'console':
             return <Console/>
         case 'puppets':
@@ -70,7 +70,7 @@ class Panels extends Component {
                 onZoomChange={this.updateConfig(node, 'grid')}
                 onHighlightChange={this.updateConfig(node, 'highlight')} />
         case 'layers':
-            return <Layers/>
+            return <Layers id={node.getId()} />
         default:
             break
         }

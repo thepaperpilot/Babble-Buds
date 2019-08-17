@@ -16,9 +16,13 @@ function mapStateToProps(state) {
 export default connect(mapStateToProps)(props => {
     let content = null
 
+    const childProps = {
+        contextmenu: props.id
+    }
+
     switch (props.targetType) {
-    case 'puppet': content = <Puppet target={props.target} />; break
-    case 'layer': content = <Layer target={props.target} />; break
+    case 'puppet': content = <Puppet {...childProps} target={props.target} />; break
+    case 'layer': content = <Layer {...childProps} target={props.target} />; break
     default: content = <div className="default">Select something to inspect</div>; break
     }
     return (

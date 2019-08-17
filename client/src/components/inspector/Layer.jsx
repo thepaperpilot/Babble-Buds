@@ -8,8 +8,9 @@ import Number from './fields/Number'
 import Vector2 from './fields/Vector2'
 import Text from './fields/Text'
 import Slots from './fields/Slots'
-import Dropdown from './../ui/Dropdown'
+import Dropdown from './../ui/InspectorDropdown'
 import Foldable from './../ui/Foldable'
+import LayerContextMenu from './../layers/LayerContextMenu'
 
 class Layer extends Component {
     constructor(props) {
@@ -20,7 +21,6 @@ class Layer extends Component {
         this.changeLayer = this.changeLayer.bind(this)
         this.changeEmote = this.changeEmote.bind(this)
         this.changeEmoteLayer = this.changeEmoteLayer.bind(this)
-        this.deleteLayer = this.deleteLayer.bind(this)
     }
 
     changePosition(pos) {
@@ -69,18 +69,7 @@ class Layer extends Component {
         }
     }
 
-    deleteLayer() {
-        this.props.dispatch({
-            type: 'DELETE_LAYER',
-            path: this.props.target
-        })
-    }
-
     render() {
-        const dropdownItems = [
-            { label: 'Delete Layer', onClick: this.deleteLayer }
-        ]
-
         let layer = this.props.character.layers
 
         this.props.target.forEach(index => {
@@ -139,10 +128,23 @@ class Layer extends Component {
         const emoteLayerDisabled = ('emoteLayer' in inherit || finder('emoteLayer', true)(layer)) && layer.emoteLayer == null
         const allEmotesDisabled = [...Array(12).keys()].map(emoteSlotDisabled).every(b => b)
 
+        const LinkedLayerContextMenu = LayerContextMenu(this.props.contextmenu)
+
         return (
             <div className="inspector">
                 <Header targetName={layer.name || asset.name} />
-                <Dropdown items={dropdownItems}/>
+                <Dropdown menu={LinkedLayerContextMenu}
+                    id={`contextmenu-layer-${this.props.contextmenu}`}
+                    collect={() => ({
+                        path: layer.path,
+                        self: this.props.self,
+                        name: layer.name,
+                        layerChildren: layer.children,
+                        tabs: Object.values(this.props.assets).reduce((acc, curr) =>
+                            acc.includes(curr.tab) ? acc : acc.concat(curr.tab), []),
+                        assetId: layer.id,
+                        asset: layer
+                    })} />
                 <div className="inspector-content">
                     <Scrollbar allowOuterScroll={true} heightRelativeToParent="100%">
                         <div className="action">
@@ -228,7 +230,8 @@ class Layer extends Component {
 function mapStateToProps(state) {
     return {
         assets: state.project.assets,
-        character: state.editor.present.character
+        character: state.editor.present.character,
+        self: state.self
     }
 }
 

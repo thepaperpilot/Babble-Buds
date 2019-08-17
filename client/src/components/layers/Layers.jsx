@@ -59,7 +59,8 @@ class Layers extends Component {
     }
 
     renderNode(node) {
-        return <Layer {...node} nodeEmote={node.emote} tabs={this.state.tabs} emotes={this.state.emotes} />
+        return <Layer {...node} contextmenu={this.props.id}
+            nodeEmote={node.emote} tabs={this.state.tabs} emotes={this.state.emotes} />
     }
 
     canBecomeParent(parent, child) {
@@ -103,6 +104,7 @@ class Layers extends Component {
     render() {
         // We don't want the ui tree modifying the tree object stored in redux because then it won't re-render everything properly
         // So we have to clone it using JSON parse and stringify
+        const LinkedLayerContextMenu = LayerContextMenu(this.props.id)
         return (
             <div className="panel console">
                 <div className="bar flex-row">
@@ -119,7 +121,7 @@ class Layers extends Component {
                             canBecomeParent={this.canBecomeParent} />
                     </Scrollbar> :
                     <div className="default">Open puppet to edit layers</div>}
-                <LayerContextMenu />
+                <LinkedLayerContextMenu />
             </div>
         )
     }

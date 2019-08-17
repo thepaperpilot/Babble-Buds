@@ -24,19 +24,14 @@ class Dropdown extends Component {
 
     render() {
         return this.props.items.length ? (
-            <div className="dropdown-wrapper">
+            <div>
                 <input
-                    className={this.props.bar ? 'dropdown bar-dropdown' : 'dropdown'}
+                    className="dropdown bar-dropdown"
                     type="checkbox"
                     id={`dropdown ${this.state.id}`}
                     checked={!this.state.folded}
                     onChange={this.toggleFolded} />
                 <label htmlFor={`dropdown ${this.state.id}`}>
-                    {this.props.bar || <button
-                        className="dropdown-image"
-                        title="Dropdown">
-                        ⚙
-                    </button>}
                     <div className="dropdown-content">
                         <AnimateHeight duration={0} height={this.state.folded ? '0%' : 'auto'}>
                             <ul>

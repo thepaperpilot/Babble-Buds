@@ -55,7 +55,7 @@ class Layer extends Component {
         const bundle = asset && asset.type === 'bundle' ?
             <div className="asset-bundle" /> : null
         return <ContextMenuTrigger
-            id="contextmenu-layer"
+            id={`contextmenu-layer-${this.props.contextmenu}`}
             holdToDisplay={-1}
             collect={() => ({ path, self, name, layerChildren: children, tabs, assetId: id, asset })}>
             <div className={classNames(className)}
