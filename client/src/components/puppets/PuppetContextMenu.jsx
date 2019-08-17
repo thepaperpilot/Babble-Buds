@@ -2,8 +2,6 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { ContextMenu, MenuItem, SubMenu, connectMenu } from 'react-contextmenu'
 
-const MENU_TYPE = 'contextmenu-puppet'
-
 class DraggablePuppet extends Component {
     constructor(props) {
         super(props)
@@ -39,14 +37,12 @@ class DraggablePuppet extends Component {
         }
     }
 
-    shouldComponentUpdate() {
-        return false
-    }
-
     render() {
-        return <ContextMenu id={MENU_TYPE}>
+        return <ContextMenu id={this.props.id}
+            onShow={this.props.onShow} onHide={this.props.onHide}>
             <MenuItem onClick={this.duplicatePuppet}>Duplicate</MenuItem>
-            <MenuItem onClick={this.edit}>Rename</MenuItem>
+            {this.props.trigger && this.props.trigger.inlineEdit &&
+                <MenuItem onClick={this.edit}>Rename</MenuItem>}
             <MenuItem onClick={this.deletePuppet}>Delete</MenuItem>
         </ContextMenu>
     }
@@ -58,4 +54,4 @@ function mapStateToProps(state) {
     }
 }
 
-export default connect(mapStateToProps)(connectMenu(MENU_TYPE)(DraggablePuppet))
+export default id => connect(mapStateToProps)(connectMenu(`contextmenu-puppet-${id}`)(DraggablePuppet))

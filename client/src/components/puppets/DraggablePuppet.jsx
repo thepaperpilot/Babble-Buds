@@ -36,7 +36,7 @@ class DraggablePuppet extends Component {
         return this.props.connectDragSource(
             <div>
                 <ContextMenuTrigger
-                    id="contextmenu-puppet"
+                    id={`contextmenu-puppet-${this.props.contextmenu}`}
                     holdToDisplay={-1}
                     collect={() => ({ puppet: parseInt(this.props.puppet, 10), inlineEdit: this.inlineEdit })}>
                     <DragPreviewImage src={this.props.thumbnail} connect={this.props.connectDragPreview} />

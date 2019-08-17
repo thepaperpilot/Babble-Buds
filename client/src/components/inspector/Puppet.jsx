@@ -4,8 +4,9 @@ import Scrollbar from 'react-custom-scroll'
 import Header from './Header'
 import Checkbox from './fields/Checkbox'
 import Number from './fields/Number'
-import Dropdown from './../ui/Dropdown'
+import Dropdown from './../ui/InspectorDropdown'
 import {reducer} from './../controller/Emotes'
+import PuppetContextMenu from './../puppets/PuppetContextMenu'
 
 const path = window.require('path')
 
@@ -13,31 +14,8 @@ class Puppet extends Component {
     constructor(props) {
         super(props)
 
-        this.duplicatePuppet = this.duplicatePuppet.bind(this)
-        this.deletePuppet = this.deletePuppet.bind(this)
         this.changePuppet = this.changePuppet.bind(this)
         this.selectEmote = this.selectEmote.bind(this)
-    }
-
-    duplicatePuppet() {
-        this.props.dispatch({
-            type: 'DUPLICATE_PUPPET',
-            puppet: this.props.target
-        })
-    }
-
-    deletePuppet() {
-        if (this.props.target === this.props.id) {
-            this.props.dispatch({
-                type: 'ERROR',
-                content: 'You can\'t delete your active puppet. Please switch puppets and try again.'
-            })
-        } else {
-            this.props.dispatch({
-                type: 'DELETE_PUPPET',
-                puppet: this.props.target
-            })
-        }
     }
 
     changePuppet(key) {
@@ -71,28 +49,22 @@ class Puppet extends Component {
     }
 
     render() {
-        // TODO target is either the id of a puppet of ours, or an owner id for a puppet being controlled by a connected client
         const puppet = this.props.puppets[this.props.target]
+        if (!puppet) return null
+            
         const thumbnails = this.props.puppetThumbnails[this.props.target]
         const disabled = puppet.creator !== this.props.self
 
-        const dropdownItems = [
-            { label: 'Duplicate Puppet', onClick: this.duplicatePuppet }
-        ]
-
-        if (!disabled) {
-            dropdownItems.push({
-                label: 'Delete Puppet',
-                onClick: this.deletePuppet
-            })
-        }
-
         const emotes = puppet.layers.children.reduce(reducer(this.props.assets), [])
+
+        const LinkedPuppetContextMenu = PuppetContextMenu(this.props.contextmenu)
 
         return (
             <div className="inspector">
                 <Header targetName={puppet.name} />
-                <Dropdown items={dropdownItems}/>
+                <Dropdown menu={LinkedPuppetContextMenu}
+                    id={`contextmenu-puppet-${this.props.contextmenu}`}
+                    collect={() => ({ puppet: parseInt(this.props.target, 10) })}/>
                 <div className="inspector-content">
                     <Scrollbar allowOuterScroll={true} heightRelativeToParent="100%">
                         <pre className="info">
@@ -127,7 +99,7 @@ class Puppet extends Component {
                                         style={{height: '120px', width: '120px'}}
                                         onClick={this.selectEmote(emote.emote)}
                                         key={emote.name} >
-                                        <div className={emote.emote === this.props.emote ? "char selected" : "char"} key={emote.name}>
+                                        <div className={emote.emote === this.props.emote ? 'char selected' : 'char'} key={emote.name}>
                                             <img alt={emote.name} src={imageSource}/>
                                             <div className="desc">{emote.name}</div>
                                         </div>

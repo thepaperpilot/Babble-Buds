@@ -77,6 +77,8 @@ class Puppets extends Component {
 
         const rows = Math.ceil(puppets.length / puppetsPerRow)
 
+        const LinkedPuppetContextMenu = PuppetContextMenu(this.props.id)
+
         return (
             <div className="panel puppet-selector">
                 <div className="bar flex-row">
@@ -114,6 +116,7 @@ class Puppets extends Component {
                                         key={i}
                                         small={size === 60}
                                         height={2 * size - 30}
+                                        contextmenu={this.props.id}
                                         puppet={puppets[start + i]} />
                                 </div>
                             })}
@@ -123,7 +126,7 @@ class Puppets extends Component {
                         </div>
                     }}
                 </List>
-                <PuppetContextMenu />
+                <LinkedPuppetContextMenu />
             </div>
         )
     }
