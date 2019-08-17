@@ -74,6 +74,15 @@ class Assets extends Component {
         this.list.current.scrollToItem(tab, 'start')
     }
 
+    // You can't click on an item in a react-window list the same frame its rendering,
+    // and the panel would re-render whenever you changed focus to it, which would happen
+    // when clicking one of the items. Basically, this line prevents it from
+    // re-rendering when focus changes to this panel (since nothing's changed), thus
+    // fixing a bug causing puppets to not get selected sometimes
+    shouldComponentUpdate(newProps, newState) {
+        return !(JSON.stringify(this.props) == JSON.stringify(newProps) && this.state == newState)
+    }
+
     render() {
         // Apply our filter to our list of assets
         const filteredAssets = this.state.filter === '' ?
