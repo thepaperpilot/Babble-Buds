@@ -64,7 +64,7 @@ class Panels extends Component {
                 onZoomChange={this.updateConfig(node, 'size')}
                 id={node.getId()} />
         case 'controller':
-            return <Controller/>
+            return <Controller id={node.getId()} />
         case 'editor':
             return <Editor rect={node._rect} grid={grid} highlight={highlight} 
                 onZoomChange={this.updateConfig(node, 'grid')}

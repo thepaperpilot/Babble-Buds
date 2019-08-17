@@ -7,7 +7,7 @@ class Controller extends Component {
     render() {
         return (
             <div className="controller-container">
-                <Characters />
+                <Characters id={this.props.id} />
                 <Emotes />
             </div>
         )

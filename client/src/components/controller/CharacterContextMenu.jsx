@@ -3,8 +3,6 @@ import { connect } from 'react-redux'
 import { ActionCreators as UndoActionCreators } from 'redux-undo'
 import { ContextMenu, MenuItem, connectMenu } from 'react-contextmenu'
 
-const MENU_TYPE = 'contextmenu-character'
-
 class CharacterContextMenu extends Component {
     constructor(props) {
         super(props)
@@ -37,7 +35,7 @@ class CharacterContextMenu extends Component {
     }
 
     render() {
-        return <ContextMenu id={MENU_TYPE}>
+        return <ContextMenu id={this.props.id}>
             <MenuItem onClick={this.clear}>Clear Slot</MenuItem>
             <MenuItem onClick={this.edit}>Edit Puppet</MenuItem>
         </ContextMenu>
@@ -50,4 +48,4 @@ function mapStateToProps(state) {
     }
 }
 
-export default connect(mapStateToProps)(connectMenu(MENU_TYPE)(CharacterContextMenu))
+export default id => connect(mapStateToProps)(connectMenu(`contextmenu-character-${id}`)(CharacterContextMenu))

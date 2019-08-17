@@ -37,7 +37,7 @@ class Character extends Component {
         className.selected = this.props.id === this.props.hotbar[this.props.index]
         const imageSource = this.props.characterThumbnails[this.props.hotbar[this.props.index]]
         return <ContextMenuTrigger
-            id="contextmenu-character"
+            id={`contextmenu-character-${this.props.contextmenu}`}
             holdToDisplay={-1}
             collect={() => ({
                 index: this.props.index,

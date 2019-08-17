@@ -135,6 +135,12 @@ const template = [
                 }
             },
             {
+                label: 'Control Panel',
+                click (item, focusedWindow) {
+                    focusedWindow.webContents.send('toggle panel', 'controller')
+                }
+            },
+            {
                 type: 'separator'
             },
             {
