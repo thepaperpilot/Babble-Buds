@@ -128,6 +128,32 @@ textarea:focus {
     outline: none;
 }
 
+img {
+    position: relative;
+    overflow: hidden;
+}
+
+img:after {
+    background-color: #242a33;
+    display: block;
+    position: absolute;
+    z-index: 2;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    content: "";
+}
+
+.selected img:after {
+    background-color: #333c4a;
+}
+
+.char:hover:not(.selected) img:after,
+.emote:hover:not(.selected) img:after {
+    background-color: #2a323d;
+}
+
 .s5 {
     width: 50%;
     height: unset;
@@ -193,7 +219,8 @@ textarea:focus {
     position: absolute;
     width: 20px;
     text-align: center;
-    opacity: .75;
+    opacity: .75;    
+    z-index: 3;
 }
 
 .animated.char::before,
