@@ -234,6 +234,7 @@ class AssetImporter extends Component {
                     <Assets
                         isAssetImporter={true}
                         assets={this.state.assets}
+                        selected={this.state.selected}
                         rect={{
                             width: Math.min(900, .9 * window.innerWidth),
                             // Magic number alert: height of the footer and bar
