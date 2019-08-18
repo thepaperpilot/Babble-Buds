@@ -16,10 +16,18 @@ class Clipboard extends Component {
 
     componentDidMount() {
         window.addEventListener('keydown', this.keyDown)
+        electron.ipcRenderer.on('cut', this.cut)
+        electron.ipcRenderer.on('copy', this.copy)
+        electron.ipcRenderer.on('paste', this.paste)
+        electron.ipcRenderer.on('delete', this.delete)
     }
 
     componentWillUnmount() {
         window.removeEventListener('keydown', this.keyDown)
+        electron.ipcRenderer.off('cut', this.cut)
+        electron.ipcRenderer.off('copy', this.copy)
+        electron.ipcRenderer.off('paste', this.paste)
+        electron.ipcRenderer.off('delete', this.delete)
     }
 
     cut() {
@@ -28,37 +36,54 @@ class Clipboard extends Component {
     }
 
     copy() {
-        /*
-        const needsActor = this.props.targetType === 'actor'
-        const actions = this.props.actions[this.props.frame].filter(action =>
-            needsActor === ('id' in action || 'target' in action))
-        electron.clipboard.writeText(JSON.stringify(actions))
-        */
+        if (this.props.character && this.props.layer != null) {
+            const layers = this.props.character.layers
+            let curr = layers
+            this.props.layer.forEach(index => {
+                if (curr == null) return
+                curr = curr.children[index]
+            })
+            electron.clipboard.writeText(JSON.stringify(curr))
+        }
     }
 
     paste() {
-        /*
-        try {
-            const actions = JSON.parse(electron.clipboard.readText())
-            this.props.dispatch({
-                type: 'ADD_ACTIONS',
-                frame: this.props.frame,
-                actions
-            })
-        } catch (e) {
-            // ignored
+        if (this.props.character) {
+            try {
+                const layer = JSON.parse(electron.clipboard.readText())
+                let l = this.props.layer || []
+
+                const layers = this.props.character.layers
+                let curr = layers;
+                (l || []).forEach((index, i) => {
+                    if (curr.children[index] != null)
+                        curr = curr.children[index]
+                    else l = l.slice(0, i)
+                })
+
+                const path = curr.id ? l.slice(0, -1) : l
+                this.props.dispatch({
+                    type: 'ADD_LAYER',
+                    path,
+                    layer
+                })
+            } catch (e) {
+                this.props.dispatch({
+                    type: 'ERROR',
+                    error: e,
+                    content: 'Failed to paste layer'
+                })
+            }
         }
-        */
     }
 
     delete() {
-        /*
-        this.props.dispatch({
-            type: 'REMOVE_ACTIONS',
-            frame: this.props.frame,
-            actor: this.props.targetType === 'actor' ? this.props.target : null
-        })
-        */
+        if (this.props.character && this.props.layer != null) {
+            this.props.dispatch({
+                type: 'DELETE_LAYER',
+                path: this.props.layer
+            })
+        }
     }
 
     keyDown(e) {
@@ -66,9 +91,6 @@ class Clipboard extends Component {
             return
 
         if (!e.ctrlKey && e.keyCode !== 46)
-            return
-
-        if (this.props.targetType !== 'frame' && this.props.targetType !== 'actor')
             return
 
         switch (e.keyCode) {
@@ -85,15 +107,10 @@ class Clipboard extends Component {
 }
 
 function mapStateToProps(state) {
-    return {}
-    /*
     return {
-        targetType: state.inspector.targetType,
-        target: state.inspector.target,
-        frame: state.timeline.present.frame,
-        actions: state.timeline.present.keyframes.actions
+        layer: state.editor.present.layer,
+        character: state.editor.present.character
     }
-    */
 }
 
 export default connect(mapStateToProps)(Clipboard)

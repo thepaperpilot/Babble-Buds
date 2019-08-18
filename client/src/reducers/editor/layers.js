@@ -103,7 +103,9 @@ function deleteLayer(state, action) {
     const layers = JSON.parse(JSON.stringify(state.character.layers))
     const curr = action.path.slice(0, -1).reduce((layer, index) => layer.children[index], layers)
     curr.children.splice(action.path[action.path.length - 1], 1)
-    const {layers: newLayers, layer} = updatePaths(layers, state.layer)
+    let {layers: newLayers, layer} = updatePaths(layers, state.layer)
+    if (curr.children.length === 0 && curr !== layers)
+        layer = layer.slice(0, -1)
     const character = util.updateObject(state.character, { layers: newLayers })
     return util.updateObject(state, { character, layer })
 }
@@ -130,12 +132,16 @@ function addLayer(state, action) {
     const inherit = Object.assign((({ head, emote, emoteLayer }) =>
         ({ head, emote, emoteLayer }))(curr), curr.inherit)
     Object.keys(inherit).forEach(k => inherit[k] == null && delete inherit[k])
-    curr.children.push({
+    let layer = Object.assign({
         children: [],
+        name: 'New Layer'
+    }, action.layer || {}, {
         inherit,
-        name: 'New Layer',
         path: action.path.concat(curr.children.length)
     })
+    if ('id' in layer)
+        delete layer.children
+    curr.children.push(layer)
 
     const character = util.updateObject(state.character, { layers })
     return util.updateObject(state, { character })
