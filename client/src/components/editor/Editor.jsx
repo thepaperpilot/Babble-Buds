@@ -165,10 +165,12 @@ function mapStateToProps(state) {
     const {character, type, id, layer} = state.editor.present
     const layers = character ? character.layers : []
 
+    console.log(state.project)
+
     return {
         character: layers,
         changed: id && type &&
-            JSON.stringify(character) !== JSON.stringify(state.project[type === 'asset' ? type : 'characters'][id]),
+            JSON.stringify(character) !== JSON.stringify(state.project[type === 'assets' ? type : 'characters'][id]),
         selected: layer
     }
 }
