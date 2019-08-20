@@ -50,6 +50,7 @@ class Stage extends Component {
             this.stage.assets = newProps.assets
             this.stage.assetsPath = newProps.assetsPath
             this.stage.reloadPuppets()
+            this.puppet = this.stage.puppets.find(p => p.id === this.puppet.id)
         }
 
         // Check for anything that requires this.puppet
