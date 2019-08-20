@@ -140,7 +140,7 @@ class Layer extends Component {
                         self: this.props.self,
                         name: layer.name,
                         layerChildren: layer.children,
-                        tabs: this.props.folders.map(f => f.name),
+                        tabs: this.props.folders,
                         assetId: layer.id,
                         asset: layer
                     })} />

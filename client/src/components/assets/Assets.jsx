@@ -209,7 +209,7 @@ class Assets extends Component {
 function mapStateToProps(state, props) {
     return {
         assets: props.assets || state.project.assets,
-        folders: props.folders || state.project.settings.folders.map(f => f.name)
+        folders: props.folders || state.project.settings.folders
     }
 }
 

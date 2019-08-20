@@ -141,15 +141,13 @@ class AssetImporter extends Component {
                 project.assetsPath || '../assets')
             const {assets, folders} = loadAssets(project, assetsPath, [])
 
-            const tabs = folders.map(f => f.name)
-
             this.setState({
                 project: filepaths[0],
                 open: true,
                 selected: [],
                 assets,
                 assetsPath,
-                tabs
+                tabs: folders
             })
         })
     }

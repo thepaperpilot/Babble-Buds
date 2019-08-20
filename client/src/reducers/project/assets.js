@@ -32,33 +32,12 @@ function handleDeleteAsset(assets, characters, id) {
     })
 }
 
-// This function returns a new folder!
-// No side effects!
-function addToFolder(folder, id) {
-    const newFolder = util.updateObject(folder, { assets: folder.assets.slice() })
-    newFolder.assets.push(id)
-    return newFolder
-}
-
-// This function returns a new folder!
-// No side effects!
-function removeFromFolder(folder, id) {
-    const newFolder = util.updateObject(folder, { assets: folder.assets.slice() })
-    newFolder.assets.splice(folder.assets.indexOf(id), 1)
-    return newFolder
-}
-
 function deleteAsset(state, action) {
     const assets = util.updateObject(state.assets)
     const characters = util.updateObject(state.characters)
     handleDeleteAsset(assets, characters, action.asset)
     
-    const folders = state.settings.folders.slice()
-    const index = folders.findIndex(f => f.name === state.assets[action.asset].tab)
-    folders[index] = removeFromFolder(folders[index], action.asset)
-    
-    const settings = util.updateObject(state.settings, { folders })
-    return util.updateObject(state, { settings, assets, characters })
+    return util.updateObject(state, { assets, characters })
 }
 
 function renameAsset(state, action) {
@@ -77,18 +56,12 @@ function moveAsset(state, action) {
         version: state.assets[action.asset].version + 1
     })
 
-    // Remove asset from old folder
-    const folders = state.settings.folders.slice()
-    const oldF = folders.findIndex(f => f.name === state.assets[action.asset].tab)
-    folders[oldF] = removeFromFolder(folders[oldF], action.asset)
-
     // Add asset to new folder
-    let newF = folders.findIndex(f => f.name === action.tab)
-    if (newF === -1) {
-        newF = folders.length
-        folders.push({ name: action.tab, assets: [] })
+    let folders = state.settings.folders
+    if (!folders.includes(action.tab)) {
+        folders = folders.slice()
+        folders.push(action.tab)
     }
-    folders[newF] = addToFolder(folders[newF], action.asset)
     
     const assets = util.updateObject(state.assets, { [action.asset]: asset })
     const settings = util.updateObject(state.settings, { folders })
@@ -106,15 +79,10 @@ function duplicateAsset(state, action) {
     fs.copySync(path.join(assetsPath, state.assets[action.asset].location),
         path.join(assetsPath, asset.location))
 
-    const folders = state.settings.folders.slice()
-    const f = folders.findIndex(f => f.name === asset.tab)
-    folders[f] = addToFolder(folders[f], `${settingsManager.settings.uuid}:${id}`)
-
     const assets = util.updateObject(state.assets, {
         [`${settingsManager.settings.uuid}:${id}`]: asset
     })
-    const settings = util.updateObject(state.settings, { folders })
-    return util.updateObject(state, { settings, assets })
+    return util.updateObject(state, { assets })
 }
 
 function deleteTab(state, action) {
@@ -122,20 +90,23 @@ function deleteTab(state, action) {
     const characters = util.updateObject(state.characters)
     Object.keys(state.assets).filter(id =>
         assets[id].tab === action.tab).forEach(asset => {
-        handleDeleteAsset(assets, null, characters, asset)
+        handleDeleteAsset(assets, characters, asset)
     })
     const folders = state.settings.folders.slice()
-    folders.splice(folders.findIndex(f => f.name === action.tab), 1)
+    folders.splice(folders.indexOf(action.tab), 1)
     const settings = util.updateObject(state.settings, { folders })
     return util.updateObject(state, { settings, assets, characters })
 }
 
 function addAssets(state, action) {
     const assets = util.updateObject(state.assets, action.assets)
-    const folders = state.settings.folders.slice()
+    let folders = state.settings.folders
     Object.keys(action.assets).forEach(id => {
-        const index = folders.findIndex(f => f.name === action.assets[id].tab)
-        folders[index] = addToFolder(folders[index], id)
+        if (!folders.includes(action.assets[id].tab)) {
+            if (folders.length === state.settings.folders.length)
+                folders = folders.slice()
+            folders.push(action.assets[id].tab)
+        }
     })
     const settings = util.updateObject(state.settings, { folders })
     return util.updateObject(state, { settings, assets })
@@ -148,9 +119,11 @@ function newAssetBundle(state, action) {
     ipcRenderer.send('background', 'generate thumbnails', thumbnailPath,
         { layers }, 'asset', id)
 
-    const folders = state.settings.folders.slice()
-    const index = folders.findIndex(f => f.name === tab)
-    folders[index] = addToFolder(folders[index], id)
+    let folders = state.settings.folders
+    if (!folders.includes(tab)) {
+        folders = folders.slice()
+        folders.push(tab)
+    }
     const settings = util.updateObject(state.settings, { folders })
 
     return addAssets(state, { settings, assets: {

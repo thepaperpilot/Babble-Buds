@@ -132,7 +132,7 @@ export function loadAssets(settings, assetsPath, characters) {
             let assets = fs.readJsonSync(path.join(assetsPath, settings.assets[i].location))
             oldAssets[settings.assets[i].name] = {}
             let keys = Object.keys(assets)
-            folders.push({name: settings.assets[i].name, assets: keys})
+            folders.push(settings.assets[i].name)
             for (let j = 0; j < keys.length; j++) {
                 assets[keys[j]].tab = settings.assets[i].name
                 assets[keys[j]].version = 0
@@ -172,11 +172,8 @@ export function loadAssets(settings, assetsPath, characters) {
                 asset.panning = []
             }
             
-            if (!folders.some(f => f.name === asset.tab))
-                folders.push({name: asset.tab, assets: []})
-            const f = folders.find(f => f.name === asset.tab)
-            if (!(key in f.assets))
-                f.assets.push(key)
+            if (!folders.includes(asset.tab))
+                folders.push(asset.tab)
         })
         return { assets, folders }
     }

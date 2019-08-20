@@ -19,7 +19,8 @@ class Folder extends Component {
     }
 
     renameFolder(name) {
-        this.props.folder.forEach(id => {
+        Object.keys(this.props.assets).filter(id =>
+            this.props.assets[id].tab === this.props.tab).forEach(id => {
             const asset = this.props.assets[id]
             if (id.split(':')[0] === this.props.self) {
                 this.props.dispatch({
@@ -51,12 +52,9 @@ class Folder extends Component {
     }
 }
 
-function mapStateToProps(state, props) {
+function mapStateToProps(state) {
     return {
         assets: state.project.assets,
-        folder: props.tab ?
-            state.project.settings.folders.find(f => f.name === props.tab).assets :
-            [],
         self: state.self
     }
 }
