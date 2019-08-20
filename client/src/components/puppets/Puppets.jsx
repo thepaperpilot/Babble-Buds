@@ -69,6 +69,8 @@ class Puppets extends Component {
             Object.keys(this.props.puppets) :
             this.search.search(this.state.filter).map(puppet => puppet.id)
         )
+        puppets.sort((a, b) =>
+            this.props.puppets[a].name.localeCompare(this.props.puppets[b].name))
 
         // Calculate how many will be shown in each row
         let puppetsPerRow = Math.floor((this.props.rect.width - 14) / (size + 16))
