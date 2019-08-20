@@ -98,7 +98,8 @@ class Console extends Component {
                 </div>
                 
                 <div className="full-panel">
-                    <Scrollbar allowOuterScroll={true} heightRelativeToParent="100%">
+                    <Scrollbar allowOuterScroll={true} heightRelativeToParent="100%" 
+                        keepAtBottom={true}>
                         {statuses.map((status, i) => (
                             <pre key={i} className={status.type}>
                                 {status.message}
