@@ -103,6 +103,8 @@ class Assets extends Component {
         const tabToRow = {}
         const assetsByTab = tabs.reduce((acc, curr) => {
             acc[curr] = filteredAssets.filter(id => this.props.assets[id].tab === curr)
+            acc[curr].sort((a, b) =>
+                this.props.assets[a].name.localeCompare(this.props.assets[b].name))
             return acc
         }, {})
         const numAssets = tabs.slice().reduce((total, tab) => {
