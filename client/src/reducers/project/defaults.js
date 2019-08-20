@@ -20,6 +20,7 @@ export const DEFAULTS = {
         'nickname': names[Math.floor(Math.random() * names.length)],
         'charactersPath': '../characters',
         'assetsPath': '../assets',
+        folders: [],
         'characters': [
             {
                 'name': '',

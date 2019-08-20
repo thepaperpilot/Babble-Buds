@@ -140,8 +140,7 @@ class Layer extends Component {
                         self: this.props.self,
                         name: layer.name,
                         layerChildren: layer.children,
-                        tabs: Object.values(this.props.assets).reduce((acc, curr) =>
-                            acc.includes(curr.tab) ? acc : acc.concat(curr.tab), []),
+                        tabs: this.props.folders.map(f => f.name),
                         assetId: layer.id,
                         asset: layer
                     })} />
@@ -230,6 +229,7 @@ class Layer extends Component {
 function mapStateToProps(state) {
     return {
         assets: state.project.assets,
+        folders: state.project.settings.folders,
         character: state.editor.present.character,
         self: state.self
     }

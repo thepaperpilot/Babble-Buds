@@ -126,11 +126,13 @@ export function loadAssets(settings, assetsPath, characters) {
     if (settings.assets) {
         // Backwards compatibility: Convert from old-style assets
         const newAssets = {}
+        const folders = []
         let oldAssets = {}
         for (let i = 0; i < settings.assets.length; i++) {
             let assets = fs.readJsonSync(path.join(assetsPath, settings.assets[i].location))
             oldAssets[settings.assets[i].name] = {}
             let keys = Object.keys(assets)
+            folders.push({name: settings.assets[i].name, assets: keys})
             for (let j = 0; j < keys.length; j++) {
                 assets[keys[j]].tab = settings.assets[i].name
                 assets[keys[j]].version = 0
@@ -153,9 +155,10 @@ export function loadAssets(settings, assetsPath, characters) {
             }
         }
         Object.values(characters).forEach(character => updateAsset(character.layers))
-        return newAssets
+        return { assets: newAssets, folders }
     } else {
         const assets = fs.readJsonSync(path.join(assetsPath, 'assets.json'))
+        const folders = settings.folders || (settings.folders = [])
 
         // Cross compatibility - windows will handle UNIX-style paths, but not vice versa
         Object.keys(assets).forEach(key => {
@@ -168,8 +171,14 @@ export function loadAssets(settings, assetsPath, characters) {
                 asset.version =  0
                 asset.panning = []
             }
+            
+            if (!folders.some(f => f.name === asset.tab))
+                folders.push({name: asset.tab, assets: []})
+            const f = folders.find(f => f.name === asset.tab)
+            if (!(key in f.assets))
+                f.assets.push(key)
         })
-        return assets
+        return { assets, folders }
     }
 }
 
@@ -227,7 +236,7 @@ function loadProject(state, action) {
 
     const assetsPath = path.join(filepath, settings.assetsPath || '../assets')
     const {characters, characterThumbnails, numCharacters, converted} = loadCharacters(settings, path.join(filepath, settings.charactersPath))
-    const assets = loadAssets(settings, assetsPath, characters)
+    const {assets} = loadAssets(settings, assetsPath, characters)
     delete settings.assets
 
     // Update assets if converted to new layers system

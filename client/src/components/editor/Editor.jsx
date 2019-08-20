@@ -165,8 +165,6 @@ function mapStateToProps(state) {
     const {character, type, id, layer} = state.editor.present
     const layers = character ? character.layers : []
 
-    console.log(state.project)
-
     return {
         character: layers,
         changed: id && type &&

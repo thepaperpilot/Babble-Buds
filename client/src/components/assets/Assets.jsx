@@ -99,8 +99,7 @@ class Assets extends Component {
 
         // Calculate how many assets we'll have in each tab,
         // and on which row each tab starts
-        const tabs = Object.values(this.props.assets).reduce((acc, curr) =>
-            acc.includes(curr.tab) ? acc : acc.concat(curr.tab), [])
+        const tabs = this.props.folders
         const tabToRow = {}
         const assetsByTab = tabs.reduce((acc, curr) => {
             acc[curr] = filteredAssets.filter(id => this.props.assets[id].tab === curr)
@@ -108,10 +107,6 @@ class Assets extends Component {
         }, {})
         const numAssets = tabs.slice().reduce((total, tab) => {
             const numAssets = assetsByTab[tab].length
-            if (numAssets === 0) {
-                tabs.splice(tabs.indexOf(tab), 1)
-                return total
-            }
             tabToRow[tab] = total
             // We add one for the header row
             return total + Math.ceil(numAssets / assetsPerRow) + 1
@@ -213,7 +208,8 @@ class Assets extends Component {
 
 function mapStateToProps(state, props) {
     return {
-        assets: props.assets || state.project.assets
+        assets: props.assets || state.project.assets,
+        folders: props.folders || state.project.settings.folders.map(f => f.name)
     }
 }
 

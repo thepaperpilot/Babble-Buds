@@ -163,7 +163,7 @@ class PuppetImporter extends Component {
 
             const assetsPath = path.join(filepaths[0],
                 project.assetsPath || '../assets')
-            const assets = loadAssets(project, assetsPath, characters)
+            const {assets} = loadAssets(project, assetsPath, characters)
 
             this.setState({
                 project: filepaths[0],

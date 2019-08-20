@@ -139,10 +139,9 @@ class AssetImporter extends Component {
             const project = fs.readJsonSync(filepaths[0])
             const assetsPath = path.join(filepaths[0],
                 project.assetsPath || '../assets')
-            const assets = loadAssets(project, assetsPath, [])
+            const {assets, folders} = loadAssets(project, assetsPath, [])
 
-            const tabs = Object.values(assets).reduce((acc, curr) =>
-                acc.includes(curr.tab) ? acc : acc.concat(curr.tab), [])
+            const tabs = folders.map(f => f.name)
 
             this.setState({
                 project: filepaths[0],
@@ -234,6 +233,7 @@ class AssetImporter extends Component {
                     <Assets
                         isAssetImporter={true}
                         assets={this.state.assets}
+                        folders={this.state.tabs}
                         selected={this.state.selected}
                         rect={{
                             width: Math.min(900, .9 * window.innerWidth),

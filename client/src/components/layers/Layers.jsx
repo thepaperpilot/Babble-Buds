@@ -11,7 +11,6 @@ class Layers extends Component {
         super(props)
 
         this.state = {
-            tabs: this.calculateTabs(props),
             emotes: this.calculateEmotes(props)
         }
 
@@ -19,16 +18,10 @@ class Layers extends Component {
         this.addLayer = this.addLayer.bind(this)
         this.canBecomeParent = this.canBecomeParent.bind(this)
         this.renderNode = this.renderNode.bind(this)
-        this.calculateTabs = this.calculateTabs.bind(this)
         this.calculateEmotes = this.calculateEmotes.bind(this)
     }
 
     componentWillReceiveProps(props) {
-        if (props.assets !== this.props.assets)
-            this.setState({
-                tabs: this.calculateTabs(props)
-            })
-        
         const emotes = this.calculateEmotes(props)
         if (emotes !== this.state.emotes)
             this.setState({ emotes })
@@ -60,7 +53,7 @@ class Layers extends Component {
 
     renderNode(node) {
         return <Layer {...node} contextmenu={this.props.id}
-            nodeEmote={node.emote} tabs={this.state.tabs} emotes={this.state.emotes} />
+            nodeEmote={node.emote} tabs={this.props.folders} emotes={this.state.emotes} />
     }
 
     canBecomeParent(parent, child) {
@@ -79,11 +72,6 @@ class Layers extends Component {
             return false
 
         return true
-    }
-
-    calculateTabs(props) {
-        return Object.values(props.assets).reduce((acc, curr) =>
-            acc.includes(curr.tab) ? acc : acc.concat(curr.tab), [])
     }
 
     calculateEmotes(props) {
@@ -132,7 +120,8 @@ function mapStateToProps(state) {
         targetType: state.inspector.targetType,
         tree: state.editor.present.character ? state.editor.present.character.layers : {},
         selected: state.editor.present.layer,
-        assets: state.project.assets
+        assets: state.project.assets,
+        folders: state.project.settings.folders
     }
 }
 
