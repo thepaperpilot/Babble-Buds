@@ -19,3 +19,9 @@
 .assets .folder-list .rcs-custom-scroll {
     width: 100%;
 }
+
+.new-folder-button {
+    display: block;
+    border: solid #333c4a 1px;
+    margin: 8px auto;
+}

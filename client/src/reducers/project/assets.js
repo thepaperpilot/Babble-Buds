@@ -159,6 +159,13 @@ function moveFolder(state, action) {
     return util.updateObject(state, { settings })
 }
 
+function newFolder(state, action) {
+    const settings = util.updateObject(state.settings, {
+        folders: [...state.settings.folders, action.folder]
+    })
+    return util.updateObject(state, { settings })
+}
+
 export default {
     'DELETE_ASSET': deleteAsset,
     'RENAME_ASSET': renameAsset,
@@ -168,5 +175,6 @@ export default {
     'ADD_ASSETS': addAssets,
     'NEW_ASSET_BUNDLE': newAssetBundle,
     'UPDATE_ASSET_THUMBNAILS': updateThumbnails,
-    'MOVE_FOLDER': moveFolder
+    'MOVE_FOLDER': moveFolder,
+    'NEW_FOLDER': newFolder
 }

@@ -16,7 +16,7 @@ class AssetContextMenu extends Component {
     newAssetTab() {
         let name = 'New Asset Folder', i = 2
         while (this.props.tabs.includes(name))
-            name = `New Asset Folder (${i})`
+            name = `New Asset Folder (${i++})`
 
         this.toFocus = name
         this.props.dispatch({

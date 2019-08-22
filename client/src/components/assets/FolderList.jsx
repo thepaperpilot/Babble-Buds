@@ -104,6 +104,38 @@ export class FolderTarget extends PureComponent {
 // Use some HOCs to give us our dispatch and other props
 const ConnectedFolderTarget = connect(null, null, null, { withRef: true })(DragSource('folder', folderSource, collectSource)(DropTarget(['asset', 'folder'], assetTarget, collect)(FolderTarget)))
 
+class NewFolderButton extends PureComponent {
+    constructor(props) {
+        super(props)
+
+        this.newFolder = this.newFolder.bind(this)
+    }
+
+    newFolder() {
+        let folder = 'New Asset Folder', i = 2
+        while (this.props.tabs.includes(folder))
+            folder = `New Asset Folder (${i++})`
+
+        this.props.dispatch({
+            type: 'NEW_FOLDER',
+            folder
+        })
+    }
+
+    render() {
+        return <button className="new-folder-button"
+            onClick={this.newFolder}>+</button>
+    }
+}
+
+function mapStateToProps(state) {
+    return {
+        tabs: state.project.settings.folders
+    }
+}
+
+const ConnectedNewFolderButton = connect(mapStateToProps)(NewFolderButton)
+
 // The actual component we export is a list of all those folder targets
 export default ({ tabs, jumpToFolder, tabToRow, CustomFolder, contextmenu }) => 
     <div className="folder-list">
@@ -120,5 +152,6 @@ export default ({ tabs, jumpToFolder, tabToRow, CustomFolder, contextmenu }) =>
 
                 return CustomFolder ? <CustomFolder {...props} /> :
                     <ConnectedFolderTarget {...props} />})}
+            {CustomFolder ? null : <ConnectedNewFolderButton />}
         </Scrollbar>
     </div>
