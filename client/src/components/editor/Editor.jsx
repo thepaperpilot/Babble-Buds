@@ -1,6 +1,7 @@
 import React, {Component} from 'react'
 import { connect } from 'react-redux'
 import { Stage } from 'react-pixi-fiber'
+import { DropTarget } from 'react-dnd'
 import Viewport from './Viewport'
 import Layer from './Layer'
 import Cross from './Cross'
@@ -12,6 +13,7 @@ class Editor extends Component {
     constructor(props) {
         super(props)
 
+        this.stage = React.createRef()
         this.viewport = React.createRef()
         this.selectedRef = React.createRef()
 
@@ -24,7 +26,8 @@ class Editor extends Component {
                 right: 0,
                 bottom: 0,
                 left: 0
-            }
+            },
+            dragPos: null
         }
 
         this.updateViewportBounds = this.updateViewportBounds.bind(this)
@@ -98,10 +101,24 @@ class Editor extends Component {
         this.updateViewportBounds()
     }
 
+    hover(dragPos) {
+        const v = this.viewport.current
+        const { top, left, transform} = v
+        const rect = this.stage.current._canvas.getBoundingClientRect()
+        const scale = transform.scale.x
+        
+        this.setState({
+            dragPos: {
+                x: left + (dragPos.x - rect.x) / scale,
+                y: top + (dragPos.y - rect.y) / scale
+            }
+        })
+    }
+
     render() {
         // TODO (re-)load assets since babble.js isn't here to do it for us
-        const {rect, character, selected, changed} = this.props
-        const {scale, grid, bounds} = this.state
+        const {rect, character, selected, changed, isOver, canDrop, item} = this.props
+        const {scale, grid, bounds, dragPos} = this.state
 
         const gridLines = []
         if (grid !== -1) {
@@ -128,8 +145,12 @@ class Editor extends Component {
             }
         }
 
-        return (
-            <div className={`panel editor${changed ? ' changed' : ''}`}>
+        return this.props.connectDropTarget(
+            <div className={`panel editor${changed ? ' changed' : ''}`}
+                style={{
+                    // Set background color based on the current drop status
+                    backgroundColor: !isOver && canDrop ? 'rgba(0, 255, 0, .05)' : ''
+                }}>
                 <div className="bar flex-row">
                     <button onClick={this.savePuppet}>Apply</button>
                     <div className="toggle" style={{ backgroundColor: this.state.highlight ? '#333c4a' : '#242a33'}} onClick={this.toggleHighlight}>
@@ -149,11 +170,23 @@ class Editor extends Component {
                 <Stage width={rect.width - (changed ? 6 : 0)} height={rect.height - 21 - (changed ? 6 : 0)} options={{
                     transparent: true,
                     antialias: true
-                }} onWheel={this.onScroll} onMouseDown={this.onMouseDown}>
+                }} onWheel={this.onScroll} onMouseDown={this.onMouseDown}
+                ref={this.stage} >
                     <Viewport width={rect.width - (changed ? 6 : 0)} height={rect.height - 21 - (changed ? 6 : 0)} ref={this.viewport}>
                         {gridLines}
                         <Cross x={0} y={0} scale={scale} color={0x888888} distance={DISTANCE * scale} />
                         <Layer layer={character} x={0} y={0} selectedRef={this.selectedRef} scale={scale} highlight={this.state.highlight ? selected : character.path} />
+                        {isOver && dragPos &&
+                            <Layer layer={{
+                                id: item.id,
+                                rotation: 0,
+                                scaleX: 1,
+                                scaleY: 1,
+                                x: 0,
+                                y: 0,
+                                path: []
+                            }} x={dragPos.x} y={dragPos.y}
+                            scale={scale} highlight={[]} />}
                     </Viewport>
                 </Stage>
             </div>
@@ -166,6 +199,7 @@ function mapStateToProps(state) {
     const layers = character ? character.layers : []
 
     return {
+        canDrop: !!character,
         character: layers,
         changed: id && type &&
             JSON.stringify(character) !== JSON.stringify(state.project[type === 'assets' ? type : 'characters'][id]),
@@ -173,4 +207,52 @@ function mapStateToProps(state) {
     }
 }
 
-export default connect(mapStateToProps)(Editor)
+const assetTarget = {
+    drop: (item, monitor, component) => {
+        const {x, y} = component.state.dragPos
+
+        let l = item.selected || []
+        let curr = item.character;
+        (l || []).forEach((index, i) => {
+            if (curr.children[index] != null)
+                curr = curr.children[index]
+            else l = l.slice(0, i)
+        })
+        const path = curr.id ? l.slice(0, -1) : l
+
+        item.dispatch({
+            type: 'ADD_LAYER',
+            path,
+            layer: {
+                id: monitor.getItem().id,
+                rotation: 0,
+                scaleX: 1,
+                scaleY: 1,
+                x, y
+            }
+        })
+        
+        item.dispatch({
+            type: 'SELECT_LAYER',
+            path: [...path, curr.children ? curr.children.length : l.slice(-1)[0] + 1]
+        })
+    },
+    canDrop: (item) => {
+        return item.canDrop
+    },
+    hover: (item, monitor, component) => {
+        if (item.canDrop)
+            component.hover(monitor.getClientOffset())
+    }
+}
+
+function collect(connect, monitor) {
+    return {
+        connectDropTarget: connect.dropTarget(),
+        isOver: monitor.isOver(),
+        canDrop: monitor.canDrop(),
+        item: monitor.getItem()
+    }
+}
+
+export default connect(mapStateToProps)(DropTarget('asset', assetTarget, collect)(Editor))

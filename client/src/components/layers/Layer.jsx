@@ -1,6 +1,7 @@
 import React, {Component} from 'react'
 import { connect } from 'react-redux'
 import classNames from 'classnames'
+import { DropTarget } from 'react-dnd'
 import { ContextMenuTrigger } from 'react-contextmenu'
 import { ActionCreators as UndoActionCreators } from 'redux-undo'
 
@@ -34,7 +35,7 @@ class Layer extends Component {
     }
 
     render() {
-        const {selected, asset, assetsPath, characterId} = this.props
+        const {selected, asset, assetsPath, characterId, isOver, canDrop} = this.props
         const {path, id, name, children, nodeEmote, emotes, head, emoteLayer, inherit, tabs, self} = this.props
         
         // TODO menu item to "recenter layer", which will only work on a layer with children, and will move the parent layer's position
@@ -58,9 +59,14 @@ class Layer extends Component {
             id={`contextmenu-layer-${this.props.contextmenu}`}
             holdToDisplay={-1}
             collect={() => ({ path, self, name, layerChildren: children, tabs, assetId: id, asset })}>
-            <div className={classNames(className)}
+            {this.props.connectDropTarget(<div className={classNames(className)}
                 onClick={this.onNodeClick}
-                onDoubleClick={this.editBundle}>
+                onDoubleClick={this.editBundle}
+                style={{
+                    // Set background color based on the current drop status
+                    backgroundColor: isOver && canDrop ? 'rgba(0, 255, 0, .2)' :
+                        canDrop ? 'rgba(0, 255, 0, .05)' : ''
+                }}>
                 {children == null ?
                     asset ?
                         <div>
@@ -71,8 +77,40 @@ class Layer extends Component {
                     name ? <div>{name}</div> : <div>root</div>}
                 {emote}
                 {bundle}
-            </div>
+            </div>)}
         </ContextMenuTrigger>
+    }
+}
+
+const assetTarget = {
+    drop: (item, monitor) => {
+        console.log(item, monitor.getItem())
+        const path = item.id ? item.path.slice(0, -1) : item.path
+        item.dispatch({
+            type: 'ADD_LAYER',
+            path,
+            layer: {
+                id: monitor.getItem().id,
+                rotation: 0,
+                scaleX: 1,
+                scaleY: 1,
+                x: 0,
+                y: 0
+            }
+        })
+        
+        item.dispatch({
+            type: 'SELECT_LAYER',
+            path: [...path, item.id ? item.path.slice(-1)[0] : item.children.length]
+        })
+    }
+}
+
+function collect(connect, monitor) {
+    return {
+        connectDropTarget: connect.dropTarget(),
+        isOver: monitor.isOver(),
+        canDrop: monitor.canDrop()
     }
 }
 
@@ -87,4 +125,4 @@ function mapStateToProps(state, props) {
     }
 }
 
-export default connect(mapStateToProps)(Layer)
+export default connect(mapStateToProps)(DropTarget('asset', assetTarget, collect)(Layer))

@@ -1,8 +1,9 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { DragSource, DragPreviewImage } from 'react-dnd'
+import { DragSource } from 'react-dnd'
 import { ActionCreators as UndoActionCreators } from 'redux-undo'
 import InlineEdit from './../ui/InlineEdit'
+import AssetDragPreview from './AssetDragPreview'
 import cx from 'classnames'
 import { ContextMenuTrigger } from 'react-contextmenu'
 
@@ -49,11 +50,20 @@ class DraggableAsset extends Component {
             animated: this.props.asset.type === 'animated',
             bundle: this.props.asset.type === 'bundle'
         })
+
+        // Create drag preview image with an empty image,
+        // so we can make our own dragpreview we have more control over
+        const img = new Image()
+        this.props.connectDragPreview(img)
+
         return <ContextMenuTrigger
             id={`contextmenu-asset-${this.props.contextmenu}`}
             holdToDisplay={-1}
             collect={() => ({ asset: this.props.id, inlineEdit: this.inlineEdit, disabled })}>
-            <DragPreviewImage src={thumbnail} connect={this.props.connectDragPreview} />
+            {this.props.isDragging && <AssetDragPreview
+                thumbnail={thumbnail}
+                name={this.props.asset.name}
+                monitor={this.props.monitor} />}
             {this.props.connectDragSource(this.props.small ?
                 <div>
                     <InlineEdit
@@ -101,10 +111,12 @@ const assetSource = {
     beginDrag: ({ id, asset, self }) => ({ id, asset, isOwned: id.split(':')[0] === self })
 }
 
-function collect(connect) {
+function collect(connect, monitor) {
     return {
         connectDragSource: connect.dragSource(),
-        connectDragPreview: connect.dragPreview()
+        connectDragPreview: connect.dragPreview(),
+        isDragging: monitor.isDragging(),
+        monitor
     }
 }
 

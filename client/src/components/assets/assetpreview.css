@@ -1,0 +1,22 @@
+.drag-preview {
+    position: fixed;
+    border: 3px solid #333c4a;
+    overflow: hidden;
+    width: 100px !important;
+    height: 100px !important;
+    z-index: 100000;
+    pointer-events: none;
+}
+
+.drag-preview .inner-line-item {
+    background-color: #333c4a;
+    color: #fff;
+    font-size: 12px;
+    overflow: hidden;
+    pointer-events: none;
+    text-align: center;
+    word-wrap: break-word;
+    flex: 0 0 auto;
+    margin: -2px;
+    margin-bottom: 4px;
+}

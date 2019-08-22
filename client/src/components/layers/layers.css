@@ -81,11 +81,6 @@
     top: 0;
     height: 100%;
     object-fit: contain;
-    background-color: inherit;
-}
-
-.layer.selected div {
-    background-color: inherit;
 }
 
 .layer.warning div:first-child {

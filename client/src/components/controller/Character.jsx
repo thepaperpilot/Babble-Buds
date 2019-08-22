@@ -44,14 +44,14 @@ class Character extends Component {
                 puppet: this.props.hotbar[this.props.index],
                 character
             })}>
-            <div
+            {this.props.connectDropTarget(<div
                 data-index={this.props.index}
                 className={classNames(className)}
                 onClick={this.changePuppet(this.props.index)}>
                 <div className="hotkey">{this.props.index + 1}</div>
                 <div className="desc">{character.name}</div>
-                {this.props.connectDropTarget(<img alt={character.name} src={imageSource}/>)}
-            </div>
+                <img alt={character.name} src={imageSource}/>
+            </div>)}
         </ContextMenuTrigger>
     }
 }
