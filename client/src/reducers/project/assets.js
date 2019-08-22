@@ -151,6 +151,14 @@ function updateThumbnails(state, action) {
     return util.updateObject(state, { assets })
 }
 
+function moveFolder(state, action) {
+    const folders = state.settings.folders.slice()
+    const dragCard = folders.splice(action.dragIndex, 1)[0]
+    folders.splice(action.hoverIndex, 0, dragCard)
+    const settings = util.updateObject(state.settings, { folders })
+    return util.updateObject(state, { settings })
+}
+
 export default {
     'DELETE_ASSET': deleteAsset,
     'RENAME_ASSET': renameAsset,
@@ -159,5 +167,6 @@ export default {
     'DELETE_TAB': deleteTab,
     'ADD_ASSETS': addAssets,
     'NEW_ASSET_BUNDLE': newAssetBundle,
-    'UPDATE_ASSET_THUMBNAILS': updateThumbnails
+    'UPDATE_ASSET_THUMBNAILS': updateThumbnails,
+    'MOVE_FOLDER': moveFolder
 }

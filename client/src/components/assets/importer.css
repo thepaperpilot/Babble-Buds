@@ -42,6 +42,10 @@
     padding: 0;
 }
 
+.asset-importer .folder-list-item {
+    border-style: solid;
+}
+
 .asset-importer .folder-list-item .header-wrapper {
     display: flex;
     justify-content: center;
@@ -58,7 +62,7 @@
 .asset-importer .toggle-button {
     padding: 0 3px;
     padding-top: 3px;
-    margin-top: -3px;
+    margin-top: -4px;
     border: solid #333c4a 3px;
     display: flex;
     align-items: center;

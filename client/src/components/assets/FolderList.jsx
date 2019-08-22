@@ -1,19 +1,56 @@
 import React, {PureComponent} from 'react'
 import { connect } from 'react-redux'
-import { DropTarget } from 'react-dnd'
+import { DropTarget, DragSource } from 'react-dnd'
 import Scrollbar from 'react-custom-scroll'
 import Folder from './Folder'
 import './folderlist.css'
 
 const assetTarget = {
-    drop({ dispatch, tab }, monitor) {
+    drop({ dispatch, tab}, monitor) {
         dispatch({
             type: 'MOVE_ASSET',
             asset: monitor.getItem().id,
             tab
         })
     },
-    canDrop: (props, monitor) => monitor.getItem().isOwned
+    canDrop: (props, monitor) => monitor.getItem().isOwned,
+    hover: (item, monitor, thisItem) => {
+        if (!thisItem.ref.current) {
+            return
+        }
+
+        const dragIndex = monitor.getItem().index
+        const hoverIndex = item.index
+        
+        if (dragIndex === hoverIndex) {
+            return
+        }
+
+        const hoverBoundingRect = thisItem.ref.current.getBoundingClientRect()
+        
+        const hoverMiddleY =
+            (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2
+        
+        const clientOffset = monitor.getClientOffset()
+        
+        const hoverClientY = clientOffset.y - hoverBoundingRect.top
+        
+        if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
+            return
+        }
+        
+        if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
+            return
+        }
+        
+        item.dispatch({
+            type: 'MOVE_FOLDER',
+            dragIndex,
+            hoverIndex
+        })
+
+        monitor.getItem().index = hoverIndex
+    }
 }
 
 function collect(connect, monitor) {
@@ -24,9 +61,21 @@ function collect(connect, monitor) {
     }
 }
 
+const folderSource = {
+    beginDrag: ({ index }) => ({ index })
+}
+
+function collectSource(connect) {
+    return {
+        connectDragSource: connect.dragSource()
+    }
+}
+
 export class FolderTarget extends PureComponent {
     constructor(props) {
         super(props)
+
+        this.ref = React.createRef()
 
         this.jumpToFolder = this.jumpToFolder.bind(this)
     }
@@ -36,9 +85,10 @@ export class FolderTarget extends PureComponent {
     }
 
     render() {
-        const { connectDropTarget, isOver, canDrop, tab } = this.props
-        return connectDropTarget(<div className="folder-list-item"
+        const { connectDragSource, connectDropTarget, isOver, canDrop, tab } = this.props
+        return connectDragSource(connectDropTarget(<div className="folder-list-item"
             onClick={this.jumpToFolder}
+            ref={this.ref}
             style={{
                 // Set background color based on the current drop status
                 backgroundColor: isOver && canDrop ? 'rgba(0, 255, 0, .2)' :
@@ -47,21 +97,22 @@ export class FolderTarget extends PureComponent {
             {/* For the actual object to render,
                 we'll just copy our Folder component from the asset list */}
             <Folder contextmenu={this.props.contextmenu} tab={tab} />
-        </div>)
+        </div>))
     }
 }
 
 // Use some HOCs to give us our dispatch and other props
-const ConnectedFolderTarget = connect()(DropTarget('asset', assetTarget, collect)(FolderTarget))
+const ConnectedFolderTarget = connect(null, null, null, { withRef: true })(DragSource('folder', folderSource, collectSource)(DropTarget(['asset', 'folder'], assetTarget, collect)(FolderTarget)))
 
 // The actual component we export is a list of all those folder targets
-export default ({ tabs, jumpToFolder, tabToRow, CustomFolder, contextmenu }) =>
+export default ({ tabs, jumpToFolder, tabToRow, CustomFolder, contextmenu }) => 
     <div className="folder-list">
         <Scrollbar allowOuterScroll={true} heightRelativeToParent="100%">
-            {tabs.map(tab => {
+            {tabs.map((tab, i) => {
                 const props = {
                     key: tab,
                     tab,
+                    index: i,
                     contextmenu,
                     row: tabToRow[tab],
                     jumpToFolder

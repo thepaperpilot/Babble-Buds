@@ -22,7 +22,7 @@
     height: 100%;
 }
 
-.assets div[draggable] {
+.assets .list-item div[draggable] {
     height: 100%;
 }
 

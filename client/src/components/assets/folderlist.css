@@ -3,7 +3,6 @@
     height: 100%;
     display: inline-flex;
     min-height: 100%;
-    border-right: solid 1px white;
     margin-right: 4px;
     vertical-align: top;
     overflow-x: hidden;
@@ -12,8 +11,9 @@
 
 .folder-list-item {
     padding-top: 4px;
-    border-bottom: solid 1px;
+    border: dashed #333c4a 1px;
     cursor: pointer;
+    margin-bottom: 4px;
 }
 
 .assets .folder-list .rcs-custom-scroll {
