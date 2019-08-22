@@ -19,6 +19,9 @@ const assetTarget = {
             return
         }
 
+        if (monitor.getItemType() !== 'folder')
+            return
+
         const dragIndex = monitor.getItem().index
         const hoverIndex = item.index
         
