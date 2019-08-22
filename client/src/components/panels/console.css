@@ -8,8 +8,11 @@
     margin: 0;
     user-select: initial;
     white-space: pre-wrap;
-    border-bottom: solid 1px white;
     z-index: 0;
+}
+
+.console pre:nth-child(2n) {
+    background: #29303B;
 }
 
 .console pre .progress {
