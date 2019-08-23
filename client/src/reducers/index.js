@@ -65,7 +65,6 @@ const reducer = combineReducers({
     settings,
     status,
     editor: undoable(editor, {
-        groupBy: groupByActionTypes(['EDIT_LAYER_POSITION', 'EDIT_LAYER_SCALE', 'ROTATE_LAYER']),
         filter: excludeAction('SET_LAYERS', 'EDIT_PUPPET')
     })
 })

@@ -13,3 +13,14 @@
     border-top: solid red 1px;
     margin-top: -1px;
 }
+
+.editor.changed .bar {
+    margin-top: -11px;
+    margin-left: -13px;
+    margin-right: -13px;
+}
+
+.editor.changed canvas {
+    margin: -11px;
+    margin-top: 0;
+}

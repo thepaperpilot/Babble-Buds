@@ -11,10 +11,6 @@ function getIcon (instance, image) {
     icon.interactive = true
     icon.on('mousedown', startDrag(instance))
         .on('touchstate', startDrag(instance))
-        .on('mouseup', endDrag)
-        .on('mouseupoutside', endDrag)
-        .on('touchend', endDrag)
-        .on('touchendoutside', endDrag)
     return icon
 }
 
@@ -35,11 +31,47 @@ function startDrag(instance) {
     }
 }
 
-function endDrag(e) {
-    const target = e.currentTarget
-    if (!target) return
+function endRotateDrag(instance, dispatch) {
+    return e => {
+        const {angle, dragging} = e.currentTarget
+        if (dragging) {
+            dispatch({
+                type: 'ROTATE_LAYER',
+                path: instance.props.layer.path,
+                rotation: angle
+            })
+            e.currentTarget.dragging = false
+            e.stopPropagation()
+        }
+    }
+}
 
-    target.dragging = false
+function endScaleDrag(instance, dispatch) {
+    return e => {
+        const {layer, scaleX, scaleY, posX, posY, dragging} = e.currentTarget
+        if (dragging) {
+            dispatch({
+                type: 'EDIT_LAYER_SCALE',
+                layer: layer.layer.path,
+                scale: [scaleX, scaleY],
+                pos: [posX, posY]
+            })
+            e.currentTarget.dragging = false
+            e.stopPropagation()
+        }
+    }
+}
+
+function endMoveDrag(instance, dispatch, e) {
+    const {startPosition, dx, dy} = e.currentTarget
+
+    if (startPosition) {
+        dispatch({
+            type: 'EDIT_LAYER_POSITION',
+            layer: instance.props.layer.path,
+            pos: [startPosition.x + dx, -startPosition.y - dy]
+        })
+    }
 }
 
 function onMove(instance) {
@@ -62,15 +94,20 @@ function onMove(instance) {
                 dx = 0
         }
 
-        instance.props.dispatch({
-            type: 'EDIT_LAYER_POSITION',
-            layer: instance.props.layer.path,
-            pos: [target.startPosition.x + dx, -target.startPosition.y - dy]
-        })
+        // Store data for setting it on dragEnd
+        target.dx = dx
+        target.dy = dy
+
+        // Update the layer and selector now
+        instance.layer.position.x = target.startPosition.x + dx
+        instance.layer.position.y = target.startPosition.y + dy
+
+        instance.selector.position.x = target.startPosition.x + dx
+        instance.selector.position.y = target.startPosition.y + dy
     }
 }
 
-function onScale(instance, dispatch, corner) {
+function onScale(instance, corner) {
     return e => {
         const target = e.currentTarget
         if (!target || !target.dragging) return
@@ -120,19 +157,28 @@ function onScale(instance, dispatch, corner) {
             //scaleX = scaleY = Math.min(scaleX, scaleY)
         }
 
-        dispatch({
-            type: 'EDIT_LAYER_SCALE',
-            layer: target.layer.layer.path,
-            scale: [scaleX, scaleY],
-            pos: [
-                target.startPosition.x + offsetX,
-                target.startPosition.y + offsetY
-            ]
-        })
+        // Store data for setting it on dragEnd
+        target.scaleX = scaleX
+        target.scaleY = scaleY
+        target.posX = target.startPosition.x + offsetX
+        target.posY = target.startPosition.y + offsetY
+
+        // Update the layer and selector now
+        instance.layer.children[0].scale.x = scaleX
+        instance.layer.children[0].scale.y = scaleY
+        instance.layer.position.x = target.posX
+        instance.layer.position.y = target.posY
+
+        drawGraphics(instance, Object.assign({}, instance.props, {
+            layer: Object.assign({}, instance.props.layer, {
+                x: target.posX,
+                y: target.posY
+            })
+        }))
     }
 }
 
-function onRotate(instance, dispatch) {
+function onRotate(instance) {
     return e => {
         const target = e.currentTarget
         if (!target || !target.dragging) return
@@ -143,41 +189,42 @@ function onRotate(instance, dispatch) {
         const a2 = Math.atan2(target.startMouse.y - ty, target.startMouse.x - tx)
         const a1 = Math.atan2(y - ty, x - tx)
 
-        let angle = a1 - a2
-        angle = angle + target.startRotation - instance.selector.rotation
+        let angle = a1 - a2 + target.startRotation
 
         if (e.data.originalEvent.shiftKey) {
             angle += instance.selector.rotation
             angle = Math.round(angle / (Math.PI / 8)) * (Math.PI / 8)
             angle -= instance.selector.rotation
-            target.last = angle + instance.selector.rotation
         }
 
-        dispatch({
-            type: 'ROTATE_LAYER',
-            path: instance.props.layer.path,
-            rotation: angle
-        })
+        // Store data for setting it on dragEnd
+        target.angle = angle - target.startRotation
+
+        // Update the layer and selector now
+        instance.layer.rotation = angle
+        instance.selector.rotation = angle
     }
 }
 
 function flipHoriz(instance, dispatch) {
-    return () => {
+    return e => {
         dispatch({
             type: 'EDIT_LAYER_SCALE',
             layer: instance.props.layer.path,
             scale: [-(instance.layer.layer.scaleX || 1), instance.layer.layer.scaleY || 1]
         })
+        e.stopPropagation()
     }
 }
 
 function flipVert(instance, dispatch) {
-    return () => {
+    return e => {
         dispatch({
             type: 'EDIT_LAYER_SCALE',
             layer: instance.props.layer.path,
             scale: [instance.layer.layer.scaleX || 1, -(instance.layer.layer.scaleY || 1)]
         })
+        e.stopPropagation()
     }
 }
 
@@ -251,6 +298,7 @@ export const behavior = {
 
         root.off('mousemove', instance.selector.mousemove)
         root.off('mouseup', instance.mouseup)
+        root.off('mouseupoutside', instance.mouseup)
         root.off('mousedown', instance.mousedown)
     },
     setupSelector: instance => {
@@ -267,9 +315,14 @@ export const behavior = {
             instance.selector = new Graphics()
             instance.selector.setParent(instance.parent.parent)
 
+            const endRot = endRotateDrag(instance, instance.props.dispatch)
             instance.rotate = getIcon(instance, 'rotate.png')
-                .on('mousemove', onRotate(instance, instance.props.dispatch))
-                .on('touchmove', onRotate(instance, instance.props.dispatch))
+                .on('mousemove', onRotate(instance))
+                .on('touchmove', onRotate(instance))
+                .on('mouseup', endRot)
+                .on('mouseupoutside', endRot)
+                .on('touchend', endRot)
+                .on('touchendoutside', endRot)
             instance.selector.addChild(instance.rotate)
             instance.flipHoriz = getIcon(instance, 'flipHoriz.png')
                 .on('click', flipHoriz(instance, instance.props.dispatch))
@@ -281,14 +334,15 @@ export const behavior = {
             instance.scalers = new Array(4).fill(0).map((e, i) => {
                 const g = new Graphics()
                 g.interactive = true
+                const endScale = endScaleDrag(instance, instance.props.dispatch)
                 g.on('mousedown', startDrag(instance))
                     .on('touchstate', startDrag(instance))
-                    .on('mouseup', endDrag)
-                    .on('mouseupoutside', endDrag)
-                    .on('touchend', endDrag)
-                    .on('touchendoutside', endDrag)
-                    .on('mousemove', onScale(instance, instance.props.dispatch, i))
-                    .on('touchmove', onScale(instance, instance.props.dispatch, i))
+                    .on('mouseup', endScale)
+                    .on('mouseupoutside', endScale)
+                    .on('touchend', endScale)
+                    .on('touchendoutside', endScale)
+                    .on('mousemove', onScale(instance, i))
+                    .on('touchmove', onScale(instance, i))
                 instance.selector.addChild(g)
                 g.layer = instance.parent
                 return g
@@ -306,9 +360,11 @@ export const behavior = {
                 target.startPosition = {x: layer.layer.x || 0, y: layer.layer.y || 0}
                 root.on('mousemove', instance.selector.mousemove)
             })
-            root.on('mouseup', instance.mouseup = () => {
+            root.on('mouseup', instance.mouseup = e => {
                 root.off('mousemove', instance.selector.mousemove)
+                endMoveDrag(instance, instance.props.dispatch, e)
             })
+            root.on('mouseupoutside', instance.mouseup)
         } else {
             requestAnimationFrame(() => behavior.setupSelector(instance))
         }
