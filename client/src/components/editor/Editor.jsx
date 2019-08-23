@@ -210,6 +210,7 @@ function mapStateToProps(state) {
 const assetTarget = {
     drop: (item, monitor, component) => {
         const {x, y} = component.state.dragPos
+        const {id, asset} = monitor.getItem()
 
         let l = item.selected || []
         let curr = item.character;
@@ -224,7 +225,8 @@ const assetTarget = {
             type: 'ADD_LAYER',
             path,
             layer: {
-                id: monitor.getItem().id,
+                id,
+                name: asset.name,
                 rotation: 0,
                 scaleX: 1,
                 scaleY: 1,

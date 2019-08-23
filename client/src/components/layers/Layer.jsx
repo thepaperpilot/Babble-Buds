@@ -84,13 +84,15 @@ class Layer extends Component {
 
 const assetTarget = {
     drop: (item, monitor) => {
-        console.log(item, monitor.getItem())
         const path = item.id ? item.path.slice(0, -1) : item.path
+        const {id, asset} = monitor.getItem()
+
         item.dispatch({
             type: 'ADD_LAYER',
             path,
             layer: {
-                id: monitor.getItem().id,
+                id,
+                name: asset.name,
                 rotation: 0,
                 scaleX: 1,
                 scaleY: 1,
