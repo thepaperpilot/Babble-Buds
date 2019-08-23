@@ -1,11 +1,9 @@
 import { CustomPIXIComponent } from 'react-pixi-fiber'
 
 const path = require('path')
-const {Sprite, Graphics} = window.PIXI
+const {Sprite, Graphics, Container} = window.PIXI
 
 const TYPE = 'Selector'
-
-let prevGraphics
 
 function getIcon (instance, image) {
     const icon = new Sprite.fromImage(path.join('icons', image))
@@ -30,10 +28,10 @@ function startDrag(instance) {
         const {x, y} = e.data.global
         const layer = instance.layer
         target.startMouse = {x, y}
-        target.startRotation = instance.rotation
+        target.startRotation = instance.selector.rotation
         target.startPosition = {x: layer.layer.x || 0, y: layer.layer.y || 0}
         target.startScale = {x: layer.layer.scaleX || 1, y: layer.layer.scaleY || 1}
-        target.startSize = instance.normalSize
+        target.startSize = instance.selector.normalSize
     }
 }
 
@@ -141,18 +139,18 @@ function onRotate(instance, dispatch) {
 
         // Credit to https://bl.ocks.org/shancarter/1034db3e675f2d3814e6006cf31dbfdc
         const {x, y} = e.data.global
-        const {tx, ty} = instance.worldTransform
+        const {tx, ty} = instance.selector.worldTransform
         const a2 = Math.atan2(target.startMouse.y - ty, target.startMouse.x - tx)
         const a1 = Math.atan2(y - ty, x - tx)
 
         let angle = a1 - a2
-        angle = angle + target.startRotation - instance.rotation
+        angle = angle + target.startRotation - instance.selector.rotation
 
         if (e.data.originalEvent.shiftKey) {
-            angle += instance.rotation
+            angle += instance.selector.rotation
             angle = Math.round(angle / (Math.PI / 8)) * (Math.PI / 8)
-            angle -= instance.rotation
-            target.last = angle + instance.rotation
+            angle -= instance.selector.rotation
+            target.last = angle + instance.selector.rotation
         }
 
         dispatch({
@@ -187,133 +185,71 @@ function drawGraphics(instance, props) {
     const {scale, layer} = props
     instance.props = props
 
-    instance.clear()
+    if (instance.selector) {
+        instance.selector.clear()
 
-    if (instance.layer) {
-        let {x, y, rotation} = layer
-        let width, height
+        if (instance.layer) {
+            let {x, y, rotation} = layer
+            let width, height
 
-        x = x || 0
-        y = y || 0
-        rotation = rotation || 0
+            x = x || 0
+            y = y || 0
+            rotation = rotation || 0
 
-        const bounds = instance.layer.getLocalBounds()
-        width = 2 * Math.max(Math.abs(bounds.left), Math.abs(bounds.right))
-        height = 2 * Math.max(Math.abs(bounds.top), Math.abs(bounds.bottom))
-        instance.normalSize = {x: width, y: height}
+            const bounds = instance.layer.getLocalBounds()
+            width = 2 * Math.max(Math.abs(bounds.left), Math.abs(bounds.right))
+            height = 2 * Math.max(Math.abs(bounds.top), Math.abs(bounds.bottom))
+            instance.selector.normalSize = {x: width, y: height}
 
-        instance.lineStyle(scale * 2, 0x888888)
-            .moveTo(-width / 2 - scale, -height / 2 - scale)
-            .lineTo(-width / 2 - scale, height / 2 + scale)
-            .lineTo(width / 2 + scale, height / 2 + scale)
-            .lineTo(width / 2 + scale, -height / 2 - scale)
-            .lineTo(-width / 2 - scale, -height / 2 - scale)
+            instance.selector.lineStyle(scale * 2, 0x888888)
+                .moveTo(-width / 2 - scale, -height / 2 - scale)
+                .lineTo(-width / 2 - scale, height / 2 + scale)
+                .lineTo(width / 2 + scale, height / 2 + scale)
+                .lineTo(width / 2 + scale, -height / 2 - scale)
+                .lineTo(-width / 2 - scale, -height / 2 - scale)
 
-        // Transform our selection to be where the layer is
-        // BUT, we want the selector to be above all layers,
-        // so its parent is the viewport. This means we need
-        // to calculate our layer's transform relative to the
-        // viewport.
-        // I tried to do that here, but its getting these weird
-        // offsets, and seems to glitch whenever we zoom in or out
-        // To be clear, this was made with the selector being a
-        // child of the viewport. I'd also tried it being a root
-        // child, but then I'd need to reposition it whenever I
-        // panned the editor, whereas currently I don't
-        // For now I'm just going to render it above all its siblings,
-        // but potentially underneath other layers :/
-        // TODO Make our selector appear above all other layers
-        /*
-        const parent = instance.parent
-        instance.setParent(instance.layer.parent)
-        instance.scale.set(1, 1)
-        instance.position.set(x, y)
-        instance.rotation = rotation
-        instance.updateTransform()
-        // Start with our current world transform
-        instance.worldTransform.clone()
-            // Divide it by the viewport's world transform
-            .append(parent.worldTransform.clone().invert())
-            // Multiply it by our local transform
-            .append(instance.localTransform)
-            // Finally, apply it to our local transform
-            .decompose(instance.transform)
-        instance.setParent(parent)
-        */
-        instance.position.set(x, y)
-        instance.rotation = rotation
+            instance.selector.position.set(x, y)
+            instance.selector.rotation = rotation
 
-        instance.scalers.forEach((scaler, i) => {
-            scaler.clear()
-            scaler.lineStyle(scale * 2, 0xFFFFFF)
-            scaler.beginFill(0x888888)
-                .drawCircle((i % 2 === 0 ? 1 : -1) * (width / 2 + scale),
-                    (Math.floor(i / 2) === 0 ? 1 : -1) * (height / 2 + scale), 4 * scale)
-        })
+            instance.scalers.forEach((scaler, i) => {
+                scaler.clear()
+                scaler.lineStyle(scale * 2, 0xFFFFFF)
+                scaler.beginFill(0x888888)
+                    .drawCircle((i % 2 === 0 ? 1 : -1) * (width / 2 + scale),
+                        (Math.floor(i / 2) === 0 ? 1 : -1) * (height / 2 + scale), 4 * scale)
+            })
 
-        instance.rotate.position.set(width / 2 + 22 * scale,
-            -height / 2 + 17 * scale)
-        instance.rotate.scale.set(scale / 10)
-        instance.flipHoriz.position.set(width / 2 + 22 * scale,
-            -height / 2 + 52 * scale)
-        instance.flipHoriz.scale.set(scale / 2)
-        instance.flipVert.position.set(width / 2 + 22 * scale,
-            -height / 2 + 87 * scale)
-        instance.flipVert.scale.set(scale / 2)
+            instance.rotate.position.set(width / 2 + 22 * scale,
+                -height / 2 + 17 * scale)
+            instance.rotate.scale.set(scale / 10)
+            instance.flipHoriz.position.set(width / 2 + 22 * scale,
+                -height / 2 + 52 * scale)
+            instance.flipHoriz.scale.set(scale / 2)
+            instance.flipVert.position.set(width / 2 + 22 * scale,
+                -height / 2 + 87 * scale)
+            instance.flipVert.scale.set(scale / 2)
+        }
     }
 }
 
 export const behavior = {
-    customDisplayObject: () => new Graphics(),
+    customDisplayObject: () => new Container(),
     customApplyProps: (instance, oldProps, newProps) => {
         drawGraphics(instance, newProps)
     },
     customDidAttach: instance => {
-        // When moving a selected layer into another layer the old selector would stay there
-        // without being removed, and also would never be re-drawn
-        // We'll add this to clean those up whenever that happens
-        requestAnimationFrame(() => {
-            if (prevGraphics && prevGraphics.parent) {
-                behavior.customWillDetach(prevGraphics)
-                prevGraphics.parent.removeChild(prevGraphics)
-            }
-            prevGraphics = instance
-        })        
-
-        instance.rotate = getIcon(instance, 'rotate.png')
-            .on('mousemove', onRotate(instance, instance.props.dispatch))
-            .on('touchmove', onRotate(instance, instance.props.dispatch))
-        instance.addChild(instance.rotate)
-        instance.flipHoriz = getIcon(instance, 'flipHoriz.png')
-            .on('click', flipHoriz(instance, instance.props.dispatch))
-        instance.addChild(instance.flipHoriz)
-        instance.flipVert = getIcon(instance, 'flipVert.png')
-            .on('click', flipVert(instance, instance.props.dispatch))
-        instance.addChild(instance.flipVert)
-
-        instance.scalers = new Array(4).fill(0).map((e, i) => {
-            const g = new Graphics()
-            g.interactive = true
-            g.on('mousedown', startDrag(instance))
-                .on('touchstate', startDrag(instance))
-                .on('mouseup', endDrag)
-                .on('mouseupoutside', endDrag)
-                .on('touchend', endDrag)
-                .on('touchendoutside', endDrag)
-                .on('mousemove', onScale(instance, instance.props.dispatch, i))
-                .on('touchmove', onScale(instance, instance.props.dispatch, i))
-            instance.addChild(g)
-            g.layer = instance.parent
-            return g
-        })
         behavior.setupSelector(instance)
     },
     customWillDetach: instance => {
+        // This function gets called by Layer because for some reason
+        // react-pixi-fiber just... doesn't 
+        instance.selector.parent.removeChild(instance.selector)
+
         let root = instance
         while (root.parent && root.parent.parent)
             root = root.parent
 
-        root.off('mousemove', instance.mousemove)
+        root.off('mousemove', instance.selector.mousemove)
         root.off('mouseup', instance.mouseup)
         root.off('mousedown', instance.mousedown)
     },
@@ -328,22 +264,50 @@ export const behavior = {
             instance.layer = instance.parent
             //instance.setParent(root)
 
-            instance.setParent(instance.parent.parent)
+            instance.selector = new Graphics()
+            instance.selector.setParent(instance.parent.parent)
+
+            instance.rotate = getIcon(instance, 'rotate.png')
+                .on('mousemove', onRotate(instance, instance.props.dispatch))
+                .on('touchmove', onRotate(instance, instance.props.dispatch))
+            instance.selector.addChild(instance.rotate)
+            instance.flipHoriz = getIcon(instance, 'flipHoriz.png')
+                .on('click', flipHoriz(instance, instance.props.dispatch))
+            instance.selector.addChild(instance.flipHoriz)
+            instance.flipVert = getIcon(instance, 'flipVert.png')
+                .on('click', flipVert(instance, instance.props.dispatch))
+            instance.selector.addChild(instance.flipVert)
+
+            instance.scalers = new Array(4).fill(0).map((e, i) => {
+                const g = new Graphics()
+                g.interactive = true
+                g.on('mousedown', startDrag(instance))
+                    .on('touchstate', startDrag(instance))
+                    .on('mouseup', endDrag)
+                    .on('mouseupoutside', endDrag)
+                    .on('touchend', endDrag)
+                    .on('touchendoutside', endDrag)
+                    .on('mousemove', onScale(instance, instance.props.dispatch, i))
+                    .on('touchmove', onScale(instance, instance.props.dispatch, i))
+                instance.selector.addChild(g)
+                g.layer = instance.parent
+                return g
+            })
 
             drawGraphics(instance, instance.props, instance.props)
 
             // Setup input listeners for panning
-            instance.mousemove = onMove(instance)
+            instance.selector.mousemove = onMove(instance)
             root.on('mousedown', instance.mousedown = e => {
                 const {x, y} = e.data.global
                 const layer = instance.layer
                 const target = e.currentTarget
                 target.startMouse = {x, y}
                 target.startPosition = {x: layer.layer.x || 0, y: layer.layer.y || 0}
-                root.on('mousemove', instance.mousemove)
+                root.on('mousemove', instance.selector.mousemove)
             })
             root.on('mouseup', instance.mouseup = () => {
-                root.off('mousemove', instance.mousemove)
+                root.off('mousemove', instance.selector.mousemove)
             })
         } else {
             requestAnimationFrame(() => behavior.setupSelector(instance))
