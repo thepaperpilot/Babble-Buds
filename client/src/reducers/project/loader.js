@@ -187,7 +187,7 @@ function close(state) {
 function loadProject(state, action) {
     const filepath = action.project.replace(/\\/g, '/')
     if (!fs.existsSync(filepath)) {
-        console.log('could\'nt find project file', filepath)
+        console.log('couldn\'t find project file', filepath)
         return close(state)
     }
 
