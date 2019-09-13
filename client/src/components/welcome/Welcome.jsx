@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import OpenProject from './OpenProject'
 import NewProject from './NewProject'
-import Console from './../panels/Console'
+import Console from './../console/Console'
 import splash from './../../data/splash.json'
 import './welcome.css'
 

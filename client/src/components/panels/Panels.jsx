@@ -1,9 +1,10 @@
 import React, {Component} from 'react'
 import { connect } from 'react-redux'
 import FlexLayout from 'flexlayout-react'
+import BrokenPanel from './BrokenPanel'
 import Assets from './../assets/Assets'
 import Stage from './../stage/Stage'
-import Console from './Console'
+import Console from './../console/Console'
 import Puppets from '../puppets/Puppets'
 import Controller from '../controller/Controller'
 import ProjectSettings from './../settings/ProjectSettings'
@@ -37,43 +38,56 @@ class Panels extends Component {
         const component = node.getComponent()
         const {grid, highlight} = node.getConfig() ? node.getConfig() : {}
 
+        let child = null
         switch(component) {
         case 'text':
-            return <div className="panel">{node.getName()}</div>
+            child = <div className="panel">{node.getName()}</div>
+            break
         case 'stage':
-            return <Stage
+            child = <Stage
                 ref={this.props.stage}
                 addJiggleListener={this.props.addJiggleListener}
                 removeJiggleListener={this.props.removeJiggleListener}
                 assetUpdater={this.props.assetUpdater}
                 rect={node._rect}
                 id={node.getId()} />
+            break
         case 'inspector':
-            return <Inspector id={node.getId()} />
+            child = <Inspector id={node.getId()} />
+            break
         case 'console':
-            return <Console/>
+            child = <Console/>
+            break
         case 'puppets':
-            return <Puppets rect={node._rect}
+            child = <Puppets rect={node._rect}
                 size={node.getConfig().size}
                 onZoomChange={this.updateConfig(node, 'size')}
                 id={node.getId()} />
+            break
         case 'project-settings':
-            return <ProjectSettings/>
+            child = <ProjectSettings/>
+            break
         case 'assets':
-            return <Assets rect={node._rect} size={node.getConfig().size}
+            child = <Assets rect={node._rect} size={node.getConfig().size}
                 onZoomChange={this.updateConfig(node, 'size')}
                 id={node.getId()} />
+            break
         case 'controller':
-            return <Controller id={node.getId()} />
+            child = <Controller id={node.getId()} />
+            break
         case 'editor':
-            return <Editor rect={node._rect} grid={grid} highlight={highlight} 
+            child = <Editor rect={node._rect} grid={grid} highlight={highlight} 
                 onZoomChange={this.updateConfig(node, 'grid')}
                 onHighlightChange={this.updateConfig(node, 'highlight')} />
+            break
         case 'layers':
-            return <Layers id={node.getId()} />
+            child = <Layers id={node.getId()} />
+            break
         default:
             break
         }
+
+        return <BrokenPanel panel={component}>{child}</BrokenPanel>
     }
 
     updateConfig(node, field) {
