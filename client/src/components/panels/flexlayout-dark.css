@@ -137,7 +137,7 @@
 
 .flexlayout__tab_button:hover .flexlayout__tab_button_trailing,
 .flexlayout__tab_button--selected .flexlayout__tab_button_trailing{
-    background: transparent url("/icons/close_white.png") no-repeat center;
+    background: transparent url("./icons/close_white.png") no-repeat center;
 }
 
 .flexlayout__tab_button_overflow {
@@ -150,7 +150,7 @@
     font-size: 10px;
     color:lightgray;
     font-family: Arial, sans-serif;
-    background: transparent url("/icons/more.png") no-repeat left;
+    background: transparent url("./icons/more.png") no-repeat left;
 }
 
 .flexlayout__tabset_header
@@ -202,7 +202,7 @@
     height:20px;
     border:none;
     outline-width: 0;
-    background: transparent url("/icons/maximize.png") no-repeat center;
+    background: transparent url("./icons/maximize.png") no-repeat center;
 
 }
 .flexlayout__tab_toolbar_button-max {
@@ -210,7 +210,7 @@
     height:20px;
     border:none;
     outline-width: 0;
-    background: transparent url("/icons/restore.png") no-repeat center;
+    background: transparent url("./icons/restore.png") no-repeat center;
 }
 
 .flexlayout__popup_menu {
@@ -334,7 +334,7 @@
 
 .flexlayout__border_button:hover .flexlayout__border_button_trailing,
 .flexlayout__border_button--selected .flexlayout__border_button_trailing{
-    background: transparent url("/icons/close_white.png") no-repeat center;
+    background: transparent url("./icons/close_white.png") no-repeat center;
 }
 
 

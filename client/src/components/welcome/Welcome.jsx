@@ -3,6 +3,10 @@ import OpenProject from './OpenProject'
 import NewProject from './NewProject'
 import Console from './../console/Console'
 import splash from './../../data/splash.json'
+
+import './fonts/m0Shgsxo4xCSzZHO6RHWxBTbgVql8nDJpwnrE27mub0.woff2'
+import './fonts/6RfRbOG3yn4TnWVTc898ERTbgVql8nDJpwnrE27mub0.woff2'
+import './fonts/Q_Z9mv4hySLTMoMjnk_rCfesZW2xOQ-xsNqO47m55DA.woff2'
 import './welcome.css'
 
 class Welcome extends Component {

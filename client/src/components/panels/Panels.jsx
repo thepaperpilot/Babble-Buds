@@ -11,6 +11,11 @@ import ProjectSettings from './../settings/ProjectSettings'
 import Inspector from './../inspector/Inspector'
 import Editor from './../editor/Editor'
 import Layers from './../layers/Layers'
+
+import './icons/close_white.png'
+import './icons/more.png'
+import './icons/maximize.png'
+import './icons/restore.png'
 import './flexlayout-dark.css'
 import './panels.css'
 

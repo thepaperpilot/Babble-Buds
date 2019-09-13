@@ -1,12 +1,20 @@
 import { CustomPIXIComponent } from 'react-pixi-fiber'
 
-const path = require('path')
+import rotateIcon from './icons/rotate.png'
+import flipHorizIcon from './icons/flipHoriz.png'
+import flipVertIcon from './icons/flipVert.png'
+
 const {Sprite, Graphics, Container} = window.PIXI
+const icons = {
+    'rotate.png': rotateIcon,
+    'flipHoriz.png': flipHorizIcon,
+    'flipVert.png': flipVertIcon
+}
 
 const TYPE = 'Selector'
 
 function getIcon (instance, image) {
-    const icon = new Sprite.fromImage(path.join('icons', image))
+    const icon = Sprite.from(icons[image])
     icon.anchor.set(.5, .5)
     icon.interactive = true
     icon.on('mousedown', startDrag(instance))
