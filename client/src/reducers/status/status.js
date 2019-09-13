@@ -1,5 +1,7 @@
 const util = require('./../util')
 
+const fs = window.require('fs-extra')
+
 export const DEFAULTS = []
 
 function log(type) {
@@ -51,11 +53,25 @@ function inProgressIncrement(state, action) {
     }))
 }
 
+function loadProject(state, action) {
+    const filepath = action.project.replace(/\\/g, '/')
+    
+    if (!fs.existsSync(filepath)) {
+        return state.concat({
+            message: `Couldn't find the project at ${filepath}`,
+            type: 'error'
+        })
+    }
+
+    return state
+}
+
 export default util.createReducer(DEFAULTS, {
     'INFO': log('info'),
     'LOG': log('log'),
     'WARN': log('warn'),
     'ERROR': error,
     'IN_PROGRESS': inProgress,
-    'IN_PROGRESS_INCREMENT': inProgressIncrement
+    'IN_PROGRESS_INCREMENT': inProgressIncrement,
+    'LOAD_PROJECT': loadProject
 })

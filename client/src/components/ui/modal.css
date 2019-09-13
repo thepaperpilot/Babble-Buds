@@ -38,7 +38,7 @@
     flex-direction: column;
 }
 
-.title {
+.modal .title {
     position: absolute;
     bottom: 100%;
     left: 10px;

@@ -102,11 +102,13 @@
 .action button {
     width: calc(100% - 20px);
     text-align: center;
+    padding: 4px;
 }
 
 .field-title {
     padding: 8px;
     box-sizing: border-box;
+    flex-shrink: 0;
 }
 
 .field-flex {

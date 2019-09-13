@@ -37,10 +37,10 @@ class OpenProject extends Component {
 
     render() {
         return (
-            <div>
-                Recent Projects:<br/>
+            <div className="open-project action">
+                <div className="section-title">Open Project</div>
                 <div className="recent-projects">{this.state.selectors}</div>
-                <button style={{margin: '8px auto', display: 'block'}} onClick={onClick}>Browse</button>
+                <button onClick={onClick}>Browse</button>
             </div>
         )
     }

@@ -31,16 +31,6 @@ class Project extends Component {
     }
 
     componentDidMount() {
-        // Print debug info
-        this.props.dispatch({
-            type: 'INFO',
-            content: `Babble Buds version: ${electron.remote.app.getVersion()}`
-        })
-        this.props.dispatch({
-            type: 'INFO',
-            content: `Other Versions: ${JSON.stringify(window.process.versions, null, 2)}`
-        })
-
         this.props.dispatch({
             type: 'LOG',
             content: 'Loading Project...'
@@ -106,7 +96,7 @@ class Project extends Component {
         case 191: this.props.dispatch({type: 'SET_EMOTE_SELF', emote: 11}); break
         case 37: this.props.dispatch({type: 'MOVE_LEFT_SELF'}); break
         case 39: this.props.dispatch({type: 'MOVE_RIGHT_SELF'}); break
-        case 38:
+        case 38:case 66:
             this.props.dispatch({type: 'JIGGLE_SELF'})
             this.state.jiggleListeners.forEach(cb => cb())
             break

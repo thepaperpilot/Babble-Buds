@@ -19,10 +19,21 @@ class App extends Component {
         this.closeProject = this.closeProject.bind(this)
         this.save = this.save.bind(this)
 
-        props.dispatch({ type: 'LOAD_PROJECT', project: settingsManager.settings.openProject })
+        if (settingsManager.settings.openProject)
+            props.dispatch({ type: 'LOAD_PROJECT', project: settingsManager.settings.openProject })
     }
 
     componentDidMount() {
+        // Print debug info
+        this.props.dispatch({
+            type: 'INFO',
+            content: `Babble Buds version: ${electron.remote.app.getVersion()}`
+        })
+        this.props.dispatch({
+            type: 'INFO',
+            content: `Other Versions: ${JSON.stringify(window.process.versions, null, 2)}`
+        })
+        
         electron.ipcRenderer.on('set project', this.setProject)
         electron.ipcRenderer.on('close', this.closeProject)
         electron.ipcRenderer.on('save', this.save)
