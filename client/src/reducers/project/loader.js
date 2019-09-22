@@ -1,3 +1,4 @@
+import {Puppet} from 'babble.js'
 import { DEFAULTS, DEFAULT_CHARACTER } from './defaults'
 
 const path = require('path')
@@ -175,7 +176,36 @@ export function loadAssets(settings, assetsPath, characters) {
             if (!folders.includes(asset.tab))
                 folders.push(asset.tab)
         })
+
+        Object.values(assets).forEach(asset => {
+            if (asset.type === 'bundle')
+                asset.conflicts = getConflicts({ assets }, asset.layers)
+        })
         return { assets, folders }
+    }
+}
+
+// Given an asset bundle, finds and returns an object with "true" values for any of the conflicting keys (head, emote, emoteLayer) within its layers,
+// plus an array of used emotes
+export function getConflicts(assets, layers) {
+    function handleLayer(field) {
+        return layer => {
+            if (field in layer)
+                return true
+        }
+    }
+
+    const emotes = []
+    function findEmotes(layer) {
+        if (layer.emote && !emotes.includes(layer.emote))
+            emotes.push(layer.emote)
+    }
+    Puppet.handleLayer(assets, layers, findEmotes)
+    return {
+        head: !!Puppet.handleLayer(assets, layers, handleLayer('head')),
+        emoteLayer: !!Puppet.handleLayer(assets, layers, handleLayer('emoteLayer')),
+        emote: !!emotes.length,
+        emotes
     }
 }
 

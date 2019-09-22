@@ -1,3 +1,5 @@
+import { getConflicts } from './loader'
+
 const fs = window.require('fs-extra')
 const path = require('path')
 
@@ -15,9 +17,9 @@ export function getNewAssetID() {
 // This function works in-place!
 // Apart from id, all these parameters will be modified!
 function handleDeleteAsset(assets, characters, id) {
-    delete assets[id]
-    Object.keys(characters).forEach(char => {
-        const character = JSON.parse(JSON.stringify(characters[char]))
+    delete assets[id];
+    [...Object.keys(characters), ...Object.keys(assets).filter(asset => asset.type === 'bundle')].forEach(char => {
+        const character = JSON.parse(JSON.stringify(char in characters ? characters[char] : assets[char]))
         const assetFilter = asset => asset.id !== id
         const parseLayer = layer => {
             if (layer.children) {
@@ -28,7 +30,10 @@ function handleDeleteAsset(assets, characters, id) {
         }
 
         character.layers = parseLayer(character.layers)
-        characters[char] = character
+        if (char in characters)
+            characters[char] = character
+        else
+            assets[char] = character
     })
 }
 
@@ -134,6 +139,7 @@ function newAssetBundle(state, action) {
             location: `${creator}/${id.split(':')[1]}.png`,
             panning: [],
             type: 'bundle',
+            conflicts: getConflicts(state.assets, layers),
             version: 0
         }
     } })

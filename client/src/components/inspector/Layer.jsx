@@ -1,6 +1,7 @@
 import React, {Component} from 'react'
 import { connect } from 'react-redux'
 import Scrollbar from 'react-custom-scroll'
+import {Puppet} from 'babble.js'
 import Header from './Header'
 import Checkbox from './fields/Checkbox'
 import Angle from './fields/Angle'
@@ -82,23 +83,21 @@ class Layer extends Component {
         const emoteLayer = inherit.emoteLayer || layer.emoteLayer
 
         const emotes = {}
-        const reducer = layer => {
+        Puppet.handleLayer(this.props.assets, this.props.character.layers, layer => {
             if (layer.emote != null && !(layer.emote in emotes))
                 emotes[layer.emote] = layer
-            if (layer.children)
-                layer.children.forEach(reducer)
-            else if (this.props.assets[layer.id].type === 'bundle')
-                this.props.assets[layer.id].layers.children.forEach(reducer)
-        }
-        this.props.character.layers.children.forEach(reducer)
+        })
 
-        const finder = (key, first) => layer => {
-            if (layer[key] != null && !first)
-                return true
-            if (layer.children && layer.children.find(finder(key)))
-                return true
-            if (layer.id && this.props.assets[layer.id].type === 'bundle' && this.props.assets[layer.id].layers.children.find(finder(key)))
-                return true
+        const handleLayer = key => layer => {
+            return layer[key] != null
+        }
+
+        // Intermediary between Puppet.handleLayer to skip the initial layer
+        const finder = key => {
+            if (layer.children)
+                return layer.children.find(l => Puppet.handleLayer(this.props.assets, l, handleLayer(key)))
+            else if (layer.id && this.props.assets[layer.id].type === 'bundle')
+                return this.props.assets[layer.id].layers.children.find(l => Puppet.handleLayer(this.props.assets, l, handleLayer(key)))
             return false
         }
 
@@ -114,7 +113,7 @@ class Layer extends Component {
         const emote = inherit.emote == null ? layer.emote : inherit.emote
         const emoteSlotDisabled = slot => 'emote' in inherit ||
             (slot in emotes && slot !== emote) ||
-            finder('emote', true)(layer)
+            finder('emote')
 
         let nestedHeadWarning = 'head' in inherit && layer.head != null ?
             <pre className="error">
@@ -125,7 +124,7 @@ class Layer extends Component {
                 {`Attempting to make this layer a${layer.emoteLayer === 'mouth' ? ' mouth' : 'n eyes'} layer but it is already inside a${inherit.emoteLayer === 'mouth' ? ' mouth' : 'n eyes'} layer.`}
             </pre> : null
 
-        const emoteLayerDisabled = ('emoteLayer' in inherit || finder('emoteLayer', true)(layer)) && layer.emoteLayer == null
+        const emoteLayerDisabled = ('emoteLayer' in inherit || finder('emoteLayer')) && layer.emoteLayer == null
         const allEmotesDisabled = [...Array(12).keys()].map(emoteSlotDisabled).every(b => b)
 
         const LinkedLayerContextMenu = LayerContextMenu(this.props.contextmenu)
@@ -203,7 +202,7 @@ class Layer extends Component {
                                     title="Head"
                                     value={layer.head || inherit.head}
                                     onChange={this.changeLayer('head')}
-                                    disabled={('head' in inherit || finder('head', true)(layer)) && !layer.head}
+                                    disabled={('head' in inherit || finder('head')) && !layer.head}
                                     help="Toggles whether or not this layer will bobble, if the bobble head option on the puppet is enabled" />
                                 <Checkbox
                                     title="Eyes"

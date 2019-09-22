@@ -8,6 +8,10 @@ import Cross from './Cross'
 import './editor.css'
 
 const DISTANCE = 10000
+const TYPE_MAP = {
+    puppet: 'characters',
+    asset: 'assets'
+}
 
 class Editor extends Component {
     constructor(props) {
@@ -117,7 +121,7 @@ class Editor extends Component {
 
     render() {
         // TODO (re-)load assets since babble.js isn't here to do it for us
-        const {rect, character, selected, changed, isOver, canDrop, item} = this.props
+        const {rect, character, selected, changed, isOver, canDrop, item, type, id} = this.props
         const {scale, grid, bounds, dragPos} = this.state
 
         const gridLines = []
@@ -175,7 +179,7 @@ class Editor extends Component {
                     <Viewport width={rect.width - (changed ? 6 : 0)} height={rect.height - 21 - (changed ? 6 : 0)} ref={this.viewport}>
                         {gridLines}
                         <Cross x={0} y={0} scale={scale} color={0x888888} distance={DISTANCE * scale} />
-                        <Layer layer={character} x={0} y={0} selectedRef={this.selectedRef} scale={scale} highlight={this.state.highlight ? selected : character.path} />
+                        <Layer layer={character} bundles={type === 'asset' ? [id] : []} x={0} y={0} selectedRef={this.selectedRef} scale={scale} highlight={this.state.highlight ? selected : character.path} />
                         {isOver && dragPos &&
                             <Layer layer={{
                                 id: item.id,
@@ -185,7 +189,7 @@ class Editor extends Component {
                                 x: 0,
                                 y: 0,
                                 path: []
-                            }} x={dragPos.x} y={dragPos.y}
+                            }} bundles={[]} x={dragPos.x} y={dragPos.y}
                             scale={scale} highlight={[]} />}
                     </Viewport>
                 </Stage>
@@ -202,8 +206,10 @@ function mapStateToProps(state) {
         canDrop: !!character,
         character: layers,
         changed: id && type &&
-            JSON.stringify(character) !== JSON.stringify(state.project[type === 'assets' ? type : 'characters'][id]),
-        selected: layer
+            JSON.stringify(character) !== JSON.stringify(state.project[TYPE_MAP[type]][id]),
+        selected: layer,
+        type,
+        id
     }
 }
 

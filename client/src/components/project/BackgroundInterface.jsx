@@ -1,5 +1,6 @@
 import React, {Component} from 'react'
 import { connect } from 'react-redux'
+import {Puppet} from 'babble.js'
 
 const { ipcRenderer } = window.require('electron')
 const path = window.require('path')
@@ -28,9 +29,9 @@ class BackgroundInterface extends Component {
         let updated = assetsPath !== this.props.assetsPath
         let updatedAssets = []
 
-        Object.keys(assets).filter(id => !(id in this.props.assets) || assets[id] !== this.props.assets[id]).forEach(id => {
+        Object.keys(this.props.assets).filter(id => !(id in assets) || assets[id] !== this.props.assets[id]).forEach(id => {
             updated = true
-            if (assets[id].type === 'bundle' && id in this.props.assets && assets[id].version !== this.props.assets[id].version) {
+            if (this.props.assets[id].type === 'bundle' && (!(id in assets) || assets[id].version !== this.props.assets[id].version)) {
                 updatedAssets.push(id)
             }
         })
@@ -55,21 +56,18 @@ class BackgroundInterface extends Component {
                     return true
                 if (layer.children)
                     return layer.children.find(handleLayer)
-                if (layer.id && assets[layer.id].type === 'bundle')
-                    return assets[layer.id].layers.children.find(handleLayer)
             }
 
             // Look for any asset bundles using it
-            Object.keys(assets).filter(id =>
-                assets[id].type === 'bundle' && assets[id].layers.children.find(handleLayer)).forEach(id => {
-                const asset = assets[id]
+            Object.keys(assets).filter(asset =>
+                assets[asset].type === 'bundle' && asset !== id && assets[asset].layers.children.find(handleLayer) && !Puppet.handleLayer(assets, assets[id].layers, l => l.id === asset)).forEach(id => {
                 const thumbnailsPath = path.join(thumbnailPaths.assets, asset.location.slice(0, -4))
-                ipcRenderer.send('background', 'generate thumbnails', thumbnailsPath, asset, 'asset', id)
+                ipcRenderer.send('background', 'generate thumbnails', thumbnailsPath, assets[asset], 'asset', asset)
             })
 
             // Look for any characters using it
-            Object.keys(characters).filter(id =>
-                characters[id].layers.children.find(handleLayer)).forEach(id => {
+            Object.keys(characters).filter(char =>
+                Puppet.handleLayer(assets, characters[char].layers, l => l.id === id)).forEach(id => {
                 const character = characters[id]
                 const thumbnailsPath = `${thumbnailPaths.characters}${id}`
                 ipcRenderer.send('background', 'generate thumbnails', thumbnailsPath, character, 'puppet', id)

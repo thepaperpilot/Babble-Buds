@@ -1,3 +1,5 @@
+import {Puppet} from 'babble.js'
+
 const util = require('./../util')
 
 export function updatePaths(layers, l) {
@@ -5,8 +7,7 @@ export function updatePaths(layers, l) {
     const parseLayer = function(layer, inherit = {}, path = []) {
         Object.keys(inherit).forEach(k => inherit[k] == null && delete inherit[k])
         if (layer.children) {
-            const inh = Object.assign((({ head, emote, emoteLayer }) =>
-                ({ head, emote, emoteLayer }))(layer), inherit)
+            const inh = Puppet.getInherit(layer, inherit)
             layer.children.forEach((child, i) => parseLayer(child, inh, path.concat(i)))
         }
         if (JSON.stringify(layer.path) === JSON.stringify(l))
@@ -129,8 +130,7 @@ function deleteAsset(state, action) {
 function addLayer(state, action) {
     const layers = JSON.parse(JSON.stringify(state.character.layers))
     const curr = action.path.reduce((layer, index) => layer.children[index], layers)
-    const inherit = Object.assign((({ head, emote, emoteLayer }) =>
-        ({ head, emote, emoteLayer }))(curr), curr.inherit)
+    const inherit = Puppet.getInherit(curr, curr.inherit)
     Object.keys(inherit).forEach(k => inherit[k] == null && delete inherit[k])
     let layer = Object.assign({
         children: [],
@@ -151,8 +151,7 @@ function wrapLayer(state, action) {
     const layers = JSON.parse(JSON.stringify(state.character.layers))
     const curr = action.path.slice(0, -1).reduce((layer, index) => layer.children[index], layers)
     const child = curr.children[action.path[action.path.length - 1]]
-    const newLayer = Object.assign((({ head, emote, emoteLayer }) =>
-        ({ head, emote, emoteLayer }))(child), {
+    const newLayer = Puppet.getInherit(child, {
         children: [child],
         inherit: child.inherit,
         name: 'New Layer',

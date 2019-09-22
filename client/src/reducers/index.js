@@ -1,6 +1,7 @@
 import undoable, { excludeAction, groupByActionTypes } from 'redux-undo'
 import util from './util'
 import project from './project/project'
+import { getConflicts } from './project/loader'
 import { DEFAULTS as PROJECT_DEFAULTS } from './project/defaults'
 import inspector, { DEFAULTS as INSPECTOR_DEFAULTS } from './inspector/inspector'
 import settings, { DEFAULTS as SETTINGS_DEFAULTS } from './settings/settings'
@@ -36,8 +37,10 @@ function saveEditor(state) {
         break
     }
     case 'asset': {
-        const assets = util.updateObject(state.project.assets, {
-            [editor.id]: editor.character
+        const assets = util.updateObject(project.assets, {
+            [editor.id]: util.updateObject(editor.character, {
+                conflicts: getConflicts(project.assets, editor.character.layers)
+            })
         })
         const thumbnailsPath = path.join(state.project.project, state.project.settings.assetsPath, editor.character.location.slice(0, -4))
         ipcRenderer.send('background', 'generate thumbnails', thumbnailsPath,

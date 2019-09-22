@@ -5,7 +5,7 @@ import Checkbox from '../inspector/fields/Checkbox'
 import Number from '../inspector/fields/Number'
 import Modal from '../ui/Modal'
 import Foldable from '../ui/Foldable'
-import {reducer} from './../controller/Emotes'
+import {getEmotes} from './../controller/Emotes'
 import './importer.css'
 
 import { loadCharacters, loadAssets } from './../../reducers/project/loader'
@@ -186,7 +186,7 @@ class PuppetImporter extends Component {
             const puppet = this.state.characters[id]
             const selected = this.state.selected.includes(id)
             const thumbnails = this.state.characterThumbnails[id].split('.').slice(0, -1).join('.')
-            const emotes = puppet.layers.children.reduce(reducer(this.state.assets), [])
+            const emotes = getEmotes(this.state.assets, puppet.layers)
             return <Foldable
                 key={id}
                 defaultFolded={true}

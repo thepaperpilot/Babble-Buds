@@ -2,6 +2,7 @@ import React, {Component} from 'react'
 import { connect } from 'react-redux'
 import Scrollbar from 'react-custom-scroll'
 import Tree from 'react-ui-tree'
+import {Puppet} from 'babble.js'
 import Layer from './Layer'
 import LayerContextMenu from './LayerContextMenu'
 import './layers.css'
@@ -23,8 +24,7 @@ class Layers extends Component {
 
     componentWillReceiveProps(props) {
         const emotes = this.calculateEmotes(props)
-        if (emotes !== this.state.emotes)
-            this.setState({ emotes })
+        this.setState({ emotes })
     }
 
     handleChange(tree) {
@@ -76,16 +76,14 @@ class Layers extends Component {
 
     calculateEmotes(props) {
         const emotes = {}
-        const reducer = layer => {
-            if (layer.emote != null && !(layer.emote in emotes))
-                emotes[layer.emote] = layer
-            if (layer.children)
-                layer.children.forEach(reducer)
-            else if (props.assets[layer.id].type === 'bundle')
-                props.assets[layer.id].layers.children.forEach(reducer)
-        }
         if (props.tree.children)
-            props.tree.children.forEach(reducer)
+            Puppet.handleLayer(props.assets, props.tree, (layer, bundles) => {
+                if (layer.emote != null && !(layer.emote in emotes)) {
+                    emotes[layer.emote] = bundles[0] ?
+                        props.tree.children.find(l => l.id === bundles[0]).path :
+                        layer.path
+                }
+            })
         return emotes
     }
 

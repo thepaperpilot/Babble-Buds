@@ -4,8 +4,21 @@ import classNames from 'classnames'
 import { DropTarget } from 'react-dnd'
 import { ContextMenuTrigger } from 'react-contextmenu'
 import { ActionCreators as UndoActionCreators } from 'redux-undo'
+import {Puppet} from 'babble.js'
 
 const join = require('path').join
+
+export function comparePaths(a, b) {
+    if (!(a instanceof Array && b instanceof Array))
+        return false
+    if (a.length !== b.length)
+        return false
+    for (let i = 0; i < a.length; i++)
+        if (a[i] !== b[i]) {
+            return false
+        }
+    return true
+}
 
 // TODO make it so we can drag this layer into the assets panel to create asset bundles
 class Layer extends Component {
@@ -35,26 +48,38 @@ class Layer extends Component {
     }
 
     render() {
-        const {selected, asset, assetsPath, characterId, isOver, canDrop} = this.props
+        const {selected, asset, assetsPath, isOver, canDrop} = this.props
         const {path, id, name, children, nodeEmote, emotes, head, emoteLayer, inherit, tabs, self} = this.props
         
         // TODO menu item to "recenter layer", which will only work on a layer with children, and will move the parent layer's position
         // so that its at the center of where all its children are, and offset each child the opposite direction to compensate
         // Thus making scaling and rotating work in a more straightforward way
         const className = ['layer']
-        if (JSON.stringify(selected) === JSON.stringify(path))
+        if (comparePaths(selected, path))
             className.push('selected')
+
+        // Check for errors
+        // We have an emote but a parent already has one
         if ((inherit && 'emote' in inherit && nodeEmote != null) ||
-            (nodeEmote != null && nodeEmote in emotes && JSON.stringify(emotes[nodeEmote].path) !== JSON.stringify(path)) ||
+            // We have an emote but that emote already exists in this puppet
+            (nodeEmote != null && nodeEmote in emotes && !comparePaths(emotes[nodeEmote], path)) ||
+            // We have a head setting but a parent already has one
             (head != null && inherit && inherit.head != null) ||
+            // We have a emote layer setting but a parent already has one
             (emoteLayer != null && inherit && inherit.emoteLayer != null) ||
-            (asset && asset.type === 'bundle' && id === characterId))
+            // At least one of many things has gone wrong relating to asset bundles
+            (asset && asset.type === 'bundle' && (
+                Object.keys(asset.conflicts).some(c => asset.conflicts[c] && c in inherit) ||
+                asset.conflicts.emotes.some(e => e in emotes && !comparePaths(emotes[e], path)))))
             className.push('warning')
+
         const emote = nodeEmote != null ?
             <div className={this.props.emote === nodeEmote ?
                 'emote-layer visible' : 'emote-layer'} /> : null
+        
         const bundle = asset && asset.type === 'bundle' ?
             <div className="asset-bundle" /> : null
+        
         return <ContextMenuTrigger
             id={`contextmenu-layer-${this.props.contextmenu}`}
             holdToDisplay={-1}
@@ -120,6 +145,7 @@ function mapStateToProps(state, props) {
     return {
         characterId: state.editor.present.id,
         selected: state.editor.present.layer,
+        assets: state.project.assets,
         asset: state.project.assets[props.id],
         emote: state.editor.present.emote,
         assetsPath: state.project.assetsPath,

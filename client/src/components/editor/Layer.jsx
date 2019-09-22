@@ -2,6 +2,7 @@ import React, {Component} from 'react'
 import { connect } from 'react-redux'
 import { Sprite, Container } from 'react-pixi-fiber'
 import Selector, { behavior } from './Selector'
+import { comparePaths } from './../layers/Layer'
 
 const path = require('path')
 const TextureCache = window.PIXI.utils.TextureCache
@@ -23,6 +24,7 @@ class RawLayer extends Component {
     render() {
         const {
             layer,
+            bundles,
             assets,
             assetsPath,
             emote,
@@ -32,29 +34,29 @@ class RawLayer extends Component {
             ...props
         } = this.props
 
-        const highlightJSON = JSON.stringify(highlight)
-        const pathJSON = JSON.stringify(layer.path)
-        const selectedJSON = JSON.stringify(selected)
-
-        const isHighlighted = highlightJSON === pathJSON
+        const isHighlighted = comparePaths(highlight, layer.path)
+        const isSelected = selected && comparePaths(selected, layer.path)
 
         let element
         if (layer.id) {
             switch (assets[layer.id].type) {
-            case 'bundle': return <Container
-                alpha={layer.emote != null && (emote == null || layer.emote !== emote) ? 0 : 1}
-                layer={layer}
-                x={layer.x || 0}
-                y={layer.y || 0}
-                rotation={layer.rotation || 0}
-                {...props} >
-                <Container scale={[layer.scaleX || 1, layer.scaleY || 1]}>
-                    {assets[layer.id].layers.children.map((l, i) =>
-                        <Layer key={i} layer={l} scale={scale} highlight={isHighlighted ? l.path : highlight} />)}
+            case 'bundle': 
+                if (bundles.includes(layer.id))
+                    return null
+                return <Container
+                    alpha={layer.emote != null && (emote == null || layer.emote !== emote) ? 0 : 1}
+                    layer={layer}
+                    x={layer.x || 0}
+                    y={layer.y || 0}
+                    rotation={layer.rotation || 0}
+                    {...props} >
+                    <Container scale={[layer.scaleX || 1, layer.scaleY || 1]}>
+                        {assets[layer.id].layers.children.map((l, i) =>
+                            <Layer bundles={[...bundles, layer.id]} key={i} layer={l} scale={scale} highlight={isHighlighted ? l.path : highlight} />)}
+                    </Container>
+                    {isSelected && bundles.length === 0 && 
+                        <Selector ref={this.selector} scale={scale} layer={layer} dispatch={this.props.dispatch} />}
                 </Container>
-                {selected && selectedJSON === pathJSON &&
-                    <Selector ref={this.selector} scale={scale} layer={layer} dispatch={this.props.dispatch} />}
-            </Container>
             default: element = <Sprite
                 anchor={[.5,.5]}
                 alpha={isHighlighted ? 1 : .5}
@@ -64,7 +66,7 @@ class RawLayer extends Component {
         } else
             element = <Container scale={[layer.scaleX || 1, layer.scaleY || 1]}>
                 {(layer.children || []).map((l, i) =>
-                    <Layer key={i} layer={l} scale={scale} highlight={isHighlighted ? l.path : highlight} />)}
+                    <Layer key={i} layer={l} bundles={bundles} scale={scale} highlight={isHighlighted ? l.path : highlight} />)}
             </Container>
 
         return  <Container
@@ -75,7 +77,7 @@ class RawLayer extends Component {
             rotation={layer.rotation || 0}
             {...props} >
             {element}
-            {selected && selectedJSON === pathJSON &&
+            {isSelected &&
                 <Selector ref={this.selector} scale={scale} layer={layer} dispatch={this.props.dispatch} />}
         </Container>
     }

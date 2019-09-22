@@ -298,7 +298,8 @@ export const behavior = {
     customWillDetach: instance => {
         // This function gets called by Layer because for some reason
         // react-pixi-fiber just... doesn't 
-        instance.selector.parent.removeChild(instance.selector)
+        if (instance.selector)
+            instance.selector.parent.removeChild(instance.selector)
 
         let root = instance
         while (root.parent && root.parent.parent)

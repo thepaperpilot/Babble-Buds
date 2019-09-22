@@ -1,5 +1,6 @@
 import React, {Component} from 'react'
 import { connect } from 'react-redux'
+import {Puppet} from 'babble.js'
 import Babble from './Babble'
 
 const path = window.require('path')
@@ -10,21 +11,16 @@ const hotkeys = [
     ['m', ',', '.', '/']
 ]
 
-export function reducer(assets) {
-    const reducer = (acc, curr) => {
-        if (curr.emote != null) {
-            return acc.concat({
-                emote: curr.emote,
-                name: curr.name
+export function getEmotes(assets, layer) {
+    const emotes = []
+    Puppet.handleLayer(assets, layer, layer => {
+        if (layer.emote != null && layer.inherit && layer.inherit.emote == null)
+            emotes.push({
+                emote: layer.emote,
+                name: layer.name
             })
-        } else if (curr.children) {
-            return curr.children.reduce(reducer, acc)
-        } else if (assets[curr.id].type === 'bundle') {
-            return assets[curr.id].layers.children.reduce(reducer, acc)
-        } else return acc
-    }
-
-    return reducer
+    })
+    return emotes
 }
 
 class Emotes extends Component {
@@ -42,7 +38,7 @@ class Emotes extends Component {
     }
 
     render() {
-        const emotes = this.props.characters[this.props.actor.id].layers.children.reduce(reducer(this.props.assets), [])
+        const emotes = getEmotes(this.props.assets, this.props.characters[this.props.actor.id].layers)
         const character = this.props.characters[this.props.actor.id]
         return (
             <div className="flex-column">

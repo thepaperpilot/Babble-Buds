@@ -5,7 +5,7 @@ import Header from './Header'
 import Checkbox from './fields/Checkbox'
 import Number from './fields/Number'
 import Dropdown from './../ui/InspectorDropdown'
-import {reducer} from './../controller/Emotes'
+import {getEmotes} from './../controller/Emotes'
 import PuppetContextMenu from './../puppets/PuppetContextMenu'
 
 const path = window.require('path')
@@ -55,7 +55,7 @@ class Puppet extends Component {
         const thumbnails = this.props.puppetThumbnails[this.props.target]
         const disabled = puppet.creator !== this.props.self
 
-        const emotes = puppet.layers.children.reduce(reducer(this.props.assets), [])
+        const emotes = getEmotes(this.props.assets, puppet.layers)
 
         const LinkedPuppetContextMenu = PuppetContextMenu(this.props.contextmenu)
 
