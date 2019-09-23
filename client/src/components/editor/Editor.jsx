@@ -9,8 +9,9 @@ import './editor.css'
 
 const DISTANCE = 10000
 const TYPE_MAP = {
-    puppet: 'characters',
-    asset: 'assets'
+    environment: p => p.settings.environments,
+    puppet: p => p.characters,
+    asset: p => p.assets
 }
 
 class Editor extends Component {
@@ -217,7 +218,7 @@ function mapStateToProps(state) {
         canDrop: !!character,
         character: layers,
         changed: id && type &&
-            JSON.stringify(character) !== JSON.stringify(state.project[TYPE_MAP[type]][id]),
+            JSON.stringify(character) !== JSON.stringify(TYPE_MAP[type](state.project)[id]),
         selected: layer,
         type,
         id
