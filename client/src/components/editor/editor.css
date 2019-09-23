@@ -1,5 +1,7 @@
 .editor {
     cursor: move;
+    transition: border-color .1s ease-in;
+    border-color: transparent;
 }
 
 .editor > canvas {
@@ -9,13 +11,11 @@
 }
 
 .editor.changed {
-    border: solid red;
+    border: solid rgba(255, 0, 0, .3);
 }
 
 .editor.changed .bar button:first-child {
-    background-color: red;
-    border-top: solid red 1px;
-    margin-top: -1px;
+    background-color: rgba(255, 0, 0, .3);
 }
 
 .editor.changed .bar {
