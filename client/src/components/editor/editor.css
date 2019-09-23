@@ -8,7 +8,7 @@
     border: solid red;
 }
 
-.editor.changed .bar button {
+.editor.changed .bar button:first-child {
     background-color: red;
     border-top: solid red 1px;
     margin-top: -1px;

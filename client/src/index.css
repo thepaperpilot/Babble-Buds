@@ -155,10 +155,11 @@ textarea:focus {
 img {
     position: relative;
     overflow: hidden;
+    background-color: #242a33;
 }
 
 img:after {
-    background-color: #242a33;
+    background-color: inherit;
     display: block;
     position: absolute;
     z-index: 2;
@@ -169,12 +170,13 @@ img:after {
     content: "";
 }
 
-.selected img:after {
+.selected img {
     background-color: #333c4a;
 }
 
-.char:hover:not(.selected) img:after,
-.emote:hover:not(.selected) img:after {
+.char:hover:not(.selected) img,
+.emote:hover:not(.selected) img,
+.smallThumbnail-wrapper:hover:not(.selected) img {
     background-color: #2a323d;
 }
 

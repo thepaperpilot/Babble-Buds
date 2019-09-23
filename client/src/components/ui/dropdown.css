@@ -19,7 +19,7 @@
 }
 
 .dropdown-wrapper .dropdown-image {
-    z-index: 10000;
+    z-index: 10;
     position: absolute;
     background-color: #242a33;
 }

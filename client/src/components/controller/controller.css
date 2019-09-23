@@ -29,6 +29,7 @@
     pointer-events: none;
     font-size: 20px;
     background: #333c4a;
+    z-index: 9;
 }
 
 .controller-container .react-contextmenu-wrapper,
