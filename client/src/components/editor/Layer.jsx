@@ -55,7 +55,7 @@ class RawLayer extends Component {
         const isSelected = selected && comparePaths(selected, layer.path)
 
         let element
-        if (layer.id) {
+        if (layer.id && layer.id in assets) {
             switch (assets[layer.id].type) {
             case 'bundle': 
                 if (bundles.includes(layer.id))
