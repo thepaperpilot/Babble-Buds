@@ -15,12 +15,12 @@
     line-height: 28px;
     position: relative;
     white-space: nowrap;
-    color: white;
+    color: var(--foreground);
 }
 
 .checkbox + .checkbox-label:before {
-    background: #242a33;
-    border: 4px solid #333c4a;
+    background: var(--background);
+    border: 4px solid var(--highlight);
     content: '';
     display: inline-block;
     height: 20px;
@@ -32,19 +32,19 @@
 }
 
 .checkbox:checked + .checkbox-label:before {
-    background: #333c4a;
-    box-shadow: inset 0 0 0 4px #242a33;
+    background: var(--highlight);
+    box-shadow: inset 0 0 0 4px var(--background);
 }
 
 .checkbox:disabled + .checkbox-label:before {
-    border-color: #3b3d41;
+    border-color: #404040;
 }
 
 .checkbox:checked:disabled + .checkbox-label:before {   
-    background: #3b3d41;
+    background: #404040;
 }
 
 .checkbox:focus + .checkbox-label, .checkbox:active + .checkbox-label {
-    color: #a3c9ef;
+    color: var(--focus);
     outline: none;
 }

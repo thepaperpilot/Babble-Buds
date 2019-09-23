@@ -1,8 +1,9 @@
 .action {
     transition: max-height .5s;
     position: relative;
-    border-bottom: solid 2px white;
+    border-bottom: solid 2px var(--foreground);
     margin-bottom: 8px;
+    padding-right: 8px;
 }
 
 .action p {
@@ -18,12 +19,13 @@
 }
 
 .inspector .info, .inspector .error, .inspector .preview {
-    background: #2a323d;
+    background: var(--far-background);
     border-radius: 4px;
     padding: 8px 16px 8px 40px;
     position: relative; 
     margin: 0;
     margin-bottom: 8px;
+    margin-left: 8px;
     user-select: initial;
     white-space: pre-wrap;
 }
@@ -180,8 +182,8 @@
     position: absolute;
     bottom: 0px;
     right: 100%;
-    background: #242a33;
-    border: 3px solid #333c4a;
+    background: var(--background);
+    border: 3px solid var(--highlight);
     width: 200px;
     padding: 8px;
 }

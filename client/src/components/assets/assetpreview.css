@@ -1,6 +1,6 @@
 .drag-preview {
     position: fixed;
-    border: 3px solid #333c4a;
+    border: 3px solid var(--highlight);
     overflow: hidden;
     width: 100px !important;
     height: 100px !important;
@@ -9,8 +9,8 @@
 }
 
 .drag-preview .inner-line-item {
-    background-color: #333c4a;
-    color: #fff;
+    background-color: var(--highlight);
+    color: var(--foreground);
     font-size: 12px;
     overflow: hidden;
     pointer-events: none;

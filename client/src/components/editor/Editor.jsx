@@ -5,6 +5,7 @@ import { DropTarget } from 'react-dnd'
 import Viewport from './Viewport'
 import Layer from './Layer'
 import Cross from './Cross'
+import {getTheme} from './../project/Themer'
 import './editor.css'
 
 const DISTANCE = 10000
@@ -130,8 +131,12 @@ class Editor extends Component {
 
     render() {
         // TODO (re-)load assets since babble.js isn't here to do it for us
-        const {rect, character, selected, changed, isOver, canDrop, item, type, id} = this.props
+        const {rect, character, selected, changed, isOver, canDrop, item, type, id, color} = this.props
         const {scale, grid, bounds, dragPos} = this.state
+
+        let {highlight, 'far-background': background} = getTheme(color)
+        highlight = `0x${highlight.slice(1)}`
+        background = `0x${background.slice(1)}`
 
         const gridLines = []
         if (grid !== -1) {
@@ -144,7 +149,7 @@ class Editor extends Component {
                     x={i}
                     y={bounds.top}
                     scale={scale}
-                    color={0x333C4A}
+                    color={highlight}
                     distance={bounds.bottom - bounds.top} />)
             }
 
@@ -153,7 +158,7 @@ class Editor extends Component {
                     x={bounds.left}
                     y={i}
                     scale={scale}
-                    color={0x333C4A}
+                    color={highlight}
                     distance={bounds.right - bounds.left} />)
             }
         }
@@ -166,7 +171,7 @@ class Editor extends Component {
                 }}>
                 <div className="bar flex-row">
                     <button onClick={this.savePuppet}>Apply</button>
-                    <div className="toggle" style={{ backgroundColor: this.state.highlight ? '#333c4a' : '#242a33'}} onClick={this.toggleHighlight}>
+                    <div className="toggle" style={{ backgroundColor: this.state.highlight ? 'var(--highlight)' : 'var(--background)'}} onClick={this.toggleHighlight}>
                         Highlight Current Layer
                     </div>
                     <button onClick={this.playAnimation} title="Play all animations">▶</button>
@@ -188,9 +193,9 @@ class Editor extends Component {
                 ref={this.stage} >
                     <Viewport width={rect.width - (changed ? 6 : 0)} height={rect.height - 21 - (changed ? 6 : 0)} ref={this.viewport}>
                         {gridLines}
-                        <Cross x={0} y={0} scale={scale * 4} color={0x333C4A} distance={DISTANCE * scale} />
+                        <Cross x={0} y={0} scale={scale * 4} color={highlight} distance={DISTANCE * scale} />
                         <Layer play={this.state.play} layer={character} bundles={type === 'asset' ? [id] : []}
-                            x={0} y={0} selectedRef={this.selectedRef} scale={scale}
+                            x={0} y={0} selectorColor={background} selectedRef={this.selectedRef} scale={scale}
                             highlight={this.state.highlight ? selected : character.path} />
                         {isOver && dragPos &&
                             <Layer layer={{
@@ -213,6 +218,8 @@ class Editor extends Component {
 function mapStateToProps(state) {
     const {character, type, id, layer} = state.editor.present
     const layers = character ? character.layers : []
+    const environment = state.project.settings.environments[state.project.settings.environment] ||
+        state.project.defaultEnvironment
 
     return {
         canDrop: !!character,
@@ -221,7 +228,8 @@ function mapStateToProps(state) {
             JSON.stringify(character) !== JSON.stringify(TYPE_MAP[type](state.project)[id]),
         selected: layer,
         type,
-        id
+        id,
+        color: environment.color
     }
 }
 

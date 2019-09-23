@@ -4,13 +4,13 @@
 
 .shortcut input[type="text"] {
     color: transparent;
-    text-shadow: 0 0 0 white;
+    text-shadow: 0 0 0 var(--foreground);
     cursor: pointer;
 }
 
 .shortcut input[type="text"]::placeholder {
     color: transparent;
-    text-shadow: 0 0 0 grey;
+    text-shadow: 0 0 0 var(--inactive);
 }
 
 .action .shortcut button {

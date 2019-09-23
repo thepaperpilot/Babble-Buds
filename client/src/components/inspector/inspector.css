@@ -21,8 +21,8 @@
 }
 
 .inspector hr {
-    width: 100%;
-    flex-shrink: 0;
+    margin: 8px -8px;
+    border-color: var(--foreground);
 }
 
 .inspector .inspector-content {
@@ -40,5 +40,5 @@
 }
 
 .inspector .foldable.warning h4 {
-    color: red;
+    color: var(--warning);
 }

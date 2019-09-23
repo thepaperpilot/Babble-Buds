@@ -12,7 +12,7 @@
 }
 
 .console pre:nth-child(2n) {
-    background: #29303B;
+    background: var(--raised);
 }
 
 .console pre .progress {

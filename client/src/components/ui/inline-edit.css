@@ -3,8 +3,8 @@
     border-top: none;
     border-left: none;
     border-right: none;
-    background-color: #333c4a;
-    color: white;
+    background-color: var(--highlight);
+    color: var(--foreground);
     padding-top: 0;
     padding-bottom: 0;
     max-width: 100%;
@@ -21,7 +21,7 @@
 }
 
 .disabled {
-    color: #888;
+    color: var(--disabled);
 }
 
 .isEditing {
@@ -29,11 +29,11 @@
 }
 
 .react-contextmenu {
-    background-color: #2a323d;
+    background-color: var(--raised);
     background-clip: padding-box;
     border: 1px solid rgba(0,0,0,.15);
     border-radius: .25rem;
-    color: white;
+    color: var(--foreground);
     font-size: 16px;
     margin: 2px 0 0;
     min-width: 160px;
@@ -54,7 +54,7 @@
 .react-contextmenu-item {
     background: 0 0;
     border: 0;
-    color: white;
+    color: var(--foreground);
     cursor: pointer;
     font-weight: 400;
     line-height: 1.5;
@@ -65,8 +65,8 @@
 
 .react-contextmenu-item.react-contextmenu-item--active,
 .react-contextmenu-item.react-contextmenu-item--selected {
-    background-color: #333c4a;
-    border-color: #333c4a;
+    background-color: var(--highlight);
+    border-color: var(--highlight);
     text-decoration: none;
 }
 

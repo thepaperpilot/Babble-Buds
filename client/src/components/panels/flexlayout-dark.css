@@ -13,20 +13,20 @@
 }
 
 .flexlayout__splitter:hover {
-    background-color: #333c4a;
+    background-color: var(--highlight);
     transition-delay: 0;
 }
 
 .flexlayout__splitter_drag {
     border-radius: 5px;
-    background-color: #2a323d;
+    background-color: var(--raised);
     z-index: 1000;
 }
 
 .flexlayout__outline_rect {
     position: absolute;
     cursor: move;
-    border: 2px solid #333c4a;
+    border: 2px solid var(--highlight);
     box-shadow: inset 0 0 60px rgba(0, 0, 0, .2);
     border-radius: 5px;
     z-index: 1000;
@@ -35,7 +35,7 @@
 
 .flexlayout__outline_rect_edge {
     cursor: move;
-    border: 2px solid #333c4a;
+    border: 2px solid var(--highlight);
     box-shadow: inset 0 0 60px rgba(0, 0, 0, .2);
     border-radius: 5px;
     z-index: 1000;
@@ -46,7 +46,7 @@
     position: absolute;
     z-index: 1000;
     box-shadow: inset 0 0 5px rgba(0, 0, 0, .2);
-    background-color: #333c4a;
+    background-color: var(--highlight);
 }
 
 .flexlayout__drag_rect {
@@ -56,10 +56,10 @@
     border-radius: 5px;
     z-index: 1000;
     box-sizing: border-box;
-    background-color:#333c4a;
+    background-color:var(--highlight);
     opacity: 0.9;
     text-align: center;
-    color:white;
+    color:var(--foreground);
     font-size: medium;
 
     display: flex;
@@ -77,9 +77,9 @@
 .flexlayout__tab {
     overflow: auto;
     position:absolute;
-    background-color: #242a33;
+    background-color: var(--background);
     box-shadow: 2px 2px 3px #222;
-    color:white;
+    color:var(--foreground);
 }
 
 .flexlayout__tab_button {
@@ -97,12 +97,12 @@
 }
 
 .flexlayout__tab_button--selected {
-    color: #ddd;
-    background-color: #242a33;
+    color: var(--foreground);
+    background-color: var(--background);
 }
 
 .flexlayout__tab_button--unselected {
-    color: gray;
+    color: var(--inactive);
 }
 
 .flexlayout__tab_button_leading {
@@ -129,15 +129,17 @@
 .flexlayout__tab_button_trailing {
     float: left;
     display:inline-block;
-    margin-left:2px;
+    margin-left:4px;
     width:8px;
     height:8px;
     padding: 4px;
 }
 
-.flexlayout__tab_button:hover .flexlayout__tab_button_trailing,
-.flexlayout__tab_button--selected .flexlayout__tab_button_trailing{
-    background: transparent url("./icons/close_white.png") no-repeat center;
+.flexlayout__tab_button_trailing::after {
+    content: "X";
+    font-size: 8px;
+    display: block;
+    transform: scale(2,1.5);
 }
 
 .flexlayout__tab_button_overflow {
@@ -148,7 +150,7 @@
     padding-left:12px;
     border:none;
     font-size: 10px;
-    color:lightgray;
+    color:lightvar(--inactive);
     font-family: Arial, sans-serif;
     background: transparent url("./icons/more.png") no-repeat left;
 }
@@ -184,7 +186,7 @@
 
 .flexlayout__tabset-maximized
 {
-    background-color: #111924;
+    background-color: var(--far-background);
 }
 
 .flexlayout__tab_toolbar {
@@ -218,17 +220,17 @@
 
 .flexlayout__popup_menu_item {
     padding: 2px 10px 2px 10px;
-    color:#ddd;
+    color:var(--foreground);
     font-size: small;
 }
 
 .flexlayout__popup_menu_item:hover {
-    background-color: #333c4a;
+    background-color: var(--highlight);
     cursor: pointer;
 }
 
 .flexlayout__popup_menu_container {
-    background-color: #2a323d;
+    background-color: var(--raised);
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     border-radius:3px;
     position:absolute;
@@ -238,7 +240,7 @@
 
 .flexlayout__border_top {
     background-color:black;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid var(--foreground);
     box-sizing: border-box;
     overflow:hidden;
 }
@@ -285,7 +287,7 @@
 
 .flexlayout__border_button {
     background-color: #222;
-    color:white;
+    color:var(--foreground);
     display:inline-block;
     white-space:nowrap;
 
@@ -297,12 +299,12 @@
 }
 
 .flexlayout__border_button--selected {
-    color: #ddd;
+    color: var(--foreground);
     background-color: #222;
 }
 
 .flexlayout__border_button--unselected {
-    color: gray;
+    color: var(--inactive);
 }
 
 .flexlayout__border_button_leading {
@@ -318,7 +320,7 @@
     float: left;
     border: none;
     color:green;
-    background-color:#ddd;
+    background-color:var(--foreground);
 }
 .flexlayout__border_button_textbox:focus {
     outline: none;

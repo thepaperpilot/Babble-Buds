@@ -33,3 +33,130 @@
 .default.broken {
     flex-direction: column;
 }
+
+.bar {
+    margin-left: -8px;
+    margin-right: -8px;
+    margin-top: -8px;
+    background-color: var(--highlight);
+    padding-left: 8px;
+    font-size: 12px;
+    border-top: solid 1px var(--far-background);
+    border-bottom: solid 1px var(--far-background);
+    white-space: nowrap;
+}
+
+.bar.flex-row {
+    margin-left: -10px;
+    margin-right: -10px;
+}
+
+.bar.flex-row > div, .bar.flex-column > div {
+    margin: 0;
+}
+
+.flex-column > .flex-grow, .flex-row > .flex-grow {
+    flex-grow: 10;
+    border-right: 1px solid var(--far-background);
+    height: 18px;
+}
+
+.bar button,
+.bar input,
+.bar .flex-spacer,
+.bar .flex-item,
+.bar .toggle,
+.bar .dropdown-wrapper {
+    margin: auto;
+    padding: 2px 8px;
+    border-bottom: none;
+    border-right: 1px solid var(--far-background);
+}
+
+.bar .flex-item {
+    user-select: initial;
+}
+
+.bar button {
+    color: var(--foreground);
+    font-size: 12px;
+    border-radius: 0;
+    text-shadow: none;
+}
+
+.bar input[type="range"] {
+    padding: 0;
+    border-right: none;
+    margin: 6px 4px;
+}
+
+.bar .search {
+    min-width: 100px;
+    flex-grow: 5;
+    position: relative;
+}
+
+.bar .search > input {
+    padding-left: 20px;
+    font-size: 12px;
+}
+
+.bar .search > input[type="search"]:focus {
+    border-bottom: none;
+}
+
+.bar .dropdown-wrapper .dropdown {
+    padding-right: 12px;
+    transition: background-color .1s ease-in;    
+}
+
+.bar > div:first-child,
+.bar > button:first-child,
+.bar > input:first-child,
+.bar > .search:first-child > input {
+    border-left: 1px solid var(--far-background);
+}
+
+.bar .dropdown:after {
+    top: 2px;
+}
+
+.bar .search:hover {
+    background-color: rgba(255,255,255,.05);
+}
+
+.bar .search:before {
+    content: '🔍';
+    position: absolute;
+    left: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.search {
+    position: relative;
+}
+
+.search > input[type="search"] {
+    padding-left: 20px;
+    font-size: 12px;
+    border-bottom: none;
+}
+
+.search:before {
+    content: '🔍';
+    position: absolute;
+    left: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.flex-column.full-panel {
+    margin-top: -10px;
+    margin-bottom: 0;
+    height: calc(100% + 16px);
+}
+
+.toggle input[type="checkbox"] {
+    display: none;
+}

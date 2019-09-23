@@ -84,11 +84,11 @@
 }
 
 .layer.warning div:first-child {
-    color: red;
+    color: var(--warning);
 }
 
 .layer.special {
-    color: grey;
+    color: var(--disabled);
 }
 
 .emote-layer:after {
@@ -111,5 +111,5 @@
 }
 
 .emote-layer:not(.visible):after {
-    color: grey;
+    color: var(--disabled);
 }

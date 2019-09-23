@@ -48,6 +48,7 @@ class RawLayer extends Component {
             scale,
             highlight,
             play,
+            selectorColor,
             ...props
         } = this.props
 
@@ -71,11 +72,12 @@ class RawLayer extends Component {
                     <Container scale={[layer.scaleX || 1, layer.scaleY || 1]}>
                         {assets[layer.id].layers.children.map((l, i) =>
                             <Layer play={play} bundles={[...bundles, layer.id]}
-                                key={i} layer={l} scale={scale}
+                                key={i} layer={l} scale={scale} selectorColor={selectorColor}
                                 highlight={isHighlighted ? l.path : highlight} />)}
                     </Container>
                     {isSelected && bundles.length === 0 && 
-                        <Selector ref={this.selector} scale={scale} layer={layer} dispatch={this.props.dispatch} />}
+                        <Selector ref={this.selector} scale={scale} layer={layer}
+                            dispatch={this.props.dispatch} selectorColor={selectorColor} />}
                 </Container>
             default: element = <Sprite
                 anchor={[.5,.5]}
@@ -86,7 +88,7 @@ class RawLayer extends Component {
         } else
             element = <Container scale={[layer.scaleX || 1, layer.scaleY || 1]}>
                 {(layer.children || []).map((l, i) =>
-                    <Layer play={play} key={i} layer={l} bundles={bundles}
+                    <Layer play={play} key={i} layer={l} bundles={bundles} selectorColor={selectorColor}
                         scale={scale} highlight={isHighlighted ? l.path : highlight} />)}
             </Container>
 
@@ -100,7 +102,8 @@ class RawLayer extends Component {
             {...props} >
             {element}
             {isSelected &&
-                <Selector ref={this.selector} scale={scale} layer={layer} dispatch={this.props.dispatch} />}
+                <Selector ref={this.selector} scale={scale} layer={layer}
+                    dispatch={this.props.dispatch} selectorColor={selectorColor}/>}
         </Container>
     }
 }

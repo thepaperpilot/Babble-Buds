@@ -21,7 +21,7 @@
 .dropdown-wrapper .dropdown-image {
     z-index: 10;
     position: absolute;
-    background-color: #242a33;
+    background-color: var(--background);
 }
 
 .dropdown-image {
@@ -35,17 +35,17 @@
 }
 
 .dropdown:checked + label .dropdown-image {
-    background-color: #2a323d;
+    background-color: var(--raised);
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     pointer-events: unset;
 }
 
 .dropdown-image.active {
-    background-color: #2a323d;
+    background-color: var(--raised);
 }
 
 .dropdown-content {
-    background-color: #2a323d;
+    background-color: var(--raised);
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     z-index: 1500;
     font-size: 16px;
@@ -71,7 +71,7 @@
 }
 
 .dropdown-content li:hover {
-    background-color: #333c4a;
+    background-color: var(--highlight);
 }
 
 .dropdown-image {

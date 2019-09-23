@@ -284,7 +284,7 @@ function drawGraphics(instance, props) {
             height = 2 * Math.max(Math.abs(bounds.top), Math.abs(bounds.bottom))
             instance.selector.normalSize = {x: width, y: height}
 
-            instance.selector.lineStyle(scale * 4, 0x111924)
+            instance.selector.lineStyle(scale * 4, props.selectorColor)
                 .moveTo(-width / 2 - scale, -height / 2 - scale)
                 .lineTo(-width / 2 - scale, height / 2 + scale)
                 .lineTo(width / 2 + scale, height / 2 + scale)
@@ -299,8 +299,8 @@ function drawGraphics(instance, props) {
                 const y = (Math.floor(i / 2) === 0 ? 1 : -1) * (height / 2 + scale)
                 scaler.clear()
                 scaler.hitArea = new Circle(x, y, scale * 8)
-                scaler.lineStyle(scale * 2, 0x111924)
-                scaler.beginFill(0x111924)
+                scaler.lineStyle(scale * 2, props.selectorColor)
+                scaler.beginFill(props.selectorColor)
                     .drawCircle(x, y, 6 * scale)
             })
 

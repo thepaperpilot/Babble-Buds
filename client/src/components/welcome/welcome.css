@@ -46,7 +46,7 @@
 
 .welcome {
     font-size: 20px;
-    background-color: #242a33;
+    background-color: var(--background);
     color: #54647a;
     width: 100%;
     min-height: calc(100% - 20px);
@@ -108,7 +108,7 @@ body::-webkit-scrollbar,
 
 .splash-text {
     font-size: 24px;
-    color: #333c4a;
+    color: var(--highlight);
     font-family: 'Pacifico', cursive;
     padding: 6px 0;
 }
@@ -140,14 +140,14 @@ body::-webkit-scrollbar,
 }
 
 .console:not(.panel) .console {
-    border: solid 1px #111924;
+    border: solid 1px var(--far-background);
     border-top: none;
     border-bottom: none;
     padding-bottom: 0;
 }
 
 .console:not(.panel) .rcs-inner-container > div > :last-child {
-    border-bottom: solid 1px #111924;
+    border-bottom: solid 1px var(--far-background);
 }
 
 .new-project .field button {
@@ -161,9 +161,9 @@ body::-webkit-scrollbar,
 }
 
 .recent-project {
-    background-color: #242a33;
+    background-color: var(--background);
     background-position: bottom;
-    color: #fff;
+    color: var(--foreground);
     cursor: pointer;
     height: calc( 100% - 16px );
     margin: 4px;
@@ -173,7 +173,7 @@ body::-webkit-scrollbar,
     display: flex;
     flex-direction: column;
     overflow-y: hidden;
-    border: 3px solid #333c4a;
+    border: 3px solid var(--highlight);
 }
 
 .recent-project img {
@@ -187,5 +187,5 @@ body::-webkit-scrollbar,
     position: absolute;
     bottom: 10px;
     left: 10px;
-    color: white;
+    color: var(--foreground);
 }

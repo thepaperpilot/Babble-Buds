@@ -11,7 +11,7 @@
 
 .folder-list-item {
     padding-top: 4px;
-    border: dashed #333c4a 1px;
+    border: dashed var(--highlight) 1px;
     cursor: pointer;
     margin-bottom: 4px;
 }
@@ -22,6 +22,6 @@
 
 .new-folder-button {
     display: block;
-    border: solid #333c4a 1px;
+    border: solid var(--highlight) 1px;
     margin: 8px auto;
 }

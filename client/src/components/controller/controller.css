@@ -18,7 +18,7 @@
 
 .selector {
     position: relative;
-    border: 3px solid #333c4a;
+    border: 3px solid var(--highlight);
 }
 
 .hotkey {
@@ -28,7 +28,7 @@
     position: absolute;
     pointer-events: none;
     font-size: 20px;
-    background: #333c4a;
+    background: var(--highlight);
     z-index: 9;
 }
 

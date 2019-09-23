@@ -6,6 +6,7 @@ import AssetUpdater from './AssetUpdater'
 import Clipboard from './Clipboard'
 import BabbleToggle from './BabbleToggle'
 import BackgroundInterface from './BackgroundInterface'
+import Themer from './Themer'
 
 const electron = window.require('electron')
 
@@ -171,6 +172,7 @@ class Project extends Component {
                 <Clipboard/>
                 <BabbleToggle />
                 <BackgroundInterface />
+                <Themer />
             </div>
         )
     }

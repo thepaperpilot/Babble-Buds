@@ -16,7 +16,7 @@
 }
 
 .tabs .tab-label.open {
-    border-bottom: solid 2px #fff;
+    border-bottom: solid 2px var(--foreground);
 }
 
 .tabs .tabs-content {

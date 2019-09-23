@@ -18,8 +18,8 @@
 .importer .foldable h4 {
     padding: 4px 24px;
     padding-left: 36px;
-    border-top: 1px solid white;
-    border-bottom: 1px solid grey;
+    border-top: 1px solid var(--foreground);
+    border-bottom: 1px solid var(--inactive);
     margin-top: -1px;
 }
 
@@ -63,7 +63,7 @@
     padding: 0 3px;
     padding-top: 3px;
     margin-top: -4px;
-    border: solid #333c4a 3px;
+    border: solid var(--highlight) 3px;
     display: flex;
     align-items: center;
 }

@@ -48,7 +48,7 @@ class Console extends Component {
 
     createFilterToggle(filter) {
         return (
-            <div className="toggle" style={{ backgroundColor: this.state[filter] ? '#333c4a' : '#242a33'}} onClick={this.toggleFilter(filter)}>
+            <div className="toggle" style={{ backgroundColor: this.state[filter] ? 'var(--highlight)' : 'var(--background)'}} onClick={this.toggleFilter(filter)}>
                 {filter}
             </div>
         )

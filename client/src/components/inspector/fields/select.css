@@ -5,7 +5,7 @@
 }
 
 .autosuggest .react-autosuggest__container.react-autosuggest__container--open {
-    border: solid 1px white;
+    border: solid 1px var(--foreground);
     margin-bottom: 8px;
 }
 
@@ -23,8 +23,8 @@
 }
 
 .autosuggest .react-autosuggest__container--open .react-autosuggest__input {
-    background-color: #333c4a;
-    border-bottom: solid 1px #111924;
+    background-color: var(--highlight);
+    border-bottom: solid 1px var(--far-background);
     margin-bottom: 0;
 }
 
@@ -36,11 +36,11 @@
 
 .autosuggest .react-autosuggest__suggestion {
     padding: 4px 8px;
-    border-bottom: solid 1px grey;
+    border-bottom: solid 1px var(--inactive);
 }
 
 .autosuggest .react-autosuggest__suggestion--highlighted {
-    background-color: #2a323d;
+    background-color: var(--raised);
 }
 
 .select-field .react-autosuggest__container {
@@ -57,7 +57,7 @@
 }
 
 .select-field .react-autosuggest__container--open .input-wrapper {
-    background-color: #333c4a;
+    background-color: var(--highlight);
 }
 
 .select-field .input-thumbnail {
@@ -67,7 +67,7 @@
 .select-field .input-wrapper {
     padding: 4px 8px;
     padding-right: 20px;
-    border-bottom: solid 1px grey;
+    border-bottom: solid 1px var(--inactive);
 }
 
 .select-field .input-wrapper:after {

@@ -46,7 +46,7 @@
 .modal-inner {
   width: 90%;
   padding: 10px;
-  background-color: #2a323d;
+  background-color: var(--raised);
   position: relative;
   overflow: hidden;
   max-width: 90%;
