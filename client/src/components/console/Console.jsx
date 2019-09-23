@@ -39,8 +39,11 @@ class Console extends Component {
         }
     }
 
-    toggleDevTools() {
-        remote.getCurrentWindow().toggleDevTools()
+    toggleDevTools(e) {
+        if (e.ctrlKey)
+            remote.ipcMain.emit('toggle background visibility')
+        else
+            remote.getCurrentWindow().toggleDevTools()
     }
 
     createFilterToggle(filter) {

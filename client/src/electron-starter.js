@@ -72,6 +72,7 @@ function createWindow() {
     ipcMain.on('background', (e, ...event) => backgroundWindow.webContents.send(...event))
     ipcMain.on('foreground', (e, ...event) => mainWindow.webContents.send(...event))
     ipcMain.on('change background visibility', (e, visible) => backgroundWindow[visible ? 'show' : 'hide']())
+    ipcMain.on('toggle background visibility', () => backgroundWindow[backgroundWindow.isVisible() ? 'hide' : 'show']())
 
     // Create the application menu
     require('./main-process/menus/application-menu.js')
