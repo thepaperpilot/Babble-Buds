@@ -57,7 +57,7 @@ class Layers extends Component {
     }
 
     canBecomeParent(parent, child) {
-        const { emote, head, emoteLayer } = child
+        const { emote, head, emoteLayer, id } = child
         const inh = Object.assign({}, parent.inherit)
 
         if (parent.emote != null) inh.emote = parent.emote
@@ -69,6 +69,8 @@ class Layers extends Component {
         if (inh.head != null && head != null)
             return false
         if (inh.emoteLayer != null && emoteLayer != null)
+            return false
+        if (id === 'CHARACTER_PLACEHOLDER' && parent.path.length)
             return false
 
         return true

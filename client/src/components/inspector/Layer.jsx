@@ -57,37 +57,47 @@ class Layer extends Component {
 
         const LinkedLayerContextMenu = LayerContextMenu(this.props.contextmenu)
 
+        const isSpecial = layer.id === 'CHARACTER_PLACEHOLDER'
+        const specialLayerWarning = isSpecial ? <div className="action">
+            <pre className="info">
+                This layer represents where the puppets will appear on the stage.
+                It cannot be changed, and its size is determined by the height and width of the environment.
+            </pre>
+        </div> : null
 
         const isEnvironment = this.props.type === 'environment'
 
         return (
             <div className="inspector">
                 <Header targetName={layer.name || asset.name} />
-                <Dropdown menu={LinkedLayerContextMenu}
-                    id={`contextmenu-layer-${this.props.contextmenu}`}
-                    collect={() => ({
-                        path: layer.path,
-                        self: this.props.self,
-                        name: layer.name,
-                        layerChildren: layer.children,
-                        tabs: this.props.folders,
-                        assetId: layer.id,
-                        asset: layer
-                    })} />
+                {isSpecial ? null :
+                    <Dropdown menu={LinkedLayerContextMenu}
+                        id={`contextmenu-layer-${this.props.contextmenu}`}
+                        collect={() => ({
+                            path: layer.path,
+                            self: this.props.self,
+                            name: layer.name,
+                            layerChildren: layer.children,
+                            tabs: this.props.folders,
+                            assetId: layer.id,
+                            asset: layer
+                        })} />}
                 <div className="inspector-content">
                     <Scrollbar allowOuterScroll={true} heightRelativeToParent="100%">
+                        {specialLayerWarning}
                         <div className="action">
-                            <Foldable title="General">
+                            <Foldable title="General" defaultFolded={isSpecial} state={isSpecial}>
                                 <Text
                                     title="Layer Name"
                                     value={layer.name}
+                                    disabled={isSpecial}
                                     onChange={this.changeLayer('name')} />
                             </Foldable>
                         </div>
-                        <TransformSection
+                        {isSpecial ? null : <TransformSection
                             layer={layer}
                             asset={asset}
-                            target={this.props.target} />
+                            target={this.props.target} />}
                         {isEnvironment ? null : <EmoteSection
                             inherit={inherit}
                             layer={layer}

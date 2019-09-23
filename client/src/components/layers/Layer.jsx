@@ -20,6 +20,15 @@ export function comparePaths(a, b) {
     return true
 }
 
+const CHARACTER_PLACEHOLDER = {
+    location: '',
+    name: 'PUPPET_PLACEHOLDER',
+    panning: [],
+    tab: '',
+    type: 'special',
+    version: 1
+}
+
 // TODO make it so we can drag this layer into the assets panel to create asset bundles
 class Layer extends Component {
     constructor(props) {
@@ -81,7 +90,14 @@ class Layer extends Component {
         
         const bundle = asset && asset.type === 'bundle' ?
             <div className="asset-bundle" /> : null
-        
+
+        if (asset && asset.type === 'special')
+            return <div
+                className={classNames(className, 'special')}
+                onClick={this.onNodeClick}>
+                {name}
+            </div>
+
         return <ContextMenuTrigger
             id={`contextmenu-layer-${this.props.contextmenu}`}
             holdToDisplay={-1}
@@ -149,7 +165,8 @@ function mapStateToProps(state, props) {
         characterId: state.editor.present.id,
         selected: state.editor.present.layer,
         assets: state.project.assets,
-        asset: state.project.assets[props.id],
+        asset: props.id === 'CHARACTER_PLACEHOLDER' ?
+            CHARACTER_PLACEHOLDER : state.project.assets[props.id],
         emote: state.editor.present.emote,
         assetsPath: state.project.assetsPath,
         self: state.self

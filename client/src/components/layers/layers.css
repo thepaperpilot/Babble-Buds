@@ -87,6 +87,10 @@
     color: red;
 }
 
+.layer.special {
+    color: grey;
+}
+
 .emote-layer:after {
     position: absolute;
     content: '😶';
