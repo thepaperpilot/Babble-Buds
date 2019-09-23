@@ -45,6 +45,7 @@ class Panels extends Component {
 
         let child = null
         switch(component) {
+        default:
         case 'text':
             child = <div className="panel">{node.getName()}</div>
             break
@@ -88,7 +89,6 @@ class Panels extends Component {
         case 'layers':
             child = <Layers id={node.getId()} />
             break
-        default:
             break
         }
 

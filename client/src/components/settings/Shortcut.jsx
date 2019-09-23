@@ -77,6 +77,7 @@ class Shortcut extends Component {
                 <p className="field-title">{this.props.title}</p>
                 <div className="shortcut">
                     <input
+                        readOnly
                         type="text"
                         placeholder="Not bound"
                         value={value}

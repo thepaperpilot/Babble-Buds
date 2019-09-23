@@ -20,14 +20,6 @@ function removeTarget(targetType) {
     }
 }
 
-function renameTarget(targetType) {
-    return (state, action) => {
-        if (state.targetType === targetType && state.target === action.oldName)
-            return util.updateObject(state, { target: action.newName })
-        return state
-    }
-}
-
 function selectLayer(state, action) {
     return inspect(state, {
         target: action.path,

@@ -1,4 +1,4 @@
-import undoable, { excludeAction, groupByActionTypes } from 'redux-undo'
+import undoable, { excludeAction } from 'redux-undo'
 import util from './util'
 import project from './project/project'
 import { getConflicts } from './project/loader'
@@ -48,6 +48,7 @@ function saveEditor(state) {
         project = util.updateObject(project, { assets })
         break
     }
+    default:
     }
     
     return util.updateObject(state, {

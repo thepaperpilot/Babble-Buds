@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { ContextMenu, MenuItem, SubMenu, connectMenu } from 'react-contextmenu'
+import { ContextMenu, MenuItem, connectMenu } from 'react-contextmenu'
 
-class DraggablePuppet extends Component {
+class PuppetContextMenu extends Component {
     constructor(props) {
         super(props)
 
@@ -24,7 +24,7 @@ class DraggablePuppet extends Component {
     }
 
     deletePuppet() {
-        if (this.props.id === this.props.trigger.puppet) {
+        if (this.props.selfId === this.props.trigger.puppet) {
             this.props.dispatch({
                 type: 'ERROR',
                 content: 'You can\'t delete your active puppet. Please switch puppets and try again.'
@@ -50,8 +50,8 @@ class DraggablePuppet extends Component {
 
 function mapStateToProps(state) {
     return {
-        id: state.project.settings.actor.id
+        selfId: state.project.settings.actor.id
     }
 }
 
-export default id => connect(mapStateToProps)(connectMenu(`contextmenu-puppet-${id}`)(DraggablePuppet))
+export default id => connect(mapStateToProps)(connectMenu(`contextmenu-puppet-${id}`)(PuppetContextMenu))

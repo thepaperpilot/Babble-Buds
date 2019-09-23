@@ -1,4 +1,4 @@
-import React, {Component} from 'react'
+import {Component} from 'react'
 import { connect } from 'react-redux'
 
 const electron = window.require('electron')
@@ -98,6 +98,7 @@ class Clipboard extends Component {
         case 67: this.copy(); break
         case 86: this.paste(); break
         case 46: this.delete(); break
+        default:
         }
     }
 

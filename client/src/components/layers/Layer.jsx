@@ -51,8 +51,10 @@ class Layer extends Component {
         const {selected, asset, assetsPath, isOver, canDrop} = this.props
         const {path, id, name, children, nodeEmote, emotes, head, emoteLayer, inherit, tabs, self} = this.props
         
-        // TODO menu item to "recenter layer", which will only work on a layer with children, and will move the parent layer's position
-        // so that its at the center of where all its children are, and offset each child the opposite direction to compensate
+        // TODO context menu item to "recenter layer", which will only work on a layer
+        // with children, and will move the parent layer's position so that its at the
+        // center of where all its children are, and offset each child the opposite
+        // direction to compensate.
         // Thus making scaling and rotating work in a more straightforward way
         const className = ['layer']
         if (comparePaths(selected, path))
