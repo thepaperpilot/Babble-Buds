@@ -31,5 +31,6 @@ export default util.createReducer(DEFAULTS, {
     'INSPECT': inspect,
     'DELETE_PUPPET': removeTarget('puppet'),
     'DELETE_LAYER': removeTarget('layer'),
+    'DELETE_ENVIRONMENT': removeTarget('environment'),
     'SELECT_LAYER': selectLayer
 })

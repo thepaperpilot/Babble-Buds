@@ -1,0 +1,113 @@
+import React, {Component} from 'react'
+import { connect } from 'react-redux'
+import Scrollbar from 'react-custom-scroll'
+import Header from './Header'
+import Number from './fields/Number'
+import Text from './fields/Text'
+import Color from './fields/Color'
+import Foldable from './../ui/Foldable'
+import Dropdown from './../ui/InspectorDropdown'
+import EnvironmentContextMenu from './../environments/EnvironmentContextMenu'
+
+class Environment extends Component {
+    constructor(props) {
+        super(props)
+
+        this.changeEnvironment = this.changeEnvironment.bind(this)
+    }
+
+    changeEnvironment(key) {
+        return value => {
+            this.props.dispatch({
+                type: 'CHANGE_ENVIRONMENT',
+                environment: this.props.target,
+                key,
+                value
+            })
+        }
+    }
+
+    render() {
+        const {
+            name, puppetScale, numCharacters,
+            color, width, height
+        } = this.props.environment
+
+        const disabled = this.props.target === -1
+
+        const LinkedEnvironmentContextMenu =
+            EnvironmentContextMenu(this.props.contextmenu)
+
+        return (
+            <div className="inspector">
+                <Header targetName={name} />
+                <Dropdown menu={LinkedEnvironmentContextMenu}
+                    id={`contextmenu-environment-${this.props.contextmenu}`}
+                    collect={() => ({
+                        environment: this.props.target,
+                        disabled
+                    })}/>
+                <div className="inspector-content">
+                    <Scrollbar allowOuterScroll={true} heightRelativeToParent="100%">
+                        <div className="action">
+                            <Foldable title="General">
+                                <Text
+                                    title="Environment Name"
+                                    value={name}
+                                    onChange={this.changeEnvironment('name')}
+                                    disabled={disabled} />
+                            </Foldable>
+                        </div>
+                        <div className="action">
+                            <Foldable title="Stage Settings">
+                                <Number
+                                    title="Puppet Scale"
+                                    value={puppetScale}
+                                    float={true}
+                                    step={.1}
+                                    onChange={this.changeEnvironment('puppetScale')}
+                                    disabled={disabled} />
+                                <Number
+                                    title="Number of Slots"
+                                    value={numCharacters}
+                                    onChange={this.changeEnvironment('numCharacters')}
+                                    disabled={disabled} />
+                                <Color
+                                    title="Background Color"
+                                    value={color}
+                                    onChange={this.changeEnvironment('color')}
+                                    disabled={disabled} />
+                            </Foldable>
+                        </div>
+                        <div className="action">
+                            <Foldable title="Scaling Settings">
+                                <Number
+                                    title="Width"
+                                    value={width}
+                                    onChange={this.changeEnvironment('width')}
+                                    disabled={disabled} />
+                                <Number
+                                    title="Height"
+                                    value={height}
+                                    onChange={this.changeEnvironment('height')}
+                                    disabled={disabled} />
+                            </Foldable>
+                        </div>
+                    </Scrollbar>
+                </div>
+            </div>
+        )
+    }
+}
+
+function mapStateToProps(state, props) {
+    const environment = props.target === -1 ?
+        state.project.defaultEnvironment :
+        state.project.settings.environments[props.target]    
+
+    return {
+        environment
+    }
+}
+
+export default connect(mapStateToProps)(Environment)

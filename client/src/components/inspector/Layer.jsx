@@ -58,6 +58,7 @@ class Layer extends Component {
         const LinkedLayerContextMenu = LayerContextMenu(this.props.contextmenu)
 
 
+        const isEnvironment = this.props.type === 'environment'
 
         return (
             <div className="inspector">
@@ -87,20 +88,20 @@ class Layer extends Component {
                             layer={layer}
                             asset={asset}
                             target={this.props.target} />
-                        <EmoteSection
+                        {isEnvironment ? null : <EmoteSection
                             inherit={inherit}
                             layer={layer}
                             finder={finder}
                             asset={asset}
                             assets={this.props.assets}
                             layers={this.props.layers}
-                            target={this.props.target} />
-                        <BabbleSection
+                            target={this.props.target} />}
+                        {isEnvironment ? null : <BabbleSection
                             inherit={inherit}
                             layer={layer}
                             finder={finder}
                             emoteLayer={emoteLayer}
-                            target={this.props.target} />
+                            target={this.props.target} />}
                         <AnimationSection 
                             layer={layer}
                             target={this.props.target} />
@@ -116,6 +117,7 @@ function mapStateToProps(state) {
         assets: state.project.assets,
         folders: state.project.settings.folders,
         layers: state.editor.present.character.layers,
+        type: state.editor.present.type,
         self: state.self
     }
 }
