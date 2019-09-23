@@ -38,6 +38,8 @@ const behavior = {
     },
     customApplyProps: (instance, oldProps, newProps) => {
         instance.resize(newProps.width, newProps.height)
+        if (oldProps.width === 0 || oldProps.height === 0)
+            instance.moveCenter(0, -newProps.height / 2)
     },
     customDidAttach: instance => {
         instance.scale.set(1, 1)
