@@ -1,8 +1,8 @@
-import React, {Component} from 'react'
+import React, {Component, memo} from 'react'
 import { connect } from 'react-redux'
 import Scrollbar from 'react-custom-scroll'
 import * as JsSearch from 'js-search'
-import { FixedSizeList as List } from 'react-window'
+import { FixedSizeList as List, areEqual } from 'react-window'
 import DraggablePuppet from './DraggablePuppet'
 import PuppetImporter from './PuppetImporter'
 import PuppetContextMenu from './PuppetContextMenu'
@@ -73,7 +73,7 @@ class Puppets extends Component {
             this.props.puppets[a].name.localeCompare(this.props.puppets[b].name))
 
         // Calculate how many will be shown in each row
-        let puppetsPerRow = Math.floor((this.props.rect.width - 14) / (size + 16))
+        let puppetsPerRow = Math.floor((this.props.rect.width - 14) / size)
         if (puppetsPerRow < 1) puppetsPerRow = 1
         if (size === 60) puppetsPerRow = 1
 
@@ -107,26 +107,26 @@ class Puppets extends Component {
                     itemCount={rows}
                     itemSize={size === 60 ? 29 : 2 * size}
                     outerElementType={CustomScrollbarsVirtualList}>
-                    {({ index, style }) => {
+                    {memo(({ index, style }) => {
                         const start = puppetsPerRow * index
                         const length = Math.min(puppetsPerRow * (index + 1), puppets.length) - puppetsPerRow * index
 
                         return <div className={size === 60 ? '' : 'list'} style={style}>
                             {Array(length).fill(0).map((x, y) => x + y).map(i => {
-                                return <div key={i} className={size === 60 ? '' : 'list-item'} style={{width: size === 60 ? '100%' : size - 30, height: 2 * size - 30}}>
+                                return <div key={i} className={size === 60 ? '' : 'list-item'} style={{width: size === 60 ? '100%' : size - 18, height: 2 * size - 18}}>
                                     <DraggablePuppet 
                                         key={i}
                                         small={size === 60}
-                                        height={2 * size - 30}
+                                        height={2 * size - 18}
                                         contextmenu={this.props.id}
                                         puppet={puppets[start + i]} />
                                 </div>
                             })}
                             {new Array(puppetsPerRow - length).fill(0).map((child, i) => (
-                                <div className="list-pad" key={`${i}-pad`} style={{width: size - 30}}></div>
+                                <div className="list-pad" key={`${i}-pad`} style={{width: size - 12}}></div>
                             ))}
                         </div>
-                    }}
+                    }, areEqual)}
                 </List>
                 <LinkedPuppetContextMenu />
             </div>

@@ -1,8 +1,7 @@
-import React, {Component} from 'react'
-import ReactDOM from 'react-dom'
+import React, {Component, memo} from 'react'
 import { connect } from 'react-redux'
 import * as JsSearch from 'js-search'
-import { FixedSizeList as List } from 'react-window'
+import { FixedSizeList as List, areEqual } from 'react-window'
 import DraggableAsset from './DraggableAsset'
 import Folder from './Folder'
 import AssetImporter from './AssetImporter'
@@ -151,7 +150,7 @@ class Assets extends Component {
                     outerElementType={CustomScrollbarsVirtualList}
                     outerRef={this.scrollbar}
                     ref={this.list} >
-                    {({ index, style }) => {
+                    {memo(({ index, style }) => {
                         if (Object.values(tabToRow).includes(index)) {
                             const tab = Object.keys(tabToRow).find(tab =>
                                 tabToRow[tab] === index)
@@ -199,7 +198,7 @@ class Assets extends Component {
                                     ))}
                             </div>
                         }
-                    }}
+                    }, areEqual)}
                 </List>
             </div>
             {this.props.isAssetImporter || <LinkedAssetContextMenu tabs={tabs} />}
