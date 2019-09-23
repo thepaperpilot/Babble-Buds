@@ -136,25 +136,31 @@ class BackgroundInterface extends Component {
                 thumbnailsPath
             })
             let content
-            if (type === 'puppet')
+            if (type === 'puppet' && id in this.props.characters)
                 content = `Updated thumbnail for "${this.props.characters[id].name}" puppet.`
-            else
-                content = `Updated thumbnail for "${this.props.environments.find(env => env.id === id).name}" environment.`
+            else if (type === 'environment') {
+                const env = this.props.environments.find(env => env.id === id)
+                if (env)
+                    content = `Updated thumbnail for "${env.name}" environment.`
+            }
+            if (content)
                 this.props.dispatch({
                     type: 'LOG',
                     content
                 })
             break
         case 'asset':
-            this.props.dispatch({
-                type: 'UPDATE_ASSET_THUMBNAILS',
-                id,
-                thumbnailsPath
-            })
-            this.props.dispatch({
-                type: 'LOG',
-                content: `Updated thumbnail for "${this.props.assets[id].name}" asset.`
-            })
+            if (id in this.props.assets) {
+                this.props.dispatch({
+                    type: 'UPDATE_ASSET_THUMBNAILS',
+                    id,
+                    thumbnailsPath
+                })
+                this.props.dispatch({
+                    type: 'LOG',
+                    content: `Updated thumbnail for "${this.props.assets[id].name}" asset.`
+                })
+            }
             break
         default:
             this.props.dispatch({
