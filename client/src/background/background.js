@@ -65,20 +65,27 @@ ipcRenderer.on('generate thumbnails', (e, thumbnailsPath, character, type, id) =
 
     // Take puppet screenshot
     let empty = document.createElement('canvas')
-    // We need to access width and height so that bounds gets set, even though we won't need them
-    const {width, height, _bounds} = stage.stage
+    const {width, height} = stage.stage
     
     //ipcRenderer.send('change background visibility', true)
 
-    stage.renderer.resize(_bounds.maxX, _bounds.maxY)
-    empty.width = _bounds.maxX
-    empty.height = _bounds.maxY
+    if (type === 'environment') {
+        stage.resize(null, character.width, character.height)
+        empty.width = character.width
+        empty.height = character.height
+    } else {
+        stage.resize(null, width, height)
+        empty.width = width
+        empty.height = height
+    }
+
     stage.renderer.render(stage.stage)
     const data = stage.renderer.view.toDataURL() === empty.toDataURL() ? null : stage.getThumbnail()
 
     // Write thumbnail to files
     if (data)
-        fs.writeFileSync(`${thumbnailsPath}.png`, new Buffer(data, 'base64'))
+        fs.writeFileSync(`${thumbnailsPath}.png`, Buffer.from(data, 'base64'))
+    else fs.removeSync(`${thumbnailsPath}.png`)
 
     if (type !== 'asset') {
         // Generate emote screenshots
@@ -95,8 +102,10 @@ ipcRenderer.on('generate thumbnails', (e, thumbnailsPath, character, type, id) =
             puppet.changeEmote(emote)
             stage.renderer.render(stage.stage)
             const data = stage.renderer.view.toDataURL() === empty.toDataURL() ? null : stage.getThumbnail()
+            const emotePath = path.join(thumbnailsPath, `${emote}.png`)
             if (data)
-                fs.writeFileSync(path.join(thumbnailsPath, `${emote}.png`), new Buffer(data, 'base64'))
+                fs.writeFileSync(emotePath, Buffer.from(data, 'base64'))
+            else fs.removeSync(emotePath)
         })
     }
 
@@ -157,7 +166,7 @@ ipcRenderer.on('add assets', async (e, assets, assetsPath, statusId) => {
                 canvas.height = height
                 ctx.putImageData(...(await gif.toImageData(0)))
                 await fs.writeFile(path.join(assetsPath, asset.thumbnail),
-                    new Buffer(canvas.toDataURL()
+                    Buffer.from(canvas.toDataURL()
                         .replace(/^data:image\/\w+;base64,/, ''), 'base64'))
                 
                 // Stitch frames together
@@ -170,7 +179,7 @@ ipcRenderer.on('add assets', async (e, assets, assetsPath, statusId) => {
                         (i % cols) * width + offsetLeft,
                         Math.floor(i / cols) * height + offsetTop)
                 }))
-                file = new Buffer(canvas.toDataURL()
+                file = Buffer.from(canvas.toDataURL()
                     .replace(/^data:image\/\w+;base64,/, ''), 'base64')
             } else {
                 await fs.writeFile(path.join(assetsPath, asset.thumbnail), file)

@@ -28,8 +28,6 @@ export function loadCharacters(settings, charactersPath) {
         }
         characterThumbnails[settings.characters[i].id] = `file:///${path.join(charactersPath, '..', 'thumbnails',
             `${settings.characters[i].id}.png`)}`.replace(/\\/g, '/')
-        fs.remove(path.join(charactersPath, '..', 'thumbnails', `new-${settings.characters[i].id}.png`))
-        fs.remove(path.join(charactersPath, '..', 'thumbnails', `new-${settings.characters[i].id}`))
 
         if (character.id > numCharacters)
             numCharacters = character.id
@@ -265,8 +263,28 @@ function loadProject(state, action) {
     const {assets} = loadAssets(settings, assetsPath, characters)
     delete settings.assets
 
+    let dirtyCharacters = []
+
+    // Remove any assets that don't exist in this project
+    const filterAssets = c => layer => {
+        if (layer.children) {
+            layer.children = layer.children.filter(filterAssets(c))
+        }
+        // TODO add warning about remove asset to console
+        if (!('id' in layer) || layer.id in assets)
+            return true
+        else {
+            if (!dirtyCharacters.includes(c))
+                dirtyCharacters.push(c)
+            return false
+        }
+    }
+    Object.keys(characters).forEach(c =>
+        characters[c].layers.children = characters[c].layers.children.filter(filterAssets(c)))
+
     // Update assets if converted to new layers system
     if (converted) {
+        dirtyCharacters = Object.keys(characters)
         const updateAsset = layer => {
             if (layer.children) {
                 layer.children.forEach(updateAsset)
@@ -277,12 +295,6 @@ function loadProject(state, action) {
         Object.values(characters).forEach(character =>
             updateAsset(character.layers))
     }
-    
-    // Remove thumbnails from puppets that were not saved last time this project was opened
-    settings.characters.forEach(character => {
-        fs.removeSync(path.join(settings.charactersPath, '..', 'thumbnails', `new-${character.id}.png`))
-        fs.removeSync(path.join(settings.charactersPath, '..', 'thumbnails', `new-${character.id}`))
-    })
 
     menu.updateMenu(true)
 
@@ -290,6 +302,7 @@ function loadProject(state, action) {
         project: filepath,
         settings,
         characters,
+        dirtyCharacters,
         characterThumbnails,
         assets,
         numCharacters,
