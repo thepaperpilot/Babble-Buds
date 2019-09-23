@@ -11,6 +11,7 @@ class Number extends Component {
                     onChange={e => this.props.onChange((this.props.float ? parseFloat : parseInt)(e.target.value, 10))}
                     step={this.props.step}
                     disabled={this.props.disabled} />
+                {this.props.help && <div className="flex-help" data-tooltip={this.props.help} />}
             </div>
         )
     }

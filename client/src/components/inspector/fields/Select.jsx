@@ -77,6 +77,7 @@ class Select extends Component {
                     getSuggestionValue={suggestion => suggestion.value}
                     onSuggestionsClearRequested={() => null}
                     onSuggestionsFetchRequested={() => null} />
+                {this.props.help && <div className="flex-help" data-tooltip={this.props.help} />}
             </div>
         )
     }
