@@ -171,7 +171,10 @@ function wrapLayer(state, action) {
 function rotateLayer(state, action) {
     const layers = JSON.parse(JSON.stringify(state.character.layers))
     const curr = action.path.reduce((layer, index) => layer.children[index], layers)
-    curr.rotation += action.rotation
+    if (curr.rotation == null)
+        curr.rotation = action.rotation
+    else
+        curr.rotation += action.rotation
     const character = util.updateObject(state.character, { layers })
     return util.updateObject(state, { character })
 }
