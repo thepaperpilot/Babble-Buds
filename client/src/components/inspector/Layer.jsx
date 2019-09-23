@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 import Scrollbar from 'react-custom-scroll'
 import {Puppet} from 'babble.js'
 import Header from './Header'
+import AnimationSection from './AnimationSection'
 import BabbleSection from './BabbleSection'
 import EmoteSection from './EmoteSection'
 import TransformSection from './TransformSection'
@@ -99,6 +100,9 @@ class Layer extends Component {
                             layer={layer}
                             finder={finder}
                             emoteLayer={emoteLayer}
+                            target={this.props.target} />
+                        <AnimationSection 
+                            layer={layer}
                             target={this.props.target} />
                     </Scrollbar>
                 </div>

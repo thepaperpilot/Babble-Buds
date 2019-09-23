@@ -1,7 +1,6 @@
 import React, {Component} from 'react'
 import { connect } from 'react-redux'
-
-const babble = require('babble.js')
+import babble from 'babble.js'
 
 class AssetUpdater extends Component {
     constructor(props) {

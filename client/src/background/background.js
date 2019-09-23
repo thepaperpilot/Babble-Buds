@@ -5,7 +5,7 @@ const path = window.require('path')
 
 const { GIF } = window.require('gif-engine-js')
 
-const stage = new Stage('stage', {'numCharacters': 1, 'puppetScale': .2}, {}, '', null, console)
+const stage = new Stage('stage', {'numCharacters': 1, 'puppetScale': 1, 'animations': false}, {}, '', null, console)
 
 async function addAssets(assets, statusId, callback) {
     // This is a bit complicated because we want to batch our requests. I found that even just limiting it to 1/ms is fine, though

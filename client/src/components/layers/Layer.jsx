@@ -117,6 +117,7 @@ const assetTarget = {
             path,
             layer: {
                 id,
+                leaf: true,
                 name: asset.name,
                 rotation: 0,
                 scaleX: 1,

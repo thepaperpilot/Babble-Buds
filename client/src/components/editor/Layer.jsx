@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 import { Sprite, Container } from 'react-pixi-fiber'
 import Selector, { behavior } from './Selector'
 import { comparePaths } from './../layers/Layer'
+import babble from 'babble.js'
 
 const path = require('path')
 const TextureCache = window.PIXI.utils.TextureCache
@@ -12,6 +13,7 @@ class RawLayer extends Component {
         super(props)
 
         this.selector = React.createRef()
+        this.container = React.createRef()
     }
 
     componentWillUnmount() {
@@ -19,6 +21,20 @@ class RawLayer extends Component {
         // won't call the customWillDetach function on the Selector for some reason
         if (this.selector.current)
             behavior.customWillDetach(this.selector.current)
+    }
+
+    componentDidUpdate(prevProps) {
+        const wasInvisible = prevProps.layer.emote != null && (prevProps.emote == null || prevProps.layer.emote !== prevProps.emote)
+        const isInvisible = this.props.layer.emote != null && (this.props.emote == null || this.props.layer.emote !== this.props.emote)
+
+        if (this.props.layer.animation !== 'None' && ((!isInvisible && wasInvisible) ||
+            prevProps.layer.animation !== this.props.layer.animation ||
+            prevProps.layer.easing !== this.props.layer.easing ||
+            prevProps.layer.duration !== this.props.layer.duration ||
+            prevProps.layer.delay !== this.props.layer.delay ||
+            prevProps.play !== this.props.play)) {
+            babble.Puppet.createTween(this.props.layer, this.container.current)
+        }
     }
 
     render() {
@@ -31,6 +47,7 @@ class RawLayer extends Component {
             selected,
             scale,
             highlight,
+            play,
             ...props
         } = this.props
 
@@ -44,6 +61,7 @@ class RawLayer extends Component {
                 if (bundles.includes(layer.id))
                     return null
                 return <Container
+                    ref={this.container}
                     alpha={layer.emote != null && (emote == null || layer.emote !== emote) ? 0 : 1}
                     layer={layer}
                     x={layer.x || 0}
@@ -52,7 +70,9 @@ class RawLayer extends Component {
                     {...props} >
                     <Container scale={[layer.scaleX || 1, layer.scaleY || 1]}>
                         {assets[layer.id].layers.children.map((l, i) =>
-                            <Layer bundles={[...bundles, layer.id]} key={i} layer={l} scale={scale} highlight={isHighlighted ? l.path : highlight} />)}
+                            <Layer play={play} bundles={[...bundles, layer.id]}
+                                key={i} layer={l} scale={scale}
+                                highlight={isHighlighted ? l.path : highlight} />)}
                     </Container>
                     {isSelected && bundles.length === 0 && 
                         <Selector ref={this.selector} scale={scale} layer={layer} dispatch={this.props.dispatch} />}
@@ -66,10 +86,12 @@ class RawLayer extends Component {
         } else
             element = <Container scale={[layer.scaleX || 1, layer.scaleY || 1]}>
                 {(layer.children || []).map((l, i) =>
-                    <Layer key={i} layer={l} bundles={bundles} scale={scale} highlight={isHighlighted ? l.path : highlight} />)}
+                    <Layer play={play} key={i} layer={l} bundles={bundles}
+                        scale={scale} highlight={isHighlighted ? l.path : highlight} />)}
             </Container>
 
         return  <Container
+            ref={this.container}
             alpha={layer.emote != null && (emote == null || layer.emote !== emote) ? 0 : 1}
             layer={layer}
             x={layer.x || 0}

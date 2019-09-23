@@ -24,6 +24,7 @@ class Editor extends Component {
         this.state = {
             scale: 1,
             grid: props.grid,
+            play: 0,
             highlight: props.highlight,
             bounds: {
                 top: 0,
@@ -40,6 +41,7 @@ class Editor extends Component {
         this.changeZoom = this.changeZoom.bind(this)
         this.toggleHighlight = this.toggleHighlight.bind(this)
         this.savePuppet = this.savePuppet.bind(this)
+        this.playAnimation = this.playAnimation.bind(this)
         this.resetPos = this.resetPos.bind(this)
 
         window.PIXI.SCALE_MODES.DEFAULT = window.PIXI.SCALE_MODES.NEAREST
@@ -97,6 +99,12 @@ class Editor extends Component {
 
     savePuppet() {
         this.props.dispatch({ type: 'SAVE_EDITOR' })
+    }
+
+    playAnimation() {
+        this.setState({
+            play: this.state.play + 1
+        })
     }
 
     resetPos() {
@@ -160,6 +168,7 @@ class Editor extends Component {
                     <div className="toggle" style={{ backgroundColor: this.state.highlight ? '#333c4a' : '#242a33'}} onClick={this.toggleHighlight}>
                         Highlight Current Layer
                     </div>
+                    <button onClick={this.playAnimation} title="Play all animations">▶</button>
                     <div className="flex-item">Zoom: {Math.round(1 / scale * 100)}%</div>
                     <div className="flex-item" onClick={this.resetPos}>Pos: {Math.round((bounds.right + bounds.left) / 2)},
                         {-Math.round((bounds.bottom + bounds.top) / 2)}</div>
@@ -179,7 +188,9 @@ class Editor extends Component {
                     <Viewport width={rect.width - (changed ? 6 : 0)} height={rect.height - 21 - (changed ? 6 : 0)} ref={this.viewport}>
                         {gridLines}
                         <Cross x={0} y={0} scale={scale} color={0x888888} distance={DISTANCE * scale} />
-                        <Layer layer={character} bundles={type === 'asset' ? [id] : []} x={0} y={0} selectedRef={this.selectedRef} scale={scale} highlight={this.state.highlight ? selected : character.path} />
+                        <Layer play={this.state.play} layer={character} bundles={type === 'asset' ? [id] : []}
+                            x={0} y={0} selectedRef={this.selectedRef} scale={scale}
+                            highlight={this.state.highlight ? selected : character.path} />
                         {isOver && dragPos &&
                             <Layer layer={{
                                 id: item.id,
@@ -232,6 +243,7 @@ const assetTarget = {
             path,
             layer: {
                 id,
+                leaf: true,
                 name: asset.name,
                 rotation: 0,
                 scaleX: 1,
