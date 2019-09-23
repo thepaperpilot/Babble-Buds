@@ -144,7 +144,7 @@ class Editor extends Component {
                     x={i}
                     y={bounds.top}
                     scale={scale}
-                    color={0x222222}
+                    color={0x333C4A}
                     distance={bounds.bottom - bounds.top} />)
             }
 
@@ -153,7 +153,7 @@ class Editor extends Component {
                     x={bounds.left}
                     y={i}
                     scale={scale}
-                    color={0x222222}
+                    color={0x333C4A}
                     distance={bounds.right - bounds.left} />)
             }
         }
@@ -188,7 +188,7 @@ class Editor extends Component {
                 ref={this.stage} >
                     <Viewport width={rect.width - (changed ? 6 : 0)} height={rect.height - 21 - (changed ? 6 : 0)} ref={this.viewport}>
                         {gridLines}
-                        <Cross x={0} y={0} scale={scale} color={0x888888} distance={DISTANCE * scale} />
+                        <Cross x={0} y={0} scale={scale * 4} color={0x333C4A} distance={DISTANCE * scale} />
                         <Layer play={this.state.play} layer={character} bundles={type === 'asset' ? [id] : []}
                             x={0} y={0} selectedRef={this.selectedRef} scale={scale}
                             highlight={this.state.highlight ? selected : character.path} />

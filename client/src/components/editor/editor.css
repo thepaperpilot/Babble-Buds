@@ -1,3 +1,7 @@
+.editor {
+    cursor: move;
+}
+
 .editor > canvas {
     margin: -8px;
     margin-top: 0;

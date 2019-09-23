@@ -4,12 +4,19 @@ import rotateIcon from './icons/rotate.png'
 import flipHorizIcon from './icons/flipHoriz.png'
 import flipVertIcon from './icons/flipVert.png'
 
-const {Sprite, Graphics, Container} = window.PIXI
+const {Sprite, Graphics, Container, Circle} = window.PIXI
 const icons = {
     'rotate.png': rotateIcon,
     'flipHoriz.png': flipHorizIcon,
     'flipVert.png': flipVertIcon
 }
+
+const directions = [
+    'se',
+    'sw',
+    'ne',
+    'nw'
+]
 
 const TYPE = 'Selector'
 
@@ -17,6 +24,7 @@ function getIcon (instance, image) {
     const icon = Sprite.from(icons[image])
     icon.anchor.set(.5, .5)
     icon.interactive = true
+    icon.cursor = `pointer`
     icon.on('mousedown', startDrag(instance))
         .on('touchstate', startDrag(instance))
     return icon
@@ -36,6 +44,11 @@ function startDrag(instance) {
         target.startPosition = {x: layer.layer.x || 0, y: layer.layer.y || 0}
         target.startScale = {x: layer.layer.scaleX || 1, y: layer.layer.scaleY || 1}
         target.startSize = instance.selector.normalSize
+
+        let root = instance
+        while (root.parent && root.parent.parent)
+            root = root.parent
+        root.cursor = target.cursor
     }
 }
 
@@ -50,6 +63,11 @@ function endRotateDrag(instance, dispatch) {
             })
             e.currentTarget.dragging = false
             e.stopPropagation()
+
+            let root = instance
+            while (root.parent && root.parent.parent)
+                root = root.parent
+            root.cursor = null
         }
     }
 }
@@ -66,6 +84,11 @@ function endScaleDrag(instance, dispatch) {
             })
             e.currentTarget.dragging = false
             e.stopPropagation()
+
+            let root = instance
+            while (root.parent && root.parent.parent)
+                root = root.parent
+            root.cursor = null
         }
     }
 }
@@ -79,6 +102,11 @@ function endMoveDrag(instance, dispatch, e) {
             layer: instance.props.layer.path,
             pos: [startPosition.x + dx, -startPosition.y - dy]
         })
+
+        let root = instance
+        while (root.parent && root.parent.parent)
+            root = root.parent
+        root.cursor = null
     }
 }
 
@@ -256,7 +284,7 @@ function drawGraphics(instance, props) {
             height = 2 * Math.max(Math.abs(bounds.top), Math.abs(bounds.bottom))
             instance.selector.normalSize = {x: width, y: height}
 
-            instance.selector.lineStyle(scale * 2, 0x888888)
+            instance.selector.lineStyle(scale * 4, 0x111924)
                 .moveTo(-width / 2 - scale, -height / 2 - scale)
                 .lineTo(-width / 2 - scale, height / 2 + scale)
                 .lineTo(width / 2 + scale, height / 2 + scale)
@@ -267,11 +295,13 @@ function drawGraphics(instance, props) {
             instance.selector.rotation = rotation
 
             instance.scalers.forEach((scaler, i) => {
+                const x = (i % 2 === 0 ? 1 : -1) * (width / 2 + scale)
+                const y = (Math.floor(i / 2) === 0 ? 1 : -1) * (height / 2 + scale)
                 scaler.clear()
-                scaler.lineStyle(scale * 2, 0xFFFFFF)
-                scaler.beginFill(0x888888)
-                    .drawCircle((i % 2 === 0 ? 1 : -1) * (width / 2 + scale),
-                        (Math.floor(i / 2) === 0 ? 1 : -1) * (height / 2 + scale), 4 * scale)
+                scaler.hitArea = new Circle(x, y, scale * 8)
+                scaler.lineStyle(scale * 2, 0x111924)
+                scaler.beginFill(0x111924)
+                    .drawCircle(x, y, 6 * scale)
             })
 
             instance.rotate.position.set(width / 2 + 22 * scale,
@@ -343,6 +373,7 @@ export const behavior = {
             instance.scalers = new Array(4).fill(0).map((e, i) => {
                 const g = new Graphics()
                 g.interactive = true
+                g.cursor = `${directions[i]}-resize`
                 const endScale = endScaleDrag(instance, instance.props.dispatch)
                 g.on('mousedown', startDrag(instance))
                     .on('touchstate', startDrag(instance))
