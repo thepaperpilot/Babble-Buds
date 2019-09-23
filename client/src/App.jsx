@@ -110,7 +110,6 @@ class App extends Component {
     }
 
     render() {
-        console.log('current project', this.props.project)
         return (
             <div className="App">
                 {
