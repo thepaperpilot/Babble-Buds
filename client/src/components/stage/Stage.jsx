@@ -146,7 +146,7 @@ class Stage extends Component {
             <div id={`screen${this.props.id}`} style={{
                 width: '100%',
                 height: '100%',
-                backgroundColor: this.props.settings.greenScreenEnabled ? this.props.settings.greenScreen : ''}
+                backgroundColor: this.props.settings.color}
             }>
                 <ReactResizeDetector handleWidth handleHeight onResize={this.onResize} />
             </div>
@@ -155,8 +155,10 @@ class Stage extends Component {
 }
 
 function mapStateToProps(state) {
+    const environment = state.project.settings.environments[state.project.settings.environment] ||
+        state.project.defaultEnvironment
     return {
-        settings: state.project.settings,
+        settings: environment,
         assets: state.project.assets,
         assetsPath: state.project.assetsPath,
         characters: state.project.characters,
