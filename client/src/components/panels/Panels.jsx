@@ -157,7 +157,7 @@ class Panels extends Component {
     }
 
     shouldComponentUpdate(newProps) {
-        return this.props.layoutUpdate === newProps.layoutUpdate
+        return this.props.layoutUpdate !== newProps.layoutUpdate
     }
 
     render() {
