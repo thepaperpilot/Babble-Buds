@@ -156,6 +156,12 @@ const template = [
                 }
             },
             {
+                label: 'Environments',
+                click (item, focusedWindow) {
+                    focusedWindow.webContents.send('toggle panel', 'environments')
+                }
+            },
+            {
                 label: 'Layers',
                 click (item, focusedWindow) {
                     focusedWindow.webContents.send('toggle panel', 'layers')

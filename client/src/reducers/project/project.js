@@ -2,6 +2,7 @@ import loader from './loader'
 import puppets from './puppets'
 import assets from './assets'
 import controller from './controller'
+import environments from './environments'
 import { DEFAULTS } from './defaults'
 
 // taken from https://wiki.urealms.com/wiki/List_of_Minor_Characters - Updated 2018-01-08
@@ -72,7 +73,7 @@ function randomizeName(state) {
 }
 
 export default util.createReducer(DEFAULTS, 
-    Object.assign(loader, puppets, assets, controller, {
+    Object.assign(loader, puppets, assets, environments, controller, {
         'UPDATE_SETTING': updateSetting,
         'EDIT_GLOBAL_SHORTCUT': updateGlobalShortcut,
         'SAVE': save,

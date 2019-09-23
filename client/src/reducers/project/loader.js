@@ -1,10 +1,10 @@
 import {Puppet} from 'babble.js'
-import { DEFAULTS, DEFAULT_CHARACTER } from './defaults'
+import { DEFAULTS, DEFAULT_CHARACTER, DEFAULT_ENVIRONMENT } from './defaults'
 
 const path = require('path')
 const fs = window.require('fs-extra')
 const semver = window.require('semver')
-const remote = window.require('electron').remote
+const {remote, ipcRenderer} = window.require('electron')
 const settingsManager = remote.require('./main-process/settings')
 const menu = remote.require('./main-process/menus/application-menu')
 
@@ -118,6 +118,21 @@ export function loadCharacters(settings, charactersPath) {
                 fs.moveSync(path.join(charactersPath, '..', 'thumbnails', `${settings.characters[i].id}`, `${emotes[j]}.png`),
                     path.join(charactersPath, '..', 'thumbnails', `${settings.characters[i].id}`, `${j}.png`))
     }
+
+    settings.environments.forEach(env => {
+        // TODO if we ever need to add backwards-compatibility checks for environments,
+        // it may be better to extract out a processCharacter function and feed environments
+        // through it as well
+        
+        characterThumbnails[env.id] = `file:///${path.join(charactersPath, '..', 'thumbnails',
+            `${env.id}.png`)}`.replace(/\\/g, '/')
+        fs.remove(path.join(charactersPath, '..', 'thumbnails', `new-${env.id}.png`))
+        fs.remove(path.join(charactersPath, '..', 'thumbnails', `new-${env.id}`))
+
+        if (env.id > numCharacters)
+            numCharacters = env.id
+    })
+
     return {characters, characterThumbnails, numCharacters, converted}
 }
 
@@ -259,9 +274,53 @@ function loadProject(state, action) {
     settingsManager.save()
 
     const assetsPath = path.join(filepath, settings.assetsPath || '../assets')
-    const {characters, characterThumbnails, numCharacters, converted} = loadCharacters(settings, path.join(filepath, settings.charactersPath))
+    let {characters, characterThumbnails, numCharacters, converted} = loadCharacters(settings, path.join(filepath, settings.charactersPath))
     const {assets} = loadAssets(settings, assetsPath, characters)
     delete settings.assets
+
+    // Update old settings to new environments
+    if ('greenScreen' in settings) {
+        // If they had a custom setup, create a environment to store it
+        if (settings.greenScreen != '#00FF00' ||
+            settings.numCharacters != 5 ||
+            settings.puppetScale != 1) {
+            const environment = {
+                'id': ++numCharacters, 
+                'name': 'Legacy',
+                'color': settings.greenScreen == '#00FF00' ? DEFAULT_ENVIRONMENT.color : settings.greenScreen,
+                'width': 1920,
+                'height': 1080,
+                'layers': {
+                    children: [
+                        {
+                            id: 'CHARACTER_PLACEHOLDER',
+                            leaf: 'true',
+                            name: 'PUPPETS',
+                            rotation: 0,
+                            scaleX: 1,
+                            scaleY: 1,
+                            x: 0,
+                            y: 0
+                        }
+                    ]
+                },
+                'numCharacters': settings.numCharacters,
+                'puppetScale': settings.puppetScale,
+                'shortcut': null
+            }
+            settings.environment = settings.environments.length
+            settings.environments.push(environment)
+            ipcRenderer.send('background', 'generate thumbnails',
+                `${path.join(filepath, settings.charactersPath, '..',
+                    'thumbnails', `${environment.id}`)}`.replace(/\\/g, '/'),
+                environment, 'environment', environment.id)
+        }
+
+        // Delete old values we don't need anymore
+        delete settings.greenScreen
+        delete settings.numCharacters
+        delete settings.puppetScale
+    }
 
     let dirtyCharacters = []
 
@@ -311,7 +370,7 @@ function loadProject(state, action) {
         oldCharacters: JSON.stringify(characters),
         charactersPath: path.join(filepath, settings.charactersPath),
         assetsPath: `file:///${path.join(filepath, settings.assetsPath)}`,
-        actor: settings.actor
+        defaultEnvironment: DEFAULT_ENVIRONMENT
     }
 }
 

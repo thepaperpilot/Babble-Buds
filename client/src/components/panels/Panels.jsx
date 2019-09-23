@@ -11,11 +11,13 @@ import ProjectSettings from './../settings/ProjectSettings'
 import Inspector from './../inspector/Inspector'
 import Editor from './../editor/Editor'
 import Layers from './../layers/Layers'
+import Environments from './../environments/Environments'
 
 import './icons/close_white.png'
 import './icons/more.png'
 import './icons/maximize.png'
 import './icons/restore.png'
+
 import './flexlayout-dark.css'
 import './panels.css'
 
@@ -89,6 +91,10 @@ class Panels extends Component {
         case 'layers':
             child = <Layers id={node.getId()} />
             break
+        case 'environments':
+            child = <Environments rect={node._rect} size={node.getConfig().size}
+                onZoomChange={this.updateConfig(node, 'size')}
+                id={node.getId()} />
             break
         }
 
@@ -143,7 +149,7 @@ class Panels extends Component {
             component: panel,
             name: panel.replace(/-/g, ' ').split(' ').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ')
         }
-        if (panel === 'puppets' || panel === 'assets') {
+        if (panel === 'puppets' || panel === 'assets' || panel === 'environments') {
             tab.config = {
                 'size': 120
             }

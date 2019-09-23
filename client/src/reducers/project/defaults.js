@@ -3,13 +3,41 @@ import names from './../../data/names.json'
 
 const remote = window.require('electron').remote
 
+export const DEFAULT_ENVIRONMENT = {
+    'name': 'Default',
+    'color': '#242a33',
+    'width': 1920,
+    'height': 1080,
+    'layers': {
+        children: [
+            {
+                id: 'CHARACTER_PLACEHOLDER',
+                leaf: 'true',
+                name: 'PUPPETS',
+                rotation: 0,
+                scaleX: 1,
+                scaleY: 1,
+                x: 0,
+                y: 0
+            }
+        ]
+    },
+    'numCharacters': 5,
+    'puppetScale': 1,
+    'shortcut': null
+}
+
+export const DEFAULT_CHARACTER = {
+    'deadbonesStyle': false,
+    'name': 'New Puppet',
+    'layers': {
+        children: []
+    }
+}
+
 export const DEFAULTS = {
     settings: {
         'clientVersion': remote.app.getVersion(),
-        'numCharacters': 5,
-        'puppetScale': 1,
-        'greenScreen': '#00FF00',
-        'greenScreenEnabled': false,
         'alwaysOnTop': false,
         'ip': 'babblebuds.xyz',
         'port': 8080,
@@ -71,23 +99,19 @@ export const DEFAULTS = {
             'Move left': null,
             'Move right': null,
             'Jiggle': null,
-        }
+        },
+        'environments': [],
+        'environment': null
     },
     project: null,
-    oldSettings: '',
     characters: {},
     dirtyCharacters: [],
     characterThumbnails: {},
     assets: {},
+    numCharacters: 0,
+    oldSettings: '',
+    oldCharacters: '',
     charactersPath: '',
     assetsPath: '',
-    numCharacters: 0
-}
-
-export const DEFAULT_CHARACTER = {
-    'deadbonesStyle': false,
-    'name': 'New Puppet',
-    'layers': {
-        children: []
-    }
+    defaultEnvironment: DEFAULT_ENVIRONMENT
 }

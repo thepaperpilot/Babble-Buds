@@ -46,6 +46,14 @@
                     "config": {
                         "size": 100
                     }
+                  },
+                  {
+                    "type": "tab",
+                    "name": "Environments",
+                    "component": "environments",
+                    "config": {
+                        "size": 100
+                    }
                   }
                 ]
               }

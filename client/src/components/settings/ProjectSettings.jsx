@@ -39,20 +39,8 @@ class ProjectSettings extends Component {
                     <div className="inspector-content">
                         <Scrollbar allowOuterScroll={true} heightRelativeToParent="100%">
                             <div className="action">
-                                <Foldable title="Green Screen">
-                                    <Color title="Green Screen Color" value={this.props.greenScreen} onChange={this.handleChange('greenScreen')} />
-                                    <Checkbox title="Green Screen Enabled" value={this.props.greenScreenEnabled} onChange={this.handleChange('greenScreenEnabled')} />
-                                </Foldable>
-                            </div>
-                            <div className="action">
                                 <Foldable title="Popout">
                                     <Checkbox title="Always On Top" value={this.props.alwaysOnTop} onChange={this.handleChange('alwaysOnTop')} />
-                                </Foldable>
-                            </div>
-                            <div className="action">
-                                <Foldable title="Stage Settings">
-                                    <Number title="Puppet Scale" value={this.props.puppetScale} onChange={this.handleChange('puppetScale')} float={true} step="0.1" />
-                                    <Number title="Number of Slots" value={this.props.numCharacters} onChange={this.handleChange('numCharacters')} />
                                 </Foldable>
                             </div>
                             <div className="action">
@@ -86,11 +74,7 @@ class ProjectSettings extends Component {
 
 function mapStateToProps(state) {
     return {
-        greenScreen: state.project.settings.greenScreen,
-        greenScreenEnabled: state.project.settings.greenScreenEnabled,
         alwaysOnTop: state.project.settings.alwaysOnTop,
-        puppetScale: state.project.settings.puppetScale,
-        numCharacters: state.project.settings.numCharacters,
         nickname: state.project.settings.nickname,
         ip: state.project.settings.ip,
         port: state.project.settings.port

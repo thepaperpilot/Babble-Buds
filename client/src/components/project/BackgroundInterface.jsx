@@ -129,15 +129,21 @@ class BackgroundInterface extends Component {
     updateThumbnails(e, type, id, thumbnailsPath) {
         switch (type) {
         case 'puppet':
+        case 'environment':
             this.props.dispatch({
                 type: 'UPDATE_PUPPET_THUMBNAILS',
                 id,
                 thumbnailsPath
             })
-            this.props.dispatch({
-                type: 'LOG',
-                content: `Updated thumbnail for "${this.props.characters[id].name}" puppet.`
-            })
+            let content
+            if (type === 'puppet')
+                content = `Updated thumbnail for "${this.props.characters[id].name}" puppet.`
+            else
+                content = `Updated thumbnail for "${this.props.environments.find(env => env.id === id).name}" environment.`
+                this.props.dispatch({
+                    type: 'LOG',
+                    content
+                })
             break
         case 'asset':
             this.props.dispatch({
@@ -168,6 +174,7 @@ function mapStateToProps(state) {
         assets: state.project.assets,
         assetsPath: state.project.assetsPath,
         characters: state.project.characters,
+        environments: state.project.settings.environments,
         dirtyCharacters: state.project.dirtyCharacters,
         thumbnailPaths: {
             assets: path.join(state.project.project, state.project.settings.assetsPath),
