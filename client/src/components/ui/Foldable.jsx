@@ -3,6 +3,18 @@ import AnimateHeight from 'react-animate-height'
 import classNames from 'classnames'
 import './foldable.css'
 
+function isNewState(a, b) {
+    if (!(a instanceof Array && b instanceof Array))
+        return a !== b
+    if (a.length !== b.length)
+        return true
+    for (let i = 0; i < a.length; i++)
+        if (a[i] !== b[i]) {
+            return true
+        }
+    return false
+}
+
 class Foldable extends Component {
     constructor(props) {
         super(props)
@@ -23,7 +35,7 @@ class Foldable extends Component {
     }
 
     componentWillReceiveProps(newProps) {
-        if (newProps.state !== this.props.state)
+        if (isNewState(newProps.state, this.props.state))
             this.setState({
                 folded: !!newProps.defaultFolded,
                 updating: true
