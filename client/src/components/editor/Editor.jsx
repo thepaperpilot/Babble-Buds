@@ -134,9 +134,10 @@ class Editor extends Component {
         const {rect, character, selected, changed, isOver, canDrop, item, type, id, color} = this.props
         const {scale, grid, bounds, dragPos} = this.state
 
-        let {highlight, 'far-background': background} = getTheme(color)
+        let {highlight, 'far-background': background, raised} = getTheme(color)
         highlight = `0x${highlight.slice(1)}`
         background = `0x${background.slice(1)}`
+        raised = `0x${raised.slice(1)}`
 
         const gridLines = []
         if (grid !== -1) {
@@ -149,7 +150,7 @@ class Editor extends Component {
                     x={i}
                     y={bounds.top}
                     scale={scale}
-                    color={highlight}
+                    color={raised}
                     distance={bounds.bottom - bounds.top} />)
             }
 
@@ -158,7 +159,7 @@ class Editor extends Component {
                     x={bounds.left}
                     y={i}
                     scale={scale}
-                    color={highlight}
+                    color={raised}
                     distance={bounds.right - bounds.left} />)
             }
         }
@@ -193,7 +194,7 @@ class Editor extends Component {
                 ref={this.stage} >
                     <Viewport width={rect.width - (changed ? 6 : 0)} height={rect.height - 21 - (changed ? 6 : 0)} ref={this.viewport}>
                         {gridLines}
-                        <Cross x={0} y={0} scale={scale * 4} color={highlight} distance={DISTANCE * scale} />
+                        <Cross x={0} y={0} scale={scale * 2} color={highlight} distance={DISTANCE * scale} />
                         <Layer play={this.state.play} layer={character} bundles={type === 'asset' ? [id] : []}
                             x={0} y={0} selectorColor={background} selectedRef={this.selectedRef} scale={scale}
                             highlight={this.state.highlight ? selected : character.path} />
