@@ -104,7 +104,7 @@ input[type="range"]::-webkit-slider-thumb {
     height: 12px;
     cursor: pointer;
     background: var(--background);
-    border: solid 2px var(--highlight);
+    border: solid 2px var(--far-background);
     border-radius: 50%;
 }
 
