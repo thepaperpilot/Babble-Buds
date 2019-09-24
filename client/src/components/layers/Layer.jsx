@@ -81,7 +81,9 @@ class Layer extends Component {
             (emoteLayer != null && inherit && inherit.emoteLayer != null) ||
             // At least one of many things has gone wrong relating to asset bundles
             (asset && asset.type === 'bundle' && (
-                Object.keys(asset.conflicts).some(c => asset.conflicts[c] && c in inherit) ||
+                (asset.conflicts.head && ('head' in inherit || head)) ||
+                (asset.conflicts.emoteLayer && ('emoteLayer' in inherit || emoteLayer)) ||
+                (asset.conflicts.emote && ('emote' in inherit || nodeEmote)) ||
                 asset.conflicts.emotes.some(e => e in emotes && !comparePaths(emotes[e], path)))))
             className.push('warning')
 
