@@ -45,3 +45,95 @@
 .selector.canDrop {
     background-color: rgba(0, 255, 0, .05);
 }
+
+.char, .emote, .babble {
+    background-color: var(--background);
+    color: var(--foreground);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 2px;
+}
+
+.char img, .emote img {
+    object-fit: contain;
+    width: calc(100% - 4px);
+    box-sizing: border-box;
+    margin: auto 2px;
+}
+
+.emote img {
+    overflow: hidden;
+}
+
+.char:hover:not(.selected),
+.emote:hover:not(.selected),
+.babble:hover:not(.selected) {
+    background-color: var(--raised);
+}
+
+.char:hover:not(.selected) img,
+.emote:hover:not(.selected) img,
+.smallThumbnail-wrapper:hover:not(.selected) img {
+    background-color: var(--raised);
+}
+
+.emote:focus, .babble:focus {
+    color: var(--foreground);
+}
+
+.emote:not(.available) {
+    background-color: var(--warning);
+}
+
+.animated.char::before,
+.animated.line-item::before,
+.bundle.char::before,
+.bundle.line-item::before {
+    position: absolute;
+    width: 20px;
+    text-align: center;
+    opacity: .75;    
+    z-index: 3;
+}
+
+.animated.char::before,
+.animated.line-item::before {
+    content: "▶️";
+    background: darkred;
+}
+
+.bundle.char::before,
+.bundle.line-item::before {
+    content: "⸫";
+    background: darkblue;
+}
+
+.animated.line-item::before,
+.bundle.line-item::before {
+    right: 0;
+}
+
+.desc {
+    background-color: var(--highlight);
+    color: var(--foreground);
+    font-size: 12px;
+    overflow: hidden;
+    pointer-events: none;
+    text-align: center;
+    word-wrap: break-word;
+    flex: 0 0 auto;
+    margin: -2px;
+    margin-bottom: 4px;
+}
+
+.disabled {
+    color: var(--disabled);
+}
+
+.selected, .selected:hover {
+    background-color: var(--highlight);
+}

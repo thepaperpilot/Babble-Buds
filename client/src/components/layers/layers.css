@@ -73,9 +73,21 @@
     position: relative;
 }
 
+.layer:not(.selected):hover {
+    background-color: var(--raised);
+}
+
+.selected img {
+    background-color: var(--highlight);
+}
+
+.layer:not(.selected):hover img {
+    background-color: var(--raised);
+}
+
 .layer img {
     position: absolute;
-    left: -25px;
+    left: -21px;
     width: 25px;
     height: 25px;
     top: 0;
