@@ -37,19 +37,18 @@ class EmoteSection extends Component {
             if (layer.emote != null && !(layer.emote in emotes))
                 emotes[layer.emote] = layer
         })
-
-        let nestedEmoteWarning = 'emote' in inherit && layer.emote != null ?
-            <pre className="error">
-                {`Attempting to place emote '${layer.name}' (${layer.emote}) inside emote '${emotes[inherit.emote].name}' (${inherit.emote})!`}
-            </pre> : null
-        let emoteExistsWarning = layer.emote != null && layer.emote in emotes && emotes[layer.emote] !== layer ?
-            <pre className="error">
-                {`Attempting to create emote '${layer.name}' (${layer.emote}) but emote with same id '${emotes[layer.emote].name}' already exists!`}
-            </pre> : null
-
+        
         const isBundle = asset && asset.type === 'bundle' ?
             <pre className="info">
                 This asset bundle has multiple emotes inside it. You can change which emote is currently visible in the Editor using these buttons. You'll need to edit the bundle itself to change what emotes are available. 
+            </pre> : null
+        const nestedEmoteWarning = 'emote' in inherit && layer.emote != null ?
+            <pre className="error">
+                {`Attempting to place emote '${layer.name}' (${layer.emote}) inside emote '${emotes[inherit.emote].name}' (${inherit.emote})!`}
+            </pre> : null
+        const emoteExistsWarning = layer.emote != null && layer.emote in emotes && emotes[layer.emote] !== layer ?
+            <pre className="error">
+                {`Attempting to create emote '${layer.name}' (${layer.emote}) but emote with same id '${emotes[layer.emote].name}' already exists!`}
             </pre> : null
 
         const emote = inherit.emote == null ? layer.emote : inherit.emote
@@ -79,9 +78,9 @@ class EmoteSection extends Component {
                     <pre className="info">
                         It's not recommended to make individual assets emotes
                     </pre>}
+                {isBundle}
                 {nestedEmoteWarning}
                 {emoteExistsWarning}
-                {isBundle}
                 <Slots
                     title="Emote"
                     rows={3}
