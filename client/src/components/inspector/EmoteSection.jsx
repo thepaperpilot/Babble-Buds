@@ -35,9 +35,11 @@ class EmoteSection extends Component {
 
         const emotes = calculateEmotes(assets, layers)
         
-        const isBundle = asset && asset.type === 'bundle' ?
+        const isBundle = asset && asset.type === 'bundle'
+        const bundleEmotesWarning = isBundle &&
+            asset.conflicts.emotes.length !== 0 ?
             <pre className="info">
-                This asset bundle has multiple emotes inside it. You can change which emote is currently visible in the Editor using these buttons. You'll need to edit the bundle itself to change what emotes are available. 
+                This asset bundle has one or more emotes inside it. You can change which emote is currently visible in the Editor using these buttons. You'll need to edit the bundle itself to change what emotes are available. 
             </pre> : null
         const nestedEmoteWarning = 'emote' in inherit && layer.emote != null ?
             <pre className="error">
@@ -58,7 +60,7 @@ class EmoteSection extends Component {
         const emoteSlotDisabled = slot => {
             if ('emote' in inherit) return false
 
-            if (isBundle) {
+            if (bundleEmotesWarning != null) {
                 return !asset.conflicts.emotes.includes(slot) || !(slot in emotes)
             } else {
                 return (slot in emotes && slot !== emote) || finder('emote')
@@ -82,7 +84,7 @@ class EmoteSection extends Component {
                     <pre className="info">
                         It's not recommended to make individual assets emotes
                     </pre>}
-                {isBundle}
+                {bundleEmotesWarning}
                 {nestedEmoteWarning}
                 {emoteExistsWarning}
                 {bundleConflictWarning}
@@ -90,9 +92,10 @@ class EmoteSection extends Component {
                     title="Emote"
                     rows={3}
                     cols={4}
-                    value={isBundle ? this.props.emote :
+                    value={bundleEmotesWarning != null ? this.props.emote :
                         layer.emote == null ? inherit.emote : layer.emote}
-                    onChange={isBundle ? this.selectEmote : this.changeEmote}
+                    onChange={bundleEmotesWarning != null ? this.selectEmote :
+                        this.changeEmote}
                     disabled={emoteSlotDisabled} />
             </Foldable>
         </div>
