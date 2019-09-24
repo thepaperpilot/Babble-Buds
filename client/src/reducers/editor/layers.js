@@ -27,6 +27,9 @@ function selectLayer(state, action) {
         if (curr.emote != null)
             emote = curr.emote
     })
+    if (emote == null && action.asset && action.asset.type === 'bundle' &&
+        !action.asset.conflicts.emotes.includes(state.emote))
+        emote = action.asset.conflicts.emotes[0]
     emote = emote == null ? state.emote : emote
     return util.updateObject(state, { layer: action.path, emote })
 }

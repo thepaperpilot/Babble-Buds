@@ -41,7 +41,8 @@ class Layer extends Component {
     onNodeClick() {
         this.props.dispatch({
             type: 'SELECT_LAYER',
-            path: this.props.path
+            path: this.props.path,
+            asset: this.props.asset
         })
     }
 
