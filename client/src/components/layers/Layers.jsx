@@ -80,10 +80,17 @@ class Layers extends Component {
         const emotes = {}
         if (props.tree.children)
             Puppet.handleLayer(props.assets, props.tree, (layer, bundles) => {
-                if (layer.emote != null && !(layer.emote in emotes)) {
-                    emotes[layer.emote] = bundles[0] ?
-                        props.tree.children.find(l => l.id === bundles[0]).path :
-                        layer.path
+                if (bundles.length > 0)
+                    return
+                if (layer.emote != null && !(layer.emote in emotes)) {    
+                    emotes[layer.emote] = layer.path
+                } else if (layer.id && layer.id in props.assets) {
+                    const asset = props.assets[layer.id]
+                    if (asset.type === 'bundle')
+                        asset.conflicts.emotes.forEach(e => {
+                            if (!(e in emotes))
+                                emotes[e] = layer.path
+                        })
                 }
             })
         return emotes
