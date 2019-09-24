@@ -208,7 +208,7 @@ export function getConflicts(assets, layers) {
 
     const emotes = []
     function findEmotes(layer) {
-        if (layer.emote && !emotes.includes(layer.emote))
+        if (layer.emote != null && !emotes.includes(layer.emote))
             emotes.push(layer.emote)
     }
     Puppet.handleLayer(assets, layers, findEmotes)
