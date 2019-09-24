@@ -4,9 +4,10 @@
     bottom: 0;
     left: 0;
     right: 0;
-    background-color: rgba(0,0,0,0.3);
+    background-color: rgba(0,0,0,0.5);
     padding: 50px;
     transition: background-color .5s ease;
+    z-index: 100;
 }
 
 .modal-backdrop:not(.open) {
@@ -26,12 +27,10 @@
     transform: translate(-50%, -50%);
     top: calc(100% + 600px);
     transition: top .5s ease;
-    border-radius: 5px;
 }
 
 .modal-content {
     overflow: hidden;
-    border-radius: 5px;
     box-sizing: border-box;
     height: 100%;
     display: flex;
@@ -42,9 +41,9 @@
     position: absolute;
     bottom: 100%;
     left: 10px;
-    padding: 4px;
+    padding: 4px 8px;
     padding-bottom: 0;
-    color: #ddd;
+    color: var(--foreground);
     background-color: var(--background);
 }
 
