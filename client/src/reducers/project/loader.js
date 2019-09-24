@@ -119,15 +119,13 @@ export function loadCharacters(settings, charactersPath) {
                     path.join(charactersPath, '..', 'thumbnails', `${settings.characters[i].id}`, `${j}.png`))
     }
 
-    settings.environments.forEach(env => {
+    (settings.environments || []).forEach(env => {
         // TODO if we ever need to add backwards-compatibility checks for environments,
         // it may be better to extract out a processCharacter function and feed environments
         // through it as well
         
         characterThumbnails[env.id] = `file:///${path.join(charactersPath, '..', 'thumbnails',
             `${env.id}.png`)}`.replace(/\\/g, '/')
-        fs.remove(path.join(charactersPath, '..', 'thumbnails', `new-${env.id}.png`))
-        fs.remove(path.join(charactersPath, '..', 'thumbnails', `new-${env.id}`))
 
         if (env.id > numCharacters)
             numCharacters = env.id
