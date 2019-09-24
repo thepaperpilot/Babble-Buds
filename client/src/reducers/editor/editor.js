@@ -25,7 +25,7 @@ function editPuppet(state, action) {
 }
 
 function selectEmote(state, action) {
-    return util.updateObject(state, { emote: action.emote })
+    return util.updateObject(state, { emote: action.emote || 0 })
 }
 
 function newAssetBundle(state, action) {

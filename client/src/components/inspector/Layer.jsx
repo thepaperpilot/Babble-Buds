@@ -103,6 +103,7 @@ class Layer extends Component {
                             layer={layer}
                             finder={finder}
                             asset={asset}
+                            emote={this.props.emote}
                             assets={this.props.assets}
                             layers={this.props.layers}
                             target={this.props.target} />}
@@ -128,6 +129,7 @@ function mapStateToProps(state) {
         folders: state.project.settings.folders,
         layers: state.editor.present.character.layers,
         type: state.editor.present.type,
+        emote: state.editor.present.emote,
         self: state.self
     }
 }
