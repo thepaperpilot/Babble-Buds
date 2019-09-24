@@ -35,7 +35,7 @@ class BabbleSection extends Component {
 
     render() {
         const {
-            inherit, layer, finder, emoteLayer
+            inherit, layer, asset, finder, emoteLayer
         } = this.props
 
         const nestedHeadWarning = 'head' in inherit && layer.head != null ?
@@ -46,13 +46,30 @@ class BabbleSection extends Component {
             <pre className="error">
                 {`Attempting to make this layer a${layer.emoteLayer === 'mouth' ? ' mouth' : 'n eyes'} layer but it is already inside a${inherit.emoteLayer === 'mouth' ? ' mouth' : 'n eyes'} layer.`}
             </pre> : null
+        const bundleHeadConflictWarning = asset && asset.type === 'bundle' &&
+            asset.conflicts.head && ('head' in inherit || layer.head != null) ?
+            <pre className="error">
+                {`This asset bundle has a mouth and/or eyes layer inside it but it is already inside a${inherit.emoteLayer === 'mouth' ? ' mouth' : 'n eyes'} layer.`}
+            </pre> : null
+        const bundleEmoteLayerConflictWarning = asset && asset.type === 'bundle' &&
+            asset.conflicts.emoteLayer && ('emoteLayer' in inherit || layer.emoteLayer != null) ?
+            <pre className="error">
+                This asset bundle has a head layer inside it but it is already inside one.
+            </pre> : null
 
         const emoteLayerDisabled = ('emoteLayer' in inherit || finder('emoteLayer')) && layer.emoteLayer == null
 
         return <div className="action">
-            <Foldable title="Babble" classNames={{ warning: nestedHeadWarning != null || nestedEmoteLayerWarning != null }}>
+            <Foldable title="Babble" classNames={{
+                    warning: nestedHeadWarning != null ||
+                        nestedEmoteLayerWarning != null ||
+                        bundleHeadConflictWarning != null ||
+                        bundleEmoteLayerConflictWarning != null
+                }}>
                 {nestedHeadWarning}
                 {nestedEmoteLayerWarning}
+                {bundleHeadConflictWarning}
+                {bundleEmoteLayerConflictWarning}
                 <Checkbox
                     title="Head"
                     value={layer.head || inherit.head}

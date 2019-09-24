@@ -111,6 +111,7 @@ class Layer extends Component {
                             inherit={inherit}
                             layer={layer}
                             finder={finder}
+                            asset={asset}
                             emoteLayer={emoteLayer}
                             target={this.props.target} />}
                         <AnimationSection 
