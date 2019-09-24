@@ -5,7 +5,6 @@ const util = require('./../util')
 export const DEFAULTS = {
     id: null,
     character: null,
-    oldCharacter: null,
     type: null,
     layer: null,
     emote: 0
@@ -17,7 +16,6 @@ function editPuppet(state, action) {
     return util.updateObject(state, {
         id: action.id,
         character,
-        oldCharacter: JSON.stringify(character),
         type: action.objectType || 'puppet',
         layer: null,
         emote: action.emote || 0
@@ -49,9 +47,8 @@ function updateThumbnails(type) {
                 version: state.character.version + 1
             }
             const character = util.updateObject(state.character, changes)
-            const oldCharacter = JSON.stringify(util.updateObject(JSON.parse(state.oldCharacter), changes))
 
-            return util.updateObject(state, { character, oldCharacter })
+            return util.updateObject(state, { character })
         }
         return state
     }

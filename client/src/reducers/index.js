@@ -23,28 +23,30 @@ const babbling = util.createReducer(false, {
 function saveEditor(state) {
     let project = state.project
     const editor = state.editor.present
+    let character = editor.character
 
     switch (editor.type) {
     case 'puppet': {
         const characters = util.updateObject(state.project.characters, {
-            [editor.id]: editor.character
+            [editor.id]: character
         })
         const thumbnailPath = path.join(state.project.project, state.project.settings.charactersPath,
             '..', 'thumbnails', `new-${editor.id}`)
         ipcRenderer.send('background', 'generate thumbnails', thumbnailPath,
-            editor.character, 'puppet', editor.id)
+            character, 'puppet', editor.id)
         project = util.updateObject(project, { characters })
         break
     }
     case 'asset': {
-        const assets = util.updateObject(project.assets, {
-            [editor.id]: util.updateObject(editor.character, {
-                conflicts: getConflicts(project.assets, editor.character.layers)
-            })
+        character = util.updateObject(character, {
+            conflicts: getConflicts(project.assets, character.layers)
         })
-        const thumbnailsPath = path.join(state.project.project, state.project.settings.assetsPath, editor.character.location.slice(0, -4))
+        const assets = util.updateObject(project.assets, {
+            [editor.id]: character
+        })
+        const thumbnailsPath = path.join(state.project.project, state.project.settings.assetsPath, character.location.slice(0, -4))
         ipcRenderer.send('background', 'generate thumbnails', thumbnailsPath,
-            editor.character, 'asset', editor.id)
+            character, 'asset', editor.id)
         project = util.updateObject(project, { assets })
         break
     }
@@ -55,7 +57,7 @@ function saveEditor(state) {
         project,
         editor: util.updateObject(state.editor, {
             present: util.updateObject(state.editor.present, {
-                oldCharacter: JSON.stringify(editor.character)
+                character
             })
         })
     })
