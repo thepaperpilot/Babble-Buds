@@ -96,11 +96,11 @@ function endScaleDrag(instance, dispatch) {
 function endMoveDrag(instance, dispatch, e) {
     const {startPosition, dx, dy} = e.currentTarget
 
-    if (startPosition) {
+    if (startPosition && (dx || dy)) {
         dispatch({
             type: 'EDIT_LAYER_POSITION',
             layer: instance.props.layer.path,
-            pos: [startPosition.x + dx, -startPosition.y - dy]
+            pos: [startPosition.x + (dx || 0), -startPosition.y - (dy || 0)]
         })
 
         let root = instance
