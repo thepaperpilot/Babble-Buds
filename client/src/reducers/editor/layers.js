@@ -100,7 +100,10 @@ function editEmote(state, action) {
     }
     if (curr.children) curr.children.forEach(parseLayer)
     const character = util.updateObject(state.character, { layers: updatePaths(layers).layers })
-    return util.updateObject(state, { character, emote: action.emote || 0 })
+    const emote = action.emote ||
+        (action.asset && action.asset.type === 'bundle' && action.asset.conflicts.emotes[0]) ||
+        0
+    return util.updateObject(state, { character, emote })
 }
 
 function deleteLayer(state, action) {

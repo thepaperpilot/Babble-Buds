@@ -24,6 +24,7 @@ class EmoteSection extends Component {
         this.props.dispatch({
             type: 'EDIT_LAYER_EMOTE',
             layer: this.props.target,
+            asset: this.props.asset,
             emote
         })
     }
@@ -102,8 +103,7 @@ class EmoteSection extends Component {
                     title="Emote"
                     rows={3}
                     cols={4}
-                    value={bundleEmotesInfo != null ?
-                        asset.conflicts.emotes.includes(this.props.emote) ? this.props.emote : null :
+                    value={bundleEmotesInfo != null ? this.props.emote :
                         layer.emote == null ? inherit.emote : layer.emote}
                     onChange={bundleEmotesInfo != null ? this.selectEmote :
                         this.changeEmote}
