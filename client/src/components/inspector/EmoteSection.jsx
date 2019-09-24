@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 import {Puppet} from 'babble.js'
 import Slots from './fields/Slots'
 import Foldable from './../ui/Foldable'
+import {calculateEmotes} from './../layers/Layers'
 
 class EmoteSection extends Component {
     constructor(props) {
@@ -32,11 +33,7 @@ class EmoteSection extends Component {
             inherit, layer, finder, asset, assets, layers
         } = this.props
 
-        const emotes = {}
-        Puppet.handleLayer(assets, layers, layer => {
-            if (layer.emote != null && !(layer.emote in emotes))
-                emotes[layer.emote] = layer
-        })
+        const emotes = calculateEmotes(assets, layers)
         
         const isBundle = asset && asset.type === 'bundle' ?
             <pre className="info">
@@ -46,9 +43,15 @@ class EmoteSection extends Component {
             <pre className="error">
                 {`Attempting to place emote '${layer.name}' (${layer.emote}) inside emote '${emotes[inherit.emote].name}' (${inherit.emote})!`}
             </pre> : null
-        const emoteExistsWarning = layer.emote != null && layer.emote in emotes && emotes[layer.emote] !== layer ?
+        const emoteExistsWarning = layer.emote != null && layer.emote in emotes &&
+            emotes[layer.emote] !== layer ?
             <pre className="error">
                 {`Attempting to create emote '${layer.name}' (${layer.emote}) but emote with same id '${emotes[layer.emote].name}' already exists!`}
+            </pre> : null
+        const bundleConflictWarning = isBundle &&
+            asset.conflicts.emotes.some(e => e in emotes && emotes[e] !== layer) ?
+            <pre className="error">
+                This asset bundle has emotes that already exist in this puppet!
             </pre> : null
 
         const emote = inherit.emote == null ? layer.emote : inherit.emote
@@ -69,7 +72,8 @@ class EmoteSection extends Component {
             <Foldable title="Emote"
                 classNames={{
                     warning: nestedEmoteWarning != null ||
-                        emoteExistsWarning != null
+                        emoteExistsWarning != null ||
+                        bundleConflictWarning != null
                 }}
                 defaultFolded={!isBundle && (asset != null || allEmotesDisabled)}
                 state={[asset != null, allEmotesDisabled]}>
@@ -81,6 +85,7 @@ class EmoteSection extends Component {
                 {isBundle}
                 {nestedEmoteWarning}
                 {emoteExistsWarning}
+                {bundleConflictWarning}
                 <Slots
                     title="Emote"
                     rows={3}

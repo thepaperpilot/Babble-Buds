@@ -7,6 +7,25 @@ import Layer from './Layer'
 import LayerContextMenu from './LayerContextMenu'
 import './layers.css'
 
+export function calculateEmotes(assets, layers) {
+    const emotes = {}
+    Puppet.handleLayer(assets, layers, (layer, bundles) => {
+        if (bundles.length > 0)
+            return
+        if (layer.emote != null && !(layer.emote in emotes)) {    
+            emotes[layer.emote] = layer
+        } else if (layer.id && layer.id in assets) {
+            const asset = assets[layer.id]
+            if (asset.type === 'bundle')
+                asset.conflicts.emotes.forEach(e => {
+                    if (!(e in emotes))
+                        emotes[e] = layer
+                })
+        }
+    })
+    return emotes
+}
+
 class Layers extends Component {
     constructor(props) {
         super(props)
@@ -77,23 +96,12 @@ class Layers extends Component {
     }
 
     calculateEmotes(props) {
-        const emotes = {}
-        if (props.tree.children)
-            Puppet.handleLayer(props.assets, props.tree, (layer, bundles) => {
-                if (bundles.length > 0)
-                    return
-                if (layer.emote != null && !(layer.emote in emotes)) {    
-                    emotes[layer.emote] = layer.path
-                } else if (layer.id && layer.id in props.assets) {
-                    const asset = props.assets[layer.id]
-                    if (asset.type === 'bundle')
-                        asset.conflicts.emotes.forEach(e => {
-                            if (!(e in emotes))
-                                emotes[e] = layer.path
-                        })
-                }
-            })
-        return emotes
+        if (props.tree.children) {
+            const emotes = calculateEmotes(props.assets, props.tree)
+            Object.keys(emotes).forEach(e => emotes[e] = emotes[e].path)
+            return emotes
+        }
+        return {}
     }
 
     render() {
