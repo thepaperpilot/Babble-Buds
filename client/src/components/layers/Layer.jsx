@@ -84,12 +84,15 @@ class Layer extends Component {
                 asset.conflicts.emotes.some(e => e in emotes && !comparePaths(emotes[e], path)))))
             className.push('warning')
 
-        const emote = nodeEmote != null ?
-            <div className={this.props.emote === nodeEmote ?
+        const isBundle = asset && asset.type === 'bundle'
+
+        const emote = nodeEmote != null ||
+            (isBundle && asset.conflicts.emotes.length !== 0) ?
+            <div className={this.props.emote === nodeEmote ||
+                (isBundle && asset.conflicts.emotes.includes(this.props.emote)) ?
                 'emote-layer visible' : 'emote-layer'} /> : null
         
-        const bundle = asset && asset.type === 'bundle' ?
-            <div className="asset-bundle" /> : null
+        const bundle = isBundle ? <div className="asset-bundle" /> : null
 
         if (asset && asset.type === 'special')
             return <div
