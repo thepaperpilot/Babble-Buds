@@ -67,11 +67,11 @@ class Puppet extends Component {
                     collect={() => ({ puppet: parseInt(this.props.target, 10) })}/>
                 <div className="inspector-content">
                     <Scrollbar allowOuterScroll={true} heightRelativeToParent="100%">
-                        <pre className="info">
-                            Creator: {puppet.creator === this.props.self ? this.props.nick : puppet.creator}<br/>
-                            OC: {puppet.oc === this.props.self ? this.props.nick : puppet.oc}
-                        </pre>
                         <div className="action">
+                            <pre className="info">
+                                Creator: {puppet.creator === this.props.self ? this.props.nick : puppet.creator}<br/>
+                                OC: {puppet.oc === this.props.self ? this.props.nick : puppet.oc}
+                            </pre>
                             <Checkbox
                                 title="Bobble head while talking"
                                 value={puppet.deadbonesStyle}

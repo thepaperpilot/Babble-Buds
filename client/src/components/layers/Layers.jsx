@@ -96,7 +96,7 @@ class Layers extends Component {
         return (
             <div className="panel console">
                 <div className="bar flex-row">
-                    <button onClick={this.addLayer}>New Layer</button>
+                    <button onClick={this.addLayer} disabled={!this.props.tree.path}>New Layer</button>
                     <div className="flex-grow" />
                 </div>
                 {this.props.tree.path ?
