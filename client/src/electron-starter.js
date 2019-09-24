@@ -26,7 +26,7 @@ function createWindow() {
         'y': mainWindowState.y,
         'width': mainWindowState.width,
         'height': mainWindowState.height,
-        backgroundColor: 'var(--background)', 
+        backgroundColor: '#242a33',
         icon: path.join(__dirname, '..', 'public', 'icons', 'icon.ico'),
         webPreferences: {
             // Used to use images stored on person's computer
