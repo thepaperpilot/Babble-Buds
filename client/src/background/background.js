@@ -1,4 +1,4 @@
-const { ipcRenderer } = window.require('electron')
+const { ipcRenderer, remote } = window.require('electron')
 const { Stage } = window.require('babble.js')
 const fs = window.require('fs-extra')
 const path = window.require('path')
@@ -51,6 +51,7 @@ ipcRenderer.on('update assets', (e, assets, assetsPath) => {
 })
 
 ipcRenderer.on('generate thumbnails', (e, thumbnailsPath, character, type, id) => {
+    
     // Put puppet on the stage
     stage.clearPuppets()
     character.position = 1
@@ -73,10 +74,12 @@ ipcRenderer.on('generate thumbnails', (e, thumbnailsPath, character, type, id) =
         stage.resize(null, character.width, character.height)
         empty.width = character.width
         empty.height = character.height
+        remote.getCurrentWindow().setContentSize(character.width, character.height)
     } else {
         stage.resize(null, width, height)
         empty.width = width
         empty.height = height
+        remote.getCurrentWindow().setContentSize(width, height)
     }
 
     stage.renderer.render(stage.stage)
