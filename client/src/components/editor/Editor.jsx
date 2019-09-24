@@ -195,7 +195,7 @@ class Editor extends Component {
                     <Viewport width={rect.width - (changed ? 6 : 0)} height={rect.height - 21 - (changed ? 6 : 0)} ref={this.viewport}>
                         {gridLines}
                         <Cross x={0} y={0} scale={scale * 2} color={highlight} distance={DISTANCE * scale} />
-                        <Layer play={this.state.play} layer={character} bundles={type === 'asset' ? [id] : []}
+                        <Layer play={this.state.play} layer={character} bundles={[]}
                             x={0} y={0} selectorColor={background} selectedRef={this.selectedRef} scale={scale}
                             highlight={this.state.highlight ? selected : character.path} />
                         {isOver && dragPos &&

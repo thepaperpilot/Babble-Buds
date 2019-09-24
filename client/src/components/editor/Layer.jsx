@@ -53,7 +53,9 @@ class RawLayer extends Component {
         } = this.props
 
         const isHighlighted = comparePaths(highlight, layer.path)
-        const isSelected = selected && comparePaths(selected, layer.path)
+        const isSelected = selected && bundles.length == 0 && comparePaths(selected, layer.path)
+
+        console.log(layer.name, layer.path, isSelected)
 
         let element
         if (layer.id && layer.id in assets) {
