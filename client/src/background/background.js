@@ -71,15 +71,19 @@ ipcRenderer.on('generate thumbnails', (e, thumbnailsPath, character, type, id) =
     //ipcRenderer.send('change background visibility', true)
 
     if (type === 'environment') {
-        stage.resize(null, character.width, character.height)
-        empty.width = character.width
-        empty.height = character.height
-        remote.getCurrentWindow().setContentSize(character.width, character.height)
+        const w = Math.ceil(character.width)
+        const h = Math.ceil(character.height)
+        stage.resize(null, w, h)
+        empty.width = w
+        empty.height = h
+        remote.getCurrentWindow().setContentSize(w, h)
     } else {
-        stage.resize(null, width, height)
-        empty.width = width
-        empty.height = height
-        remote.getCurrentWindow().setContentSize(width, height)
+        const w = Math.ceil(width)
+        const h = Math.ceil(height)
+        stage.resize(null, w, h)
+        empty.width = w
+        empty.height = h
+        remote.getCurrentWindow().setContentSize(w, h)
     }
 
     stage.renderer.render(stage.stage)
