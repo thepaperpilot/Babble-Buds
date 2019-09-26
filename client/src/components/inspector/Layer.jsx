@@ -66,6 +66,8 @@ class Layer extends Component {
         </div> : null
 
         const isEnvironment = this.props.type === 'environment'
+        const isEmotesBundle = asset && asset.type === 'bundle' &&
+            asset.conflicts.emotes.length > 0
 
         return (
             <div className="inspector">
@@ -84,8 +86,12 @@ class Layer extends Component {
                         })} />}
                 <div className="inspector-content">
                     <Scrollbar allowOuterScroll={true} heightRelativeToParent="100%">
-                        {specialLayerWarning}
                         <div className="action">
+                            {specialLayerWarning}
+                            {isEnvironment && isEmotesBundle &&
+                                <pre className="error">
+                                    This is an asset bundle with emotes inside of an environment. Be aware it is impossible to change the current emote of the background, and it will only ever display the first emote!
+                                </pre>}
                             <Foldable title="General" defaultFolded={isSpecial} state={isSpecial}>
                                 <Text
                                     title="Layer Name"
