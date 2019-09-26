@@ -215,7 +215,6 @@ export function getConflicts(assets, layers) {
     return {
         head: !!Puppet.handleLayer(assets, layers, handleLayer('head')),
         emoteLayer: !!Puppet.handleLayer(assets, layers, handleLayer('emoteLayer')),
-        emote: !!emotes.length,
         emotes
     }
 }
