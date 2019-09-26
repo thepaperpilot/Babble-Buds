@@ -226,7 +226,8 @@ function mapStateToProps(state) {
         canDrop: !!character,
         character: layers,
         changed: id && type &&
-            JSON.stringify(character) !== JSON.stringify(TYPE_MAP[type](state.project)[id]),
+            JSON.stringify(character.layers) !==
+            JSON.stringify(TYPE_MAP[type](state.project)[id].layers),
         selected: layer,
         type,
         id,
