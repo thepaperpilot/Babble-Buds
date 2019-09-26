@@ -27,6 +27,9 @@ function saveEditor(state) {
 
     switch (editor.type) {
     case 'puppet': {
+        character = util.updateObject(state.project.characters[editor.id], {
+            layers: character.layers
+        })
         const characters = util.updateObject(state.project.characters, {
             [editor.id]: character
         })
@@ -38,7 +41,8 @@ function saveEditor(state) {
         break
     }
     case 'asset': {
-        character = util.updateObject(character, {
+        character = util.updateObject(project.assets[editor.id], {
+            layers: character.layers,
             conflicts: getConflicts(project.assets, character.layers)
         })
         const assets = util.updateObject(project.assets, {
