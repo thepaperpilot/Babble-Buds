@@ -1,6 +1,9 @@
-import {Component} from 'react'
+import { Component } from 'react'
 import { connect } from 'react-redux'
-import {Puppet} from 'babble.js'
+import { Puppet } from 'babble.js'
+import { info } from '../../redux/status'
+import { updateThumbnail } from '../../redux/project/characterThumbnails'
+import { updateThumbnail as updateAssetThumbnail} from '../../redux/project/assets/actions'
 
 const { ipcRenderer } = window.require('electron')
 const path = window.require('path')
@@ -28,7 +31,7 @@ class BackgroundInterface extends Component {
     }
 
     componentWillReceiveProps(newProps) {
-        const { assets, assetsPath, characters, thumbnailPaths } = newProps
+        const { assets, assetsPath, characters, environments, thumbnailPaths } = newProps
 
         // Since we try to get the first project loaded ASAP, we don't necessarily
         // wait for BackgroundInterface to be set up before generating any
@@ -58,19 +61,13 @@ class BackgroundInterface extends Component {
         })
 
         if (updated) {
-            this.props.dispatch({
-                type: 'INFO',
-                content: 'Updating assets in background process...'
-            })
+            this.props.dispatch(info('Updating assets in background process...'))
             ipcRenderer.send('background', 'update assets', assets, assetsPath)
         }
 
         updatedAssets.forEach(id => {
             const asset = assets[id]
-            this.props.dispatch({
-                type: 'INFO',
-                content: `Asset bundle "${asset.name}" (${id}) changed. Re-rendering dependent thumbnails...`
-            })
+            this.props.dispatch(info(`Asset bundle "${asset.name}" (${id}) changed. Re-rendering dependent thumbnails...`))
             
             const handleLayer = layer => {
                 if (layer.id === id)
@@ -104,6 +101,13 @@ class BackgroundInterface extends Component {
             ).forEach(id => {
                 dirtyCharacters.push(id)
             })
+            // aaaand environments!
+            Object.keys(environments).filter(env =>
+                Puppet.handleLayer(assets, environments[env].layers, l => l.id === id) &&
+                !(id in dirtyCharacters)
+            ).forEach(id => {
+                dirtyCharacters.push(id)
+            })
         })
 
         // Regenerate characters that need it
@@ -112,13 +116,13 @@ class BackgroundInterface extends Component {
 
     checkDirtyCharacters(props, dirtyCharacters) {
         if (dirtyCharacters.length) {
-            const {characters, thumbnailPaths} = props
+            const {characters, environments, thumbnailPaths} = props
 
             dirtyCharacters.forEach(id => {
-                const character = characters[id]
+                const character = characters[id] || environments[id]
                 const thumbnailsPath = `${thumbnailPaths.characters}${id}`
                 ipcRenderer.send('background', 'generate thumbnails', thumbnailsPath,
-                    character, 'puppet', id)
+                    character, id in characters ? 'puppet' : 'environment', id)
             })
 
             if (props.dirtyCharacters.length && !this.hasUpdated)
@@ -127,47 +131,10 @@ class BackgroundInterface extends Component {
     }
 
     updateThumbnails(e, type, id, thumbnailsPath) {
-        switch (type) {
-        case 'puppet':
-        case 'environment':
-            this.props.dispatch({
-                type: 'UPDATE_PUPPET_THUMBNAILS',
-                id,
-                thumbnailsPath
-            })
-            let content
-            if (type === 'puppet' && id in this.props.characters)
-                content = `Updated thumbnail for "${this.props.characters[id].name}" puppet.`
-            else if (type === 'environment') {
-                const env = this.props.environments.find(env => env.id === id)
-                if (env)
-                    content = `Updated thumbnail for "${env.name}" environment.`
-            }
-            if (content)
-                this.props.dispatch({
-                    type: 'LOG',
-                    content
-                })
-            break
-        case 'asset':
-            if (id in this.props.assets) {
-                this.props.dispatch({
-                    type: 'UPDATE_ASSET_THUMBNAILS',
-                    id,
-                    thumbnailsPath
-                })
-                this.props.dispatch({
-                    type: 'LOG',
-                    content: `Updated thumbnail for "${this.props.assets[id].name}" asset.`
-                })
-            }
-            break
-        default:
-            this.props.dispatch({
-                type: 'ERROR',
-                content: `Unknown Thumbnail Type "${type}".`
-            })
-        }
+        if (type === 'asset')
+            this.props.dispatch(updateAssetThumbnail(id, thumbnailsPath))
+        else
+            this.props.dispatch(updateThumbnail(id, type, thumbnailsPath))
     }
 
     render() {
@@ -180,7 +147,7 @@ function mapStateToProps(state) {
         assets: state.project.assets,
         assetsPath: state.project.assetsPath,
         characters: state.project.characters,
-        environments: state.project.settings.environments,
+        environments: state.project.environments,
         dirtyCharacters: state.project.dirtyCharacters,
         thumbnailPaths: {
             assets: path.join(state.project.project, state.project.settings.assetsPath),

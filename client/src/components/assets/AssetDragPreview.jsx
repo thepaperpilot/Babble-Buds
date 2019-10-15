@@ -41,7 +41,7 @@ class AssetDragPreview extends PureComponent {
             top: y,
             left: x
         }}>
-            <img src={thumbnail} />
+            <img src={thumbnail} alt={name} />
             <div className="inner-line-item">{name}</div>
         </div>
     }

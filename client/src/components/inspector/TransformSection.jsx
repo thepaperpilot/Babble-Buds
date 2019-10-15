@@ -1,8 +1,9 @@
-import React, {Component} from 'react'
+import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import Angle from './fields/Angle'
 import Vector2 from './fields/Vector2'
-import Foldable from './../ui/Foldable'
+import Foldable from '../ui/Foldable'
+import { changeLayer } from '../../redux/editor/layers'
 
 class TransformSection extends Component {
     constructor(props) {
@@ -14,30 +15,15 @@ class TransformSection extends Component {
     }
 
     changePosition(pos) {
-        this.props.dispatch({
-            type: 'EDIT_LAYER_POSITION',
-            layer: this.props.target,
-            pos
-        })
+        this.props.dispatch(changeLayer(this.props.target, { x: pos[0], y: pos[1] }))
     }
 
     changeScale(scale) {
-        this.props.dispatch({
-            type: 'EDIT_LAYER_SCALE',
-            layer: this.props.target,
-            scale
-        })
+        this.props.dispatch(changeLayer(this.props.target, { scaleX: scale[0], scaleY: scale[1] }))
     }
 
     changeLayer(key) {
-        return value => {
-            this.props.dispatch({
-                type: 'EDIT_LAYER',
-                layer: this.props.target,
-                key,
-                value
-            })
-        }
+        return value => { this.props.dispatch(changeLayer(this.props.target, { [key]: value })) }
     }
 
     render() {

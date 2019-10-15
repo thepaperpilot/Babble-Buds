@@ -1,5 +1,7 @@
-import {Component} from 'react'
+import { Component } from 'react'
 import { connect } from 'react-redux'
+import { error } from '../../redux/status'
+import { addLayer, deleteLayer } from '../../redux/editor/layers'
 
 const electron = window.require('electron')
 
@@ -36,9 +38,8 @@ class Clipboard extends Component {
     }
 
     copy() {
-        if (this.props.character && this.props.layer != null) {
-            const layers = this.props.character.layers
-            let curr = layers
+        if (this.props.id != null && this.props.layer != null) {
+            let curr = this.props.layers
             this.props.layer.forEach(index => {
                 if (curr == null) return
                 curr = curr.children[index]
@@ -48,13 +49,12 @@ class Clipboard extends Component {
     }
 
     paste() {
-        if (this.props.character) {
+        if (this.props.id != null) {
             try {
                 const layer = JSON.parse(electron.clipboard.readText())
                 let l = this.props.layer || []
 
-                const layers = this.props.character.layers
-                let curr = layers;
+                let curr = this.props.layers;
                 (l || []).forEach((index, i) => {
                     if (curr.children[index] != null)
                         curr = curr.children[index]
@@ -62,27 +62,16 @@ class Clipboard extends Component {
                 })
 
                 const path = curr.id ? l.slice(0, -1) : l
-                this.props.dispatch({
-                    type: 'ADD_LAYER',
-                    path,
-                    layer
-                })
+                this.props.dispatch(addLayer(path, layer))
             } catch (e) {
-                this.props.dispatch({
-                    type: 'ERROR',
-                    error: e,
-                    content: 'Failed to paste layer'
-                })
+                this.props.dispatch(error('Failed to paste layer', e))
             }
         }
     }
 
     delete() {
-        if (this.props.character && this.props.layer != null) {
-            this.props.dispatch({
-                type: 'DELETE_LAYER',
-                path: this.props.layer
-            })
+        if (this.props.id != null && this.props.layer != null) {
+            this.props.dispatch(deleteLayer(this.props.layer))
         }
     }
 
@@ -109,8 +98,9 @@ class Clipboard extends Component {
 
 function mapStateToProps(state) {
     return {
-        layer: state.editor.present.layer,
-        character: state.editor.present.character
+        id: state.editor.present.id,
+        layer: state.editor.present.selected.layer,
+        layers: state.editor.present.layers
     }
 }
 

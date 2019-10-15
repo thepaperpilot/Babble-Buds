@@ -2,7 +2,8 @@ import React, {Component} from 'react'
 import { connect } from 'react-redux'
 import Select from './fields/Select'
 import Number from './fields/Number'
-import Foldable from './../ui/Foldable'
+import Foldable from '../ui/Foldable'
+import { changeLayer } from '../../redux/editor/layers'
 
 class AnimationSection extends Component {
     constructor(props) {
@@ -13,22 +14,14 @@ class AnimationSection extends Component {
     }
 
     changeAnimation(value) {
-        this.props.dispatch({
-            type: 'EDIT_LAYER',
-            layer: this.props.target,
-            key: 'animation',
-            value: value === 'None' ? null : value.toUpperCase().replace(' ', '_')
-        })
+        this.props.dispatch(changeLayer(this.props.target, {
+            animation:value === 'None' ? null : value.toUpperCase().replace(' ', '_')
+        }))
     }
 
     changeLayer(key) {
         return value => {
-            this.props.dispatch({
-                type: 'EDIT_LAYER',
-                layer: this.props.target,
-                key,
-                value
-            })
+            this.props.dispatch(changeLayer(this.props.target, { [key]: value }))
         }
     }
 

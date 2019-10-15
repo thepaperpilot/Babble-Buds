@@ -1,5 +1,6 @@
-import React, {Component} from 'react'
+import React, { Component } from 'react'
 import { connect } from 'react-redux'
+import { error } from '../../redux/status'
 
 const remote = window.require('electron').remote
 
@@ -16,13 +17,9 @@ class BrokenPanel extends Component {
         return { hasError: true }
     }
     
-    componentDidCatch(error) {
+    componentDidCatch(err) {
         const panel = (this.props.panel.charAt(0).toUpperCase() + this.props.panel.slice(1)).replace('-', ' ')
-        this.props.dispatch({
-            type: 'ERROR',
-            content: `${panel} Panel crashed due to the following error: ${error.name}: ${error.message}`,
-            error
-        })
+        this.props.dispatch(error(`${panel} Panel crashed due to the following error: ${err.name}: ${err.message}`, err))
     }
 
     toggleDevTools() {

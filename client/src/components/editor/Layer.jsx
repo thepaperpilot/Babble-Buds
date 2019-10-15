@@ -2,7 +2,7 @@ import React, {Component} from 'react'
 import { connect } from 'react-redux'
 import { Sprite, Container } from 'react-pixi-fiber'
 import Selector, { behavior } from './Selector'
-import { comparePaths } from './../layers/Layer'
+import { comparePaths } from '../layers/Layer'
 import babble from 'babble.js'
 
 const path = require('path')
@@ -43,7 +43,6 @@ class RawLayer extends Component {
             bundles,
             assets,
             assetsPath,
-            emote,
             selected,
             scale,
             highlight,
@@ -52,8 +51,9 @@ class RawLayer extends Component {
             ...props
         } = this.props
 
-        const isHighlighted = comparePaths(highlight, layer.path)
-        const isSelected = selected && bundles.length == 0 && comparePaths(selected, layer.path)
+        const isHighlighted = highlight == null || comparePaths(highlight, layer.path)
+        const isSelected = selected.layer && bundles.length == 0 &&
+            comparePaths(selected.layer, layer.path)
 
         let element
         if (layer.id && layer.id in assets) {
@@ -63,7 +63,8 @@ class RawLayer extends Component {
                     return null
                 return <Container
                     ref={this.container}
-                    alpha={layer.emote != null && (emote == null || layer.emote !== emote) ? 0 : 1}
+                    alpha={layer.emote != null &&
+                        (selected.emote == null || layer.emote !== selected.emote) ? 0 : 1}
                     layer={layer}
                     x={layer.x || 0}
                     y={layer.y || 0}
@@ -88,13 +89,15 @@ class RawLayer extends Component {
         } else
             element = <Container scale={[layer.scaleX || 1, layer.scaleY || 1]}>
                 {(layer.children || []).map((l, i) =>
-                    <Layer play={play} key={i} layer={l} bundles={bundles} selectorColor={selectorColor}
-                        scale={scale} highlight={isHighlighted ? l.path : highlight} />)}
+                    <Layer play={play} key={i} layer={l} bundles={bundles}
+                        selectorColor={selectorColor} scale={scale}
+                        highlight={isHighlighted ? l.path : highlight} />)}
             </Container>
 
         return  <Container
             ref={this.container}
-            alpha={layer.emote != null && (emote == null || layer.emote !== emote) ? 0 : 1}
+            alpha={layer.emote != null &&
+                (selected.emote == null || layer.emote !== selected.emote) ? 0 : 1}
             layer={layer}
             x={layer.x || 0}
             y={layer.y || 0}
@@ -110,8 +113,7 @@ class RawLayer extends Component {
 
 function mapStateToProps(state) {
     return {
-        emote: state.editor.present.emote,
-        selected: state.editor.present.layer,
+        selected: state.editor.present.selected,
         assets: state.project.assets,
         assetsPath: state.project.assetsPath
     }

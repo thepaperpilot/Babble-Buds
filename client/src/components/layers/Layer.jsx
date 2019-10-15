@@ -1,10 +1,11 @@
-import React, {Component} from 'react'
+import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import classNames from 'classnames'
 import { DropTarget } from 'react-dnd'
 import { ContextMenuTrigger } from 'react-contextmenu'
-import { ActionCreators as UndoActionCreators } from 'redux-undo'
-import {Puppet} from 'babble.js'
+import { open } from '../../redux/editor/editor'
+import { addLayer } from '../../redux/editor/layers'
+import { selectLayer } from '../../redux/editor/selected'
 
 const join = require('path').join
 
@@ -39,27 +40,19 @@ class Layer extends Component {
     }
 
     onNodeClick() {
-        this.props.dispatch({
-            type: 'SELECT_LAYER',
-            path: this.props.path,
-            asset: this.props.asset
-        })
+        this.props.dispatch(selectLayer(this.props.path))
     }
 
     editBundle() {
         if (this.props.asset && this.props.asset.type === 'bundle') {
-            this.props.dispatch({
-                type: 'EDIT_PUPPET',
-                id: this.props.id,
-                character: this.props.asset,
-                objectType: 'asset'
-            })
+            this.props.dispatch(open(this.props.id, this.props.asset.layers, 'asset'))
         }
     }
 
     render() {
         const {selected, asset, assetsPath, isOver, canDrop} = this.props
-        const {path, id, name, children, nodeEmote, emotes, head, emoteLayer, inherit, tabs, self} = this.props
+        const {path, id, name, children, nodeEmote, emotes, head, emoteLayer, inherit, tabs}
+            = this.props
         
         // TODO context menu item to "recenter layer", which will only work on a layer
         // with children, and will move the parent layer's position so that its at the
@@ -67,7 +60,7 @@ class Layer extends Component {
         // direction to compensate.
         // Thus making scaling and rotating work in a more straightforward way
         const className = ['layer']
-        if (comparePaths(selected, path))
+        if (comparePaths(selected.layer, path))
             className.push('selected')
 
         // Check for errors
@@ -91,8 +84,8 @@ class Layer extends Component {
 
         const emote = nodeEmote != null ||
             (isBundle && asset.conflicts.emotes.length !== 0) ?
-            <div className={this.props.emote === nodeEmote ||
-                (isBundle && asset.conflicts.emotes.includes(this.props.emote)) ?
+            <div className={selected.emote === nodeEmote ||
+                (isBundle && asset.conflicts.emotes.includes(selected.emote)) ?
                 'emote-layer visible' : 'emote-layer'} /> : null
         
         const bundle = isBundle ? <div className="asset-bundle" /> : null
@@ -107,7 +100,7 @@ class Layer extends Component {
         return <ContextMenuTrigger
             id={`contextmenu-layer-${this.props.contextmenu}`}
             holdToDisplay={-1}
-            collect={() => ({ path, self, name, layerChildren: children, tabs, assetId: id, asset })}>
+            collect={() => ({ path, name, tabs, assetId: id, asset })}>
             {this.props.connectDropTarget(<div className={classNames(className)}
                 onClick={this.onNodeClick}
                 onDoubleClick={this.editBundle}
@@ -136,25 +129,16 @@ const assetTarget = {
         const path = item.id ? item.path.slice(0, -1) : item.path
         const {id, asset} = monitor.getItem()
 
-        item.dispatch({
-            type: 'ADD_LAYER',
-            path,
-            layer: {
-                id,
-                leaf: true,
-                name: asset.name,
-                rotation: 0,
-                scaleX: 1,
-                scaleY: 1,
-                x: 0,
-                y: 0
-            }
-        })
+        item.dispatch(addLayer(path, {
+            id,
+            leaf: true,
+            name: asset.name
+        }))
         
-        item.dispatch({
-            type: 'SELECT_LAYER',
-            path: [...path, item.id ? item.path.slice(-1)[0] : item.children.length]
-        })
+        item.dispatch(selectLayer([
+            ...path,
+            item.id ? item.path.slice(-1)[0] : item.children.length
+        ]))
     }
 }
 
@@ -168,14 +152,10 @@ function collect(connect, monitor) {
 
 function mapStateToProps(state, props) {
     return {
-        characterId: state.editor.present.id,
-        selected: state.editor.present.layer,
-        assets: state.project.assets,
+        selected: state.editor.present.selected,
         asset: props.id === 'CHARACTER_PLACEHOLDER' ?
             CHARACTER_PLACEHOLDER : state.project.assets[props.id],
-        emote: state.editor.present.emote,
-        assetsPath: state.project.assetsPath,
-        self: state.self
+        assetsPath: state.project.assetsPath
     }
 }
 

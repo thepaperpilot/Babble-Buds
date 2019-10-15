@@ -5,9 +5,10 @@ import Header from './Header'
 import Number from './fields/Number'
 import Text from './fields/Text'
 import Color from './fields/Color'
-import Foldable from './../ui/Foldable'
-import Dropdown from './../ui/InspectorDropdown'
-import EnvironmentContextMenu from './../environments/EnvironmentContextMenu'
+import Foldable from '../ui/Foldable'
+import Dropdown from '../ui/InspectorDropdown'
+import EnvironmentContextMenu from '../environments/EnvironmentContextMenu'
+import { changeEnvironment } from '../../redux/project/environments'
 
 class Environment extends Component {
     constructor(props) {
@@ -18,12 +19,7 @@ class Environment extends Component {
 
     changeEnvironment(key) {
         return value => {
-            this.props.dispatch({
-                type: 'CHANGE_ENVIRONMENT',
-                environment: this.props.target,
-                key,
-                value
-            })
+            this.props.dispatch(changeEnvironment(this.props.target, { [key]: value }))
         }
     }
 
@@ -102,8 +98,8 @@ class Environment extends Component {
 
 function mapStateToProps(state, props) {
     const environment = props.target === -1 ?
-        state.project.defaultEnvironment :
-        state.project.settings.environments[props.target]    
+        state.defaults.environment :
+        state.project.environments[props.target]
 
     return {
         environment

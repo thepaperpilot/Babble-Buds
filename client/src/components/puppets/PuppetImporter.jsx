@@ -1,14 +1,15 @@
-import React, {Component} from 'react'
+import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import Scrollbar from 'react-custom-scroll'
 import Checkbox from '../inspector/fields/Checkbox'
 import Number from '../inspector/fields/Number'
 import Modal from '../ui/Modal'
 import Foldable from '../ui/Foldable'
-import {getEmotes} from './../controller/Emotes'
-import './importer.css'
+import { getEmotes } from '../controller/Emotes'
+import { loadCharacters, loadAssets } from '../../redux/project/loader'
+import { inProgress } from '../../redux/status'
 
-import { loadCharacters, loadAssets } from './../../reducers/project/loader'
+import './importer.css'
 
 const fs = window.require('fs-extra')
 const path = require('path')
@@ -81,19 +82,9 @@ class PuppetImporter extends Component {
             open: false
         })
 
-        this.props.dispatch({
-            type: 'IN_PROGRESS',
-            count: Object.keys(puppets).length,
-            content: 'Importing puppets...',
-            id: puppetsStatusId
-        })
+        this.props.dispatch(inProgress(puppetsStatusId, Object.keys(puppets).length, 'Importing puppets...'))
 
-        this.props.dispatch({
-            type: 'IN_PROGRESS',
-            count: Object.keys(assets).length,
-            content: 'Importing assets...',
-            id: assetsStatusId
-        })
+        this.props.dispatch(inProgress(assetsStatusId, Object.keys(assets).length, 'Importing assets...'))
 
         ipcRenderer.send('background', 'add puppets',
             puppets,

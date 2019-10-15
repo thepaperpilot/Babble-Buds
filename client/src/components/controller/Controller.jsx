@@ -1,7 +1,7 @@
 import React, {Component} from 'react'
-import './controller.css'
 import Emotes from './Emotes'
 import Characters from './Characters'
+import './controller.css'
 
 class Controller extends Component {
     render() {

@@ -8,9 +8,10 @@ import BabbleSection from './BabbleSection'
 import EmoteSection from './EmoteSection'
 import TransformSection from './TransformSection'
 import Text from './fields/Text'
-import Dropdown from './../ui/InspectorDropdown'
-import Foldable from './../ui/Foldable'
-import LayerContextMenu from './../layers/LayerContextMenu'
+import Dropdown from '../ui/InspectorDropdown'
+import Foldable from '../ui/Foldable'
+import LayerContextMenu from '../layers/LayerContextMenu'
+import { changeLayer } from '../../redux/editor/layers'
 
 class Layer extends Component {
     constructor(props) {
@@ -21,12 +22,7 @@ class Layer extends Component {
 
     changeLayer(key) {
         return value => {
-            this.props.dispatch({
-                type: 'EDIT_LAYER',
-                layer: this.props.target,
-                key,
-                value
-            })
+            this.props.dispatch(changeLayer(this.props.target, { [key]: value }))
         }
     }
 
@@ -134,7 +130,7 @@ function mapStateToProps(state) {
     return {
         assets: state.project.assets,
         folders: state.project.settings.folders,
-        layers: state.editor.present.character.layers,
+        layers: state.editor.present.layers,
         type: state.editor.present.type,
         emote: state.editor.present.emote,
         self: state.self

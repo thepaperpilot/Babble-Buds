@@ -1,5 +1,4 @@
 import React, {Component} from 'react'
-import { connect } from 'react-redux'
 import Autosuggest from 'react-autosuggest'
 import './select.css'
 
@@ -83,4 +82,4 @@ class Select extends Component {
     }
 }
 
-export default connect()(Select)
+export default Select

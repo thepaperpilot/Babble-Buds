@@ -8,9 +8,9 @@ import AssetImporter from './AssetImporter'
 import AssetContextMenu from './AssetContextMenu'
 import FolderContextMenu from './FolderContextMenu'
 import FolderList from './FolderList'
-import CustomScrollbarsVirtualList from './../ui/CustomScrollbarsVirtualList'
+import CustomScrollbarsVirtualList from '../ui/CustomScrollbarsVirtualList'
 import './assets.css'
-import './../ui/list.css'
+import '../ui/list.css'
 
 class Assets extends Component {
     constructor(props) {
@@ -210,7 +210,7 @@ class Assets extends Component {
 function mapStateToProps(state, props) {
     return {
         assets: props.assets || state.project.assets,
-        folders: props.folders || state.project.settings.folders
+        folders: props.folders || state.project.folders
     }
 }
 

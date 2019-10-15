@@ -1,4 +1,4 @@
-import React, {Component} from 'react'
+import React, { Component } from 'react'
 import AnimateHeight from 'react-animate-height'
 import classNames from 'classnames'
 import './foldable.css'

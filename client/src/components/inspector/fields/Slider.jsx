@@ -31,7 +31,7 @@ class Slider extends Component {
 
 function mapStateToProps(state) {
     return {
-        numCharacters: state.project.settings.numCharacters
+        numCharacters: state.environment.numCharacters
     }
 }
 

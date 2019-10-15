@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { ContextMenu, MenuItem, connectMenu } from 'react-contextmenu'
+import { deleteCharacter, duplicateCharacter } from '../../redux/project/characters/actions'
+import { changePuppet } from '../../redux/controller'
 
 class PuppetContextMenu extends Component {
     constructor(props) {
@@ -9,6 +11,7 @@ class PuppetContextMenu extends Component {
         this.edit = this.edit.bind(this)
         this.duplicatePuppet = this.duplicatePuppet.bind(this)
         this.deletePuppet = this.deletePuppet.bind(this)
+        this.switchPuppet = this.switchPuppet.bind(this)
     }
 
     edit() {
@@ -17,29 +20,21 @@ class PuppetContextMenu extends Component {
     }
 
     duplicatePuppet() {
-        this.props.dispatch({
-            type: 'DUPLICATE_PUPPET',
-            puppet: this.props.trigger.puppet
-        })
+        this.props.dispatch(duplicateCharacter(this.props.trigger.puppet))
     }
 
     deletePuppet() {
-        if (this.props.selfId === this.props.trigger.puppet) {
-            this.props.dispatch({
-                type: 'ERROR',
-                content: 'You can\'t delete your active puppet. Please switch puppets and try again.'
-            })
-        } else {
-            this.props.dispatch({
-                type: 'DELETE_PUPPET',
-                puppet: this.props.trigger.puppet
-            })
-        }
+        this.props.dispatch(deleteCharacter(this.props.trigger.puppet))
+    }
+
+    switchPuppet() {
+        this.props.dispatch(changePuppet(this.props.trigger.puppet, true))
     }
 
     render() {
         return <ContextMenu id={this.props.id}
             onShow={this.props.onShow} onHide={this.props.onHide}>
+            <MenuItem onClick={this.switchPuppet}>Switch to Puppet</MenuItem>
             <MenuItem onClick={this.duplicatePuppet}>Duplicate</MenuItem>
             {this.props.trigger && this.props.trigger.inlineEdit &&
                 <MenuItem onClick={this.edit}>Rename</MenuItem>}
@@ -48,10 +43,4 @@ class PuppetContextMenu extends Component {
     }
 }
 
-function mapStateToProps(state) {
-    return {
-        selfId: state.project.settings.actor.id
-    }
-}
-
-export default id => connect(mapStateToProps)(connectMenu(`contextmenu-puppet-${id}`)(PuppetContextMenu))
+export default id => connect()(connectMenu(`contextmenu-puppet-${id}`)(PuppetContextMenu))

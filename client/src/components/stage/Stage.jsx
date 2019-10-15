@@ -1,12 +1,16 @@
-import React, {Component} from 'react'
+import React, { Component } from 'react'
 import ReactResizeDetector from 'react-resize-detector'
 import { connect } from 'react-redux'
+import { info, log, warn, error } from '../../redux/status'
+import { inspect } from '../../redux/inspector'
 
 const babble = require('babble.js')
 
 class Stage extends Component {
     constructor(props) {
         super(props)
+
+        this.puppets = null
 
         this.info = this.info.bind(this)
         this.warn = this.warn.bind(this)
@@ -16,7 +20,6 @@ class Stage extends Component {
         this.registerPuppetLoader = this.registerPuppetLoader.bind(this)
         this.onResize = this.onResize.bind(this)
         this.loadPuppets = this.loadPuppets.bind(this)
-        this.jiggle = this.jiggle.bind(this)
     }
 
     componentDidMount() {
@@ -30,74 +33,82 @@ class Stage extends Component {
     }
 
     componentWillUnmount() {
-        this.props.removeJiggleListener(this.jiggle)
         if (this.regPuppetLoader)
             clearTimeout(this.regPuppetLoader)
     }
 
     componentWillReceiveProps(newProps) {
+        // Update environment
         if (this.props.settings !== newProps.settings) {
             this.stage.project = newProps.settings
             this.stage.resize()
         }
-        if (this.props.characters[this.props.actor.id] !==
-            newProps.characters[newProps.actor.id]) {
-            this.stage.removePuppet(this.props.self)
-            this.addPuppet(newProps)
-        }
+        // Update assets
         if (this.props.assets !== newProps.assets ||
             this.props.assetsPath !== newProps.assetsPath) {
             this.stage.assets = newProps.assets
             this.stage.assetsPath = newProps.assetsPath
             this.stage.reloadPuppets()
-            this.puppet = this.stage.puppets.find(p => p.id === this.puppet.id)
         }
 
-        // Check for anything that requires this.puppet
-        if (!this.puppet) return
-        if (this.props.actor.emote !== newProps.actor.emote) {
-            this.puppet.changeEmote(newProps.actor.emote)
-        }
-        if (this.props.actor.position !== newProps.actor.position) {
-            this.puppet.target = newProps.actor.position
-        }
-        if (this.props.actor.facingLeft !== newProps.actor.facingLeft) {
-            this.puppet.facingLeft = newProps.actor.facingLeft
-            if (this.puppet.movingAnim === 0)
-                this.puppet.container.scale.x = (newProps.actor.facingLeft ? -1 : 1) * (this.stage.project.puppetScale || 1)
-        }
-        if (this.props.babbling !== newProps.babbling) {
-            this.puppet.setBabbling(newProps.babbling)
-        }
+        // If we haven't loaded our puppets in yet, ignore actor changes
+        if (this.puppets == null)
+            return
+
+        // Add actors
+        newProps.actors.filter(actor => !(actor.id in this.puppets)).forEach(actor => {
+            const character = Object.assign({}, actor.character, {
+                position: actor.position,
+                emote: actor.emote,
+                facingLeft: actor.facingLeft
+            })
+            this.puppets[actor.id] = this.stage.addPuppet(character, actor.id)
+        })
+        // Remove actors
+        Object.keys(this.puppets).filter(id => !newProps.actors.some(a => a.id === id)).forEach(actor => {
+            this.stage.removePuppet(actor.id)
+            delete this.puppets[actor.id]
+        })
+        // Update actors
+        newProps.actors.filter(actor => actor.id in this.puppets).forEach(newActor => {
+            const old = this.props.actors.find(actor => actor.id === newActor.id)
+            const puppet = this.puppets[newActor.id]
+            if (old.emote !== newActor.emote)
+                puppet.changeEmote(newActor.emote)
+            if (old.position !== newActor.position)
+                puppet.target = newActor.position
+            if (old.facingLeft !== newActor.facingLeft) {
+                puppet.facingLeft = newActor.facingLeft
+                if (puppet.movingAnim === 0)
+                    puppet.container.scale.x = (newActor.facingLeft ? -1 : 1) *
+                        (newProps.settings.puppetScale || 1)
+            }
+            if (old.babbling !== newActor.babbling)
+                puppet.setBabbling(newActor.babbling)
+            if (old.jiggle !== newActor.jiggle)
+                puppet.jiggle()
+            if (old.character !== newActor.character) {
+                const tempPuppet = this.stage.createPuppet(newActor.character)
+                this.puppets[newActor.id] =
+                    this.stage.setPuppet(newActor.id, tempPuppet)
+            }
+        })
     }
 
     info(content) {
-        this.props.dispatch({
-            type: 'INFO',
-            content
-        })
+        this.props.dispatch(info(content))
     }
 
     warn(content) {
-        this.props.dispatch({
-            type: 'WARN',
-            content
-        })
+        this.props.dispatch(warn(content))
     }
 
     log(content) {
-        this.props.dispatch({
-            type: 'LOG',
-            content
-        })
+        this.props.dispatch(log(content))
     }
 
-    error(error) {
-        this.props.dispatch({
-            type: 'ERROR',
-            content: 'Error occured in babble.js',
-            error
-        })
+    error(err) {
+        this.props.dispatch(error('Error occured in babble.js', err))
     }
 
     registerPuppetLoader() {
@@ -114,31 +125,20 @@ class Stage extends Component {
 
     loadPuppets(stage) {
         stage.registerPuppetListener('mousedown', (e) => {
-            const {creator, id} = e.target.puppet.puppet
-            this.props.dispatch({
-                type: 'INSPECT',
-                target: creator === this.props.self ? id : creator,
-                targetType: 'puppet'
-            })
+            this.props.dispatch(inspect(e.target.puppet.puppet.id, 'puppet-network'))
         })
 
-        this.addPuppet(this.props)
-        this.props.addJiggleListener(this.jiggle)
-    }
-
-    addPuppet(props) {
-        if (props.characters[props.actor.id]) {
-            const character = Object.assign({}, props.characters[props.actor.id])
-            character.position = props.actor.position
-            character.emote = props.actor.emote
-            character.facingLeft = props.actor.facingLeft
-            this.puppet = this.stage.addPuppet(character, props.self)
-        }
-    }
-
-    jiggle() {
-        if (this.puppet)
-            this.puppet.jiggle()
+        this.puppets = this.props.actors.reduce((acc, curr) => {
+            const character = Object.assign({}, curr.character, {
+                position: curr.position,
+                emote: curr.emote,
+                facingLeft: curr.facingLeft
+            })
+            return {
+                ...acc,
+                [curr.id]: this.stage.addPuppet(character, curr.id)
+            }
+        }, {})
     }
 
     render() {
@@ -155,16 +155,12 @@ class Stage extends Component {
 }
 
 function mapStateToProps(state) {
-    const environment = state.project.settings.environments[state.project.settings.environment] ||
-        state.project.defaultEnvironment
     return {
-        settings: environment,
+        controlled: state.controller.actors,
+        settings: state.environment,
         assets: state.project.assets,
         assetsPath: state.project.assetsPath,
-        characters: state.project.characters,
-        actor: state.project.settings.actor,
-        self: state.self,
-        babbling: state.babbling
+        actors: state.actors
     }
 }
 

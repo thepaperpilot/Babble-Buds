@@ -1,6 +1,8 @@
-import React, {Component} from 'react'
+import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import classNames from 'classnames'
+import { inspect } from '../../redux/inspector'
+
 import './inline-edit.css'
 
 class InlineEdit extends Component {
@@ -45,11 +47,7 @@ class InlineEdit extends Component {
         if (selected && !disabled)
             this.edit()
         else if (selectable !== false) {
-            dispatch({
-                type: 'INSPECT',
-                targetType: targetType,
-                target: target
-            })
+            dispatch(inspect(target, targetType))
         }
     }
 

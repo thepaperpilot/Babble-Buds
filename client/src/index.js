@@ -6,12 +6,12 @@ import logger from 'redux-logger'
 import thunk from 'redux-thunk'
 import { batchedSubscribe } from 'redux-batched-subscribe'
 import App from './App'
-import reducer from './reducers/index'
+import reducer from './redux/index'
 
 import './index.css'
 
 const enhancer = compose(
-    applyMiddleware(logger, thunk),
+    applyMiddleware(thunk),
     batchedSubscribe(unstable_batchedUpdates)
 )
 const store = createStore(reducer, enhancer)

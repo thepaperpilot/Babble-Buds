@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { ContextMenu, MenuItem, connectMenu } from 'react-contextmenu'
+import { duplicateEnvironment, deleteEnvironment } from '../../redux/project/environments'
 
 class EnvironmentContextMenu extends Component {
     constructor(props) {
@@ -17,17 +18,11 @@ class EnvironmentContextMenu extends Component {
     }
 
     duplicateEnvironment() {
-        this.props.dispatch({
-            type: 'DUPLICATE_ENVIRONMENT',
-            environment: this.props.trigger.environment
-        })
+        this.props.dispatch(duplicateEnvironment(this.props.trigger.environment))
     }
 
     deleteEnvironment() {
-        this.props.dispatch({
-            type: 'DELETE_ENVIRONMENT',
-            environment: this.props.trigger.environment
-        })
+        this.props.dispatch(deleteEnvironment(this.props.trigger.environment))
     }
 
     render() {

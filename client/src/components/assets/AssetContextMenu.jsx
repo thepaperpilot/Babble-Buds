@@ -1,6 +1,7 @@
 import React, {Component} from 'react'
 import { connect } from 'react-redux'
 import { ContextMenu, MenuItem, SubMenu, connectMenu } from 'react-contextmenu'
+import { moveAsset, duplicateAsset, deleteAssets } from '../../redux/project/assets/actions'
 
 class AssetContextMenu extends Component {
     constructor(props) {
@@ -19,28 +20,17 @@ class AssetContextMenu extends Component {
             name = `New Asset Folder (${i++})`
 
         this.toFocus = name
-        this.props.dispatch({
-            type: 'MOVE_ASSET',
-            asset: this.props.trigger.asset,
-            tab: name
-        })
+        this.props.dispatch(moveAsset(this.props.trigger.asset, name))
     }
 
     moveAsset(tab) {
         return () => {
-            this.props.dispatch({
-                type: 'MOVE_ASSET',
-                asset: this.props.trigger.asset,
-                tab
-            })
+            this.props.dispatch(moveAsset(this.props.trigger.asset, tab))
         }
     }
 
     duplicateAsset() {
-        this.props.dispatch({
-            type: 'DUPLICATE_ASSET',
-            asset: this.props.trigger.asset
-        })
+        this.props.dispatch(duplicateAsset(this.props.trigger.asset))
     }
 
     edit() {
@@ -49,10 +39,7 @@ class AssetContextMenu extends Component {
     }
 
     deleteAsset() {
-        this.props.dispatch({
-            type: 'DELETE_ASSET',
-            asset: this.props.trigger.asset
-        })
+        this.props.dispatch(deleteAssets([ this.props.trigger.asset ]))
     }
 
     render() {

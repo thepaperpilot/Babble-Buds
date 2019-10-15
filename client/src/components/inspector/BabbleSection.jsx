@@ -1,7 +1,8 @@
 import React, {Component} from 'react'
 import { connect } from 'react-redux'
 import Checkbox from './fields/Checkbox'
-import Foldable from './../ui/Foldable'
+import Foldable from '../ui/Foldable'
+import { changeLayer } from '../../redux/editor/layers'
 
 class BabbleSection extends Component {
     constructor(props) {
@@ -13,23 +14,15 @@ class BabbleSection extends Component {
 
     changeLayer(key) {
         return value => {
-            this.props.dispatch({
-                type: 'EDIT_LAYER',
-                layer: this.props.target,
-                key,
-                value
-            })
+            this.props.dispatch(changeLayer(this.props.target, { [key]: value }))
         }
     }
 
     changeEmoteLayer(emote) {
         return value => {
-            this.props.dispatch({
-                type: 'EDIT_LAYER',
-                layer: this.props.target,
-                key: 'emoteLayer',
-                value: value ? emote : 'base'
-            })
+            this.props.dispatch(changeLayer(this.props.target, {
+                emoteLayer: value ? emote : 'base'
+            }))
         }
     }
 

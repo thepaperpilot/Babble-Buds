@@ -1,14 +1,15 @@
 import React, {Component, memo} from 'react'
 import { connect } from 'react-redux'
-import Scrollbar from 'react-custom-scroll'
 import * as JsSearch from 'js-search'
 import { FixedSizeList as List, areEqual } from 'react-window'
 import Environment from './Environment'
 //import EnvironmentImporter from './EnvironmentImporter'
 import EnvironmentContextMenu from './EnvironmentContextMenu'
-import CustomScrollbarsVirtualList from './../ui/CustomScrollbarsVirtualList'
+import CustomScrollbarsVirtualList from '../ui/CustomScrollbarsVirtualList'
+import { newEnvironment } from '../../redux/project/environments'
+
 import './environments.css'
-import './../ui/list.css'
+import '../ui/list.css'
 
 class Environments extends Component {
     constructor(props) {
@@ -27,7 +28,7 @@ class Environments extends Component {
     }
 
     newEnvironment() {
-        this.props.dispatch({ type: 'NEW_ENVIRONMENT' })
+        this.props.dispatch(newEnvironment())
     }
 
     onChange(e) {
@@ -109,6 +110,7 @@ class Environments extends Component {
 
                         return <div className={size === 60 ? '' : 'list'} style={style}>
                             {Array(length).fill(0).map((x, y) => x + y).map(i => {
+                                const id = environments[start + i]
                                 return <div key={i} className={size === 60 ? '' : 'list-item'} style={{width: size === 60 ? '100%' : size - 18, height: size - 18}}>
                                     <Environment 
                                         key={i}
@@ -116,7 +118,9 @@ class Environments extends Component {
                                         width={size - 18}
                                         height={size - 18}
                                         contextmenu={this.props.id}
-                                        env={environments[start + i]} />
+                                        id={id}
+                                        environment={id === -1 ? this.props.defaultEnvironment :
+                                            this.props.environments[id]} />
                                 </div>
                             })}
                             {new Array(environmentsPerRow - length).fill(0).map((child, i) => (
@@ -133,9 +137,8 @@ class Environments extends Component {
 
 function mapStateToProps(state) {
     return {
-        environments: state.project.settings.environments,
-        environment: state.project.settings.environment,
-        defaultEnvironment: state.project.defaultEnvironment
+        environments: state.project.environments,
+        defaultEnvironment: state.defaults.environment
     }
 }
 

@@ -1,4 +1,5 @@
 import { CustomPIXIComponent } from 'react-pixi-fiber'
+import { changeLayer } from '../../redux/editor/layers'
 
 import rotateIcon from './icons/rotate.png'
 import flipHorizIcon from './icons/flipHoriz.png'
@@ -54,13 +55,11 @@ function startDrag(instance) {
 
 function endRotateDrag(instance, dispatch) {
     return e => {
-        const {angle, dragging} = e.currentTarget
+        const {angle, dragging, startRotation} = e.currentTarget
         if (dragging) {
-            dispatch({
-                type: 'ROTATE_LAYER',
-                path: instance.props.layer.path,
-                rotation: angle
-            })
+            dispatch(changeLayer(instance.props.layer.path, {
+                rotation: (startRotation || 0) + angle
+            }))
             e.currentTarget.dragging = false
             e.stopPropagation()
 
@@ -76,12 +75,12 @@ function endScaleDrag(instance, dispatch) {
     return e => {
         const {layer, scaleX, scaleY, posX, posY, dragging} = e.currentTarget
         if (dragging) {
-            dispatch({
-                type: 'EDIT_LAYER_SCALE',
-                layer: layer.layer.path,
-                scale: [scaleX, scaleY],
-                pos: [posX, posY]
-            })
+            dispatch(changeLayer(layer.layer.path, {
+                scaleX,
+                scaleY,
+                x: posX,
+                y: posY
+            }))
             e.currentTarget.dragging = false
             e.stopPropagation()
 
@@ -97,11 +96,10 @@ function endMoveDrag(instance, dispatch, e) {
     const {startPosition, dx, dy} = e.currentTarget
 
     if (startPosition && (dx || dy)) {
-        dispatch({
-            type: 'EDIT_LAYER_POSITION',
-            layer: instance.props.layer.path,
-            pos: [startPosition.x + (dx || 0), -startPosition.y - (dy || 0)]
-        })
+        dispatch(changeLayer(instance.props.layer.path, {
+            x: startPosition.x + (dx || 0),
+            y: -startPosition.y - (dy || 0)
+        }))
 
         let root = instance
         while (root.parent && root.parent.parent)
@@ -244,22 +242,20 @@ function onRotate(instance) {
 
 function flipHoriz(instance, dispatch) {
     return e => {
-        dispatch({
-            type: 'EDIT_LAYER_SCALE',
-            layer: instance.props.layer.path,
-            scale: [-(instance.layer.layer.scaleX || 1), instance.layer.layer.scaleY || 1]
-        })
+        dispatch(changeLayer(instance.props.layer.path, {
+            scaleX: -(instance.layer.layer.scaleX || 1),
+            scaleY: instance.layer.layer.scaleY || 1
+        }))
         e.stopPropagation()
     }
 }
 
 function flipVert(instance, dispatch) {
     return e => {
-        dispatch({
-            type: 'EDIT_LAYER_SCALE',
-            layer: instance.props.layer.path,
-            scale: [instance.layer.layer.scaleX || 1, -(instance.layer.layer.scaleY || 1)]
-        })
+        dispatch(changeLayer(instance.props.layer.path, {
+            scaleX: instance.layer.layer.scaleX || 1,
+            scaleY: -(instance.layer.layer.scaleY || 1)
+        }))
         e.stopPropagation()
     }
 }

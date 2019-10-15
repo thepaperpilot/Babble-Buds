@@ -1,5 +1,4 @@
 import React, {Component} from 'react'
-import { connect } from 'react-redux'
 import './checkbox.css'
 
 class Slots extends Component {
@@ -49,4 +48,4 @@ class Slots extends Component {
     }
 }
 
-export default connect()(Slots)
+export default Slots

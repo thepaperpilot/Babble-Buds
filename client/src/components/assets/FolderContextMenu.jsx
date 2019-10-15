@@ -1,8 +1,9 @@
 import React, {Component} from 'react'
 import { connect } from 'react-redux'
 import { ContextMenu, MenuItem, connectMenu } from 'react-contextmenu'
-
-import { getNewAssetID } from './../../reducers/project/assets'
+import { getNewAssetID } from '../../redux/project/assets/reducers'
+import { removeFolder } from '../../redux/project/folders'
+import { inProgress } from '../../redux/status'
 
 const path = require('path')
 const {remote, ipcRenderer} = window.require('electron')
@@ -28,12 +29,7 @@ class FolderContextMenu extends Component {
 
     loadAssets(assets, animated, tab) {
         const statusId = `asset-${FolderContextMenu.id++}`
-        this.props.dispatch({
-            type: 'IN_PROGRESS',
-            count: assets.length,
-            content: 'Adding new assets...',
-            id: statusId
-        })
+        this.props.dispatch(inProgress(statusId, assets.length, 'Adding new assets...'))
 
         assets = assets.reduce((acc, curr) => {
             const name = curr.replace(/^.*[\\/]/, '')
@@ -107,11 +103,7 @@ class FolderContextMenu extends Component {
     }
 
     deleteFolder() {
-        // TODO can't delete other people's assets IF we're connected to other people
-        this.props.dispatch({
-            type: 'DELETE_TAB',
-            tab: this.props.trigger.tab
-        })
+        this.props.dispatch(removeFolder(this.props.trigger.tab, true))
     }
 
     render() {

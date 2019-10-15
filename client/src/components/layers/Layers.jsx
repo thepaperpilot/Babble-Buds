@@ -1,10 +1,12 @@
-import React, {Component} from 'react'
+import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import Scrollbar from 'react-custom-scroll'
 import Tree from 'react-ui-tree'
-import {Puppet} from 'babble.js'
+import { Puppet } from 'babble.js'
 import Layer from './Layer'
 import LayerContextMenu from './LayerContextMenu'
+import { setLayers, addLayer } from '../../redux/editor/layers'
+
 import './layers.css'
 
 export function calculateEmotes(assets, layers) {
@@ -47,27 +49,11 @@ class Layers extends Component {
     }
 
     handleChange(tree) {
-        // The callback is used to allow us to trigger another action after this one completes
-        // Specifically, we want to take the newly calculated path SET_LAYERS generates for
-        // the currently selected layer, and select it
-        this.props.dispatch({
-            type: 'SET_LAYERS',
-            tree,
-            callback: path => {
-                if (this.props.targetType === 'layer' && path)
-                    this.props.dispatch({
-                        type: 'SELECT_LAYER',
-                        path
-                    })
-            }
-        })
+        this.props.dispatch(setLayers(tree))
     }
 
     addLayer() {
-        this.props.dispatch({
-            type: 'ADD_LAYER',
-            path: []
-        })
+        this.props.dispatch(addLayer([]))
     }
 
     renderNode(node) {
@@ -111,10 +97,10 @@ class Layers extends Component {
         return (
             <div className="panel console">
                 <div className="bar flex-row">
-                    <button onClick={this.addLayer} disabled={!this.props.tree.path}>New Layer</button>
+                    <button onClick={this.addLayer} disabled={!this.props.tree.children}>New Layer</button>
                     <div className="flex-grow" />
                 </div>
-                {this.props.tree.path ?
+                {this.props.tree.children ?
                     <Scrollbar allowOuterScroll={true} heightRelativeToParent="100%">
                         <Tree
                             tree={JSON.parse(JSON.stringify(this.props.tree))}
@@ -132,11 +118,9 @@ class Layers extends Component {
 
 function mapStateToProps(state) {
     return {
-        targetType: state.inspector.targetType,
-        tree: state.editor.present.character ? state.editor.present.character.layers : {},
-        selected: state.editor.present.layer,
+        tree: state.editor.present.layers ? state.editor.present.layers : {},
         assets: state.project.assets,
-        folders: state.project.settings.folders
+        folders: state.project.folders
     }
 }
 

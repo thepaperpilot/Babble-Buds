@@ -1,4 +1,4 @@
-import React, {Component} from 'react'
+import React, { Component } from 'react'
 import { connect } from 'react-redux'
 
 const DEFAULT_THEME = {
@@ -154,10 +154,8 @@ class Project extends Component {
 }
 
 function mapStateToProps(state) {
-    const environment = state.project.settings.environments[state.project.settings.environment] ||
-        state.project.defaultEnvironment
     return {
-        color: environment.color
+        color: state.environment.color
     }
 }
 

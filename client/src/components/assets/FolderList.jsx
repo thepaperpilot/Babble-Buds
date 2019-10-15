@@ -3,15 +3,13 @@ import { connect } from 'react-redux'
 import { DropTarget, DragSource } from 'react-dnd'
 import Scrollbar from 'react-custom-scroll'
 import Folder from './Folder'
+import { moveFolder, addFolder } from '../../redux/project/folders'
+import { moveAsset } from '../../redux/project/assets/actions'
 import './folderlist.css'
 
 const assetTarget = {
     drop({ dispatch, tab}, monitor) {
-        dispatch({
-            type: 'MOVE_ASSET',
-            asset: monitor.getItem().id,
-            tab
-        })
+        dispatch(moveAsset(monitor.getItem().id, tab))
     },
     canDrop: (props, monitor) => monitor.getItem().isOwned,
     hover: (item, monitor, thisItem) => {
@@ -46,11 +44,7 @@ const assetTarget = {
             return
         }
         
-        item.dispatch({
-            type: 'MOVE_FOLDER',
-            dragIndex,
-            hoverIndex
-        })
+        item.dispatch(moveFolder(dragIndex, hoverIndex))
 
         monitor.getItem().index = hoverIndex
     }
@@ -119,10 +113,7 @@ class NewFolderButton extends PureComponent {
         while (this.props.tabs.includes(folder))
             folder = `New Asset Folder (${i++})`
 
-        this.props.dispatch({
-            type: 'NEW_FOLDER',
-            folder
-        })
+        this.props.dispatch(addFolder(folder))
     }
 
     render() {
@@ -133,7 +124,7 @@ class NewFolderButton extends PureComponent {
 
 function mapStateToProps(state) {
     return {
-        tabs: state.project.settings.folders
+        tabs: state.project.folders
     }
 }
 

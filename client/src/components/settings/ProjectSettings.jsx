@@ -1,34 +1,45 @@
-import React, {Component} from 'react'
+import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import Scrollbar from 'react-custom-scroll'
-import Header from './../inspector/Header'
-import Foldable from './../ui/Foldable'
+import Shortcuts from './Shortcuts'
+import Header from '../inspector/Header'
+import Foldable from '../ui/Foldable'
 import Checkbox from '../inspector/fields/Checkbox'
-import Color from '../inspector/fields/Color'
 import Number from '../inspector/fields/Number'
 import Text from '../inspector/fields/Text'
-import Shortcuts from './Shortcuts'
+import { setAlwaysOnTop } from '../../redux/project/settings/settings'
+import { set, randomize } from '../../redux/project/settings/nickname'
+import { setIP, setPort } from '../../redux/project/settings/networking'
 
 class ProjectSettings extends Component {
     constructor(props) {
         super(props)
 
-        this.handleChange = this.handleChange.bind(this)
+        this.changeAlwaysOnTop = this.changeAlwaysOnTop.bind(this)
+        this.changeNickname = this.changeNickname.bind(this)
         this.randomizeNickname = this.randomizeNickname.bind(this)
+        this.setIP = this.setIP.bind(this)
+        this.setPort = this.setPort.bind(this)
     }
 
-    handleChange(name) {
-        return value => this.props.dispatch({
-            type: 'UPDATE_SETTING',
-            name,
-            value
-        })
+    changeAlwaysOnTop(alwaysOnTop) {
+        this.props.dispatch(setAlwaysOnTop(alwaysOnTop))
+    }
+
+    changeNickname(name) {
+        this.props.dispatch(set(name))
     }
 
     randomizeNickname() {
-        this.props.dispatch({
-            type: 'RANDOMIZE_NICKNAME'
-        })
+        this.props.dispatch(randomize())
+    }
+
+    setIP(ip) {
+        this.props.dispatch(setIP(ip))
+    }
+
+    setPort(port) {
+        this.props.dispatch(setPort(port))
     }
 
     render() {
@@ -40,19 +51,19 @@ class ProjectSettings extends Component {
                         <Scrollbar allowOuterScroll={true} heightRelativeToParent="100%">
                             <div className="action">
                                 <Foldable title="Popout">
-                                    <Checkbox title="Always On Top" value={this.props.alwaysOnTop} onChange={this.handleChange('alwaysOnTop')} />
+                                    <Checkbox title="Always On Top" value={this.props.alwaysOnTop} onChange={this.changeAlwaysOnTop} />
                                 </Foldable>
                             </div>
                             <div className="action">
                                 <Foldable title="Nickname">
-                                    <Text title="Nickname" value={this.props.nickname} onChange={this.handleChange('nickname')} />
+                                    <Text title="Nickname" value={this.props.nickname} onChange={this.changeNickname} />
                                     <button onClick={this.randomizeNickname}>Randomize</button>
                                 </Foldable>
                             </div>
                             <div className="action">
                                 <Foldable title="Networking Settings">
-                                    <Text title="Server IP" value={this.props.ip} onChange={this.handleChange('ip')} />
-                                    <Number title="Server Port" value={this.props.port} onChange={this.handleChange('port')} />
+                                    <Text title="Server IP" value={this.props.ip} onChange={this.setIP} />
+                                    <Number title="Server Port" value={this.props.port} onChange={this.setPort} />
                                     <button onClick={this.connect}>Connect</button>
                                 </Foldable>
                             </div>
@@ -76,8 +87,8 @@ function mapStateToProps(state) {
     return {
         alwaysOnTop: state.project.settings.alwaysOnTop,
         nickname: state.project.settings.nickname,
-        ip: state.project.settings.ip,
-        port: state.project.settings.port
+        ip: state.project.settings.networking.ip,
+        port: state.project.settings.networking.port
     }
 }
 

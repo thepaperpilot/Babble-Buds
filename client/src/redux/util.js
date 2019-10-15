@@ -14,6 +14,6 @@ exports.createReducer = function(initialState, handlers, fallback) {
  * @param {object} oldObject the object you're updating
  * @param {object} newValues any new or updated values
  */
-exports.updateObject = function (oldObject, newValues) {
+exports.updateObject = function (oldObject, newValues = {}) {
     return Object.assign({}, oldObject, newValues)
 }

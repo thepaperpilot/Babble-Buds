@@ -1,5 +1,6 @@
-import {Component} from 'react'
+import { Component } from 'react'
 import { connect } from 'react-redux'
+import { setBabbling } from '../../redux/controller'
 
 const electron = window.require('electron')
 
@@ -19,9 +20,7 @@ class BabbleToggle extends Component {
     }
 
     babbleToggle() {
-        this.props.dispatch({
-            type: `${this.props.babbling ? 'STOP' : 'START'}_BABBLING_SELF`
-        })
+        this.props.dispatch(setBabbling(!this.props.babbling))
     }
 
     render() {
@@ -31,7 +30,7 @@ class BabbleToggle extends Component {
 
 function mapStateToProps(state) {
     return {
-        babbling: state.babbling
+        babbling: state.controller.babbling
     }
 }
 

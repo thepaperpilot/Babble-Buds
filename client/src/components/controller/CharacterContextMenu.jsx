@@ -1,7 +1,8 @@
 import React, {Component} from 'react'
 import { connect } from 'react-redux'
-import { ActionCreators as UndoActionCreators } from 'redux-undo'
 import { ContextMenu, MenuItem, connectMenu } from 'react-contextmenu'
+import { open } from '../../redux/editor/editor'
+import { setSlot } from '../../redux/project/settings/hotbar'
 
 class CharacterContextMenu extends Component {
     constructor(props) {
@@ -12,26 +13,11 @@ class CharacterContextMenu extends Component {
     }
 
     clear() {
-        if (this.props.actor === this.props.trigger.puppet) {
-            this.props.dispatch({
-                type: 'ERROR',
-                content: 'Can\'t clear active hotbar slot. Please switch to a different slot and try again.'
-            })
-        } else {
-            this.props.dispatch({
-                type: 'SET_HOTBAR_SLOT',
-                index: this.props.trigger.index,
-                puppet: 0
-            })
-        }
+        this.props.dispatch(setSlot(this.props.trigger.index, 0))
     }
 
     edit() {
-        this.props.dispatch({
-            type: 'EDIT_PUPPET',
-            id: this.props.trigger.puppet,
-            character: this.props.trigger.character
-        })
+        this.props.dispatch(open(this.props.trigger.puppet, this.props.trigger.character.layers))
     }
 
     render() {
@@ -42,10 +28,4 @@ class CharacterContextMenu extends Component {
     }
 }
 
-function mapStateToProps(state) {
-    return {
-        actor: state.project.settings.actor.id
-    }
-}
-
-export default id => connect(mapStateToProps)(connectMenu(`contextmenu-character-${id}`)(CharacterContextMenu))
+export default id => connect()(connectMenu(`contextmenu-character-${id}`)(CharacterContextMenu))

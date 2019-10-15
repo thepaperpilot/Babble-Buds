@@ -1,8 +1,9 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import InlineEdit from './../ui/InlineEdit'
-import SmallThumbnail from './../ui/SmallThumbnail'
 import { ContextMenuTrigger } from 'react-contextmenu'
+import InlineEdit from '../ui/InlineEdit'
+import { open } from '../../redux/editor/editor'
+import { changeEnvironment } from '../../redux/project/environments'
 
 class Environment extends Component {
     constructor(props) {
@@ -15,22 +16,12 @@ class Environment extends Component {
     }
 
     renameEnvironment(name) {
-        this.props.dispatch({
-            type: 'CHANGE_ENVIRONMENT',
-            environment: this.props.env,
-            key: 'name',
-            value: name
-        })
+        this.props.dispatch(changeEnvironment(this.props.id, { name }))
     }
 
     editEnvironment() {
-        if (this.props.env !== -1) {
-            this.props.dispatch({
-                type: 'EDIT_PUPPET',
-                id: this.props.env,
-                character: this.props.environment,
-                objectType: 'environment'
-            })
+        if (this.props.id !== -1) {
+            this.props.dispatch(open(this.props.id, this.props.environment.layers, 'environment'))
         }
     }
 
@@ -60,16 +51,16 @@ class Environment extends Component {
                 id={`contextmenu-environment-${this.props.contextmenu}`}
                 holdToDisplay={-1}
                 collect={() => ({
-                    environment: this.props.env,
+                    environment: this.props.id,
                     inlineEdit: this.inlineEdit,
-                    disabled: this.props.env === -1
+                    disabled: this.props.id === -1
                 })}>
                 {this.props.small ?
                     <div>
                         <InlineEdit
                             ref={this.inlineEdit}
                             disabled={true}
-                            target={this.props.env}
+                            target={this.props.id}
                             targetType="environment"
                             label={name}
                             className="line-item smallThumbnail-wrapper"
@@ -87,7 +78,7 @@ class Environment extends Component {
                         <InlineEdit
                             ref={this.inlineEdit}
                             disabled={true}
-                            target={this.props.env}
+                            target={this.props.id}
                             targetType="environment"
                             label={name}
                             className="char"
@@ -108,11 +99,8 @@ class Environment extends Component {
 }
 
 function mapStateToProps(state, props) {
-    const environment = state.project.settings.environments[props.env] ||
-            state.project.defaultEnvironment
     return {
-        environment,
-        thumbnail: state.project.characterThumbnails[environment.id]
+        thumbnail: state.project.characterThumbnails[props.id]
     }
 }
 

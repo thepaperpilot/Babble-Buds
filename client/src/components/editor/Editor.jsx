@@ -5,7 +5,10 @@ import { DropTarget } from 'react-dnd'
 import Viewport from './Viewport'
 import Layer from './Layer'
 import Cross from './Cross'
-import {getTheme} from './../project/Themer'
+import { getTheme } from '../project/Themer'
+import { save } from '../../redux/editor/editor'
+import { addLayer } from '../../redux/editor/layers'
+import { selectLayer } from '../../redux/editor/selected'
 import './editor.css'
 
 const DISTANCE = 10000
@@ -100,7 +103,7 @@ class Editor extends Component {
     }
 
     savePuppet() {
-        this.props.dispatch({ type: 'SAVE_EDITOR' })
+        this.props.dispatch(save())
     }
 
     playAnimation() {
@@ -131,7 +134,7 @@ class Editor extends Component {
 
     render() {
         // TODO (re-)load assets since babble.js isn't here to do it for us
-        const {rect, character, selected, changed, isOver, canDrop, item, type, id, color} = this.props
+        const {rect, layers, selected, changed, isOver, canDrop, item, color} = this.props
         const {scale, grid, bounds, dragPos} = this.state
 
         let {highlight, 'far-background': background, raised} = getTheme(color)
@@ -195,9 +198,9 @@ class Editor extends Component {
                     <Viewport width={rect.width - (changed ? 6 : 0)} height={rect.height - 21 - (changed ? 6 : 0)} ref={this.viewport}>
                         {gridLines}
                         <Cross x={0} y={0} scale={scale * 2} color={highlight} distance={DISTANCE * scale} />
-                        <Layer play={this.state.play} layer={character} bundles={[]}
+                        {!!layers && <Layer play={this.state.play} layer={layers} bundles={[]}
                             x={0} y={0} selectorColor={background} selectedRef={this.selectedRef} scale={scale}
-                            highlight={this.state.highlight ? selected : character.path} />
+                            highlight={this.state.highlight ? selected : null} />}
                         {isOver && dragPos &&
                             <Layer layer={{
                                 id: item.id,
@@ -217,21 +220,18 @@ class Editor extends Component {
 }
 
 function mapStateToProps(state) {
-    const {character, type, id, layer} = state.editor.present
-    const layers = character ? character.layers : []
-    const environment = state.project.settings.environments[state.project.settings.environment] ||
-        state.project.defaultEnvironment
+    const {layers, type, id, selected} = state.editor.present
 
     return {
-        canDrop: !!character,
-        character: layers,
-        changed: id && type &&
-            JSON.stringify(character.layers) !==
-            JSON.stringify(TYPE_MAP[type](state.project)[id].layers),
-        selected: layer,
+        canDrop: !!layers,
+        changed: id && type && (TYPE_MAP[type](state.project)[id] == null ||
+            JSON.stringify(layers) !==
+            JSON.stringify(TYPE_MAP[type](state.project)[id].layers)),
+        selected: selected.layer,
+        layers,
         type,
         id,
-        color: environment.color
+        color: state.environment.color
     }
 }
 
@@ -249,24 +249,17 @@ const assetTarget = {
         })
         const path = curr.id ? l.slice(0, -1) : l
 
-        item.dispatch({
-            type: 'ADD_LAYER',
-            path,
-            layer: {
-                id,
-                leaf: true,
-                name: asset.name,
-                rotation: 0,
-                scaleX: 1,
-                scaleY: 1,
-                x, y
-            }
-        })
+        item.dispatch(addLayer(path, {
+            id,
+            leaf: true,
+            name: asset.name,
+            rotation: 0,
+            scaleX: 1,
+            scaleY: 1,
+            x, y
+        }))
         
-        item.dispatch({
-            type: 'SELECT_LAYER',
-            path: [...path, curr.children ? curr.children.length : l.slice(-1)[0] + 1]
-        })
+        item.dispatch(selectLayer([...path, curr.children ? curr.children.length : l.slice(-1)[0] + 1]))
     },
     canDrop: (item) => {
         return item.canDrop

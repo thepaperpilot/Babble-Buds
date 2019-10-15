@@ -51,7 +51,6 @@ ipcRenderer.on('update assets', (e, assets, assetsPath) => {
 })
 
 ipcRenderer.on('generate thumbnails', (e, thumbnailsPath, character, type, id) => {
-    
     // Put puppet on the stage
     stage.clearPuppets()
     character.position = 1

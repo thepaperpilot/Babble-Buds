@@ -1,14 +1,15 @@
 import React, {Component, memo} from 'react'
 import { connect } from 'react-redux'
-import Scrollbar from 'react-custom-scroll'
 import * as JsSearch from 'js-search'
 import { FixedSizeList as List, areEqual } from 'react-window'
 import DraggablePuppet from './DraggablePuppet'
 import PuppetImporter from './PuppetImporter'
 import PuppetContextMenu from './PuppetContextMenu'
-import CustomScrollbarsVirtualList from './../ui/CustomScrollbarsVirtualList'
+import CustomScrollbarsVirtualList from '../ui/CustomScrollbarsVirtualList'
+import { newCharacter } from '../../redux/project/characters/actions'
+
 import './puppets.css'
-import './../ui/list.css'
+import '../ui/list.css'
 
 class Puppets extends Component {
     constructor(props) {
@@ -27,7 +28,7 @@ class Puppets extends Component {
     }
 
     newPuppet() {
-        this.props.dispatch({ type: 'NEW_PUPPET' })
+        this.props.dispatch(newCharacter())
     }
 
     onChange(e) {

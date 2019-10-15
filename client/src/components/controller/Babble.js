@@ -1,5 +1,6 @@
 import React, {Component} from 'react'
 import { connect } from 'react-redux'
+import { setBabbling } from '../../redux/controller'
 
 class Babble extends Component {
     constructor(props) {
@@ -10,11 +11,11 @@ class Babble extends Component {
     }
 
     startBabbling() {
-        this.props.dispatch({ type: 'START_BABBLING_SELF' })
+        this.props.dispatch(setBabbling(true))
     }
 
     stopBabbling() {
-        this.props.dispatch({ type: 'STOP_BABBLING_SELF' })
+        this.props.dispatch(setBabbling())
     }
 
     render() {
@@ -32,7 +33,7 @@ class Babble extends Component {
 
 function mapStateToProps(state) {
     return {
-        babbling: state.babbling
+        babbling: state.controller.babbling
     }
 }
 

@@ -1,12 +1,15 @@
-import React, {Component} from 'react'
+import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import Scrollbar from 'react-custom-scroll'
 import Header from './Header'
 import Checkbox from './fields/Checkbox'
 import Number from './fields/Number'
-import Dropdown from './../ui/InspectorDropdown'
-import {getEmotes} from './../controller/Emotes'
-import PuppetContextMenu from './../puppets/PuppetContextMenu'
+import Dropdown from '../ui/InspectorDropdown'
+import { getEmotes } from '../controller/Emotes'
+import PuppetContextMenu from '../puppets/PuppetContextMenu'
+import { open } from '../../redux/editor/editor'
+import { setEmote } from '../../redux/editor/selected'
+import { changeCharacter } from '../../redux/project/characters/actions'
 
 const path = window.require('path')
 
@@ -20,39 +23,25 @@ class Puppet extends Component {
 
     changePuppet(key) {
         return value => {
-            this.props.dispatch({
-                type: 'CHANGE_PUPPET',
-                puppet: this.props.target,
-                key,
-                value
-            })
+            this.props.dispatch(changeCharacter(this.props.target, { [key]: value }))
         }
     }
 
     selectEmote(emote) {
         return () => {
             if (this.props.isBeingEdited) {
-                this.props.dispatch({
-                    type: 'SET_EDITOR_EMOTE',
-                    emote
-                })
+                this.props.dispatch(setEmote(emote))
             } else {
-                const puppet = this.props.puppets[this.props.target]
-                this.props.dispatch({
-                    type: 'EDIT_PUPPET',
-                    id: this.props.target,
-                    character: puppet,
-                    emote
-                })
+                const puppet = this.props.puppet
+                this.props.dispatch(open(this.props.target, puppet.layers, 'puppet', emote))
             }
         }
     }
 
     render() {
-        const puppet = this.props.puppets[this.props.target]
+        const { puppet, thumbnail } = this.props
         if (!puppet) return null
-            
-        const thumbnails = this.props.puppetThumbnails[this.props.target]
+
         const disabled = puppet.creator !== this.props.self
 
         const emotes = getEmotes(this.props.assets, puppet.layers)
@@ -90,9 +79,9 @@ class Puppet extends Component {
                         </div>
                         <div className="list">
                             {emotes.map(emote => {
-                                const lastIndex = thumbnails.lastIndexOf('.png')
-                                const imageSource = path.join(thumbnails.slice(0, lastIndex),
-                                    `${emote.emote}.png${thumbnails.slice(lastIndex + 4)}`)
+                                const lastIndex = thumbnail.lastIndexOf('.png')
+                                const imageSource = path.join(thumbnail.slice(0, lastIndex),
+                                    `${emote.emote}.png${thumbnail.slice(lastIndex + 4)}`)
                                 return (
                                     <div
                                         className="list-item"
@@ -117,14 +106,13 @@ class Puppet extends Component {
 function mapStateToProps(state, props) {
     const isBeingEdited = props.target == state.editor.present.id
     return {
-        puppets: state.project.characters,
-        puppetThumbnails: state.project.characterThumbnails,
+        puppet: state.project.characters[props.target],
+        thumbnail: state.project.characterThumbnails[props.target],
         self: state.self,
         nick: state.project.settings.nickname,
-        id: state.project.settings.actor.id,
         isBeingEdited,
         assets: state.project.assets,
-        emote: isBeingEdited ? state.editor.present.emote : null
+        emote: isBeingEdited ? state.editor.present.selected.emote : null
     }
 }
 

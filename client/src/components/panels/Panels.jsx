@@ -1,17 +1,18 @@
-import React, {Component} from 'react'
+import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import FlexLayout from 'flexlayout-react'
 import BrokenPanel from './BrokenPanel'
-import Assets from './../assets/Assets'
-import Stage from './../stage/Stage'
-import Console from './../console/Console'
+import Assets from '../assets/Assets'
+import Stage from '../stage/Stage'
+import Console from '../console/Console'
 import Puppets from '../puppets/Puppets'
 import Controller from '../controller/Controller'
-import ProjectSettings from './../settings/ProjectSettings'
-import Inspector from './../inspector/Inspector'
-import Editor from './../editor/Editor'
-import Layers from './../layers/Layers'
-import Environments from './../environments/Environments'
+import ProjectSettings from '../settings/ProjectSettings'
+import Inspector from '../inspector/Inspector'
+import Editor from '../editor/Editor'
+import Layers from '../layers/Layers'
+import Environments from '../environments/Environments'
+import { saveLayout, loadLayout } from '../../redux/settings'
 
 import './icons/close_white.png'
 import './icons/more.png'
@@ -21,7 +22,7 @@ import './icons/restore.png'
 import './flexlayout-dark.css'
 import './panels.css'
 
-import defaultLayout from './../../data/default-layout.json'
+import defaultLayout from '../../data/default-layout.json'
 
 const electron = window.require('electron')
 
@@ -54,8 +55,6 @@ class Panels extends Component {
         case 'stage':
             child = <Stage
                 ref={this.props.stage}
-                addJiggleListener={this.props.addJiggleListener}
-                removeJiggleListener={this.props.removeJiggleListener}
                 assetUpdater={this.props.assetUpdater}
                 rect={node._rect}
                 id={node.getId()} />
@@ -104,18 +103,12 @@ class Panels extends Component {
     updateConfig(node, field) {
         return value => {
             node.getConfig()[field] = value
-            this.props.dispatch({
-                type: 'UPDATE_LAYOUT',
-                layout: this.state.model.toJson()
-            })
+            this.props.dispatch(saveLayout(this.state.model.toJson()))
         }
     }
 
     onModelChange(model) {
-        this.props.dispatch({
-            type: 'UPDATE_LAYOUT',
-            layout: model.toJson()
-        })
+        this.props.dispatch(saveLayout(model.toJson()))
     }
 
     componentDidMount() {
@@ -137,7 +130,7 @@ class Panels extends Component {
     loadLayout(e, layout) {
         switch (layout) {
         case 'default':
-            this.props.dispatch({ type: 'LOAD_LAYOUT', layout: defaultLayout })
+            this.props.dispatch(loadLayout(defaultLayout))
             break
         default:
             break

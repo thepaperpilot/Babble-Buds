@@ -1,9 +1,12 @@
-import React, {Component} from 'react'
+import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { DragDropContext } from 'react-dnd'
 import HTML5Backend from 'react-dnd-html5-backend'
 import Welcome from './components/welcome/Welcome'
 import Project from './components/project/Project'
+import { info } from './redux/status'
+import { close, load } from './redux/project/project'
+import { save } from './redux/project/saver'
 
 const electron = window.require('electron')
 const dialog = electron.remote.dialog
@@ -20,19 +23,13 @@ class App extends Component {
         this.save = this.save.bind(this)
 
         if (settingsManager.settings.openProject)
-            props.dispatch({ type: 'LOAD_PROJECT', project: settingsManager.settings.openProject })
+            props.dispatch(load(settingsManager.settings.openProject))
     }
 
     componentDidMount() {
         // Print debug info
-        this.props.dispatch({
-            type: 'INFO',
-            content: `Babble Buds version: ${electron.remote.app.getVersion()}`
-        })
-        this.props.dispatch({
-            type: 'INFO',
-            content: `Other Versions: ${JSON.stringify(window.process.versions, null, 2)}`
-        })
+        this.props.dispatch(info(`Babble Buds version: ${electron.remote.app.getVersion()}`))
+        this.props.dispatch(info(`Other Versions: ${JSON.stringify(window.process.versions, null, 2)}`))
         
         electron.ipcRenderer.on('set project', this.setProject)
         electron.ipcRenderer.on('close', this.closeProject)
@@ -52,10 +49,7 @@ class App extends Component {
     setProject(event, project) {
         if (!this.checkChanges()) return
 
-        this.props.dispatch({
-            type: 'LOAD_PROJECT',
-            project
-        })
+        this.props.dispatch(load(project))
     }
 
     closeProject() {
@@ -64,16 +58,18 @@ class App extends Component {
         settingsManager.closeProject()
         settingsManager.save()
 
-        this.props.dispatch({ type: 'CLOSE_PROJECT' })
+        this.props.dispatch(close())
     }
 
     checkChanges() {
         if (this.props.project === null) return true
             
-        const {oldSettings, settings, oldCharacters, characters} = this.props
+        const { settings, characters, environments, assets, saver } = this.props
 
-        let changes = oldSettings !== JSON.stringify(settings)
-        changes = changes || oldCharacters !== JSON.stringify(characters)
+        let changes = saver.settings !== JSON.stringify(settings)
+        changes = changes || saver.characters !== JSON.stringify(characters)
+        changes = changes || saver.environments !== JSON.stringify(environments)
+        changes = changes || saver.assets !== JSON.stringify(assets)
 
         if (changes) {
             let response = dialog.showMessageBox({
@@ -101,12 +97,7 @@ class App extends Component {
     }
 
     save() {
-        // TODO create a "thumbnail stage" instead of using a ref
-        if (!this.stage.current) return
-        this.props.dispatch({
-            type: 'SAVE',
-            thumbnail: this.stage.current.stage.getThumbnail()
-        })
+        this.props.dispatch(save())
     }
 
     render() {
@@ -114,7 +105,7 @@ class App extends Component {
             <div className="App">
                 {
                     this.props.project ?
-                        <Project stage={this.stage} /> :
+                        <Project /> :
                         <Welcome />
                 }
             </div>
@@ -126,9 +117,10 @@ function mapStateToProps(state) {
     return {
         project: state.project.project,
         settings: state.project.settings,
-        oldSettings: state.project.oldSettings,
         characters: state.project.characters,
-        oldCharacters: state.project.oldCharacters
+        environments: state.project.environments,
+        assets: state.project.assets,
+        saver: state.project.saver
     }
 }
 

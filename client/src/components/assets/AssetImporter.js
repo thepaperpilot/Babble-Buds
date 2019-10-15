@@ -1,13 +1,13 @@
 import React, {Component} from 'react'
 import { connect } from 'react-redux'
-import Scrollbar from 'react-custom-scroll'
 import Checkbox from '../inspector/fields/Checkbox'
 import Assets from './Assets'
 import Modal from '../ui/Modal'
+import { inProgress } from '../../redux/status'
 import './importer.css'
 
-import { getNewAssetID } from './../../reducers/project/assets'
-import { loadAssets } from './../../reducers/project/loader'
+import { getNewAssetID } from '../../redux/project/assets/reducers'
+import { loadAssets } from '../../redux/project/loader'
 
 const fs = window.require('fs-extra')
 const path = require('path')
@@ -56,12 +56,7 @@ class AssetImporter extends Component {
             open: false
         })
 
-        this.props.dispatch({
-            type: 'IN_PROGRESS',
-            count: selected.length,
-            content: 'Importing assets...',
-            id: statusId
-        })
+        this.props.dispatch(inProgress(statusId, selected.length, 'Importing assets...'))
 
         ipcRenderer.send('background', 'import',
             this.state.duplicate,

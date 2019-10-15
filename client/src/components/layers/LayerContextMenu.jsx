@@ -1,9 +1,9 @@
-import React, {Component} from 'react'
+import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { ContextMenu, MenuItem, SubMenu, connectMenu } from 'react-contextmenu'
-import { ActionCreators as UndoActionCreators } from 'redux-undo'
-
-import { getNewAssetID } from './../../reducers/project/assets'
+import { deleteLayer, wrapLayer, addLayer } from '../../redux/editor/layers'
+import { open } from '../../redux/editor/editor'
+import { createAssetBundle } from '../../redux/project/assets/actions'
 
 class LayerContextMenu extends Component {
     constructor(props) {
@@ -14,56 +14,40 @@ class LayerContextMenu extends Component {
         this.createAsset = this.createAsset.bind(this)
     }
 
-    editLayer(type) {
+    editLayer(action) {
         return () => {
-            this.props.dispatch({
-                type,
-                path: this.props.trigger.path
-            })
+            this.props.dispatch(action(this.props.trigger.path))
         }
     }
 
     editBundle() {
         const {assetId, asset} = this.props.trigger
         
-        this.props.dispatch({
-            type: 'EDIT_PUPPET',
-            id: assetId,
-            character: asset,
-            objectType: 'asset'
-        })
+        this.props.dispatch(open(assetId, asset.layers, 'asset'))
     }
 
     createAsset(tab) {
         return () => {
-            this.props.dispatch({
-                type: 'NEW_ASSET_BUNDLE',
-                id: `${this.props.trigger.self}:${getNewAssetID()}`,
-                name: this.props.trigger.name,
-                path: this.props.trigger.path,
-                tab,
-                layers: { children: this.props.trigger.layerChildren },
-                creator: this.props.trigger.self
-            })
+            const { path, name } = this.props.trigger
+            this.props.dispatch(createAssetBundle(path, name, tab))
         }
     }
 
     render() {
         if (!this.props.trigger) return <ContextMenu id={this.props.id}
             onShow={this.props.onShow} onHide={this.props.onHide}>
-            <MenuItem onClick={this.editLayer('DELETE_LAYER')}>Delete Layer</MenuItem>
-            <MenuItem onClick={this.editLayer('WRAP_LAYER')}>Wrap Layer</MenuItem>
+            <MenuItem onClick={this.editLayer(deleteLayer)}>Delete Layer</MenuItem>
+            <MenuItem onClick={this.editLayer(wrapLayer)}>Wrap Layer</MenuItem>
         </ContextMenu>
 
         const {assetId, tabs, asset} = this.props.trigger
         return <ContextMenu
             id={this.props.id} onShow={this.props.onShow} onHide={this.props.onHide}>
-            <MenuItem onClick={this.editLayer('DELETE_LAYER')}>Delete Layer</MenuItem>
-            <MenuItem onClick={this.editLayer('WRAP_LAYER')}>Wrap Layer</MenuItem>
+            <MenuItem onClick={this.editLayer(wrapLayer)}>Wrap Layer</MenuItem>
             {assetId && asset.type === 'bundle' &&
                 <MenuItem onClick={this.editBundle}>Edit Bundle</MenuItem>}
             {assetId == null &&
-                <MenuItem onClick={this.editLayer('ADD_LAYER')}>Add Layer</MenuItem>}
+                <MenuItem onClick={this.editLayer(addLayer)}>Add Layer</MenuItem>}
             {assetId == null && <SubMenu title="Convert to prefab">
                 {tabs.map(tab =>
                     <MenuItem
@@ -73,6 +57,7 @@ class LayerContextMenu extends Component {
                     </MenuItem>
                 )}
             </SubMenu>}
+            <MenuItem onClick={this.editLayer(deleteLayer)}>Delete Layer</MenuItem>
         </ContextMenu>
     }
 }

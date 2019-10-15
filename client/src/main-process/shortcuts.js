@@ -8,37 +8,32 @@ ipcMain.on('global', (e, toRemove, toRegister) => {
     toRegister.forEach(o => {
         if (o.accel) {
             globalShortcut.register(o.accel, () => {
-                let action
+                let action, data
                 switch (o.shortcut) {
                 case 'Toggle babbling':
                     e.sender.send('babbleToggle')
                     return
                 case 'Move left':
-                    action = { type: 'MOVE_LEFT_SELF' }
+                    action = 'moveLeft'
                     break
                 case 'Move right':
-                    action = { type: 'MOVE_RIGHT_SELF' }
+                    action = 'moveRight'
                     break
                 case 'Jiggle':
-                    action = { type: 'JIGGLE_SELF' }
+                    action = 'jiggle'
                     break
                 default: {
                     const words = o.shortcut.split(' ')
+                    data = words[2]- 1
                     if (words[1] && words[1] === 'puppet') {
-                        action = {
-                            type: 'CHANGE_PUPPET_SELF',
-                            index: words[2] - 1
-                        }
+                        action = 'changePuppet'
                     } else if (words[1] && words[1] === 'emote') {
-                        action = {
-                            type: 'SET_EMOTE_SELF',
-                            index: words[2] - 1
-                        }
+                        action = 'setEmote'
                     }
                     break
                 }
                 }
-                e.sender.send('dispatch', action)
+                e.sender.send('dispatch', action, data)
             })
         }
     })

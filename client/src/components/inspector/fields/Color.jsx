@@ -1,20 +1,5 @@
 import React, {Component} from 'react'
 
-// Changes the RGB/HEX temporarily to a HSL-Value, modifies that value 
-// and changes it back to RGB/HEX.
-
-function changeHue(rgb, degree) {
-    var hsl = rgbToHSL(rgb);
-    hsl.h += degree;
-    if (hsl.h > 360) {
-        hsl.h -= 360;
-    }
-    else if (hsl.h < 0) {
-        hsl.h += 360;
-    }
-    return hslToRGB(hsl);
-}
-
 // exepcts a string and returns an object
 function rgbToHSL(rgb) {
     // strip the leading # if it's there

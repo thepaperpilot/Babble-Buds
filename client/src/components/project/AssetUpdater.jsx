@@ -1,4 +1,4 @@
-import React, {Component} from 'react'
+import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import babble from 'babble.js'
 
@@ -14,7 +14,7 @@ class AssetUpdater extends Component {
     }
 
     componentDidMount() {
-        this.stage = new babble.Stage('assetupdater', this.props.settings, this.props.assets, this.props.assetsPath, this.loadPuppets)
+        this.stage = new babble.Stage('assetupdater', this.props.environment, this.props.assets, this.props.assetsPath, this.loadPuppets)
     }
 
     componentWillReceiveProps(newProps) {
@@ -43,9 +43,9 @@ class AssetUpdater extends Component {
 
 function mapStateToProps(state) {
     return {
-        settings: state.project.settings,
+        environment: state.environment,
         assets: state.project.assets,
-        assetsPath: state.project.assetsPath,
+        assetsPath: state.project.assetsPath
     }
 }
 

@@ -3,6 +3,8 @@ import { connect } from 'react-redux'
 import { DropTarget } from 'react-dnd'
 import classNames from 'classnames'
 import { ContextMenuTrigger } from 'react-contextmenu'
+import { changePuppet } from '../../redux/controller'
+import { setSlot } from '../../redux/project/settings/hotbar'
 
 class Character extends Component {
     constructor(props) {
@@ -11,20 +13,18 @@ class Character extends Component {
         this.changePuppet = this.changePuppet.bind(this)
     }
 
-    changePuppet(index) {
-        return () => this.props.dispatch({
-            type: 'CHANGE_PUPPET_SELF',
-            index
-        })
+    changePuppet() {
+        this.props.dispatch(changePuppet(this.props.index))
     }
 
     render() {
-        const character = this.props.characters[this.props.hotbar[this.props.index]]
+        const { puppet, character, thumbnail, selected, isOver, canDrop, index } = this.props
         const className = {
             'char': true,
             'selector': true,
-            'isOver': this.props.isOver,
-            'canDrop': this.props.canDrop
+            isOver,
+            canDrop,
+            selected
         }
         if (!character) {
             return this.props.connectDropTarget(<div className="react-contextmenu-wrapper">
@@ -34,44 +34,39 @@ class Character extends Component {
                 </div>
             </div>)
         }
-        className.selected = this.props.id === this.props.hotbar[this.props.index]
-        const imageSource = this.props.characterThumbnails[this.props.hotbar[this.props.index]]
         return <ContextMenuTrigger
             id={`contextmenu-character-${this.props.contextmenu}`}
             holdToDisplay={-1}
             collect={() => ({
-                index: this.props.index,
-                puppet: this.props.hotbar[this.props.index],
+                index,
+                puppet,
                 character
             })}>
             {this.props.connectDropTarget(<div
-                data-index={this.props.index}
+                data-index={index}
                 className={classNames(className)}
-                onClick={this.changePuppet(this.props.index)}>
-                <div className="hotkey">{this.props.index + 1}</div>
+                onClick={this.changePuppet}>
+                <div className="hotkey">{index + 1}</div>
                 <div className="desc">{character.name}</div>
-                <img alt={character.name} src={imageSource}/>
+                <img alt={character.name} src={thumbnail}/>
             </div>)}
         </ContextMenuTrigger>
     }
 }
 
-function mapStateToProps(state) {
+function mapStateToProps(state, props) {
+    const puppet = state.project.settings.hotbar[props.index]
     return {
-        hotbar: state.project.settings.hotbar,
-        characters: state.project.characters,
-        characterThumbnails: state.project.characterThumbnails,
-        id: state.project.settings.actor.id
+        puppet,
+        character: state.project.characters[puppet],
+        thumbnail: state.project.characterThumbnails[puppet],
+        selected: state.controller.actors.some(id => state.actors.find(actor => actor.id === id).puppetId === puppet)
     }
 }
 
 const puppetTarget = {
     drop(props, monitor) {
-        props.dispatch({
-            type: 'SET_HOTBAR_SLOT',
-            index: props.index,
-            puppet: monitor.getItem().puppet
-        })
+        props.dispatch(setSlot(props.index, monitor.getItem().puppet))
     }
 }
 

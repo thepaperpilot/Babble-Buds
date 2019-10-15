@@ -1,4 +1,4 @@
-import React, {Component} from 'react'
+import React, { Component } from 'react'
 import Scrollbar from 'react-custom-scroll'
 import './../ui/scrollbar.css'
 

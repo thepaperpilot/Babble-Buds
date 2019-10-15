@@ -1,9 +1,10 @@
-import React, {Component} from 'react'
+import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import {Puppet} from 'babble.js'
 import Slots from './fields/Slots'
-import Foldable from './../ui/Foldable'
-import {calculateEmotes} from './../layers/Layers'
+import Foldable from '../ui/Foldable'
+import { calculateEmotes } from '../layers/Layers'
+import { setEmote } from '../../redux/editor/selected'
+import { changeEmote } from '../../redux/editor/layers'
 
 class EmoteSection extends Component {
     constructor(props) {
@@ -14,19 +15,11 @@ class EmoteSection extends Component {
     }
 
     selectEmote(emote) {
-        this.props.dispatch({
-            type: 'SET_EDITOR_EMOTE',
-            emote
-        })
+        this.props.dispatch(setEmote(emote))
     }
 
     changeEmote(emote) {
-        this.props.dispatch({
-            type: 'EDIT_LAYER_EMOTE',
-            layer: this.props.target,
-            asset: this.props.asset,
-            emote
-        })
+        this.props.dispatch(changeEmote(this.props.target, emote))
     }
 
     render() {

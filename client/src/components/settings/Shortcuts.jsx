@@ -1,6 +1,7 @@
-import React, {Component} from 'react'
+import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import Shortcut from './Shortcut'
+import { setShortcut } from '../../redux/project/settings/shortcuts'
 
 class Shortcuts extends Component {
     constructor(props) {
@@ -10,11 +11,7 @@ class Shortcuts extends Component {
     }
 
     onChange(shortcut) {
-        return value => this.props.dispatch({
-            type: 'EDIT_GLOBAL_SHORTCUT',
-            shortcut: shortcut,
-            value
-        })
+        return value => this.props.dispatch(setShortcut(shortcut, value))
     }
 
     render() {
