@@ -135,7 +135,7 @@ export function loadCharacters(settings, charactersPath, defaults) {
         // through it as well
         const loadedEnvironment =
             fs.readJsonSync(path.join(charactersPath, settings.environments[i].location))
-        const id = settings.environment[i].id
+        const id = settings.environments[i].id
         environments[id] =
             Object.assign({}, defaults.environment, loadedEnvironment)
 
