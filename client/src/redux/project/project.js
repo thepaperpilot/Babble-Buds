@@ -129,6 +129,8 @@ export function load(filepath) {
                     'id': numCharacters + 1,
                     'location': `${numCharacters + 1}.json`
                 })
+                fs.writeFileSync(path.join(filepath, '..', 'characters', `${numCharacters + 1}.json`),
+                    JSON.stringify(environment, null, 4))
                 ipcRenderer.send('background', 'generate thumbnails',
                     `${path.join(filepath, settings.charactersPath, '..',
                         'thumbnails', `${numCharacters + 1}`)}`.replace(/\\/g, '/'),
