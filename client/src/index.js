@@ -11,7 +11,7 @@ import reducer from './redux/index'
 import './index.css'
 
 const enhancer = compose(
-    applyMiddleware(thunk),
+    applyMiddleware(logger, thunk),
     batchedSubscribe(unstable_batchedUpdates)
 )
 const store = createStore(reducer, enhancer)
