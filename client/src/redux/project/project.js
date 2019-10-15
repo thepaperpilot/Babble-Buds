@@ -1,7 +1,7 @@
 import { combineReducers } from 'redux'
 import util from '../util.js'
 import folders from './folders'
-import saved, { load as loadProject } from './saver'
+import saver, { load as loadProject } from './saver'
 import settings, { setSettings } from './settings/settings'
 import characters, { setCharacters } from './characters/reducers'
 import environments, { setEnvironments } from './environments'
@@ -210,5 +210,5 @@ export default combineReducers({
     dirtyCharacters,
     assets,
     folders,
-    saved
+    saver
 })
