@@ -48,8 +48,6 @@ class Editor extends Component {
         this.savePuppet = this.savePuppet.bind(this)
         this.playAnimation = this.playAnimation.bind(this)
         this.resetPos = this.resetPos.bind(this)
-
-        window.PIXI.SCALE_MODES.DEFAULT = window.PIXI.SCALE_MODES.NEAREST
     }
 
     componentDidMount() {
