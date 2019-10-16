@@ -5,7 +5,7 @@ const path = window.require('path')
 
 const { GIF } = window.require('gif-engine-js')
 
-const stage = new Stage('stage', {'numCharacters': 1, 'puppetScale': 1, 'animations': false}, {}, '', null, console)
+const stage = new Stage('stage', {'numCharacters': 1, 'puppetScale': 1, 'animations': false}, {}, '', null, console, false)
 
 let isLoadingAssets = false
 
