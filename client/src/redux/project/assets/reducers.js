@@ -59,7 +59,7 @@ export function setAssets(assets) {
 }
 
 // Reducers
-export default util.createReducer([], {
+export default util.createReducer({}, {
     [SET]: (state, action) => action.assets,
     [ADD]: (state, action) => ({...state, ...action.assets}),
     [REMOVE]: (state, action) => {

@@ -15,7 +15,7 @@ export function setCharacters(characters) {
 }
 
 // Reducers
-export default util.createReducer([], {
+export default util.createReducer({}, {
     [SET]: (state, action) => action.characters,
     [ADD]: (state, action) => ({...state, [action.id]: action.character}),
     [REMOVE]: (state, action) => {

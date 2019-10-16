@@ -123,8 +123,8 @@ class Stage extends Component {
         this.stage.resize()
     }
 
-    loadPuppets(stage) {
-        stage.registerPuppetListener('mousedown', (e) => {
+    loadPuppets() {
+        this.stage.registerPuppetListener('mousedown', (e) => {
             this.props.dispatch(inspect(e.target.puppet.puppet.id, 'puppet-network'))
         })
 

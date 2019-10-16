@@ -22,12 +22,7 @@ export function removeEnvironment(id) {
 }
 
 // Reducers
-export default util.createReducer([
-    {
-        'id': 1,
-        'location': '1.json'
-    }
-], {
+export default util.createReducer([], {
     [SET]: (state, action) => action.environments,
     [ADD]: (state, action) => [...state, action.environment],
     [REMOVE]: (state, action) => {

@@ -127,7 +127,7 @@ export function changeEnvironment(id, environment) {
 }
 
 // Reducers
-export default util.createReducer([], {
+export default util.createReducer({}, {
     [SET]: (state, action) => action.environments,
     [ADD]: (state, action) => ({...state, [action.id]: action.environment}),
     [REMOVE]: (state, action) => {

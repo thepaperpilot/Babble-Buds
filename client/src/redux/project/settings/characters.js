@@ -22,12 +22,7 @@ export function removeCharacter(id) {
 }
 
 // Reducers
-export default util.createReducer([
-    {
-        'id': 1,
-        'location': '1.json'
-    }
-], {
+export default util.createReducer([], {
     [SET]: (state, action) => action.characters,
     [ADD]: (state, action) => [...state, action.character],
     [REMOVE]: (state, action) => {

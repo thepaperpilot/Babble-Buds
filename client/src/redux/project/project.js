@@ -7,10 +7,12 @@ import characters, { setCharacters } from './characters/reducers'
 import environments, { setEnvironments } from './environments'
 import assets, { setAssets } from './assets/reducers'
 import characterThumbnails, { setThumbnails } from './characterThumbnails'
-import dirtyCharacters, { addCharacters } from './dirtyCharacters'
+import dirtyCharacters, { addCharacters, clearCharacters } from './dirtyCharacters'
 import { loadCharacters, loadAssets } from './loader'
 import { setEnvironment, setDefaultEnvironment } from '../environment'
 import { setSinglePlayer } from '../networking'
+import { clearActors } from '../actors'
+import { setActors } from '../controller'
 import { warn } from '../status'
 
 const fs = window.require('fs-extra')
@@ -78,7 +80,17 @@ function filterCharacters(dispatch, assets, characters) {
 
 // Action Creators
 export function close() {
-    return { type: SET_PROJECT, project: null }
+    return (dispatch, getState) => {
+        dispatch({ type: SET_PROJECT, project: null })
+        dispatch(setSettings(getState().defaults.settings))
+        dispatch(setCharacters({}))
+        dispatch(setEnvironments({}))
+        dispatch(setThumbnails({}))
+        dispatch(clearCharacters())
+        dispatch(setAssets({}))
+        dispatch(clearActors())
+        dispatch(setActors([]))
+    }
 }
 
 export function load(filepath) {
@@ -125,12 +137,10 @@ export function load(filepath) {
                     'puppetScale': settings.puppetScale
                 })
                 environments[numCharacters + 1] = environment
-                settings.environments.push({
+                settings.environments = [...settings.environments, {
                     'id': numCharacters + 1,
                     'location': `${numCharacters + 1}.json`
-                })
-                fs.writeFileSync(path.join(filepath, '..', 'characters', `${numCharacters + 1}.json`),
-                    JSON.stringify(environment, null, 4))
+                }]
                 ipcRenderer.send('background', 'generate thumbnails',
                     `${path.join(filepath, settings.charactersPath, '..',
                         'thumbnails', `${numCharacters + 1}`)}`.replace(/\\/g, '/'),
@@ -164,7 +174,6 @@ export function load(filepath) {
         }
 
         // Set ALL the things!
-        dispatch({ type: SET_PROJECT, project: filepath })
         dispatch({ type: SET_NUM_CHARACTERS, numCharacters })
         dispatch({ type: SET_CHARACTERS_PATH, charactersPath: path.join(filepath, settings.charactersPath) })
         dispatch({ type: SET_ASSETS_PATH, assetsPath: `file:///${path.join(filepath, settings.assetsPath)}` })
@@ -176,6 +185,7 @@ export function load(filepath) {
         dispatch(setAssets(assets))
         dispatch(loadProject(settings, characters, environments, assets))
         dispatch(setSinglePlayer())
+        dispatch({ type: SET_PROJECT, project: filepath })
     }
 }
 

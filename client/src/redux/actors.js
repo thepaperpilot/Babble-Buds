@@ -3,6 +3,7 @@ import { Puppet } from 'babble.js'
 import { warn } from './status'
 
 // Action Types
+const CLEAR = 'actors/CLEAR'
 const ADD = 'actors/ADD'
 const REMOVE = 'actors/REMOVE'
 const CHANGE = 'actors/CHANGE'
@@ -13,6 +14,10 @@ export function getActor(state, id) {
 }
 
 // Action Creators
+export function clearActors() {
+    return { type: CLEAR }
+}
+
 export function addActor(id, puppetId, character) {
     return (dispatch, getState) => {
         const assets = getState().project.assets
@@ -140,6 +145,7 @@ export function setBabbling(id, babbling = false) {
 
 // Reducers
 export default util.createReducer([], {
+    [CLEAR]: () => [],
     [ADD]: (state, action) => [...state, action.actor],
     [REMOVE]: (state, action) => {
         const index = state.findIndex(({id}) => id === action.id)
