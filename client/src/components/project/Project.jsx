@@ -121,10 +121,10 @@ class Project extends Component {
         // The asset updater needs to be updated before any Stage panels, so we put it above the panels component
         return this.assetUpdater.current ? <div>
             <AssetUpdater ref={this.assetUpdater} />
+            <BackgroundInterface />
             <Panels assetUpdater={this.assetUpdater.current} />
             <Clipboard/>
             <BabbleToggle />
-            <BackgroundInterface />
             <Themer />
         </div> : <div>
             <AssetUpdater ref={this.assetUpdater} />

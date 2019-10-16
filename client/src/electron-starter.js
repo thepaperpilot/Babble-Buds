@@ -80,6 +80,14 @@ function createWindow() {
     require('./main-process/shortcuts')
 }
 
+exports.openProject = function() {
+    backgroundWindow.loadURL(url.format({
+        pathname: path.join(__dirname, 'background', 'index.html'),
+        protocol: 'file:',
+        slashes: true
+    }))
+}
+
 // Holy shit this one line of code fixed all my performance issues
 app.disableHardwareAcceleration()
 

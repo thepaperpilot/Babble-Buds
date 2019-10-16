@@ -7,6 +7,8 @@ const { GIF } = window.require('gif-engine-js')
 
 const stage = new Stage('stage', {'numCharacters': 1, 'puppetScale': 1, 'animations': false}, {}, '', null, console)
 
+let isLoadingAssets = false
+
 async function addAssets(assets, statusId, callback) {
     // This is a bit complicated because we want to batch our requests. I found that even just limiting it to 1/ms is fine, though
     let assetsToSend = {}
@@ -44,13 +46,23 @@ const bubbleVisibility = layer => {
     bubbleVisibility(layer.parent)
 }
 
-ipcRenderer.on('update assets', (e, assets, assetsPath) => {
+async function waitUntilAssetsLoaded() {
+    while (true) {
+        if (!isLoadingAssets) { return }
+        await new Promise(resolve => setTimeout(resolve, 10))
+    }
+}
+
+ipcRenderer.on('update assets', async (e, assets, assetsPath) => {
     stage.assets = assets
     stage.assetsPath = assetsPath
-    stage.reloadAssets()
+    isLoadingAssets = true
+    await new Promise(resolve => stage.reloadAssets(resolve))
+    isLoadingAssets = false
 })
 
-ipcRenderer.on('generate thumbnails', (e, thumbnailsPath, character, type, id) => {
+ipcRenderer.on('generate thumbnails', async (e, thumbnailsPath, character, type, id) => {
+    await waitUntilAssetsLoaded()
     // Put puppet on the stage
     stage.clearPuppets()
     character.position = 1

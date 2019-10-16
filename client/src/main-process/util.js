@@ -1,3 +1,4 @@
+const {openProject} = require('../electron-starter')
 const {app, dialog, BrowserWindow} = require('electron')
 
 const path = require('path')

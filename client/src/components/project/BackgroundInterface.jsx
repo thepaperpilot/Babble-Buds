@@ -14,22 +14,20 @@ class BackgroundInterface extends Component {
 
         this.hasUpdated = false
 
-        const {assets, assetsPath} = props
-        ipcRenderer.send('background', 'update assets', assets, assetsPath)
-
         this.updateThumbnails = this.updateThumbnails.bind(this)
         this.checkDirtyCharacters = this.checkDirtyCharacters.bind(this)
     }
 
     componentDidMount() {
-        ipcRenderer.on('update thumbnails', this.updateThumbnails)
-        this.checkDirtyCharacters(this.props, this.props.dirtyCharacters)
-
         this.props.dispatch(info('Updating assets in background process...'))
         ipcRenderer.send('background', 'update assets', this.props.assets, this.props.assetsPath)
+
+        ipcRenderer.on('update thumbnails', this.updateThumbnails)
+        this.checkDirtyCharacters(this.props, this.props.dirtyCharacters)
     }
 
-    componentWillDismount() {
+    componentWillUnmount() {
+        this.hasUpdated = false
         ipcRenderer.off('update thumbnails', this.updateThumbnails)
     }
 
