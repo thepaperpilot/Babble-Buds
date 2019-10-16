@@ -24,6 +24,9 @@ class BackgroundInterface extends Component {
     componentDidMount() {
         ipcRenderer.on('update thumbnails', this.updateThumbnails)
         this.checkDirtyCharacters(this.props, this.props.dirtyCharacters)
+
+        this.props.dispatch(info('Updating assets in background process...'))
+        ipcRenderer.send('background', 'update assets', this.props.assets, this.props.assetsPath)
     }
 
     componentWillDismount() {
@@ -60,7 +63,7 @@ class BackgroundInterface extends Component {
             }
         })
 
-        if (updated) {
+        if (updated && Object.keys(assets).length > 0) {
             this.props.dispatch(info('Updating assets in background process...'))
             ipcRenderer.send('background', 'update assets', assets, assetsPath)
         }
