@@ -48,23 +48,27 @@ class Editor extends Component {
         this.savePuppet = this.savePuppet.bind(this)
         this.playAnimation = this.playAnimation.bind(this)
         this.resetPos = this.resetPos.bind(this)
+        this.renderViewport = this.renderViewport.bind(this)
     }
 
     componentDidMount() {
-        this.viewport.current.on('moved', this.updateViewportBounds)
-        this.viewport.current.on('zoomed', this.updateViewportBounds)
+        const v = this.viewport.current.getViewport()
+        v.on('moved', this.updateViewportBounds)
+        v.on('zoomed', this.updateViewportBounds)
     }
 
     componentDidUpdate(prevProps) {
         if (this.props.bounds !== prevProps.bounds || this.props.rect !== prevProps.rect)
             this.updateViewportBounds()
+        else
+            this.renderViewport()
     }
 
     updateViewportBounds() {
-        const {top, right, bottom, left} = this.viewport.current
+        const {top, right, bottom, left} = this.viewport.current.getViewport()
         this.setState({
             bounds: {top, right, bottom, left}
-        })
+        }, this.renderViewport)
     }
 
     onScroll(e) {
@@ -74,10 +78,10 @@ class Editor extends Component {
         const rect = e.target.getBoundingClientRect()
         e.clientX -= rect.left
         e.clientY -= rect.top
-        this.viewport.current.plugins.wheel.wheel(e)
+        this.viewport.current.getViewport().plugins.wheel.wheel(e)
 
         this.setState({
-            scale: 1 / this.viewport.current.scale.x
+            scale: 1 / this.viewport.current.getViewport().scale.x
         })
         this.updateViewportBounds()
     }
@@ -112,12 +116,12 @@ class Editor extends Component {
 
     resetPos() {
         const {rect, changed} = this.props
-        this.viewport.current.moveCenter(0, -(rect.height - 21 - (changed ? 6 : 0)) / 2)
+        this.viewport.current.getViewport().moveCenter(0, -(rect.height - 21 - (changed ? 6 : 0)) / 2)
         this.updateViewportBounds()
     }
 
     hover(dragPos) {
-        const v = this.viewport.current
+        const v = this.viewport.current.getViewport()
         const { top, left, transform} = v
         const rect = this.stage.current._canvas.getBoundingClientRect()
         const scale = transform.scale.x
@@ -128,6 +132,11 @@ class Editor extends Component {
                 y: top + (dragPos.y - rect.y) / scale
             }
         })
+    }
+
+    renderViewport() {
+        const v = this.viewport.current.getViewport()
+        v.app.renderer.render(v.app.stage)
     }
 
     render() {
@@ -146,23 +155,25 @@ class Editor extends Component {
             const startX = Math.ceil(bounds.left / gridSize) * gridSize
             const startY = Math.ceil(bounds.top / gridSize) * gridSize
 
-            for (let i = startX; i < bounds.right; i += gridSize) {
-                gridLines.push(<Cross key={`h${i}`}
-                    x={i}
-                    y={bounds.top}
-                    scale={scale}
-                    color={raised}
-                    distance={bounds.bottom - bounds.top} />)
-            }
+            if ((bounds.right - bounds.left) / gridSize <= 100)
+                for (let i = startX; i < bounds.right; i += gridSize) {
+                    gridLines.push(<Cross key={`h${i}`}
+                        x={i}
+                        y={bounds.top}
+                        scale={scale}
+                        color={raised}
+                        distance={bounds.bottom - bounds.top} />)
+                }
 
-            for (let i = startY; i < bounds.bottom; i += gridSize) {
-                gridLines.push(<Cross key={`v${i}`}
-                    x={bounds.left}
-                    y={i}
-                    scale={scale}
-                    color={raised}
-                    distance={bounds.right - bounds.left} />)
-            }
+            if ((bounds.bottom - bounds.top) / gridSize <= 100)
+                for (let i = startY; i < bounds.bottom; i += gridSize) {
+                    gridLines.push(<Cross key={`v${i}`}
+                        x={bounds.left}
+                        y={i}
+                        scale={scale}
+                        color={raised}
+                        distance={bounds.right - bounds.left} />)
+                }
         }
 
         return this.props.connectDropTarget(
@@ -190,7 +201,8 @@ class Editor extends Component {
                 </div>
                 <Stage width={rect.width - (changed ? 6 : 0)} height={rect.height - 21 - (changed ? 6 : 0)} options={{
                     transparent: true,
-                    antialias: true
+                    antialias: true,
+                    autoStart: false
                 }} onWheel={this.onScroll} onMouseDown={this.onMouseDown}
                 ref={this.stage} >
                     <Viewport width={rect.width - (changed ? 6 : 0)} height={rect.height - 21 - (changed ? 6 : 0)} ref={this.viewport}>

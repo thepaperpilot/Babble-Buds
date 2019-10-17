@@ -1,4 +1,5 @@
-import { CustomPIXIComponent } from 'react-pixi-fiber'
+import React, { Component } from 'react'
+import { CustomPIXIComponent, withApp } from 'react-pixi-fiber'
 import { changeLayer } from '../../redux/editor/layers'
 
 import rotateIcon from './icons/rotate.png'
@@ -98,8 +99,10 @@ function endMoveDrag(instance, dispatch, e) {
     if (startPosition && (dx || dy)) {
         dispatch(changeLayer(instance.props.layer.path, {
             x: startPosition.x + (dx || 0),
-            y: -startPosition.y - (dy || 0)
+            y: startPosition.y + (dy || 0)
         }))
+        e.currentTarget.dx = 0
+        e.currentTarget.dy = 0
 
         let root = instance
         while (root.parent && root.parent.parent)
@@ -138,6 +141,8 @@ function onMove(instance) {
 
         instance.selector.position.x = target.startPosition.x + dx
         instance.selector.position.y = target.startPosition.y + dy
+        
+        instance.props.app.renderer.render(instance.props.app.stage)
     }
 }
 
@@ -237,6 +242,8 @@ function onRotate(instance) {
         // Update the layer and selector now
         instance.layer.rotation = angle
         instance.selector.rotation = angle
+
+        instance.props.app.renderer.render(instance.props.app.stage)
     }
 }
 
@@ -311,6 +318,7 @@ function drawGraphics(instance, props) {
             instance.flipVert.scale.set(scale / 2)
         }
     }
+    props.app.renderer.render(props.app.stage)
 }
 
 export const behavior = {
@@ -319,6 +327,7 @@ export const behavior = {
         drawGraphics(instance, newProps)
     },
     customDidAttach: instance => {
+        instance.props.selector.current = instance
         behavior.setupSelector(instance)
     },
     customWillDetach: instance => {
@@ -401,10 +410,26 @@ export const behavior = {
                 endMoveDrag(instance, instance.props.dispatch, e)
             })
             root.on('mouseupoutside', instance.mouseup)
+            // The icons need some time to show up for some reason /shrug
+            setTimeout(() => instance.props.app.renderer.render(instance.props.app.stage), 1)
         } else {
             requestAnimationFrame(() => behavior.setupSelector(instance))
         }
     }
 }
 
-export default CustomPIXIComponent(behavior, TYPE)
+const Selector = withApp(CustomPIXIComponent(behavior, TYPE))
+
+class SelectorWrapper extends Component {
+    constructor(props) {
+        super(props)
+
+        this.selector = {}
+    }
+
+    render() {
+        return <Selector {...this.props} selector={this.selector} />
+    }
+}
+
+export default SelectorWrapper

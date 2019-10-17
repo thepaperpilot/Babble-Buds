@@ -1,6 +1,6 @@
 import React, {Component} from 'react'
 import { connect } from 'react-redux'
-import { Sprite, Container } from 'react-pixi-fiber'
+import { Sprite, Container, withApp } from 'react-pixi-fiber'
 import Selector, { behavior } from './Selector'
 import { comparePaths } from '../layers/Layer'
 import babble from 'babble.js'
@@ -20,7 +20,7 @@ class RawLayer extends Component {
         // This is necessary because removing a layer with a selector on it
         // won't call the customWillDetach function on the Selector for some reason
         if (this.selector.current)
-            behavior.customWillDetach(this.selector.current)
+            behavior.customWillDetach(this.selector.current.selector.current)
     }
 
     componentDidUpdate(prevProps) {
@@ -33,7 +33,9 @@ class RawLayer extends Component {
             prevProps.layer.duration !== this.props.layer.duration ||
             prevProps.layer.delay !== this.props.layer.delay ||
             prevProps.play !== this.props.play)) {
-            babble.Puppet.createTween(this.props.layer, this.container.current)
+            babble.Puppet.createTween(this.props.layer, this.container.current).on('update', () => {
+                this.props.app.renderer.render(this.props.app.stage)
+            })
         }
     }
 
@@ -119,5 +121,5 @@ function mapStateToProps(state) {
     }
 }
 
-const Layer = connect(mapStateToProps)(RawLayer)
+const Layer = withApp(connect(mapStateToProps)(RawLayer))
 export default Layer
