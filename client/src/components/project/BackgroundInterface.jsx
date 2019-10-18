@@ -67,7 +67,7 @@ class BackgroundInterface extends Component {
         }
 
         updatedAssets.forEach(id => {
-            const asset = assets[id]
+            const asset = assets[id] || this.props.assets[id]
             this.props.dispatch(info(`Asset bundle "${asset.name}" (${id}) changed. Re-rendering dependent thumbnails...`))
             
             const handleLayer = layer => {
@@ -79,6 +79,7 @@ class BackgroundInterface extends Component {
 
             // Look for any asset bundles using it
             Object.keys(assets).filter(asset =>
+                asset in assets && 
                 // Check if this asset is a bundle
                 assets[asset].type === 'bundle' &&
                 // And its not the updated asset
