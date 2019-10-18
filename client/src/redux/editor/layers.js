@@ -187,7 +187,7 @@ export function deleteLayer(path) {
 export function addLayer(path, layer = {}) {
     return (dispatch, getState) => {
         const state = getState()
-        if (!checkEditor(state)) return
+        if (!checkEditor(dispatch, state)) return
 
         const layers = state.editor.present.layers
 
@@ -210,6 +210,8 @@ export function addLayer(path, layer = {}) {
             x: 0,
             y: 0
         }, layer)
+        if (newLayer.id == null)
+            newLayer.children = []
         children.push(newLayer)
 
         dispatch(changeLayer(path, { children }))
@@ -219,7 +221,7 @@ export function addLayer(path, layer = {}) {
 export function wrapLayer(path) {
     return (dispatch, getState) => {
         const state = getState()
-        if (!checkEditor(state)) return
+        if (!checkEditor(dispatch, state)) return
 
         const layers = state.editor.present.layers
         

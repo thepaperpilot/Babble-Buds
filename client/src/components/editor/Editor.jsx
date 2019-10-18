@@ -251,7 +251,7 @@ const assetTarget = {
         const {id, asset} = monitor.getItem()
 
         let l = item.selected || []
-        let curr = item.character;
+        let curr = item.layers;
         (l || []).forEach((index, i) => {
             if (curr.children[index] != null)
                 curr = curr.children[index]
