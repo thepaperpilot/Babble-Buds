@@ -115,11 +115,11 @@
 
 .field-flex {
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
 }
 
 .field-flex > :not(.field-label) {
-    margin: 4px;
+    margin: 4px 0;
 }
 
 .field-label {
