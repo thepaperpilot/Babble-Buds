@@ -133,9 +133,8 @@ export function changeCharacter(id, character) {
 
         // Update any of our actors currently using this puppet
         character = util.updateObject(project.characters[id], character)
-        controller.actors.forEach(actorId => {
-            actors.filter(actor => actor.id === actorId)
-                .forEach(actor => dispatch(changePuppet(actorId, id, character)))
-        })
+        actors.filter(actor => controller.actors.includes(actor.id))
+            .filter(actor => actor.puppetId === id)
+            .forEach(actor => dispatch(changePuppet(actor.id, id, character)))
     }
 }
