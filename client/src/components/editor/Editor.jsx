@@ -199,13 +199,14 @@ class Editor extends Component {
                         onChange={this.changeZoom} />
                     <div className="flex-grow"></div>
                 </div>
-                <Stage width={rect.width - (changed ? 6 : 0)} height={rect.height - 21 - (changed ? 6 : 0)} options={{
+                <div className="changed-warning" style={{ height: rect.height - 25 }}></div>
+                <Stage width={rect.width} height={rect.height - 21} options={{
                     transparent: true,
                     antialias: true,
                     autoStart: false
                 }} onWheel={this.onScroll} onMouseDown={this.onMouseDown}
                 ref={this.stage} >
-                    <Viewport width={rect.width - (changed ? 6 : 0)} height={rect.height - 21 - (changed ? 6 : 0)} ref={this.viewport}>
+                    <Viewport width={rect.width} height={rect.height} ref={this.viewport}>
                         {gridLines}
                         <Cross x={0} y={0} scale={scale * 2} color={highlight} distance={DISTANCE * scale} />
                         {!!layers && <Layer play={this.state.play} layer={layers} bundles={[]}

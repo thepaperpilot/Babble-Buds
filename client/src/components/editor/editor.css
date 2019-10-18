@@ -1,7 +1,5 @@
 .editor {
     cursor: move;
-    transition: border-color .1s ease-in;
-    border-color: transparent;
 }
 
 .editor > canvas {
@@ -10,21 +8,20 @@
     user-select: none;
 }
 
-.editor.changed {
-    border: solid var(--warning);
+.editor > .changed-warning {
+    border: solid transparent;
+    transition: border-color .1s ease-in;
+    pointer-events: none;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.editor.changed > .changed-warning {
+    border-color: var(--warning);
 }
 
 .editor.changed .bar button:first-child {
     background-color: var(--warning);
-}
-
-.editor.changed .bar {
-    margin-top: -11px;
-    margin-left: -13px;
-    margin-right: -13px;
-}
-
-.editor.changed canvas {
-    margin: -11px;
-    margin-top: 0;
 }
