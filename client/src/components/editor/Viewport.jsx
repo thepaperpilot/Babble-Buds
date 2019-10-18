@@ -43,9 +43,14 @@ const behavior = {
         return v
     },
     customApplyProps: (instance, oldProps, newProps) => {
+        const { x, y } = instance.center
         instance.resize(newProps.width, newProps.height)
-        if (oldProps.width === 0 || oldProps.height === 0)
-            instance.moveCenter(0, -newProps.height / 2)
+        if (newProps.children[2])
+            // Maintain center
+            instance.moveCenter(x, y)
+        else
+            // Set center to bottom middle
+            instance.moveCenter(0, -newProps.height / 2 / instance.scale.x)
     },
     customDidAttach: instance => {
         instance.scale.set(1, 1)
