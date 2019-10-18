@@ -4,13 +4,14 @@
 import util from '../../util.js'
 import { warn } from '../../status'
 import { close } from '../../inspector'
+import { close as closeEditor } from '../../editor/editor'
 import { setNumCharacters } from '../project'
 import { updateThumbnail, removeThumbnail } from '../characterThumbnails'
 import {
     addCharacter as addCharacterSettings,
     removeCharacter
 } from '../settings/characters'
-import { getActor } from '../../actors'
+import { getActor, changePuppet } from '../../actors'
 import { SET, ADD, REMOVE, EDIT } from './reducers'
 
 const path = window.require('path')
@@ -106,13 +107,18 @@ export function deleteCharacter(id) {
         dispatch({ type: REMOVE, id })
         dispatch(removeThumbnail(id))
         dispatch(removeCharacter(id))
-        dispatch(close())
+        if (state.inspector.targetType === 'puppet' &&
+            state.inspector.target === id)
+            dispatch(close())
+        if (state.editor.present.type === 'puppet' &&
+            state.editor.present.id === id)
+            dispatch(closeEditor())
     }
 }
 
 export function changeCharacter(id, character) {
     return (dispatch, getState) => {
-        const project = getState().project
+        const { project, controller, actors } = getState()
         if (!(id in project.characters)) {
             warn("Cannot modify character because character doesn't exist")
             return
@@ -124,5 +130,12 @@ export function changeCharacter(id, character) {
             `${folder}/new-${id}`, character, 'puppet', id)
 
         dispatch({ type: EDIT, id, character })
+
+        // Update any of our actors currently using this puppet
+        character = util.updateObject(project.characters[id], character)
+        controller.actors.forEach(actorId => {
+            actors.filter(actor => actor.id === actorId)
+                .forEach(actor => dispatch(changePuppet(actorId, id, character)))
+        })
     }
 }

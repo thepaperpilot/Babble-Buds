@@ -3,6 +3,7 @@
 
 import util from '../../util.js'
 import { warn } from '../../status'
+import { close } from '../../editor/editor'
 import { changeCharacter } from '../characters/actions'
 import { addFolder, removeFolder } from '../folders'
 import { changeLayer, setLayers as setEditorLayers } from '../../editor/layers'
@@ -109,6 +110,12 @@ export function deleteAssets(ids) {
             if (layers)
                 dispatch(setEditorLayers(layers))
         }
+
+        // Close the editor if any of the deleted assets
+        //  was an asset bundle open inside it
+        if (editor.present.type === 'asset' &&
+            ids.includes(editor.present.id))
+            dispatch(close())
     }
 }
 

@@ -1,31 +1,26 @@
-import util from '../util.js'
-import { warn } from '../status'
-import { close } from '../inspector'
-import { setNumCharacters } from './project'
-import { updateThumbnail, removeThumbnail } from './characterThumbnails'
-import { copyThumbnails } from './characters/actions'
+// We split up certain modules into reducers and actions due to some issues
+//  with circular dependencies when creating the reducers
+
+import util from '../../util.js'
+import { warn } from '../../status'
+import { close } from '../../inspector'
+import { close as closeEditor } from '../../editor/editor'
+import { setNumCharacters } from '../project'
+import { updateThumbnail, removeThumbnail } from '../characterThumbnails'
+import { copyThumbnails } from '../characters/actions'
 import {
     addEnvironment as addEnvironmentSettings,
     removeEnvironment
-} from './settings/environments'
-import { setEnvironment, setDefaultEnvironment } from '../environment'
+} from '../settings/environments'
+import { setEnvironment, setDefaultEnvironment } from '../../environment'
+import { SET, ADD, REMOVE, EDIT } from './reducers'
 
 const path = window.require('path')
 const fs = window.require('fs-extra')
 const { remote, ipcRenderer } = window.require('electron')
 const settingsManager = remote.require('./main-process/settings')
 
-// Action Types
-const SET = 'project/environments/SET'
-const ADD = 'project/environments/ADD'
-const REMOVE = 'project/environments/REMOVE'
-const EDIT = 'project/environments/EDIT'
-
 // Action Creators
-export function setEnvironments(environments) {
-    return { type: SET, environments }
-}
-
 export function addEnvironment(id, environment) {
     return (dispatch, getState) => {
         const project = getState().project
@@ -95,6 +90,9 @@ export function deleteEnvironment(id) {
         if (state.inspector.targetType === 'environment' &&
             state.inspector.target === id)
             dispatch(close())
+        if (state.editor.present.type === 'environment' &&
+            state.editor.present.id === id)
+            dispatch(closeEditor())
         if (state.environment.setter === state.self &&
             state.environment.environmentId === id)
             dispatch(setDefaultEnvironment())
@@ -125,17 +123,3 @@ export function changeEnvironment(id, environment) {
         }
     }
 }
-
-// Reducers
-export default util.createReducer({}, {
-    [SET]: (state, action) => action.environments,
-    [ADD]: (state, action) => ({...state, [action.id]: action.environment}),
-    [REMOVE]: (state, action) => {
-        const environments = util.updateObject(state)
-        delete environments[action.id]
-        return environments
-    },
-    [EDIT]: (state, action) => util.updateObject(state, {
-        [action.id]: util.updateObject(state[action.id], action.environment)
-    })
-})

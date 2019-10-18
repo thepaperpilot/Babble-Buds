@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { ContextMenu, MenuItem, connectMenu } from 'react-contextmenu'
-import { duplicateEnvironment, deleteEnvironment } from '../../redux/project/environments'
+import { duplicateEnvironment, deleteEnvironment } from '../../redux/project/environments/actions'
 
 class EnvironmentContextMenu extends Component {
     constructor(props) {

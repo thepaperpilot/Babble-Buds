@@ -6,7 +6,7 @@ import Environment from './Environment'
 //import EnvironmentImporter from './EnvironmentImporter'
 import EnvironmentContextMenu from './EnvironmentContextMenu'
 import CustomScrollbarsVirtualList from '../ui/CustomScrollbarsVirtualList'
-import { newEnvironment } from '../../redux/project/environments'
+import { newEnvironment } from '../../redux/project/environments/actions'
 
 import './environments.css'
 import '../ui/list.css'

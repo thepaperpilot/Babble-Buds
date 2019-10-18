@@ -117,6 +117,10 @@ export function setLayers(layers) {
     return changeLayer([], layers)
 }
 
+export function clear() {
+    return { type: CHANGE_LAYERS, layers: null }
+}
+
 // Use this method to change the layer's emote,
 //  and handle changing the puppet to the proper emote
 export function changeEmote(path, emote = null) {

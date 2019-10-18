@@ -8,7 +8,7 @@ import Color from './fields/Color'
 import Foldable from '../ui/Foldable'
 import Dropdown from '../ui/InspectorDropdown'
 import EnvironmentContextMenu from '../environments/EnvironmentContextMenu'
-import { changeEnvironment } from '../../redux/project/environments'
+import { changeEnvironment } from '../../redux/project/environments/actions'
 
 class Environment extends Component {
     constructor(props) {

@@ -1,12 +1,12 @@
 import { combineReducers } from 'redux'
 import undoable, { ActionCreators } from 'redux-undo'
 import util from '../util.js'
-import layers, { setLayers } from './layers'
+import layers, { setLayers, clear } from './layers'
 import { selectLayer, setEmote } from './selected'
 import selected from './selected'
+import { changeEnvironment } from '../project/environments/actions'
 import { changeCharacter } from '../project/characters/actions'
 import { setLayers as setAssetLayers } from '../project/assets/actions'
-import { changePuppet } from '../actors'
 import { warn } from '../status'
 
 const path = window.require('path')
@@ -26,34 +26,26 @@ export function open(id, layers, type = 'puppet', emote = 0) {
     }
 }
 
+export function close() {
+    return (dispatch, getState) => {
+        dispatch({ type: OPEN, id: null, objectType: null })
+        dispatch(clear())
+    }
+}
+
 export function save() {
     return (dispatch, getState) => {
-        const state = getState()
-        const project = state.project
-        const editor = state.editor.present
-        
-        let character = null
-
+        const editor = getState().editor.present        
         switch (editor.type) {
+        case 'environment': {
+            dispatch(changeEnvironment(editor.id, { layers: editor.layers }))
+        }
         case 'puppet': {
-            character = util.updateObject(project.characters[editor.id], {
-                layers: editor.layers
-            })
-            dispatch(changeCharacter(editor.id, { layers: character.layers }))
-
-            // Update any of our actors currently using this puppet
-            state.controller.actors.forEach(id => {
-                state.actors.filter(actor => actor.id === id)
-                    .forEach(actor => dispatch(changePuppet(id, editor.id, character)))
-            })
-
+            dispatch(changeCharacter(editor.id, { layers: editor.layers }))
             break
         }
         case 'asset': {
-            character = util.updateObject(project.assets[editor.id], {
-                layers: editor.layers
-            })
-            dispatch(setAssetLayers(editor.id, character.layers))
+            dispatch(setAssetLayers(editor.id, editor.layers))
             break
         }
         default:

@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import { ContextMenuTrigger } from 'react-contextmenu'
 import InlineEdit from '../ui/InlineEdit'
 import { open } from '../../redux/editor/editor'
-import { changeEnvironment } from '../../redux/project/environments'
+import { changeEnvironment } from '../../redux/project/environments/actions'
 
 class Environment extends Component {
     constructor(props) {
