@@ -89,7 +89,8 @@ exports.openProject = function() {
 }
 
 // Holy shit this one line of code fixed all my performance issues
-app.disableHardwareAcceleration()
+//app.disableHardwareAcceleration()
+app.commandLine.appendSwitch('ignore-gpu-blacklist')
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.

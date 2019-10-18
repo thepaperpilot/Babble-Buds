@@ -48,7 +48,7 @@
     "react-dnd-html5-backend": "^7.4.4",
     "react-dom": "^16.8.6",
     "react-edit-inline": "^1.0.8",
-    "react-pixi-fiber": "^0.8.0",
+    "react-pixi-fiber": "^0.9.3",
     "react-redux": "^5.0.7",
     "react-resize-detector": "^2.3.0",
     "react-scripts": "^3.0.1",
@@ -66,6 +66,7 @@
   "dependencies": {
     "electron": "^5.0.1",
     "fs-extra": "~8.0.1",
+    "pixi.js": "^5.1.5",
     "redux-logger": "^3.0.6",
     "semver": "^6.0.0",
     "socket.io": "~2.2.0",

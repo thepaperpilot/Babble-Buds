@@ -10,6 +10,15 @@ import reducer from './redux/index'
 
 import './index.css'
 
+window.PIXI.settings.SCALE_MODE = 0
+//window.PIXI.settings.RESOLUTION = 4
+window.PIXI.settings.ROUND_PIXELS = true
+//window.PIXI.settings.PRECISION_FRAGMENT = 'highp'
+//window.PIXI.settings.RENDER_OPTIONS.resolution = 4
+window.PIXI.settings.RENDER_OPTIONS.antialias = true
+//window.PIXI.settings.RENDER_OPTIONS.autoDensity = true
+window.PIXI.settings.MIPMAP_TEXTURES = window.PIXI.MIPMAP_MODES.ON
+
 const enhancer = compose(
     applyMiddleware(logger, thunk),
     batchedSubscribe(unstable_batchedUpdates)
