@@ -7,7 +7,7 @@
   "scripts": {
     "start": "BROWSER=none react-scripts start",
     "build": "react-scripts build && ./build.sh",
-    "test": "node_modules/.bin/mocha -w",
+    "test": "node_modules/.bin/mocha -w --recursive --require babel-core/register",
     "test:prod": "npm run build && PROD=true node_modules/.bin/mocha",
     "eject": "react-scripts eject",
     "electron": "ELECTRON_START_URL=http://localhost:3000 electron --inspect .",
@@ -23,8 +23,11 @@
   "license": "CC0-1.0",
   "devDependencies": {
     "babble.js": "~1.9.1",
+    "babel-core": "^6.26.3",
+    "babel-preset-es2015": "^6.24.1",
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
+    "chai-redux": "^1.0.2",
     "classnames": "^2.2.6",
     "electron-is-accelerator": "^0.1.2",
     "electron-packager": "^13.1.1",
@@ -61,7 +64,7 @@
     "redux-batched-subscribe": "^0.1.6",
     "redux-thunk": "^2.3.0",
     "redux-undo": "^1.0.0-beta9-9-7",
-    "spectron": "^5.0.0"
+    "spectron": "^7.0.0"
   },
   "dependencies": {
     "electron": "^5.0.1",

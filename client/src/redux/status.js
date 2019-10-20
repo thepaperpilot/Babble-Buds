@@ -67,7 +67,7 @@ export function inProgressIncrement(id, amount = 1) {
         } else {
             const message = `${status.content} (${status.count + amount}/${status.total})`
             status = { count: status.count + amount, message }
-            dispatch({ type: UPDATE, status })
+            dispatch({ type: UPDATE, id, status })
         }
     }
 }
@@ -77,7 +77,7 @@ export default util.createReducer([], {
     [ADD]: (state, action) => [...state, action.status],
     [UPDATE]: (state, action) => {
         const statuses = state.slice()
-        const index = state.findIndex(id => id === action.id)
+        const index = state.findIndex(status => status.id === action.id)
         statuses[index] = util.updateObject(statuses[index], action.status)
         return statuses
     }
