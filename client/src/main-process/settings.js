@@ -17,12 +17,12 @@ module.exports = exports = {
         numAssets: 0
     },
     save: function() {
-        fs.writeJson(filepath, this.settings)
+        fs.ensureDirSync(app.getPath('userData'))
+        fs.writeJsonSync(filepath, this.settings)
     },
-    load: function(testing) {
+    load: function() {
         let obj
-        if  (testing) obj = {}
-        else if (fs.existsSync(filepath))
+        if (fs.existsSync(filepath))
             obj = fs.readJsonSync(filepath)
         else return
                 
@@ -38,7 +38,7 @@ module.exports = exports = {
         while (this.settings.recentProjects.length > 3)
             this.settings.recentProjects.splice(3, 1)
         var filename = util.slugify(this.settings.openProject)
-        if (thumbnail) fs.writeFile(path.join(app.getPath('userData'), `${filename}.png`), new Buffer(thumbnail, 'base64'), (err) => {
+        if (thumbnail) fs.writeFileSync(path.join(app.getPath('userData'), `${filename}.png`), new Buffer(thumbnail, 'base64'), (err) => {
             if (err) console.log(err)
         })
     },

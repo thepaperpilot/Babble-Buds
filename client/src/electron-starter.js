@@ -12,7 +12,7 @@ let backgroundWindow
 
 function createWindow() {
     // Load application settings
-    settings.load(process.env.TESTING)
+    settings.load()
 
     // Load window state
     let mainWindowState = windowStateKeeper({

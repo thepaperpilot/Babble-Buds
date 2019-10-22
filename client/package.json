@@ -39,6 +39,7 @@
     "gif-engine-js": "^1.0.1",
     "js-search": "^1.4.2",
     "mocha": "^5.2.0",
+    "mock-require": "^3.0.3",
     "pixi-tween": "^0.2.0",
     "pixi-viewport": "^3.23.1",
     "react": "^16.8.6",
@@ -63,8 +64,7 @@
     "redux": "^4.0.1",
     "redux-batched-subscribe": "^0.1.6",
     "redux-thunk": "^2.3.0",
-    "redux-undo": "^1.0.0-beta9-9-7",
-    "spectron": "^7.0.0"
+    "redux-undo": "^1.0.0-beta9-9-7"
   },
   "dependencies": {
     "electron": "^5.0.1",

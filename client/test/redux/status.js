@@ -2,6 +2,7 @@ import chai, { expect } from 'chai'
 import chaiRedux from 'chai-redux'
 import thunk from 'redux-thunk'
 import { combineReducers } from 'redux'
+import logFailedStore from '../util/logFailedStore'
 import status, { info, log, warn, error, inProgress, inProgressIncrement } from '../../src/redux/status'
 
 chai.use(chaiRedux)
@@ -13,11 +14,7 @@ describe('redux/status', () => {
         store = chai.createReduxStore({ reducer: combineReducers({ status }), middleware: thunk })
     })
 
-    afterEach(function() {
-        if (this.currentTest.state === 'failed') {
-            console.log(store.getState())
-        }
-    })
+    afterEach(() => logFailedStore(store))
 
     it('should add info status', () => {
         store.dispatch(info('info test'))
