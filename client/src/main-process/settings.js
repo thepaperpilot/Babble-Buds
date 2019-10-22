@@ -1,11 +1,9 @@
-const {app} = require('electron')
 const util = require('./util')
 const fs = require('fs-extra')
 
 const path = require('path')
 const uuid = require('uuid')
 
-const filepath = path.join(app.getPath('userData'), 'settings.json')
 const defaultLayout = require('./../data/default-layout.json')
 
 module.exports = exports = {
@@ -17,13 +15,13 @@ module.exports = exports = {
         numAssets: 0
     },
     save: function() {
-        fs.writeJson(filepath, this.settings)
+        fs.writeJson(path.join(require('electron').app.getPath('userData'), 'settings.json'), this.settings)
     },
     load: function(testing) {
         let obj
         if  (testing) obj = {}
-        else if (fs.existsSync(filepath))
-            obj = fs.readJsonSync(filepath)
+        else if (fs.existsSync(path.join(require('electron').app.getPath('userData'), 'settings.json')))
+            obj = fs.readJsonSync(path.join(require('electron').app.getPath('userData'), 'settings.json'))
         else return
                 
         Object.assign(this.settings, obj)
@@ -38,7 +36,7 @@ module.exports = exports = {
         while (this.settings.recentProjects.length > 3)
             this.settings.recentProjects.splice(3, 1)
         var filename = util.slugify(this.settings.openProject)
-        if (thumbnail) fs.writeFile(path.join(app.getPath('userData'), `${filename}.png`), new Buffer(thumbnail, 'base64'), (err) => {
+        if (thumbnail) fs.writeFile(path.join(require('electron').app.getPath('userData'), `${filename}.png`), new Buffer(thumbnail, 'base64'), (err) => {
             if (err) console.log(err)
         })
     },
