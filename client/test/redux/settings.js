@@ -32,7 +32,7 @@ describe('redux/settings', function () {
         settingsManager.load()
     })
 
-    afterEach(() => logFailedStore(store))
+    afterEach(logFailedStore(() => store.getState()))
 
     after(() => {
         fs.removeSync(settingsFolder)

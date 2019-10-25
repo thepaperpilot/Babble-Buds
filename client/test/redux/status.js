@@ -14,7 +14,7 @@ describe('redux/status', () => {
         store = chai.createReduxStore({ reducer: combineReducers({ status }), middleware: thunk })
     })
 
-    afterEach(() => logFailedStore(store))
+    afterEach(logFailedStore(() => store.getState()))
 
     it('should add info status', () => {
         store.dispatch(info('info test'))

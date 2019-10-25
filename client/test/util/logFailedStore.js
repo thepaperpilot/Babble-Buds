@@ -1,7 +1,7 @@
-export default function(store) {
+export default function(getState) {
     return function() {
         if (this.currentTest.state === 'failed') {
-            console.log(store.getState())
+            console.log(getState())
         }
     }
 }

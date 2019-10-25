@@ -18,8 +18,9 @@ export function setSinglePlayer() {
             // If we're not controlling any, just remove all of them
             state.actors.forEach(actor => dispatch(removeActor(actor.id)))
 
-            // Otherwise, we're probably loading a project
+            // We're also probably loading a project
             // So set our puppet to the first on our hotbar
+            //  (and even if we're not, we should still add in at least one puppet to control)
             const hotbar = state.project.settings.hotbar
             let puppetId = hotbar.find(i => i in state.project.characters)
             
