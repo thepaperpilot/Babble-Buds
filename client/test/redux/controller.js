@@ -3,7 +3,6 @@ import chaiRedux from 'chai-redux'
 import thunk from 'redux-thunk'
 import { combineReducers } from 'redux'
 import mock from 'mock-require'
-import logFailedStore from '../util/logFailedStore'
 import fakeReducer from '../util/fakeReducer'
 import fakeActions from '../util/fakeActions'
 
@@ -36,8 +35,6 @@ describe('redux/controller', () => {
             project: fakeReducer
         })
     })
-
-    afterEach(logFailedStore(() => store.getState()))
 
     after(() => {
         mock.stop('../../src/redux/actors')

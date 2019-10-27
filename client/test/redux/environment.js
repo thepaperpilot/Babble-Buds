@@ -2,7 +2,6 @@ import chai, { expect } from 'chai'
 import chaiRedux from 'chai-redux'
 import thunk from 'redux-thunk'
 import { combineReducers } from 'redux'
-import logFailedStore from '../util/logFailedStore'
 import fakeReducer from '../util/fakeReducer'
 import environment, { setEnvironment, setDefaultEnvironment } from '../../src/redux/environment'
 
@@ -28,8 +27,6 @@ describe('redux/environment', function () {
     beforeEach(() => {
         store = chai.createReduxStore({ reducer, middleware, initialState })
     })
-
-    afterEach(logFailedStore(() => store.getState()))
 
     it("should set environment", () => {
         store.dispatch(setEnvironment('fake setter', 'fake environment id', {

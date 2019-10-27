@@ -2,7 +2,6 @@ import chai, { expect } from 'chai'
 import chaiRedux from 'chai-redux'
 import thunk from 'redux-thunk'
 import { combineReducers } from 'redux'
-import logFailedStore from '../util/logFailedStore'
 import settings, { saveLayout, loadLayout } from '../../src/redux/settings'
 import settingsManager from '../../src/main-process/settings'
 import fs from 'fs-extra'
@@ -31,8 +30,6 @@ describe('redux/settings', function () {
         fs.writeJsonSync(settingsFile, defaultSettings)
         settingsManager.load()
     })
-
-    afterEach(logFailedStore(() => store.getState()))
 
     after(() => {
         fs.removeSync(settingsFolder)
