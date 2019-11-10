@@ -34,8 +34,7 @@ describe('redux/networking', function () {
     })
 
     after(() => {
-        mock.stop('../../src/redux/actors')
-        mock.stop('../../src/redux/controller')
+        mock.stopAll()
         disableTimeouts.stop()
     })
 

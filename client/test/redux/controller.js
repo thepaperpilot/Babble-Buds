@@ -36,9 +36,7 @@ describe('redux/controller', () => {
         })
     })
 
-    after(() => {
-        mock.stop('../../src/redux/actors')
-    })
+    after(mock.stopAll)
 
     it('should set actors', () => {
         const initialState = {

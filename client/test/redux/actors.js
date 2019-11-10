@@ -55,9 +55,7 @@ describe('redux/actors', function () {
         })
     })
 
-    after(() => {
-        mock.stop('../../src/redux/status')
-    })
+    after(mock.stopAll)
 
     it("should get actor", () => {
         const initialState = {

@@ -2,8 +2,7 @@ import { combineReducers } from 'redux'
 import undoable, { ActionCreators } from 'redux-undo'
 import util from '../util.js'
 import layers, { setLayers, clear } from './layers'
-import { selectLayer, setEmote } from './selected'
-import selected from './selected'
+import selected, { selectLayer, setEmote } from './selected'
 import { changeEnvironment } from '../project/environments/actions'
 import { changeCharacter } from '../project/characters/actions'
 import { setLayers as setAssetLayers } from '../project/assets/actions'
@@ -27,7 +26,7 @@ export function open(id, layers, type = 'puppet', emote = 0) {
 }
 
 export function close() {
-    return (dispatch, getState) => {
+    return dispatch => {
         dispatch({ type: OPEN, id: null, objectType: null })
         dispatch(clear())
     }
