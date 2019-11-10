@@ -8,6 +8,8 @@
     "start": "BROWSER=none react-scripts start",
     "build": "react-scripts build && ./build.sh",
     "test": "node_modules/.bin/mocha",
+    "test-watch": "node_modules/.bin/mocha -w --reporter min",
+    "test-debug": "node_modules/.bin/mocha --inspect-brk",
     "test:prod": "npm run build && PROD=true node_modules/.bin/mocha",
     "eject": "react-scripts eject",
     "electron": "ELECTRON_START_URL=http://localhost:3000 electron --inspect .",

@@ -1,6 +1,4 @@
--w
 --recursive
---reporter min
 --require babel-core/register
 --require test/mocha-hooks/mock-canvas.js
 --require test/mocha-hooks/mock-electron.js
