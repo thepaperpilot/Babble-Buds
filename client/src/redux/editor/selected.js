@@ -1,5 +1,6 @@
 import { combineReducers } from 'redux'
 import util from '../util.js'
+import { comparePaths } from './layers'
 import { warn } from '../status'
 import { inspect } from '../inspector'
 
@@ -14,7 +15,7 @@ export function setEmote(emote = 0) {
 
 export function selectLayer(path = [], shouldInspect = true) {
     return (dispatch, getState) => {
-        if (path === [] || path == null) {
+        if (comparePaths(path, []) || path == null) {
             dispatch({ type: SELECT_LAYER, path })
             return
         }
@@ -38,7 +39,7 @@ export function selectLayer(path = [], shouldInspect = true) {
         if (emote == null && curr.id != null && curr.id in assets) {
             const asset = assets[curr.id]
             if (asset.type === 'bundle' &&
-                !asset.conflicts.emotes.includes(editor.emote)) {
+                !asset.conflicts.emotes.includes(editor.selected.emote)) {
                 emote = asset.conflicts.emotes[0]
             }
         }

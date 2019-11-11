@@ -9,7 +9,7 @@ const CHANGE_LAYERS = 'editor/layers/CHANGE_LAYERS'
 
 // Utility Functions
 // Takes two objects and returns if they are two arrays with equivalent values
-function comparePaths(a, b) {
+export function comparePaths(a, b) {
     if (!(a instanceof Array && b instanceof Array))
         return false
     if (a.length !== b.length)
