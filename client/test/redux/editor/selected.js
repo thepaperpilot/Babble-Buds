@@ -6,7 +6,7 @@ import mock from 'mock-require'
 import { createEmptyHistory } from './editor'
 import fakeReducer from '../../util/fakeReducer'
 import fakeActions from '../../util/fakeActions'
-import undoable, { ActionCreators } from 'redux-undo'
+import undoable from 'redux-undo'
 
 chai.use(chaiRedux)
 

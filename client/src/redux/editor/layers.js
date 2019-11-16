@@ -67,17 +67,16 @@ function checkEditor(dispatch, state) {
 }
 
 // Action Creators
-export function changeLayer(path, layer) {
+export function changeLayer(path, layer = {}) {
     return (dispatch, getState) => {
         const state = getState()
         if (!checkEditor(dispatch, state)) return
 
-        let layers = util.updateObject(state.editor.present.layers || [])
+        let layers = util.updateObject(state.editor.present.layers || {})
         let curr = getLayerAtPath(layers, path.slice(0, -1), true)
         
-        // Create new copies of all the changed layers' ancestors
         if (curr == null) {
-            warn("Unable to change that layer: Layer not found.")
+            dispatch(warn("Unable to change that layer: Layer not found."))
             return
         }
 
@@ -140,7 +139,7 @@ export function changeEmote(path, emote = null) {
 
             // Check if its an asset bundle, in which case change to an internal emote
             // (if there is one)
-            if ('id' in curr && curr.id in assets) {
+            if (curr && 'id' in curr && curr.id in assets) {
                 const asset = assets[curr.id]
                 if (asset.type === 'bundle' && asset.conflicts.emotes.length > 0) {
                     dispatch(setEmote(asset.conflicts.emotes[0]))
@@ -163,7 +162,7 @@ export function deleteLayer(path) {
             return
         }
 
-        const { layers, layer } = state.editor.present
+        const { layers, selected } = state.editor.present
 
         const curr = getLayerAtPath(layers, path.slice(0, -1))
         const index = path[path.length - 1]
@@ -176,10 +175,10 @@ export function deleteLayer(path) {
         children.splice(index, 1)
         dispatch(changeLayer(path.slice(0, -1), { children }))
 
-        if (children.length === 0 && comparePaths(path, layer))
+        if (children.length === 0 && selected.layer && comparePaths(path, selected.layer.slice(0, path.length)))
             dispatch(selectLayer(path.slice(0, -1)))
 
-        if (state.inspector.targetType === 'layer' && comparePaths(state.inspector.target, path))
+        if (state.inspector.targetType === 'layer' && comparePaths(state.inspector.target.slice(0, path.length), path))
             dispatch(close())
     }
 }
