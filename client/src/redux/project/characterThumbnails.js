@@ -7,7 +7,7 @@ const REMOVE = 'project/characterThumbnails/REMOVE'
 const EDIT = 'project/characterThumbnails/EDIT'
 
 // Action Creators
-export function setThumbnails(thumbnails) {
+export function setThumbnails(thumbnails = {}) {
     return { type: SET, thumbnails }
 }
 

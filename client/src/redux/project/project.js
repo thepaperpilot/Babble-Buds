@@ -85,7 +85,7 @@ export function close() {
         dispatch(setSettings(getState().defaults.settings))
         dispatch(setCharacters({}))
         dispatch(setEnvironments({}))
-        dispatch(setThumbnails({}))
+        dispatch(setThumbnails())
         dispatch(clearCharacters())
         dispatch(setAssets({}))
         dispatch(clearActors())
