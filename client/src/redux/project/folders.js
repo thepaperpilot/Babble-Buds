@@ -41,14 +41,20 @@ export function renameFolder(old, newFolder) {
         const self = state.self
 
         let failed = false
+        let succeeded = false
         Object.keys(assets).filter(id => assets[id].tab === old).forEach(id => {
             if (id.split(':')[0] === self) {
                 dispatch(moveAsset(id, newFolder))
+                succeeded = true
             } else failed = true
         })
 
         if (failed)
             dispatch(warn("Unable to remove old folder because some assets inside it are owned by someone else. To delete that folder you'll have to remove those assets and try again."))
+        else
+            dispatch(removeFolder(old))
+        if (!succeeded)
+            dispatch(addFolder(newFolder))
     }
 }
 
