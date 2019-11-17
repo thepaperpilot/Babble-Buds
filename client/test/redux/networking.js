@@ -9,7 +9,7 @@ import disableTimeouts from '../util/disableTimeouts'
 
 chai.use(chaiRedux)
 
-let store, networking, setSinglePlayer
+let networking, setSinglePlayer
 let reducer
 
 const middleware = thunk
@@ -55,7 +55,7 @@ describe('redux/networking', function () {
                 }
             }
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(setSinglePlayer())
         expect(store).to.have
@@ -82,7 +82,7 @@ describe('redux/networking', function () {
                 }
             }
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(setSinglePlayer())
         expect(store).to.have
@@ -110,7 +110,7 @@ describe('redux/networking', function () {
                 }
             }
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(setSinglePlayer())
         expect(store.__history.filter(h => h.action.type !== '@@INIT')).to.be.empty
@@ -133,7 +133,7 @@ describe('redux/networking', function () {
                 }
             }
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(setSinglePlayer())
         expect(store).to.have

@@ -8,7 +8,7 @@ import fakeActions from '../util/fakeActions'
 
 chai.use(chaiRedux)
 
-let store, actors, getActor
+let actors, getActor
 let clearActors, addActor, removeActor, changePuppet, setEmote, moveLeft, moveRight, jiggle, setBabbling
 let reducer
 
@@ -65,7 +65,7 @@ describe('redux/actors', function () {
                 getBasicActor(3)
             ]
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         expect(getActor(store.getState(), 2)).eql(getBasicActor(2))
     })
@@ -78,7 +78,7 @@ describe('redux/actors', function () {
                 getBasicActor(3)
             ]
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(clearActors())
         expect(store).to.have.state.like({ actors: [] })
@@ -91,7 +91,7 @@ describe('redux/actors', function () {
                 assets: {}
             }
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(addActor('test', 'test character', { layers: {} }))
         expect(store).to.have.state.like({
@@ -110,7 +110,7 @@ describe('redux/actors', function () {
                 }
             }
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         const character = {
             layers: {
@@ -155,7 +155,7 @@ describe('redux/actors', function () {
                 }
             }
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         const character = {
             layers: {
@@ -185,7 +185,7 @@ describe('redux/actors', function () {
                 getBasicActor(3)
             ]
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(removeActor(2))
         expect(store).to.have.state.like({
@@ -204,7 +204,7 @@ describe('redux/actors', function () {
                 getBasicActor(3)
             ]
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(changePuppet(2, 'test character 2',
             { name: 'new character' }))
@@ -228,7 +228,7 @@ describe('redux/actors', function () {
                 getBasicActor(3)
             ]
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(setEmote(2, 3))
         expect(store).to.have.state.like({
@@ -248,7 +248,7 @@ describe('redux/actors', function () {
                 getBasicActor(3)
             ]
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(moveLeft(2))
         expect(store).to.have.state.like({
@@ -271,7 +271,7 @@ describe('redux/actors', function () {
                 numCharacters: 3
             }
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(moveLeft(2))
         expect(store).to.have.state.like({
@@ -294,7 +294,7 @@ describe('redux/actors', function () {
                 numCharacters: 3
             }
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(moveLeft(2))
         expect(store).to.have.state.like({
@@ -317,7 +317,7 @@ describe('redux/actors', function () {
                 numCharacters: 3
             }
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(moveRight(2))
         expect(store).to.have.state.like({
@@ -340,7 +340,7 @@ describe('redux/actors', function () {
                 numCharacters: 3
             }
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(moveRight(2))
         expect(store).to.have.state.like({
@@ -363,7 +363,7 @@ describe('redux/actors', function () {
                 numCharacters: 3
             }
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(moveLeft(2))
         expect(store).to.have.state.like({
@@ -383,7 +383,7 @@ describe('redux/actors', function () {
                 getBasicActor(3)
             ]
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(jiggle(1))
         store.dispatch(jiggle(2))
@@ -404,7 +404,7 @@ describe('redux/actors', function () {
                 getBasicActor(3)
             ]
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(setBabbling(1, true))
         store.dispatch(setBabbling(2, false))
@@ -423,7 +423,7 @@ describe('redux/actors', function () {
                 getBasicActor(1)
             ]
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(removeActor(2))
         store.dispatch(changePuppet(2))
@@ -440,13 +440,13 @@ describe('redux/actors', function () {
             environment: null
         })
         expect(store).to.have
-            .dispatched({ type: 'fake action', f: 'warn' })
-            .then.dispatched({ type: 'fake action', f: 'warn' })
-            .then.dispatched({ type: 'fake action', f: 'warn' })
-            .then.dispatched({ type: 'fake action', f: 'warn' })
-            .then.dispatched({ type: 'fake action', f: 'warn' })
-            .then.dispatched({ type: 'fake action', f: 'warn' })
-            .then.dispatched({ type: 'fake action', f: 'warn' })
-            .not.then.dispatched({ type: 'fake action', f: 'warn' })
+            .dispatched({ f: 'warn' })
+            .then.dispatched({ f: 'warn' })
+            .then.dispatched({ f: 'warn' })
+            .then.dispatched({ f: 'warn' })
+            .then.dispatched({ f: 'warn' })
+            .then.dispatched({ f: 'warn' })
+            .then.dispatched({ f: 'warn' })
+            .not.then.dispatched({ f: 'warn' })
     })
 })

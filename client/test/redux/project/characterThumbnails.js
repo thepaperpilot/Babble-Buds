@@ -8,7 +8,7 @@ import fakeActions from '../../util/fakeActions'
 
 chai.use(chaiRedux)
 
-let store, characterThumbnails, setThumbnails, removeThumbnail, updateThumbnail
+let characterThumbnails, setThumbnails, removeThumbnail, updateThumbnail
 let reducer
 
 const middleware = thunk
@@ -41,7 +41,7 @@ describe('redux/project/characterThumbnails', function () {
                 }
             }
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(setThumbnails({
             test2: 'updated'
@@ -64,7 +64,7 @@ describe('redux/project/characterThumbnails', function () {
                 }
             }
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(removeThumbnail('test'))
         expect(store).to.have.state.like({
@@ -86,7 +86,7 @@ describe('redux/project/characterThumbnails', function () {
                 }
             }
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(updateThumbnail('test', 'puppet', 'fake/path'))
         expect(store.getState().project.characterThumbnails.test).to.have.string('file:///fake/path.png?random=')

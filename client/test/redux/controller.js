@@ -8,7 +8,7 @@ import fakeActions from '../util/fakeActions'
 
 chai.use(chaiRedux)
 
-let store, controller
+let controller
 let setActors, setEmote, moveLeft, moveRight, jiggle, changePuppet, setBabbling
 let reducer
 
@@ -44,7 +44,7 @@ describe('redux/controller', () => {
                 actors: []
             }
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(setActors([0]))
         expect(store).to.have.state.like({
@@ -61,7 +61,7 @@ describe('redux/controller', () => {
                 actors: [1, 2]
             }
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(setEmote('emote'))
         expect(store).to.have
@@ -75,7 +75,7 @@ describe('redux/controller', () => {
                 actors: [1, 2]
             }
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(moveLeft())
         expect(store).to.have
@@ -89,7 +89,7 @@ describe('redux/controller', () => {
                 actors: [1, 2]
             }
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(moveRight())
         expect(store).to.have
@@ -103,7 +103,7 @@ describe('redux/controller', () => {
                 actors: [1, 2]
             }
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(jiggle())
         expect(store).to.have
@@ -127,7 +127,7 @@ describe('redux/controller', () => {
                 }
             }
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(changePuppet(0))
         expect(store).to.have
@@ -151,7 +151,7 @@ describe('redux/controller', () => {
                 }
             }
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(changePuppet('test', true))
         expect(store).to.have
@@ -166,7 +166,7 @@ describe('redux/controller', () => {
                 babbling: false
             }
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(setBabbling(true))
         expect(store).to.have

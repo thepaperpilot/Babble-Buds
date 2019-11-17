@@ -10,7 +10,7 @@ import undoable from 'redux-undo'
 
 chai.use(chaiRedux)
 
-let store, selected, setEmote, selectLayer
+let selected, setEmote, selectLayer
 let reducer
 
 const middleware = thunk
@@ -45,22 +45,10 @@ describe('redux/editor/selected', function () {
                 }
             })
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(setEmote(2))
-        expect(store).to.have
-            .state.like({
-                editor: {
-                    ...store.getState().editor,
-                    present: {
-                        selected: {
-                            emote: 2,
-                            layer: null
-                        },
-                        layers: null
-                    }
-                }
-            })
+        expect(store.getState().editor.present.selected.emote).to.eql(2)
     })
 
     it("should select empty layer", () => {
@@ -72,22 +60,10 @@ describe('redux/editor/selected', function () {
                 }
             })
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(selectLayer())
-        expect(store).to.have
-            .state.like({
-                editor: {
-                    ...store.getState().editor,
-                    present: {
-                        selected: {
-                            emote: 0,
-                            layer: []
-                        },
-                        layers: null
-                    }
-                }
-            })
+        expect(store.getState().editor.present.selected.layer).to.be.empty
     })
 
     it("should select non-empty layer", () => {
@@ -101,23 +77,11 @@ describe('redux/editor/selected', function () {
             }),
             project: { assets: {} }
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(selectLayer([0]))
-        expect(store).to.have
-            .state.like({
-                editor: {
-                    ...store.getState().editor,
-                    present: {
-                        selected: {
-                            emote: 0,
-                            layer: [0]
-                        },
-                        layers: { children: [ {} ] }
-                    }
-                }
-            })
-            .then.dispatched({ f: 'inspect', args: [[0], "layer"] })
+        expect(store.getState().editor.present.selected.layer).to.eql([0])
+        expect(store).to.have.dispatched({ f: 'inspect', args: [[0], "layer"] })
     })
 
     it("should warn when selecting non-existent layer", () => {
@@ -131,23 +95,11 @@ describe('redux/editor/selected', function () {
             }),
             project: { assets: {} }
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(selectLayer([0]))
-        expect(store).to.have
-            .state.like({
-                editor: {
-                    ...store.getState().editor,
-                    present: {
-                        ...initialState.editor.present,
-                        selected: {
-                            emote: 0,
-                            layer: null
-                        }
-                    }
-                }
-            })
-            .then.dispatched({ f: 'warn' })
+        expect(store.getState().editor.present.selected.layer).to.be.null
+        expect(store).to.have.dispatched({ f: 'warn' })
     })
 
     it("should set emote when selecting a layer with an emote", () => {
@@ -161,23 +113,12 @@ describe('redux/editor/selected', function () {
             }),
             project: { assets: {} }
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(selectLayer([0]))
-        expect(store).to.have
-            .state.like({
-                editor: {
-                    ...store.getState().editor,
-                    present: {
-                        ...initialState.editor.present,
-                        selected: {
-                            emote: 2,
-                            layer: [0]
-                        }
-                    }
-                }
-            })
-            .then.dispatched({ f: 'inspect', args: [[0], "layer"] })
+        expect(store.getState().editor.present.selected.emote).to.be.eql(2)
+        expect(store.getState().editor.present.selected.layer).to.be.eql([0])
+        expect(store).to.have.dispatched({ f: 'inspect', args: [[0], "layer"] })
     })
 
     it("should set emote when selecting a layer with an asset bundle", () => {
@@ -191,32 +132,16 @@ describe('redux/editor/selected', function () {
             }),
             project: {
                 assets: {
-                    test: {
-                        type: 'bundle',
-                        conflicts: {
-                            emotes: [3]
-                        }
-                    }
+                    test: { type: 'bundle', conflicts: { emotes: [3] } }
                 }
             }
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(selectLayer([0]))
-        expect(store).to.have
-            .state.like({
-                editor: {
-                    ...store.getState().editor,
-                    present: {
-                        ...initialState.editor.present,
-                        selected: {
-                            emote: 3,
-                            layer: [0]
-                        }
-                    }
-                }
-            })
-            .then.dispatched({ f: 'inspect', args: [[0], "layer"] })
+        expect(store.getState().editor.present.selected.emote).to.be.eql(3)
+        expect(store.getState().editor.present.selected.layer).to.be.eql([0])
+        expect(store).to.have.dispatched({ f: 'inspect', args: [[0], "layer"] })
     })
 
     it("should prevent inspecting layer", () => {
@@ -230,22 +155,10 @@ describe('redux/editor/selected', function () {
             }),
             project: { assets: {} }
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(selectLayer([0], false))
-        expect(store).to.have
-            .state.like({
-                editor: {
-                    ...store.getState().editor,
-                    present: {
-                        ...initialState.editor.present,
-                        selected: {
-                            emote: 0,
-                            layer: [0]
-                        }
-                    }
-                }
-            })
-            .not.then.dispatched({ f: 'inspect', args: [[0], "layer"] })
+        expect(store.getState().editor.present.selected.layer).to.be.eql([0])
+        expect(store).to.not.have.dispatched({ f: 'inspect' })
     })
 })

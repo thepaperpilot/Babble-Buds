@@ -9,7 +9,7 @@ import undoable, { ActionCreators } from 'redux-undo'
 
 chai.use(chaiRedux)
 
-let store, editor, open, close, save
+let editor, open, close, save
 let reducer
 
 const middleware = thunk
@@ -54,7 +54,7 @@ describe('redux/editor/editor', function () {
                 layers: null
             })
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(open('test character', 'test layers'))
         expect(store).to.have
@@ -88,7 +88,7 @@ describe('redux/editor/editor', function () {
             })
         }
 
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
         return
 
         store.dispatch(close())

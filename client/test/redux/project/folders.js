@@ -8,7 +8,7 @@ import fakeActions from '../../util/fakeActions'
 
 chai.use(chaiRedux)
 
-let store, folders, setFolders, addFolder, removeFolder, moveFolder, renameFolder
+let folders, setFolders, addFolder, removeFolder, moveFolder, renameFolder
 let reducer
 
 const middleware = thunk
@@ -55,7 +55,7 @@ describe('redux/project/folders', function () {
                 folders: [ 'test' ]
             }
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(setFolders([ 'other test', 'test2' ]))
         expect(store).to.have.state.like({
@@ -72,7 +72,7 @@ describe('redux/project/folders', function () {
                 folders: [ 'test' ]
             }
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(addFolder('testing'))
         expect(store).to.have.state.like({
@@ -89,7 +89,7 @@ describe('redux/project/folders', function () {
                 folders: [ 'test' ]
             }
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(removeFolder('test'))
         expect(store).to.have.state.like({
@@ -98,7 +98,7 @@ describe('redux/project/folders', function () {
                 folders: []
             }
         })
-        .and.not.dispatched({ type: 'fake action', f: 'deleteAssets' })
+        .and.not.dispatched({ f: 'deleteAssets' })
     })
 
     it('should delete folder', () => {
@@ -108,10 +108,10 @@ describe('redux/project/folders', function () {
                 assets: testAssets
             }
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(removeFolder('test', true))
-        expect(store).to.have.dispatched({ type: 'fake action', f: 'deleteAssets', args: [ Object.keys(testAssets) ] })
+        expect(store).to.have.dispatched({ f: 'deleteAssets', args: [ Object.keys(testAssets) ] })
             .then.state.like({
                 project: {
                     ...store.getState().project,
@@ -126,7 +126,7 @@ describe('redux/project/folders', function () {
                 folders: [ 'test', 'test2', 'test3' ]
             }
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(moveFolder(1, 2))
         expect(store).to.have.state.like({
@@ -145,7 +145,7 @@ describe('redux/project/folders', function () {
             },
             self: 'test'
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(renameFolder('test', 'test2'))
         expect(store).to.have.state.like({
@@ -164,13 +164,13 @@ describe('redux/project/folders', function () {
             },
             self: 'test'
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(renameFolder('test', 'test2'))
         const chain = expect(store).to.have
         Object.keys(testAssets).forEach(asset =>
-            chain.then.dispatched({ type: 'fake action', f: 'moveAsset', args:[ asset, 'test2' ] }))
-        chain.not.dispatched({ type: 'fake action', f: 'warn' })
+            chain.then.dispatched({ f: 'moveAsset', args:[ asset, 'test2' ] }))
+        chain.not.dispatched({ f: 'warn' })
     })
 
     it('should rename folder with unowned assets', () => {
@@ -181,16 +181,16 @@ describe('redux/project/folders', function () {
             },
             self: 'test'
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(renameFolder('test', 'test2'))
-        expect(store).to.have.dispatched({ type: 'fake action', f: 'warn'})
+        expect(store).to.have.dispatched({ f: 'warn'})
             .then.have.state.like({
                 project: {
                     ...store.getState().project,
                     folders: [ 'test', 'test2' ]
                 }
             })
-            .not.dispatched({ type: 'fake action', f: 'moveAsset' })
+            .not.dispatched({ f: 'moveAsset' })
     })
 })

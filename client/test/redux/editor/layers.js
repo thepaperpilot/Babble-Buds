@@ -10,7 +10,7 @@ import undoable, { ActionCreators } from 'redux-undo'
 
 chai.use(chaiRedux)
 
-let store, layers
+let layers
 let changeLayer, setLayers, clear, changeEmote
 let deleteLayer, addLayer, wrapLayer
 let reducer
@@ -53,7 +53,7 @@ describe('redux/editor/layers', function () {
                 id: null
             })
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(changeLayer())
         store.dispatch(changeEmote())
@@ -61,12 +61,12 @@ describe('redux/editor/layers', function () {
         store.dispatch(addLayer())
         store.dispatch(wrapLayer())
         expect(store).to.have
-            .dispatched({ type: 'fake action', f: 'warn' })
-            .then.dispatched({ type: 'fake action', f: 'warn' })
-            .then.dispatched({ type: 'fake action', f: 'warn' })
-            .then.dispatched({ type: 'fake action', f: 'warn' })
-            .then.dispatched({ type: 'fake action', f: 'warn' })
-            .not.then.dispatched({ type: 'fake action', f: 'warn' })
+            .dispatched({ f: 'warn' })
+            .then.dispatched({ f: 'warn' })
+            .then.dispatched({ f: 'warn' })
+            .then.dispatched({ f: 'warn' })
+            .then.dispatched({ f: 'warn' })
+            .not.then.dispatched({ f: 'warn' })
     })
 
     it("should warn if path doesn't exist", () => {
@@ -79,7 +79,7 @@ describe('redux/editor/layers', function () {
             project: { assets: {} },
             inspector: {}
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(changeLayer([0,0]))
         store.dispatch(changeEmote([0,0]))
@@ -87,14 +87,14 @@ describe('redux/editor/layers', function () {
         store.dispatch(addLayer([0,0]))
         store.dispatch(wrapLayer([0,0]))
         expect(store).to.have
-            .dispatched({ type: 'fake action', f: 'warn' })
-            .then.dispatched({ type: 'fake action', f: 'warn' })
+            .dispatched({ f: 'warn' })
+            .then.dispatched({ f: 'warn' })
             // changeEmote will set the emote even if it doesn't change the layer's emote
-            .then.dispatched({ type: 'fake action', f: 'setEmote' })
-            .then.dispatched({ type: 'fake action', f: 'warn' })
-            .then.dispatched({ type: 'fake action', f: 'warn' })
-            .then.dispatched({ type: 'fake action', f: 'warn' })
-            .not.then.dispatched({ type: 'fake action', f: 'warn' })
+            .then.dispatched({ f: 'setEmote' })
+            .then.dispatched({ f: 'warn' })
+            .then.dispatched({ f: 'warn' })
+            .then.dispatched({ f: 'warn' })
+            .not.then.dispatched({ f: 'warn' })
     })
 
     it("should change layer", () => {
@@ -111,22 +111,10 @@ describe('redux/editor/layers', function () {
             project: { assets: {} },
             inspector: {}
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(changeLayer([0], { name: 'updated' }))
-        expect(store).to.have.state.like({
-            editor: {
-                ...store.getState().editor,
-                present: {
-                    ...store.getState().editor.present,
-                    layers: {
-                        children: [
-                            { name: 'updated' }
-                        ]
-                    }
-                }
-            }
-        })
+        expect(store.getState().editor.present.layers.children[0].name).to.eql('updated')
     })
 
     it("should set layers", () => {
@@ -143,29 +131,14 @@ describe('redux/editor/layers', function () {
             project: { assets: {} },
             inspector: {}
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(setLayers({
             children: [
                 { name: 'updated' }
             ]
         }))
-        expect(store).to.have.state.like({
-            editor: {
-                ...store.getState().editor,
-                present: {
-                    ...store.getState().editor.present,
-                    layers: {
-                        children: [
-                            {
-                                ...store.getState().editor.present.layers.children[0],
-                                name: 'updated'
-                            }
-                        ]
-                    }
-                }
-            }
-        })
+        expect(store.getState().editor.present.layers.children[0].name).to.eql('updated')
     })
 
     it("should clear", () => {
@@ -182,18 +155,10 @@ describe('redux/editor/layers', function () {
             project: { assets: {} },
             inspector: {}
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(clear())
-        expect(store).to.have.state.like({
-            editor: {
-                ...store.getState().editor,
-                present: {
-                    ...store.getState().editor.present,
-                    layers: null
-                }
-            }
-        })
+        expect(store.getState().editor.present.layers).to.be.null
     })
 
     it("should change emote", () => {
@@ -210,26 +175,11 @@ describe('redux/editor/layers', function () {
             project: { assets: {} },
             inspector: {}
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(changeEmote([0], 2))
-        expect(store).to.have.state.like({
-            editor: {
-                ...store.getState().editor,
-                present: {
-                    ...store.getState().editor.present,
-                    layers: {
-                        children: [
-                            {
-                                name: 'test',
-                                emote: 2
-                            }
-                        ]
-                    }
-                }
-            }
-        })
-        .then.dispatched({ type: 'fake action', f: 'setEmote', args: [2] })
+        expect(store.getState().editor.present.layers.children[0].emote).to.eql(2)
+        expect(store).to.have.dispatched({ f: 'setEmote', args: [2] })
     })
 
     it("should remove an emote", () => {
@@ -246,26 +196,11 @@ describe('redux/editor/layers', function () {
             project: { assets: {} },
             inspector: {}
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(changeEmote([0]))
-        expect(store).to.have.state.like({
-            editor: {
-                ...store.getState().editor,
-                present: {
-                    ...store.getState().editor.present,
-                    layers: {
-                        children: [
-                            {
-                                name: 'test',
-                                emote: null
-                            }
-                        ]
-                    }
-                }
-            }
-        })
-        .then.dispatched({ type: 'fake action', f: 'setEmote', args: [] })
+        expect(store.getState().editor.present.layers.children[0].emote).to.be.null
+        expect(store).to.have.dispatched({ f: 'setEmote', args: [] })
     })
 
     it("should remove an emote with an emote inside an asset bundle", () => {
@@ -288,27 +223,11 @@ describe('redux/editor/layers', function () {
             } },
             inspector: {}
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(changeEmote([0]))
-        expect(store).to.have.state.like({
-            editor: {
-                ...store.getState().editor,
-                present: {
-                    ...store.getState().editor.present,
-                    layers: {
-                        children: [
-                            {
-                                name: 'test',
-                                emote: null,
-                                id: 'test'
-                            }
-                        ]
-                    }
-                }
-            }
-        })
-        .then.dispatched({ type: 'fake action', f: 'setEmote', args: [4] })
+        expect(store.getState().editor.present.layers.children[0].emote).to.be.null
+        expect(store).to.have.dispatched({ f: 'setEmote', args: [4] })
     })
 
     it("should delete a top-level layer", () => {
@@ -325,20 +244,10 @@ describe('redux/editor/layers', function () {
             project: { assets: {} },
             inspector: {}
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(deleteLayer([0]))
-        expect(store).to.have.state.like({
-            editor: {
-                ...store.getState().editor,
-                present: {
-                    ...store.getState().editor.present,
-                    layers: {
-                        children: []
-                    }
-                }
-            }
-        })
+        expect(store.getState().editor.present.layers.children).to.be.empty
     })
 
     it("should close inspector when deleting open layer", () => {
@@ -355,21 +264,11 @@ describe('redux/editor/layers', function () {
             project: { assets: {} },
             inspector: { targetType: 'layer', target: [0] }
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(deleteLayer([0]))
-        expect(store).to.have.state.like({
-            editor: {
-                ...store.getState().editor,
-                present: {
-                    ...store.getState().editor.present,
-                    layers: {
-                        children: []
-                    }
-                }
-            }
-        })
-        .then.dispatched({ type: 'fake action', f: 'close' })
+        expect(store.getState().editor.present.layers.children).to.be.empty
+        expect(store).to.have.dispatched({ f: 'close' })
     })
 
     it("should close inspector when deleting parent of open layer", () => {
@@ -386,21 +285,11 @@ describe('redux/editor/layers', function () {
             project: { assets: {} },
             inspector: { targetType: 'layer', target: [0,0] }
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(deleteLayer([0]))
-        expect(store).to.have.state.like({
-            editor: {
-                ...store.getState().editor,
-                present: {
-                    ...store.getState().editor.present,
-                    layers: {
-                        children: []
-                    }
-                }
-            }
-        })
-        .then.dispatched({ type: 'fake action', f: 'close' })
+        expect(store.getState().editor.present.layers.children).to.be.empty
+        expect(store).to.have.dispatched({ f: 'close' })
     })
 
     it("should not close inspector when deleting non-open layer", () => {
@@ -417,21 +306,11 @@ describe('redux/editor/layers', function () {
             project: { assets: {} },
             inspector: { targetType: 'layer', target: [1] }
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(deleteLayer([0]))
-        expect(store).to.have.state.like({
-            editor: {
-                ...store.getState().editor,
-                present: {
-                    ...store.getState().editor.present,
-                    layers: {
-                        children: []
-                    }
-                }
-            }
-        })
-        .then.not.dispatched({ type: 'fake action', f: 'close' })
+        expect(store.getState().editor.present.layers.children).to.be.empty
+        expect(store).to.not.have.dispatched({ f: 'close' })
     })
 
     it("should delete selected top-level layer", () => {
@@ -448,21 +327,11 @@ describe('redux/editor/layers', function () {
             project: { assets: {} },
             inspector: {}
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(deleteLayer([0]))
-        expect(store).to.have.state.like({
-            editor: {
-                ...store.getState().editor,
-                present: {
-                    ...store.getState().editor.present,
-                    layers: {
-                        children: []
-                    }
-                }
-            }
-        })
-        .then.dispatched({ type: 'fake action', f: 'selectLayer', args: [[]] })
+        expect(store.getState().editor.present.layers.children).to.be.empty
+        expect(store).to.have.dispatched({ f: 'selectLayer', args: [[]] })
     })
 
     it("should delete selected non-top-level layer", () => {
@@ -479,23 +348,11 @@ describe('redux/editor/layers', function () {
             project: { assets: {} },
             inspector: {}
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(deleteLayer([0,0]))
-        expect(store).to.have.state.like({
-            editor: {
-                ...store.getState().editor,
-                present: {
-                    ...store.getState().editor.present,
-                    layers: {
-                        children: [
-                            { children: [] }
-                        ]
-                    }
-                }
-            }
-        })
-        .then.dispatched({ type: 'fake action', f: 'selectLayer', args: [[0]] })
+        expect(store.getState().editor.present.layers.children[0].children).to.be.empty
+        expect(store).to.have.dispatched({ f: 'selectLayer', args: [[0]] })
     })
 
     it("should add layer", () => {
@@ -510,29 +367,10 @@ describe('redux/editor/layers', function () {
             project: { assets: {} },
             inspector: {}
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(addLayer([0], { name: 'test' }))
-        expect(store).to.have.state.like({
-            editor: {
-                ...store.getState().editor,
-                present: {
-                    ...store.getState().editor.present,
-                    layers: {
-                        children: [
-                            {
-                                children: [
-                                    {
-                                        ...store.getState().editor.present.layers.children[0].children[0],
-                                        name: 'test'
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                }
-            }
-        })
+        expect(store.getState().editor.present.layers.children[0].children).to.have.lengthOf(1)
     })
 
     it("should warn if adding layer to asset layer", () => {
@@ -547,21 +385,11 @@ describe('redux/editor/layers', function () {
             project: { assets: {} },
             inspector: {}
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(addLayer([0], { name: 'test' }))
-        expect(store).to.have.state.like({
-            editor: {
-                ...store.getState().editor,
-                present: {
-                    ...store.getState().editor.present,
-                    layers: {
-                        children: [ { id: 'test' } ]
-                    }
-                }
-            }
-        })
-        .then.dispatched({ type: 'fake action', f: 'warn' })
+        expect(store.getState().editor.present.layers.children[0].children).to.be.undefined
+        expect(store).to.have.dispatched({ f: 'warn' })
     })
 
     it("should add root layer", () => {
@@ -576,25 +404,10 @@ describe('redux/editor/layers', function () {
             project: { assets: {} },
             inspector: {}
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(addLayer([], { name: 'test' }))
-        expect(store).to.have.state.like({
-            editor: {
-                ...store.getState().editor,
-                present: {
-                    ...store.getState().editor.present,
-                    layers: {
-                        children: [
-                            {
-                                ...store.getState().editor.present.layers.children[0],
-                                name: 'test'
-                            }
-                        ]
-                    }
-                }
-            }
-        })
+        expect(store.getState().editor.present.layers.children).to.have.lengthOf(1)
     })
 
     it("should wrap layer", () => {
@@ -609,29 +422,9 @@ describe('redux/editor/layers', function () {
             project: { assets: {} },
             inspector: {}
         }
-        store = chai.createReduxStore({ reducer, middleware, initialState })
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(wrapLayer([0]))
-        expect(store).to.have.state.like({
-            editor: {
-                ...store.getState().editor,
-                present: {
-                    ...store.getState().editor.present,
-                    layers: {
-                        children: [
-                            {
-                                ...store.getState().editor.present.layers.children[0],
-                                children: [
-                                    {
-                                        ...store.getState().editor.present.layers.children[0].children[0],
-                                        name: 'test'
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                }
-            }
-        })
+        expect(store.getState().editor.present.layers.children[0].children[0].name).to.eql('test')
     })
 })
