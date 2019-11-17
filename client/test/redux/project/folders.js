@@ -30,7 +30,7 @@ describe('redux/project/folders', function () {
         mock('../../../src/redux/status', fakeActions('warn'))
         mock('../../../src/redux/project/assets/actions', fakeActions('moveAsset', 'deleteAssets'))
 
-        const f = require('../../../src/redux/project/folders')
+        const f = mock.reRequire('../../../src/redux/project/folders')
         folders = f.default
         setFolders = f.setFolders
         addFolder = f.addFolder

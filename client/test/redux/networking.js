@@ -21,7 +21,7 @@ describe('redux/networking', function () {
         mock('../../src/redux/controller', fakeActions('setActors'))
         disableTimeouts()
 
-        const n = require('../../src/redux/networking')
+        const n = mock.reRequire('../../src/redux/networking')
         networking = n.default
         setSinglePlayer = n.setSinglePlayer
 

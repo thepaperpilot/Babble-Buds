@@ -1,3 +1,4 @@
+import '../util/mock-electron'
 import chai, { expect } from 'chai'
 import chaiRedux from 'chai-redux'
 import thunk from 'redux-thunk'

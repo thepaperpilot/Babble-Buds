@@ -34,7 +34,7 @@ describe('redux/editor/editor', function () {
             ActionCreators: fakeActions('clearHistory')
         }))
 
-        const e = require('../../../src/redux/editor/editor')
+        const e = mock.reRequire('../../../src/redux/editor/editor')
         editor = e.default
         open = e.open
         close = e.close

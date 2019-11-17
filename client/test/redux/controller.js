@@ -20,7 +20,7 @@ describe('redux/controller', () => {
             fakeActions('setEmote', 'moveLeft', 'moveRight', 'jiggle',
                 'changePuppet', 'setBabbling'))
 
-        const c = require('../../src/redux/controller')
+        const c = mock.reRequire('../../src/redux/controller')
         controller = c.default
         setActors = c.setActors
         setEmote = c.setEmote

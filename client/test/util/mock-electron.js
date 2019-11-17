@@ -14,6 +14,9 @@ mock('electron', {
     },
     remote: {
         // Used in redux/settings.js to get to the main process' settings manager
-        require: () => require('../../src/main-process/settings')
+        require: () => require('../../src/main-process/settings'),
+        app: {
+            getVersion: () => process.env.npm_package_version
+        }
     }
 })

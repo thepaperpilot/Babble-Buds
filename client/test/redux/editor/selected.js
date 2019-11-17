@@ -20,7 +20,7 @@ describe('redux/editor/selected', function () {
         mock('../../../src/redux/status', fakeActions('warn'))
         mock('../../../src/redux/inspector', fakeActions('inspect'))
 
-        const s = require('../../../src/redux/editor/selected')
+        const s = mock.reRequire('../../../src/redux/editor/selected')
         selected = s.default
         setEmote = s.setEmote
         selectLayer = s.selectLayer

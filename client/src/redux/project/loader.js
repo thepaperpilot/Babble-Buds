@@ -11,6 +11,7 @@ export function loadCharacters(settings, charactersPath, defaults) {
     const characters = {}
     const environments = {}
     const characterThumbnails = {}
+    const errors = []
     let converted = false
 
     let numCharacters = 0
@@ -146,7 +147,7 @@ export function loadCharacters(settings, charactersPath, defaults) {
             numCharacters = id
     }
 
-    return {characters, environments, characterThumbnails, numCharacters, converted}
+    return {characters, environments, characterThumbnails, numCharacters, converted, errors}
 }
 
 // Loads and automatically converts a project's assets

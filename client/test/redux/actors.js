@@ -35,7 +35,7 @@ describe('redux/actors', function () {
         mock('../../src/redux/status',
             fakeActions('warn'))
 
-        const a = require('../../src/redux/actors')
+        const a = mock.reRequire('../../src/redux/actors')
         actors = a.default
         getActor = a.getActor
         clearActors = a.clearActors

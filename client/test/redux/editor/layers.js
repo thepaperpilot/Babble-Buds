@@ -24,7 +24,7 @@ describe('redux/editor/layers', function () {
         mock('../../../src/redux/status', fakeActions('warn'))
         mock('../../../src/redux/inspector', fakeActions('inspect', 'close'))
 
-        const l = require('../../../src/redux/editor/layers')
+        const l = mock.reRequire('../../../src/redux/editor/layers')
         layers = l.default
         changeLayer = l.changeLayer
         setLayers = l.setLayers

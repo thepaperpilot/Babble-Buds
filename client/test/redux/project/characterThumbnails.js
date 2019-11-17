@@ -17,7 +17,7 @@ describe('redux/project/characterThumbnails', function () {
     before(() => {
         mock('../../../src/redux/status', fakeActions('log'))
 
-        const c = require('../../../src/redux/project/characterThumbnails')
+        const c = mock.reRequire('../../../src/redux/project/characterThumbnails')
         characterThumbnails = c.default
         setThumbnails = c.setThumbnails
         removeThumbnail = c.removeThumbnail
