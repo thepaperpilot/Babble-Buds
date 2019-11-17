@@ -11,13 +11,24 @@ export function loadCharacters(settings, charactersPath, defaults) {
     const characters = {}
     const environments = {}
     const characterThumbnails = {}
-    const errors = []
+    const characterErrors = []
+    const environmentErrors = []
     let converted = false
 
     let numCharacters = 0
     for (let i = 0; i < settings.characters.length; i++) {
-        const loadedCharacter =
-            fs.readJsonSync(path.join(charactersPath, settings.characters[i].location))
+        const characterPath = path.join(charactersPath, settings.characters[i].location)
+        if (!fs.existsSync(characterPath)) {
+            characterErrors.push({ index: i, error: 'File doesn\'t exist' })
+            continue
+        }
+
+        const loadedCharacter = fs.readJsonSync(characterPath, { throws: false })
+        if (loadedCharacter == null) {
+            characterErrors.push({ index: i, error: 'Invalid JSON syntax' })
+            continue
+        }
+
         const id = settings.characters[i].id
         const character = characters[id] =
             Object.assign({}, defaults.character, loadedCharacter)
@@ -54,34 +65,30 @@ export function loadCharacters(settings, charactersPath, defaults) {
             }
             character.emotes = arr
             character.emote = emotes.indexOf(character.emote || 'default')
-            if (settings.actor.id === character.id) {
+            if (settings.actor && settings.actor.id === character.id) {
                 settings.actor.emote = emotes.indexOf(character.emote || 'default')
             }
-            for (let i = 0; i < character.eyes.length; i++) {
-                character.eyes[i] = emotes.indexOf(character.eyes[i] || 'default')
-            }
-            for (let i = 0; i < character.mouths.length; i++) {
-                character.mouths[i] = emotes.indexOf(character.mouths[i] || 'default')
-            }
+
+            if (character.eyes)
+                for (let i = 0; i < character.eyes.length; i++) {
+                    character.eyes[i] = emotes.indexOf(character.eyes[i] || 'default')
+                }
+
+            if (character.mouths)
+                for (let i = 0; i < character.mouths.length; i++) {
+                    character.mouths[i] = emotes.indexOf(character.mouths[i] || 'default')
+                }
         }
 
-        const layers = ['body', 'head', 'hat', 'props']
+        const layers = ['body', 'head', 'emotes', 'hat', 'props']
         // Backwards compatibility: Convert from old layers system
-        if ('body' in character) {
+        character.layers = character.layers || {}
+        if (layers.some(l => l in character)) {
             converted = true
-            const layer = character.layers = { children: [] }
-            layers.forEach(l => {
-                const child = {
-                    name: l,
-                    children: character[l].map(e => {
-                        e.leaf = 'true'
-                        return e
-                    })
-                }
-                if (l === 'hat' || l === 'head')
-                    child.head = true
-                layer.children.push(child)
-            })
+            const layer = character.layers
+            if (layer.children == null)
+                layer.children = []
+
             const emotes = []
             character.emotes.forEach((e, i) => {
                 if (!e.enabled) return
@@ -102,10 +109,26 @@ export function loadCharacters(settings, charactersPath, defaults) {
                     })
                 })
             })
-            layer.children.splice(2, 0, {
-                name: 'emotes',
-                head: true,
-                children: emotes
+
+            layers.filter(l => l in character).forEach(l => {
+                if (l == 'emotes') {
+                    layer.children.push({
+                        name: 'emotes',
+                        head: true,
+                        children: emotes
+                    })
+                    return
+                }
+                const child = {
+                    name: l,
+                    children: character[l].map(e => {
+                        e.leaf = 'true'
+                        return e
+                    })
+                }
+                if (l === 'hat' || l === 'head')
+                    child.head = true
+                layer.children.push(child)
             })
 
             delete character.emotes
@@ -134,8 +157,18 @@ export function loadCharacters(settings, charactersPath, defaults) {
         // TODO if we ever need to add backwards-compatibility checks for environments,
         // it may be better to extract out a processCharacter function and feed environments
         // through it as well
-        const loadedEnvironment =
-            fs.readJsonSync(path.join(charactersPath, settings.environments[i].location))
+        const environmentPath = path.join(charactersPath, settings.environments[i].location)
+        if (!fs.existsSync(environmentPath)) {
+            environmentErrors.push({ index: i, error: 'File doesn\'t exist' })
+            continue
+        }
+
+        const loadedEnvironment = fs.readJsonSync(environmentPath, { throws: false })
+        if (loadedEnvironment == null) {
+            environmentErrors.push({ index: i, error: 'Invalid JSON syntax' })
+            continue
+        }
+        
         const id = settings.environments[i].id
         environments[id] =
             Object.assign({}, defaults.environment, loadedEnvironment)
@@ -147,7 +180,15 @@ export function loadCharacters(settings, charactersPath, defaults) {
             numCharacters = id
     }
 
-    return {characters, environments, characterThumbnails, numCharacters, converted, errors}
+    return {
+        characters,
+        environments,
+        characterThumbnails,
+        numCharacters,
+        converted,
+        characterErrors,
+        environmentErrors
+    }
 }
 
 // Loads and automatically converts a project's assets
@@ -186,7 +227,14 @@ export function loadAssets(settings, assetsPath, characters) {
         Object.values(characters).forEach(character => updateAsset(character.layers))
         return { assets: newAssets, folders }
     } else {
-        const assets = fs.readJsonSync(path.join(assetsPath, 'assets.json'))
+        const assetsFilePath = path.join(assetsPath, 'assets.json')
+        if (!fs.existsSync(assetsFilePath))
+            return { error: 'File not found' }
+
+        const assets = fs.readJsonSync(assetsFilePath, { throws: false })
+        if (assets == null)
+            return { error: 'Invalid JSON syntax' }
+
         const folders = settings.folders || (settings.folders = [])
 
         // Cross compatibility - windows will handle UNIX-style paths, but not vice versa

@@ -1,0 +1,7 @@
+{
+    "testid": {
+        "type": "sprite",
+        "name": "My test sprite",
+        "location": "testid.png"
+    }
+}

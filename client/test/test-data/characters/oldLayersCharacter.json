@@ -1,0 +1,18 @@
+{
+    "deadbonesStyle": false,
+    "name": "New Puppet",
+    "body": [ { "id": "test" } ],
+    "emotes": {
+        "default": {
+            "enabled": true,
+            "mouth": [ { "id": "test" } ],
+            "eyes": [ { "id": "test" } ]
+        }
+    },
+    "mouths": [
+        0
+    ],
+    "eyes": [
+        0
+    ]
+}

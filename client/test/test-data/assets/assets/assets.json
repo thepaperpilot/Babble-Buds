@@ -1,0 +1,10 @@
+{
+    "test:testid": {
+        "tab": "test1",
+        "type": "sprite",
+        "version": 0,
+        "panning": [],
+        "name": "My test sprite",
+        "location": "testid.png"
+    }
+}

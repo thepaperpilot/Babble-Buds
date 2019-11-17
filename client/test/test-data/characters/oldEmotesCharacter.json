@@ -1,0 +1,26 @@
+{
+    "deadbonesStyle": false,
+    "name": "New Puppet",
+    "layers": {
+        "children": []
+    },
+    "emotes": {
+        "default": {
+            "enabled": true,
+            "mouth": [],
+            "eyes": []
+        },
+        "happy": {
+            "enabled": true,
+            "mouth": [],
+            "eyes": []
+        }
+    },
+    "eyes": [
+        0,
+        1
+    ],
+    "mouths": [
+        0
+    ]
+}
