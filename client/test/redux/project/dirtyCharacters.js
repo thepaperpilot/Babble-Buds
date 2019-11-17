@@ -2,7 +2,6 @@ import chai, { expect } from 'chai'
 import chaiRedux from 'chai-redux'
 import thunk from 'redux-thunk'
 import { combineReducers } from 'redux'
-import mock from 'mock-require'
 import dirtyCharacters, { addCharacters, clearCharacters } from '../../../src/redux/project/dirtyCharacters'
 
 chai.use(chaiRedux)
@@ -16,8 +15,6 @@ const reducer = combineReducers({
 const middleware = thunk
 
 describe('redux/project/dirtyCharacters', function () {
-    after(mock.stopAll)
-
     it("should add characters", () => {
         const initialState = {
             project: {
