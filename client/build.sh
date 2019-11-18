@@ -1,3 +1,4 @@
+(cd build; npm install)
 mkdir build/.public
 mv build/* build/.public
 mv build/.public build/public

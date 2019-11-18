@@ -166,7 +166,6 @@ class Panels extends Component {
                     ref={this.layout}
                     model={this.state.model}
                     factory={this.factory.bind(this)}
-                    onRenderTab={console.log}
                     onModelChange={this.onModelChange} />
             </div>
         )
