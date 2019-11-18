@@ -10,7 +10,7 @@ export const REMOVE = 'project/characters/REMOVE'
 export const EDIT = 'project/characters/EDIT'
 
 // Action Creators
-export function setCharacters(characters) {
+export function setCharacters(characters = {}) {
     return { type: SET, characters }
 }
 

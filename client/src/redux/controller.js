@@ -14,7 +14,7 @@ const SET_ACTORS = 'controller/SET_ACTORS'
 const SET_BABBLING = 'controller/SET_BABBLING'
 
 // Action Creators
-export function setActors(actors) {
+export function setActors(actors = []) {
     return { type: SET_ACTORS, actors }
 }
 

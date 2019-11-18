@@ -10,7 +10,7 @@ export const REMOVE = 'project/environments/REMOVE'
 export const EDIT = 'project/environments/EDIT'
 
 // Action Creators
-export function setEnvironments(environments) {
+export function setEnvironments(environments = {}) {
     return { type: SET, environments }
 }
 

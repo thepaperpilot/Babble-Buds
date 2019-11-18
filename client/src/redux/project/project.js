@@ -83,13 +83,13 @@ export function close() {
     return (dispatch, getState) => {
         dispatch({ type: SET_PROJECT, project: null })
         dispatch(setSettings(getState().defaults.settings))
-        dispatch(setCharacters({}))
-        dispatch(setEnvironments({}))
+        dispatch(setCharacters())
+        dispatch(setEnvironments())
         dispatch(setThumbnails())
         dispatch(clearCharacters())
-        dispatch(setAssets({}))
+        dispatch(setAssets())
         dispatch(clearActors())
-        dispatch(setActors([]))
+        dispatch(setActors())
     }
 }
 
@@ -104,7 +104,12 @@ export function load(filepath) {
         }
 
         // Loads project settings with defaults
-        const settings = util.updateObject(state.defaults.settings, fs.readJsonSync(filepath))
+        const loadedSettings = fs.readJsonSync(filepath, { throws: false })
+        if (loadedSettings == null) {
+            dispatch(warn(`Couldn't open project at ${filepath}. Invalid JSON syntax.`))
+            return
+        }
+        const settings = util.updateObject(state.defaults.settings, loadedSettings)
 
         // Confirm loading project if mismatched versions
         if (!confirmOpen())
@@ -117,9 +122,18 @@ export function load(filepath) {
 
         // Load assets and characters and environments
         const assetsPath = path.join(filepath, settings.assetsPath || '../assets')
-        let {characters, environments, characterThumbnails, numCharacters, converted} =
+        let {characters, environments, characterThumbnails, numCharacters, converted, characterErrors, environmentErrors} =
             loadCharacters(settings, path.join(filepath, settings.charactersPath), state.defaults)
-        const {assets} = loadAssets(settings, assetsPath, characters)
+
+        // Warn if there were any errors loading the characters or environments
+        if (characterErrors.length > 0)
+            dispatch(warn(`Error loading the following characters: ${characterErrors.map(e => `${e.index} (${e.error})`).join(';')}`))
+        if (environmentErrors.length > 0)
+            dispatch(warn(`Error loading the following environments: ${environmentErrors.map(e => `${e.index} (${e.error})`).join(';')}`))
+
+        const {assets, error} = loadAssets(settings, assetsPath, characters)
+        if (error)
+            dispatch(warn(`Failed to load assets: ${error}`))
         delete settings.assets
 
         // Update old stage settings to new environments system

@@ -1,0 +1,53 @@
+{
+    "clientVersion": "1.0.0",
+    "alwaysOnTop": false,
+    "networking": {
+        "ip": "babblebuds.xyz",
+        "port": 8080,
+        "roomName": "lobby",
+        "roomPassword": ""
+    },
+    "nickname": "nickname",
+    "charactersPath": "../characters",
+    "assetsPath": "../assets",
+    "characters": [],
+    "environments": [],
+    "hotbar": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+    ],
+    "shortcuts": {
+        "Select puppet 1": null,
+        "Select puppet 2": null,
+        "Select puppet 3": null,
+        "Select puppet 4": null,
+        "Select puppet 5": null,
+        "Select puppet 6": null,
+        "Select puppet 7": null,
+        "Select puppet 8": null,
+        "Select puppet 9": null,
+        "Select emote 1": null,
+        "Select emote 2": null,
+        "Select emote 3": null,
+        "Select emote 4": null,
+        "Select emote 5": null,
+        "Select emote 6": null,
+        "Select emote 7": null,
+        "Select emote 8": null,
+        "Select emote 9": null,
+        "Select emote 10": null,
+        "Select emote 11": null,
+        "Select emote 12": null,
+        "Toggle babbling": null,
+        "Move left": null,
+        "Move right": null,
+        "Jiggle": null
+    }
+}

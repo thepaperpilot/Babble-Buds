@@ -47,7 +47,7 @@ export function getConflicts(assets, layers) {
 }
 
 // Action Creators
-export function setAssets(assets) {
+export function setAssets(assets = {}) {
     return (dispatch, getState) => {
         let folders = Object.values(assets).reduce((acc, curr) => {
             if (acc.includes(curr.tab)) return acc

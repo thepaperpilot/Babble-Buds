@@ -230,11 +230,11 @@ export function loadAssets(settings, assetsPath, characters) {
     } else {
         const assetsFilePath = path.join(assetsPath, 'assets.json')
         if (!fs.existsSync(assetsFilePath))
-            return { error: 'File not found' }
+            return { error: 'File not found', assets: {} }
 
         const assets = fs.readJsonSync(assetsFilePath, { throws: false })
         if (assets == null)
-            return { error: 'Invalid JSON syntax' }
+            return { error: 'Invalid JSON syntax', assets: {} }
 
         const folders = settings.folders || (settings.folders = [])
 
