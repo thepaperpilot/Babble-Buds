@@ -47,14 +47,18 @@ class BackgroundInterface extends Component {
         let updated = assetsPath !== this.props.assetsPath
         let updatedAssets = []
 
-        Object.keys(this.props.assets).filter(id =>
+        const assetKeys = [
+            ...Object.keys(this.props.assets),
+            ...Object.keys(assets)
+        ]
+        assetKeys.filter(id =>
             // asset doesn't exist in new assets list (it got deleted)
             !(id in assets) ||
             // asset was changed
                 assets[id] !== this.props.assets[id]).forEach(id => {
             updated = true
             // If the asset was a bundle
-            if (this.props.assets[id].type === 'bundle' &&
+            if (id in this.props.assets && this.props.assets[id].type === 'bundle' &&
                 // and was either deleted or has incremented the version field
                 (!(id in assets) || assets[id].version !== this.props.assets[id].version)) {
                 updatedAssets.push(id)
