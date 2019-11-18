@@ -141,6 +141,37 @@ describe('redux/editor/layers', function () {
         expect(store.getState().editor.present.layers.children[0].name).to.eql('updated')
     })
 
+    it("should move selected layers", () => {
+        const initialState = {
+            editor: createEmptyHistory({
+                id: 0,
+                layers: {
+                    children: [
+                        { children: [ { name: 'test', path: [0, 0] } ] }
+                    ]
+                },
+                selected: { layer: [0, 0] }
+            }),
+            project: { assets: {} },
+            inspector: {}
+        }
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
+
+        store.dispatch(setLayers({
+            children: [
+                { children: [] },
+                { name: 'test', path: [0, 0] }
+            ]
+        }))
+        expect(store).to.have.state.like({
+            editor: {
+                ...store.getState().editor
+            }
+        })
+        // Making sure this gets dispatched only after the state changes
+        .then.dispatched({ f: 'selectLayer', args: [[1]] })
+    })
+
     it("should clear", () => {
         const initialState = {
             editor: createEmptyHistory({

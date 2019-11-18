@@ -98,16 +98,19 @@ export function changeLayer(path, layer = {}) {
             delete curr.emoteLayer
 
         // If we changed our children, update their paths
+        let newSelected = state.editor.present.selected.layer
         if ('children' in layer) {
-            const newSelected =
+            newSelected =
                 updatePaths(curr, state.editor.present.selected.layer, curr.inherit, curr.path)
-            if (newSelected !== state.editor.present.selected.layer) {
-                dispatch(selectLayer(newSelected))
-            }
         }
 
         // Store our new layers object
         dispatch({ type: CHANGE_LAYERS, layers })
+        
+        // Reselect moved layer, if applicable
+        if (newSelected !== state.editor.present.selected.layer) {
+            dispatch(selectLayer(newSelected))
+        }
     }
 }
 
