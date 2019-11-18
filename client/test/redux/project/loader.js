@@ -6,13 +6,26 @@ import path from 'path'
 const charactersPath = path.join(__dirname, '..', '..', 'test-data', 'characters')
 const assetsPath = path.join(__dirname, '..', '..', 'test-data', 'assets')
 
+const defaults = {
+    character: {
+        layers: {
+            children: []
+        }
+    },
+    environment: {
+        layers: {
+            children: []
+        }
+    }
+}
+
 describe('redux/project/loader', function () {
     it('should error if loading character from non-existent file', () => {
         const settings = {
             characters: [ { location: 'doesn\'t exist', id: 1 } ],
             environments: []
         }
-        expect(loadCharacters(settings, charactersPath, {}).characterErrors).to.have.lengthOf(1)
+        expect(loadCharacters(settings, charactersPath, defaults).characterErrors).to.have.lengthOf(1)
     })
 
     it('should error if loading character from non-json file', () => {
@@ -20,7 +33,7 @@ describe('redux/project/loader', function () {
             characters: [ { location: 'invalid.json', id: 1 } ],
             environments: []
         }
-        expect(loadCharacters(settings, charactersPath, {}).characterErrors).to.have.lengthOf(1)
+        expect(loadCharacters(settings, charactersPath, defaults).characterErrors).to.have.lengthOf(1)
     })
 
     it('should handle loading empty character', () => {
@@ -28,7 +41,7 @@ describe('redux/project/loader', function () {
             characters: [ { location: 'empty.json', id: 1 } ],
             environments: []
         }
-        expect(loadCharacters(settings, charactersPath, {}).characters[1]).to.exist
+        expect(loadCharacters(settings, charactersPath, defaults).characters[1]).to.exist
     })
 
     it('should load characters', () => {
@@ -36,7 +49,22 @@ describe('redux/project/loader', function () {
             characters: [ { location: 'character.json', id: 1 } ],
             environments: []
         }
-        expect(loadCharacters(settings, charactersPath, {}).characters[1]).to.exist
+        expect(loadCharacters(settings, charactersPath, defaults).characters[1]).to.exist
+    })
+
+    it('should load multiple characters', () => {
+        const settings = {
+            characters: [
+                { location: 'character.json', id: 1 },
+                { location: 'character.json', id: 2 },
+                { location: 'character.json', id: 3 }
+            ],
+            environments: []
+        }
+        const characters = loadCharacters(settings, charactersPath, defaults).characters
+        expect(characters[1].layers.children).to.have.lengthOf(1)
+        expect(characters[2].layers.children).to.have.lengthOf(1)
+        expect(characters[3].layers.children).to.have.lengthOf(1)
     })
 
     it('should error if loading environment from non-existent file', () => {
@@ -44,7 +72,7 @@ describe('redux/project/loader', function () {
             characters: [],
             environments: [ { location: 'doesn\'t exist', id: 1 } ]
         }
-        expect(loadCharacters(settings, charactersPath, {}).environmentErrors).to.have.lengthOf(1)
+        expect(loadCharacters(settings, charactersPath, defaults).environmentErrors).to.have.lengthOf(1)
     })
 
     it('should error if loading environment from non-json file', () => {
@@ -52,7 +80,7 @@ describe('redux/project/loader', function () {
             characters: [],
             environments: [ { location: 'invalid.json', id: 1 } ]
         }
-        expect(loadCharacters(settings, charactersPath, {}).environmentErrors).to.have.lengthOf(1)
+        expect(loadCharacters(settings, charactersPath, defaults).environmentErrors).to.have.lengthOf(1)
     })
 
     it('should handle loading empty environment', () => {
@@ -60,7 +88,7 @@ describe('redux/project/loader', function () {
             characters: [],
             environments: [ { location: 'empty.json', id: 1 } ]
         }
-        expect(loadCharacters(settings, charactersPath, {}).environments[1]).to.exist
+        expect(loadCharacters(settings, charactersPath, defaults).environments[1]).to.exist
     })
 
     it('should load environments', () => {
@@ -68,7 +96,22 @@ describe('redux/project/loader', function () {
             characters: [],
             environments: [ { location: 'environment.json', id: 1 } ]
         }
-        expect(loadCharacters(settings, charactersPath, {}).environments[1]).to.exist
+        expect(loadCharacters(settings, charactersPath, defaults).environments[1]).to.exist
+    })
+
+    it('should load multiple environments', () => {
+        const settings = {
+            characters: [],
+            environments: [
+                { location: 'environment.json', id: 1 },
+                { location: 'environment.json', id: 2 },
+                { location: 'environment.json', id: 3 }
+            ]
+        }
+        const environments = loadCharacters(settings, charactersPath, defaults).environments
+        expect(environments[1].layers.children).to.have.lengthOf(1)
+        expect(environments[2].layers.children).to.have.lengthOf(1)
+        expect(environments[3].layers.children).to.have.lengthOf(1)
     })
 
     it('should load pre-emotes update characters', () => {
@@ -76,7 +119,7 @@ describe('redux/project/loader', function () {
             characters: [ { location: 'oldEmotesCharacter.json', id: 1 } ],
             environments: []
         }
-        expect(loadCharacters(settings, charactersPath, {}).characters[1].layers.children[0].children).to.eql([
+        expect(loadCharacters(settings, charactersPath, defaults).characters[1].layers.children[0].children).to.eql([
             {"name":"default","emote":0,"children":[],"inherit":{"head":true},"path":[0,0]},
             {"name":"happy","emote":1,"children":[],"inherit":{"head":true},"path":[0,1]}
         ])
@@ -88,7 +131,7 @@ describe('redux/project/loader', function () {
             environments: []
         }
         // this could probably be a tad more thorough
-        expect(loadCharacters(settings, charactersPath, {}).characters[1].layers.children).to.have.lengthOf(2)
+        expect(loadCharacters(settings, charactersPath, defaults).characters[1].layers.children).to.have.lengthOf(2)
     })
 
     it('should error if loading assets from non-existent file', () => {

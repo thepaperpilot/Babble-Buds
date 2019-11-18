@@ -2,6 +2,6 @@
     "deadbonesStyle": false,
     "name": "New Puppet",
     "layers": {
-        "children": []
+        "children": [ { "id": "test" } ]
     }
 }

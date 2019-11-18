@@ -32,6 +32,8 @@ export function loadCharacters(settings, charactersPath, defaults) {
         const id = settings.characters[i].id
         const character = characters[id] =
             Object.assign({}, defaults.character, loadedCharacter)
+        if (character.layers === defaults.character.layers)
+            character.layers = { children: [] }
 
         character.creator = settingsManager.settings.uuid
         character.creatorNick = settings.nickname
@@ -82,7 +84,6 @@ export function loadCharacters(settings, charactersPath, defaults) {
 
         const layers = ['body', 'head', 'emotes', 'hat', 'props']
         // Backwards compatibility: Convert from old layers system
-        character.layers = character.layers || {}
         if (layers.some(l => l in character)) {
             converted = true
             const layer = character.layers
