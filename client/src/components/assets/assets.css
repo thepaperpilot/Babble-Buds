@@ -17,6 +17,17 @@
     padding-left: 6px;
 }
 
+.assets .line-item > div {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.assets .line-item img {
+    height: unset;
+    max-height: 100%;
+    max-width: 100%;
+}
+
 .assets .list-item > div,
 .assets .list-item > div > div {
     height: 100%;

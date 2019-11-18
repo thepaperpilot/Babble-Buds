@@ -69,7 +69,8 @@ class DraggableAsset extends Component {
                         <div className="smallThumbnail-img" style={{width: '20px', height: '20px'}}>
                             <img
                                 alt={this.props.asset.name}
-                                src={thumbnail}/>
+                                src={thumbnail}
+                                draggable={false} />
                         </div>
                     </InlineEdit>
                 </div> :
@@ -84,7 +85,8 @@ class DraggableAsset extends Component {
                         onDoubleClick={this.editAsset}>
                         <img
                             alt={this.props.asset.name}
-                            src={thumbnail} />
+                            src={thumbnail}
+                            draggable={false} />
                     </InlineEdit>
                 </div>
             )}
