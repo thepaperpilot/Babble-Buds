@@ -89,7 +89,6 @@ describe('redux/editor/editor', function () {
         }
 
         const store = chai.createReduxStore({ reducer, middleware, initialState })
-        return
 
         store.dispatch(close())
         expect(store).to.have
