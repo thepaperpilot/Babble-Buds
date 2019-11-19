@@ -30,20 +30,24 @@ function saveCharacter(location, thumbnailsPath, id, character) {
 // Action Creators
 export function save() {
     return (dispatch, getState) => {
-        const { settings, characters, environments, assets } = getState().project
+        const { settings, characters, environments, assets, project }
+            = getState().project
 
         // Save project settings
-        const project = settingsManager.settings.openProject
-        fs.writeFile(project, JSON.stringify(settings, null, 4))
+        fs.writeFileSync(project, JSON.stringify(settings, null, 4))
 
         // Save project characters and environments
         const thumbnailsPath = path.join(project, settings.charactersPath, '..', 'thumbnails')
+        fs.ensureDirSync(thumbnailsPath)
+        const charactersPath = path.join(project, '..', 'characters')
+        fs.ensureDirSync(charactersPath)
+
         settings.characters.forEach(character =>
-            saveCharacter(path.join(project, '..', 'characters', character.location),
+            saveCharacter(path.join(charactersPath, character.location),
                 thumbnailsPath, character.id, characters[character.id])
         )
         settings.environments.forEach(environment => {
-            saveCharacter(path.join(project, '..', 'characters', environment.location),
+            saveCharacter(path.join(charactersPath, environment.location),
                 thumbnailsPath, environment.id, environments[environment.id])
         })
 
