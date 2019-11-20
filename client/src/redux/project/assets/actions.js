@@ -105,8 +105,8 @@ export function deleteAssets(ids) {
         })
 
         // Edit the open puppet in the editor, if it exists
-        if (editor.type === 'puppet' && editor.id in characters) {
-            const layers = handleLayers(editor.layers)
+        if (editor.present.type === 'puppet') {
+            const layers = handleLayers(editor.present.layers)
             if (layers)
                 dispatch(setEditorLayers(layers))
         }
@@ -193,7 +193,7 @@ export function moveAsset(id, tab) {
     }
 }
 
-export function createAssetBundle(path, name, tab) {
+export function createAssetBundle(layerPath, name, tab) {
     return (dispatch, getState) => {
         const state = getState()
         const {project, assets, settings} = state.project
@@ -202,20 +202,30 @@ export function createAssetBundle(path, name, tab) {
 
         // Replace Editor layers with the asset bundle
         let curr = state.editor.present.layers
-        for (let i = 0; i < path.length - 1; i++) {
-            curr = curr.children[path[i]]
-            if (curr.children == null || curr.children.length <= path[i]) {
+        for (let i = 0; i < layerPath.length - 1; i++) {
+            curr = curr.children[layerPath[i]]
+            if (curr.children == null || curr.children.length <= layerPath[i]) {
                 dispatch(warn("Unable to convert that layer into an asset bundle: Layer not found."))
                 return
             }
         }
         const children = curr.children.slice()
-        const index = path[path.length - 1]
-        curr = children[index] = util.updateObject(children[index], { id })
-        const layers = { children: curr.children }
-        delete curr.children
+        const index = layerPath[layerPath.length - 1]
+        if (children[index] == null) {
+            dispatch(warn("Unable to convert that layer into an asset bundle: Layer not found."))
+            return
+        }
+        let layers
+        if ('id' in children[index]) {
+            layers = { children: [ children[index] ] }
+            children[index] = { id }
+        } else {
+            layers = curr.children[index]
+            children[index] = util.updateObject(children[index], { id })
+            delete children[index].children
+        }
 
-        dispatch(changeLayer(path.slice(0, -1), { children }))
+        dispatch(changeLayer(layerPath.slice(0, -1), { children }))
 
         // Create Asset Bundle
         const thumbnailPath = path.join(project, settings.assetsPath,
