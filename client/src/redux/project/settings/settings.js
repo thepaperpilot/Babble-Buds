@@ -4,7 +4,7 @@ import characters, { setCharacters } from './characters'
 import environments, { setEnvironments } from './environments'
 import hotbar, { setHotbar } from './hotbar'
 import networking, { setNetworking } from './networking'
-import nickname, { set as setNickname } from './nickname'
+import nickname, { setNickname } from './nickname'
 import shortcuts, { setShortcuts } from './shortcuts'
 
 const remote = window.require('electron').remote

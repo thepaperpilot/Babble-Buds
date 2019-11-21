@@ -8,7 +8,8 @@ import Checkbox from '../inspector/fields/Checkbox'
 import Number from '../inspector/fields/Number'
 import Text from '../inspector/fields/Text'
 import { setAlwaysOnTop } from '../../redux/project/settings/settings'
-import { set, randomize } from '../../redux/project/settings/nickname'
+import { setNickname, randomizeNickname } from
+    '../../redux/project/settings/nickname'
 import { setIP, setPort } from '../../redux/project/settings/networking'
 
 class ProjectSettings extends Component {
@@ -27,11 +28,11 @@ class ProjectSettings extends Component {
     }
 
     changeNickname(name) {
-        this.props.dispatch(set(name))
+        this.props.dispatch(setNickname(name))
     }
 
     randomizeNickname() {
-        this.props.dispatch(randomize())
+        this.props.dispatch(randomizeNickname())
     }
 
     setIP(ip) {

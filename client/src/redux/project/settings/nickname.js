@@ -12,11 +12,11 @@ function getRandomName() {
 }
 
 // Action Creators
-export function randomize() {
+export function randomizeNickname() {
     return { type: SET, nickname: getRandomName() }
 }
 
-export function set(nickname) {
+export function setNickname(nickname) {
     return { type: SET, nickname }
 }
 
