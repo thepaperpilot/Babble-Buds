@@ -1,8 +1,26 @@
 .puppet-selector .line-item {
     white-space: nowrap;
+    display: flex;
+}
+
+.puppet-selector .inner-line-item {
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-left: 4px;
+    display: inline-block;
 }
 
 .puppet-selector .rcs-custom-scroll {
     margin-left: -10px;
     margin-right: -10px;
+}
+
+.puppet-selector .smallThumbnail-img {
+    display: inline-block;
+}
+
+.puppet-selector .smallThumbnail-img img {
+    max-width: 100%;
+    max-height: 100%;
 }
