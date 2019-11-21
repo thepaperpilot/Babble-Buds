@@ -505,6 +505,10 @@ describe('redux/project/assets/actions', function () {
     it('should update thumbnail', () => {
         const initialState = {
             project: {
+                project,
+                settings: {
+                    assetsPath
+                },
                 assets: {
                     test: {
                         version: 0
@@ -521,7 +525,7 @@ describe('redux/project/assets/actions', function () {
                 ...store.getState().project,
                 assets: {
                     test: {
-                        location: path.join("actions", "test.png"),
+                        location: "test.png",
                         version: 1
                     }
                 }
