@@ -11,7 +11,7 @@ import path from 'path'
 
 chai.use(chaiRedux)
 
-let addCharacter, newCharacter, duplicateCharacter, deleteCharacter, changeCharacter
+let addEnvironment, newEnvironment, duplicateEnvironment, deleteEnvironment, changeEnvironment
 let reducer
 let ipcRenderer
 
@@ -20,79 +20,50 @@ const charactersPath = path.join('characters', 'actions')
 
 const middleware = thunk
 
-describe('redux/project/characters/actions', function () {
+describe('redux/project/environments/actions', function () {
     before(() => {
         mockElectron()
         ipcRenderer = require('electron').ipcRenderer
         mock('../../../../src/redux/status', fakeActions('warn'))
         mock('../../../../src/redux/inspector', fakeActions('close'))
-        mock('../../../../src/redux/actors', {
-            getActor: require('../../../../src/redux/actors').getActor,
-            ...fakeActions('changePuppet')
-        })
+        mock('../../../../src/redux/environment', fakeActions('setEnvironment', 'setDefaultEnvironment'))
         mock('../../../../src/redux/editor/editor', fakeActions('close'))
         mock('../../../../src/redux/project/characterThumbnails', fakeActions('updateThumbnail', 'removeThumbnail'))
-        mock('../../../../src/redux/project/settings/characters', fakeActions('addCharacter', 'removeCharacter'))
-        mock('../../../../src/redux/project/project', fakeActions('setNumCharacters'))        
+        mock('../../../../src/redux/project/settings/environments', fakeActions('addEnvironment', 'removeEnvironment'))
+        mock('../../../../src/redux/project/project', fakeActions('setNumCharacters'))
     })
 
     beforeEach(() => {
-        const c = mock.reRequire('../../../../src/redux/project/characters/actions')
-        addCharacter = c.addCharacter
-        newCharacter = c.newCharacter
-        duplicateCharacter = c.duplicateCharacter
-        deleteCharacter = c.deleteCharacter
-        changeCharacter = c.changeCharacter
+        const e = mock.reRequire('../../../../src/redux/project/environments/actions')
+        addEnvironment = e.addEnvironment
+        newEnvironment = e.newEnvironment
+        duplicateEnvironment = e.duplicateEnvironment
+        deleteEnvironment = e.deleteEnvironment
+        changeEnvironment = e.changeEnvironment
 
-        const characters = mock.reRequire('../../../../src/redux/project/characters/reducers').default
+        const environments = mock.reRequire('../../../../src/redux/project/environments/reducers').default
         reducer = combineReducers({
             project: combineReducers({
                 numCharacters: fakeReducer,
                 charactersPath: fakeReducer,
                 settings: fakeReducer,
                 characterThumbnails: fakeReducer,
-                characters
+                environments
             }),
-            controller: fakeReducer,
             inspector: fakeReducer,
             editor: fakeReducer,
-            actors: fakeReducer,
             defaults: fakeReducer,
+            environment: fakeReducer,
             self: fakeReducer
         })
     })
 
     after(mock.stopAll)
 
-    it('should add character', () => {
+    it('should add environment', () => {
         const initialState = {
             project: {
-                characters: {},
-                numCharacters: 0,
-                charactersPath
-            }
-        }
-        const store = chai.createReduxStore({ reducer, middleware, initialState })
-
-        store.dispatch(addCharacter(1, { name: 'test' }))
-        const thumbnail = path.join(charactersPath, '..', 'thumbnails', 'new-1')
-        expect(store).to.have.state.like({
-            project: {
-                ...store.getState().project,
-                characters: {
-                    1: { name: 'test' }
-                }
-            }
-        })
-        .and.dispatched({ f: 'setNumCharacters', args: [1] })
-        .and.dispatched({ f: 'updateThumbnail', args: [1, 'puppet', thumbnail] })
-        .and.dispatched({ f: 'addCharacter', args: [1] })
-    })
-
-    it('should create character', () => {
-        const initialState = {
-            project: {
-                characters: {},
+                environments: {},
                 numCharacters: 0,
                 charactersPath,
                 settings: {
@@ -100,21 +71,51 @@ describe('redux/project/characters/actions', function () {
                 }
             },
             defaults: {
-                character: {
-                    name: 'test'
-                }
+                environment: {}
             },
             self: 'test-uuid'
         }
         const store = chai.createReduxStore({ reducer, middleware, initialState })
 
-        store.dispatch(newCharacter())
+        store.dispatch(addEnvironment(1, { name: 'test' }))
+        const thumbnail = path.join(charactersPath, '..', 'thumbnails', 'new-1')
         expect(store).to.have.state.like({
             project: {
                 ...store.getState().project,
-                characters: {
+                environments: {
+                    1: { name: 'test' }
+                }
+            }
+        })
+        .and.dispatched({ f: 'setNumCharacters', args: [1] })
+        .and.dispatched({ f: 'updateThumbnail', args: [1, 'environment', thumbnail] })
+        .and.dispatched({ f: 'addEnvironment', args: [1] })
+    })
+
+    it('should create environment', () => {
+        const initialState = {
+            project: {
+                environments: {},
+                numCharacters: 0,
+                charactersPath,
+                settings: {
+                    nickname: 'testnick'
+                }
+            },
+            defaults: {
+                environment: {}
+            },
+            self: 'test-uuid'
+        }
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
+
+        store.dispatch(newEnvironment())
+        expect(store).to.have.state.like({
+            project: {
+                ...store.getState().project,
+                environments: {
                     1: {
-                        name: 'test',
+                        name: 'New Environment',
                         creator: 'test-uuid',
                         creatorNick: 'testnick',
                         oc: 'test-uuid',
@@ -125,32 +126,35 @@ describe('redux/project/characters/actions', function () {
         })
     })
 
-    it('should duplicate character', () => {
+    it('should duplicate environment', () => {
         const initialState = {
             project: {
-                characters: {
-                    1: {
-                        name: 'test'
-                    }
+                environments: {
+                    1: { name: 'test' }
                 },
-                numCharacters: 1,
+                characterThumbnails: {
+                    1: 'file:///fake/path/1.png'
+                },
                 settings: {
                     nickname: 'testnick'
                 },
-                characterThumbnails: {
-                    1: "1.png"
-                },
+                numCharacters: 1,
                 charactersPath
             },
+            inspector: {},
+            editor: {
+                present: {}
+            },
+            environment: {},
             self: 'test-uuid'
         }
         const store = chai.createReduxStore({ reducer, middleware, initialState })
 
-        store.dispatch(duplicateCharacter(1))
+        store.dispatch(duplicateEnvironment(1))
         expect(store).to.have.state.like({
             project: {
                 ...store.getState().project,
-                characters: {
+                environments: {
                     1: { name: 'test' },
                     2: {
                         name: 'test (copy)',
@@ -162,121 +166,130 @@ describe('redux/project/characters/actions', function () {
         })
     })
 
-    it('should delete character', () => {
+    it('should delete environment', () => {
         const initialState = {
             project: {
-                characters: {
-                    1: {
-                        name: 'test'
-                    }
-                }
-            },
-            controller: {
-                actors: []
-            },
-            inspector: {},
-            editor: {
-                present: {}
-            }
-        }
-        const store = chai.createReduxStore({ reducer, middleware, initialState })
-
-        store.dispatch(deleteCharacter(1))
-        expect(store).to.have.state.like({
-            project: {
-                ...store.getState().project,
-                characters: {}
-            }
-        })
-        .then.dispatched({ f: 'removeThumbnail', args: [1] })
-        .then.dispatched({ f: 'removeCharacter', args: [1] })
-        .not.dispatched({ f: 'close' })
-    })
-
-    it('should close inspector when deleting open character', () => {
-        const initialState = {
-            project: {
-                characters: {
-                    1: {
-                        name: 'test'
-                    }
-                }
-            },
-            controller: {
-                actors: []
-            },
-            inspector: { targetType: 'puppet', target: 1 },
-            editor: {
-                present: {}
-            }
-        }
-        const store = chai.createReduxStore({ reducer, middleware, initialState })
-
-        store.dispatch(deleteCharacter(1))
-        expect(store).to.have.dispatched({ f: 'close' })
-    })
-
-    it('should close editor when deleting open character', () => {
-        const initialState = {
-            project: {
-                characters: {
-                    1: {
-                        name: 'test'
-                    }
-                }
-            },
-            controller: {
-                actors: []
-            },
-            inspector: {},
-            editor: {
-                present: { type: 'puppet', id: 1 }
-            }
-        }
-        const store = chai.createReduxStore({ reducer, middleware, initialState })
-
-        store.dispatch(deleteCharacter(1))
-        expect(store).to.have.dispatched({ f: 'close' })
-    })
-
-    it('should warn if deleting active character', () => {
-        const initialState = {
-            project: {
-                characters: {
-                    1: {
-                        name: 'test'
-                    }
-                }
-            },
-            controller: {
-                actors: [0]
-            },
-            actors: [
-                { id: 0, puppetId: 1 }
-            ]
-        }
-        const store = chai.createReduxStore({ reducer, middleware, initialState })
-
-        store.dispatch(deleteCharacter(1))
-        expect(store).to.have.dispatched({ f: 'warn' })
-    })
-
-    it('should change character', () => {
-        const initialState = {
-            project: {
-                characters: {
+                environments: {
                     1: { name: 'test', foo: 'bar' }
                 },
                 characterThumbnails: {
                     1: 'file:///fake/path/1.png'
                 }
             },
-            controller: {
-                actors: [0]
+            inspector: {},
+            editor: {
+                present: {}
             },
-            actors: [
-                { id: 0, puppetId: 1 }
-            ]
+            environment: {},
+            self: 'test-uuid'
+        }
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
+
+        store.dispatch(deleteEnvironment(1))
+        expect(store).to.have.state.like({
+            project: {
+                ...store.getState().project,
+                environments: {}
+            }
+        })
+        .then.dispatched({ f: 'removeThumbnail', args: [1] })
+        .then.dispatched({ f: 'removeEnvironment', args: [1] })
+        .not.dispatched({ f: 'close' })
+    })
+
+    it('should close inspector when deleting open environment', () => {
+        const initialState = {
+            project: {
+                environments: {
+                    1: { name: 'test', foo: 'bar' }
+                },
+                characterThumbnails: {
+                    1: 'file:///fake/path/1.png'
+                }
+            },
+            inspector: {
+                targetType: "environment",
+                target: 1
+            },
+            editor: {
+                present: {}
+            },
+            environment: {},
+            self: 'test-uuid'
+        }
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
+
+        store.dispatch(deleteEnvironment(1))
+        expect(store).to.have.dispatched({ f: 'close' })
+    })
+
+    it('should close editor when deleting open environment', () => {
+        const initialState = {
+            project: {
+                environments: {
+                    1: { name: 'test', foo: 'bar' }
+                },
+                characterThumbnails: {
+                    1: 'file:///fake/path/1.png'
+                }
+            },
+            inspector: {},
+            editor: {
+                present: {
+                    type: "environment",
+                    id: 1
+                }
+            },
+            environment: {},
+            self: 'test-uuid'
+        }
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
+
+        store.dispatch(deleteEnvironment(1))
+        expect(store).to.have.dispatched({ f: 'close' })
+    })
+
+    it('should return to default environment if deleting current environment', () => {
+        const initialState = {
+            project: {
+                environments: {
+                    1: { name: 'test', foo: 'bar' }
+                },
+                characterThumbnails: {
+                    1: 'file:///fake/path/1.png'
+                }
+            },
+            inspector: {},
+            editor: {
+                present: {}
+            },
+            environment: {
+                setter: 'test-uuid',
+                environmentId: 1
+            },
+            self: 'test-uuid'
+        }
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
+
+        store.dispatch(deleteEnvironment(1))
+        expect(store).to.have.dispatched({ f: 'setDefaultEnvironment' })
+    })
+
+    it('should change environment', () => {
+        const initialState = {
+            project: {
+                environments: {
+                    1: { name: 'test', foo: 'bar' }
+                },
+                characterThumbnails: {
+                    1: 'file:///fake/path/1.png'
+                }
+            },
+            environment: {
+                setter: 'test-uuid',
+                environmentId: 1
+            },
+            self: 'test-uuid'
         }
         const store = chai.createReduxStore({ reducer, middleware, initialState })
         let backgroundMessage
@@ -284,41 +297,36 @@ describe('redux/project/characters/actions', function () {
             backgroundMessage = data
         })
 
-        store.dispatch(changeCharacter(1, { name: 'updated' }))
+        store.dispatch(changeEnvironment(1, { name: 'updated' }))
         expect(store).to.have.state.like({
             project: {
                 ...store.getState().project,
-                characters: {
+                environments: {
                     1: { name: 'updated', foo: 'bar' }
                 }
             }
         })
-        .then.dispatched({ f: 'changePuppet', args: [
-            0,
-            1,
-            { name: 'updated', foo: 'bar' }
-        ]})
         expect(backgroundMessage).to.eql([
             "generate thumbnails",
-            '/fake/path/new-1',
+            'fake/path/new-1',
             { name: 'updated', foo: 'bar' },
-            'puppet',
+            'environment',
             1
         ])
         ipcRenderer.removeAllListeners('background')
     })
 
-    it('should warn if accessing character that doesn\'t exist', () => {
+    it('should warn if accessing environment that doesn\'t exist', () => {
         const initialState = {
             project: {
-                characters: {}
+                environments: {}
             }
         }
         const store = chai.createReduxStore({ reducer, middleware, initialState })
 
-        store.dispatch(duplicateCharacter(1))
-        store.dispatch(deleteCharacter(1))
-        store.dispatch(changeCharacter(1))
+        store.dispatch(duplicateEnvironment(1))
+        store.dispatch(deleteEnvironment(1))
+        store.dispatch(changeEnvironment(1))
         expect(store).to.have.dispatched({ f: 'warn' })
             .then.dispatched({ f: 'warn' })
             .then.dispatched({ f: 'warn' })

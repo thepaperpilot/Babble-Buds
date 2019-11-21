@@ -17,8 +17,7 @@ import { SET, ADD, REMOVE, EDIT } from './reducers'
 
 const path = window.require('path')
 const fs = window.require('fs-extra')
-const { remote, ipcRenderer } = window.require('electron')
-const settingsManager = remote.require('./main-process/settings')
+const { ipcRenderer } = window.require('electron')
 
 // Action Creators
 export function addEnvironment(id, environment) {
@@ -42,7 +41,7 @@ export function newEnvironment() {
         const id = state.project.numCharacters + 1
         const environment = util.updateObject(state.defaults.environment)
         environment.name = "New Environment"
-        environment.creator = environment.oc = settingsManager.settings.uuid
+        environment.creator = environment.oc = state.self
         environment.creatorNick = environment.ocNick = state.project.settings.nickname
 
         fs.removeSync(`${path.join(state.project.charactersPath, '..', 'thumbnails',
@@ -60,12 +59,12 @@ export function duplicateEnvironment(id) {
         const newId = state.project.numCharacters + 1
 
         if (!(id in state.project.environments)) {
-            warn("Cannot duplicate environment because environment doesn't exist")
+            dispatch(warn("Cannot duplicate environment because environment doesn't exist"))
             return
         }
 
         const environment = util.updateObject(state.project.environments[id], {
-            creator: settingsManager.settings.uuid,
+            creator: state.self,
             creatorNick: state.project.settings.nickname,
             name: `${state.project.environments[id].name} (copy)`
         })
@@ -80,7 +79,7 @@ export function deleteEnvironment(id) {
     return (dispatch, getState) => {
         const state = getState()
         if (!(id in state.project.environments)) {
-            warn("Cannot delete environment because environment doesn't exist")
+            dispatch(warn("Cannot delete environment because environment doesn't exist"))
             return
         }
 
@@ -104,16 +103,17 @@ export function changeEnvironment(id, environment) {
         const state = getState()
         const project = state.project
         if (!(id in project.environments)) {
-            warn("Cannot modify environment because environment doesn't exist")
+            dispatch(warn("Cannot modify environment because environment doesn't exist"))
             return
         }
 
+        dispatch({ type: EDIT, id, environment })
+
+        environment = util.updateObject(project.environments[id], environment)
         const thumbnail = project.characterThumbnails[id]
         ipcRenderer.send('background', 'generate thumbnails',
             `${thumbnail.slice(8).split('/').slice(0, -1).join('/')}/new-${id}`,
             environment, 'environment', id)
-
-        dispatch({ type: EDIT, id, environment })
 
         if (state.environment.setter == state.self &&
             state.environment.environmentId == id) {

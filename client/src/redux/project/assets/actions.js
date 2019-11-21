@@ -11,8 +11,7 @@ import { SET, ADD, REMOVE, EDIT, getNewAssetID, getConflicts } from './reducers'
 
 const fs = window.require('fs-extra')
 const path = require('path')
-const {remote, ipcRenderer} = window.require('electron')
-const settingsManager = remote.require('./main-process/settings')
+const {ipcRenderer} = window.require('electron')
 
 // Action Creators
 export function addAssets(assets) {
@@ -32,7 +31,8 @@ export function addAssets(assets) {
 export function duplicateAsset(asset) {
     return (dispatch, getState) => {
         const id = getNewAssetID()
-        const {assets, project, settings} = getState().project
+        const state = getState()
+        const {assets, project, settings} = state.project
 
         if (!(asset in assets)) {
             dispatch(warn("Cannot duplicate asset because asset does not exist."))
@@ -40,7 +40,7 @@ export function duplicateAsset(asset) {
         }
 
         const newAsset = util.updateObject(assets[asset], {
-            location: path.join(settingsManager.settings.uuid, `${id}.png`),
+            location: path.join(state.self, `${id}.png`),
             panning: [],
             version: 0,
             name: `${assets[asset].name} (copy)`
@@ -49,7 +49,7 @@ export function duplicateAsset(asset) {
         dispatch({
             type: ADD,
             assets: {
-                [`${settingsManager.settings.uuid}:${id}`]: newAsset
+                [`${state.self}:${id}`]: newAsset
             }
         })
 

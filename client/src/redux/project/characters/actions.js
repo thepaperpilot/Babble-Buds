@@ -16,8 +16,7 @@ import { SET, ADD, REMOVE, EDIT } from './reducers'
 
 const path = window.require('path')
 const fs = window.require('fs-extra')
-const { remote, ipcRenderer } = window.require('electron')
-const settingsManager = remote.require('./main-process/settings')
+const { ipcRenderer } = window.require('electron')
 
 //  Utility Functions
 export function copyThumbnails(dispatch, type, thumbnail, newId) {
@@ -56,7 +55,7 @@ export function newCharacter() {
         const state = getState()
         const id = state.project.numCharacters + 1
         const character = util.updateObject(state.defaults.character)
-        character.creator = character.oc = settingsManager.settings.uuid
+        character.creator = character.oc = state.self
         character.creatorNick = character.ocNick = state.project.settings.nickname
 
         const thumbnailPath =
@@ -79,7 +78,7 @@ export function duplicateCharacter(id) {
         }
 
         const character = util.updateObject(state.project.characters[id], {
-            creator: settingsManager.settings.uuid,
+            creator: state.self,
             creatorNick: state.project.settings.nickname,
             name: `${state.project.characters[id].name} (copy)`
         })

@@ -119,7 +119,8 @@ describe('redux/project/assets/actions', function () {
                 settings: {
                     assetsPath
                 }
-            }
+            },
+            self: 'test-uuid'
         }
         const store = chai.createReduxStore({ reducer, middleware, initialState })
 
