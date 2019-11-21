@@ -35,7 +35,7 @@ export function duplicateAsset(asset) {
         const {assets, project, settings} = getState().project
 
         if (!(asset in assets)) {
-            warn("Cannot duplicate asset because asset does not exist.")
+            dispatch(warn("Cannot duplicate asset because asset does not exist."))
             return
         }
 
@@ -134,7 +134,7 @@ export function setLayers(asset, layers) {
         const {project, assets, settings} = state.project
 
         if (!(asset in assets)) {
-            warn("Cannot modify asset because asset does not exist.")
+            dispatch(warn("Cannot modify asset because asset does not exist."))
             return
         }
 
@@ -155,7 +155,7 @@ export function renameAsset(id, name) {
     return (dispatch, getState) => {
         const assets = getState().project.assets
         if (!(id in assets)) {
-            warn("Cannot modify asset because asset does not exist.")
+            dispatch(warn("Cannot modify asset because asset does not exist."))
             return
         }
 
@@ -175,7 +175,7 @@ export function moveAsset(id, tab) {
         const { assets, folders } = getState().project
 
         if (!(id in assets)) {
-            warn("Cannot modify asset because asset does not exist.")
+            dispatch(warn("Cannot modify asset because asset does not exist."))
             return
         }
 
@@ -250,7 +250,7 @@ export function updateThumbnail(id, thumbnailsPath) {
     return (dispatch, getState) => {
         const assets = getState().project.assets
         if (!(id in assets)) {
-            warn("Cannot modify asset because asset does not exist.")
+            dispatch(warn("Cannot modify asset because asset does not exist."))
             return
         }
 

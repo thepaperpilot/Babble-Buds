@@ -541,10 +541,19 @@ describe('redux/project/assets/actions', function () {
         const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(duplicateAsset("invalid"))
+        // Shouldn't warn, just not crash
         store.dispatch(deleteAssets(["invalid"]))
         store.dispatch(setLayers("invalid"))
         store.dispatch(renameAsset("invalid"))
         store.dispatch(moveAsset("invalid"))
         store.dispatch(updateThumbnail("invalid"))
+        expect(store).to.have.dispatched({ f: 'warn' })
+            // This is from the deleteAssets call
+            .then.dispatched({ ids: ["invalid"] })
+            .then.dispatched({ f: 'warn' })
+            .then.dispatched({ f: 'warn' })
+            .then.dispatched({ f: 'warn' })
+            .then.dispatched({ f: 'warn' })
+            .not.then.dispatched({ f: 'warn' })
     })
 })
