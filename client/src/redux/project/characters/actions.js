@@ -65,7 +65,6 @@ export function newCharacter() {
         fs.removeSync(`${path.join(thumbnailPath, `new-${id}`)}`)
 
         dispatch(addCharacter(id, character))
-        dispatch(updateThumbnail(id, 'puppet', `${path.join(thumbnailPath, `new-${id}`)}`))
     }
 }
 
@@ -75,7 +74,7 @@ export function duplicateCharacter(id) {
         const newId = state.project.numCharacters + 1
 
         if (!(id in state.project.characters)) {
-            warn("Cannot duplicate character because character doesn't exist")
+            dispatch(warn("Cannot duplicate character because character doesn't exist"))
             return
         }
 
@@ -95,12 +94,12 @@ export function deleteCharacter(id) {
     return (dispatch, getState) => {
         const state = getState()
         if (!(id in state.project.characters)) {
-            warn("Cannot delete character because character doesn't exist")
+            dispatch(warn("Cannot delete character because character doesn't exist"))
             return
         }
         if (state.controller.actors.some(actor =>
             getActor(state, actor).puppetId === id)) {
-            warn("You can't delete your active puppet!")
+            dispatch(warn("You can't delete your active puppet!"))
             return
         }
 
@@ -120,19 +119,19 @@ export function changeCharacter(id, character) {
     return (dispatch, getState) => {
         const { project, controller, actors } = getState()
         if (!(id in project.characters)) {
-            warn("Cannot modify character because character doesn't exist")
+            dispatch(warn("Cannot modify character because character doesn't exist"))
             return
         }
 
-        const thumbnail = project.characterThumbnails[id].slice(8)
+        dispatch({ type: EDIT, id, character })
+
+        character = util.updateObject(project.characters[id], character)
+        const thumbnail = project.characterThumbnails[id].slice(7)
         const folder = thumbnail.split('/').slice(0, -1).join('/')
         ipcRenderer.send('background', 'generate thumbnails',
             `${folder}/new-${id}`, character, 'puppet', id)
 
-        dispatch({ type: EDIT, id, character })
-
         // Update any of our actors currently using this puppet
-        character = util.updateObject(project.characters[id], character)
         actors.filter(actor => controller.actors.includes(actor.id))
             .filter(actor => actor.puppetId === id)
             .forEach(actor => dispatch(changePuppet(actor.id, id, character)))
