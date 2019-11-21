@@ -19,7 +19,7 @@ let ipcRenderer
 // We use these to set up a fake settings file before each test
 //  (and we remove it afterwards)
 let settingsManager
-const settingsFolder = path.join(__dirname, '..', 'test-user-data')
+const settingsFolder = path.join(__dirname, '..', '..', '..', 'test-user-data')
 const settingsFile = path.join(settingsFolder, 'settings.json')
 const defaultSettings = {
     "openProject":"",
