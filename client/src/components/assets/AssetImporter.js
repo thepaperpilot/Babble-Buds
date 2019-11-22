@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import Checkbox from '../inspector/fields/Checkbox'
 import Assets from './Assets'
 import Modal from '../ui/Modal'
-import { inProgress } from '../../redux/status'
+import { warn, inProgress } from '../../redux/status'
 import './importer.css'
 
 import { getNewAssetID } from '../../redux/project/assets/reducers'
@@ -132,9 +132,15 @@ class AssetImporter extends Component {
         }, filepaths => {
             if (!filepaths) return
             const project = fs.readJsonSync(filepaths[0])
+            filepaths[0] = filepaths[0].replace(/\\/g, '/')
+            
             const assetsPath = path.join(filepaths[0],
                 project.assetsPath || '../assets')
-            const {assets, folders} = loadAssets(project, assetsPath, [])
+            const {assets, folders, error, errors} = loadAssets(project, assetsPath, [])
+            if (error)
+                this.props.dispatch(warn(error))
+            if (errors)
+                errors.forEach(e => this.props.dispatch(warn(e)))
 
             this.setState({
                 project: filepaths[0],

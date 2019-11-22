@@ -1,3 +1,4 @@
+import util from '../util.js'
 import { getConflicts } from './assets/reducers'
 import { updatePaths } from '../editor/layers'
 
@@ -14,6 +15,14 @@ export function loadCharacters(settings, charactersPath, defaults) {
     const characterErrors = []
     const environmentErrors = []
     let converted = false
+
+    // Apply default settings
+    settings = util.updateObject({
+        characters: [],
+        environments: [],
+        nickname: 'Imported',
+
+    }, settings)
 
     let numCharacters = 0
     for (let i = 0; i < settings.characters.length; i++) {
@@ -199,8 +208,18 @@ export function loadAssets(settings, assetsPath, characters) {
         const newAssets = {}
         const folders = []
         let oldAssets = {}
+        let errors = []
         for (let i = 0; i < settings.assets.length; i++) {
-            let assets = fs.readJsonSync(path.join(assetsPath, settings.assets[i].location))
+            const assetsFilePath = path.join(assetsPath, settings.assets[i].location)
+            if (!fs.existsSync(assetsFilePath)) {
+                errors.push(`Could not load tab "${settings.assets[i].name}" at "${assetsFilePath}": File not found`)
+                continue
+            }
+            let assets = fs.readJsonSync(assetsFilePath, { throws: false })
+            if (assets == null) {
+                errors.push(`Could not load tab "${settings.assets[i].name}" at "${assetsFilePath}": Invalid JSON syntax`)
+                continue
+            }
             oldAssets[settings.assets[i].name] = {}
             let keys = Object.keys(assets)
             folders.push(settings.assets[i].name)
@@ -218,15 +237,18 @@ export function loadAssets(settings, assetsPath, characters) {
         // Update asset references in puppets
         const updateAsset = asset => {
             if (asset.children) {
-                asset.children.forEach(updateAsset)
-            } else {
+                asset.children = asset.children.filter(updateAsset)
+            } else if (asset.tab in oldAssets && asset.hash in oldAssets[asset.tab]) {
                 asset.id = `${settingsManager.settings.uuid}:${oldAssets[asset.tab][asset.hash]}`
                 delete asset.tab
                 delete asset.hash
+            } else {
+                return false
             }
+            return true
         }
         Object.values(characters).forEach(character => updateAsset(character.layers))
-        return { assets: newAssets, folders }
+        return { assets: newAssets, folders, errors }
     } else {
         const assetsFilePath = path.join(assetsPath, 'assets.json')
         if (!fs.existsSync(assetsFilePath))

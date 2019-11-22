@@ -7,7 +7,7 @@ import Modal from '../ui/Modal'
 import Foldable from '../ui/Foldable'
 import { getEmotes } from '../controller/Emotes'
 import { loadCharacters, loadAssets } from '../../redux/project/loader'
-import { inProgress } from '../../redux/status'
+import { warn, inProgress } from '../../redux/status'
 
 import './importer.css'
 
@@ -137,12 +137,13 @@ class PuppetImporter extends Component {
         }, filepaths => {
             if (!filepaths) return
             const project = fs.readJsonSync(filepaths[0])
+            filepaths[0] = filepaths[0].replace(/\\/g, '/')
             
             const puppetsPath = path.join(filepaths[0],
                 project.charactersPath || '../characters')
             const { characters: rawCharacters,
                 characterThumbnails: rawThumbnails } =
-                loadCharacters(project, puppetsPath)
+                loadCharacters(project, puppetsPath, this.props.defaults)
             const characters = {}
             const characterThumbnails = {}
             Object.values(rawCharacters).forEach((character, i) => {
@@ -154,7 +155,11 @@ class PuppetImporter extends Component {
 
             const assetsPath = path.join(filepaths[0],
                 project.assetsPath || '../assets')
-            const {assets} = loadAssets(project, assetsPath, characters)
+            const {assets, error, errors} = loadAssets(project, assetsPath, characters)
+            if (error)
+                this.props.dispatch(warn(error))
+            if (errors)
+                errors.forEach(e => this.props.dispatch(warn(e)))
 
             this.setState({
                 project: filepaths[0],
@@ -264,7 +269,8 @@ function mapStateToProps(state) {
         charactersPath: state.project.settings.charactersPath,
         self: state.self,
         nick: state.project.settings.nickname,
-        numCharacters: state.project.numCharacters
+        numCharacters: state.project.numCharacters,
+        defaults: state.defaults
     }
 }
 

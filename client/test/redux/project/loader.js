@@ -67,6 +67,19 @@ describe('redux/project/loader', function () {
         expect(characters[3].layers.children).to.have.lengthOf(1)
     })
 
+    it('should handle loading from empty settings', () => {
+        const settings = {}
+        expect(loadCharacters(settings, charactersPath, defaults).characters).to.be.empty
+    })
+
+    it('should error if loading from non-existent charactersPath', () => {
+        const settings = {
+            characters: [ { location: 'character.json', id: 1 } ],
+            environments: []
+        }
+        expect(loadCharacters(settings, '', defaults).characterErrors).to.have.lengthOf(1)
+    })
+
     it('should error if loading environment from non-existent file', () => {
         const settings = {
             characters: [],
@@ -170,5 +183,45 @@ describe('redux/project/loader', function () {
         expect(characters[0].layers.children[0].tab).to.not.exist
         expect(characters[0].layers.children[0].hash).to.not.exist
         expect(characters[0].layers.children[0].id).to.exist
+    })
+
+    it('should warn if loading assets in settings with non-existent file', () => {
+        const settings = {
+            assets: [
+                { name: 'assets', location: 'doesn\'t exist.json' }
+            ]
+        }
+        const characters = [
+            {
+                "deadbonesStyle": false,
+                "name": "New Puppet",
+                "layers": {
+                    "children": [ { tab: 'assets', hash: 'testid' } ]
+                }
+            }
+        ]
+        const assets = loadAssets(settings, path.join(assetsPath, 'old'), characters)
+        expect(Object.keys(assets.errors)).to.have.lengthOf(1)
+        expect(characters[0].layers.children).to.be.empty
+    })
+
+    it('should warn if loading assets in settings with non-json file', () => {
+        const settings = {
+            assets: [
+                { name: 'assets', location: 'assets.json' }
+            ]
+        }
+        const characters = [
+            {
+                "deadbonesStyle": false,
+                "name": "New Puppet",
+                "layers": {
+                    "children": [ { tab: 'assets', hash: 'testid' } ]
+                }
+            }
+        ]
+        const assets = loadAssets(settings, path.join(assetsPath, 'invalid'), characters)
+        expect(Object.keys(assets.errors)).to.have.lengthOf(1)
+        expect(characters[0].layers.children).to.be.empty
     })
 })
