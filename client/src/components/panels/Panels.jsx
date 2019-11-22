@@ -6,7 +6,8 @@ import Assets from '../assets/Assets'
 import Stage from '../stage/Stage'
 import Console from '../console/Console'
 import Puppets from '../puppets/Puppets'
-import Controller from '../controller/Controller'
+import Characters from '../controller/Characters'
+import Emotes from '../controller/Emotes'
 import ProjectSettings from '../settings/ProjectSettings'
 import Inspector from '../inspector/Inspector'
 import Editor from '../editor/Editor'
@@ -80,7 +81,11 @@ class Panels extends Component {
                 id={node.getId()} />
             break
         case 'controller':
-            child = <Controller id={node.getId()} />
+        case 'puppet-controller':
+            child = <Characters id={node.getId()} />
+            break
+        case 'emote-controller':
+            child = <Emotes id={node.getId()} />
             break
         case 'editor':
             child = <Editor rect={node._rect} grid={grid} highlight={highlight} 

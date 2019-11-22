@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 import { Puppet } from 'babble.js'
 import Babble from './Babble'
 import { setEmote } from '../../redux/controller'
+import './controller.css'
 
 const path = window.require('path')
 
@@ -64,7 +65,7 @@ class Emotes extends Component {
         const emotes = this.props.actors.map((actor, i) =>
             getEmotes(this.props.assets, actor.character.layers))
 
-        return (
+        return <div className="controller-container">
             <div className="flex-column">
                 {hotkeys.map((n, nIndex) => (
                     <div key={nIndex} className="flex-row">
@@ -93,7 +94,7 @@ class Emotes extends Component {
                     </div>))}
                 <Babble />
             </div>
-        )
+        </div>
     }
 }
 

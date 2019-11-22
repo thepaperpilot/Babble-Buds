@@ -65,18 +65,29 @@
             "children": [
               {
                 "type": "tabset",
-                "weight": 67,
+                "weight": 33,
                 "children": [
                   {
                     "type": "tab",
-                    "name": "Control Panel",
-                    "component": "controller"
+                    "name": "Puppet Controller",
+                    "component": "puppet-controller"
                   }
                 ]
               },
               {
                 "type": "tabset",
                 "weight": 33,
+                "children": [
+                  {
+                    "type": "tab",
+                    "name": "Emote Controller",
+                    "component": "emote-controller"
+                  }
+                ]
+              },
+              {
+                "type": "tabset",
+                "weight": 34,
                 "children": [
                   {
                     "type": "tab",
