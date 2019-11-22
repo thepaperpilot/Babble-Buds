@@ -56,7 +56,6 @@ describe('redux/settings', function () {
     })
 
     it('should load layout', () => {
-        // Rerun 'should save layout' test:
         store.dispatch(loadLayout('test layout [invalid]'))
         expect(store).to.have.state.like({
             settings: { layout: 'test layout [invalid]', layoutUpdate: 1 }

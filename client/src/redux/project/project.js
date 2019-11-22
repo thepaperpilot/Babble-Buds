@@ -96,7 +96,6 @@ export function close() {
 export function load(filepath) {
     return (dispatch, getState) => {
         const state = getState()
-        filepath = filepath.replace(/\\/g, '/')
 
         if (!fs.existsSync(filepath)) {
             dispatch(warn(`Couldn't find a project at ${filepath}`))
