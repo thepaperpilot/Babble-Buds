@@ -248,7 +248,7 @@ export function createAssetBundle(layerPath, name, tab) {
 
 export function updateThumbnail(id, thumbnailsPath) {
     return (dispatch, getState) => {
-        const assets = getState().project.assets
+        const { project, settings, assets } = getState().project
         if (!(id in assets)) {
             dispatch(warn("Cannot modify asset because asset does not exist."))
             return
@@ -256,7 +256,7 @@ export function updateThumbnail(id, thumbnailsPath) {
 
         const asset = assets[id]
         dispatch({ type: EDIT, id, asset: {
-            location: `${thumbnailsPath.split('/').slice(-2).join('/')}.png`,
+            location: `${path.relative(path.join(project, settings.assetsPath), thumbnailsPath)}.png`,
             version: asset.version + 1
         }})
     }

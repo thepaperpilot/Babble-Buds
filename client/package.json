@@ -5,15 +5,18 @@
   "main": "src/electron-starter.js",
   "homepage": "./",
   "scripts": {
-    "start": "BROWSER=none react-scripts start",
-    "build": "react-scripts build && ./build.sh",
+    "start": "run-script-os",
+    "start:nix": "react-scripts start",
+    "start:win32": "set BROWSER=none&&react-scripts start",
+    "build": "run-script-os",
+    "build:nix": "react-scripts build && ./build.sh",
+    "build:win32": "react-scripts build && build.bat",
     "test": "node_modules/.bin/mocha",
     "test-watch": "node_modules/.bin/mocha -w --reporter min",
     "test-debug": "node_modules/.bin/mocha --inspect-brk",
-    "test:prod": "npm run build && PROD=true node_modules/.bin/mocha",
-    "eject": "react-scripts eject",
-    "electron": "ELECTRON_START_URL=http://localhost:3000 electron --inspect .",
-    "lpostinstall": "cd ./node_modules/react-contextmenu; npm install; npm run build:dist && npm run build:es5 && npm run build:es6",
+    "electron": "run-script-os",
+    "electron:nix": "ELECTRON_START_URL=http://localhost:3000 electron --inspect .",
+    "electron:win32": "set ELECTRON_START_URL=http://localhost:3000&&electron --inspect .",
     "package": "npm run build && electron-packager ./build BabbleBuds --all --prune --overwrite --out ./out --icon build/public/icons/icon.icns"
   },
   "repository": "https://github.com/thepaperpilot/babble-buds",
@@ -50,7 +53,7 @@
     "react-autosize-textarea": "^7.0.0",
     "react-autosuggest": "^9.4.3",
     "react-contextmenu": "^2.11.0",
-    "react-custom-scroll": "git://github.com/thepaperpilot/react-custom-scroll.git#fix-click-scroll",
+    "react-custom-scroll": "^4.1.5",
     "react-dnd": "^7.4.5",
     "react-dnd-html5-backend": "^7.4.4",
     "react-dom": "^16.8.6",
@@ -67,7 +70,8 @@
     "redux": "^4.0.1",
     "redux-batched-subscribe": "^0.1.6",
     "redux-thunk": "^2.3.0",
-    "redux-undo": "^1.0.0-beta9-9-7"
+    "redux-undo": "^1.0.0-beta9-9-7",
+    "run-script-os": "^1.0.7"
   },
   "dependencies": {
     "electron": "^5.0.1",

@@ -165,11 +165,12 @@ describe('redux/project/project', function () {
         }
         const store = chai.createReduxStore({ reducer, middleware, initialState })
 
-        store.dispatch(load(path.join(projectPath, 'project.babble')))
+        const filepath = path.join(projectPath, 'project.babble')
+        store.dispatch(load(filepath))
         expect(store).to.have.state.like({
             project: {
                 ...store.getState().project,
-                project: path.join(projectPath, 'project.babble')
+                project: filepath
             }
         }).and.dispatched({ f: 'setSettings', args: [defaults.settings] })
     })
