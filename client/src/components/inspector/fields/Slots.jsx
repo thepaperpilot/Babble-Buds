@@ -43,6 +43,7 @@ class Slots extends Component {
                         </div>))}
                     </div>)}
                 </div>
+                {this.props.help && <div className="flex-help" data-tooltip={this.props.help} />}
             </div>
         )
     }

@@ -42,3 +42,16 @@
 .inspector .foldable.warning h4 {
     color: var(--warning);
 }
+
+.inspector .emote-section .field-title + .field-flex-vertical > .field-flex:first-child > div:first-child label::after {
+    content: "default";
+    font-size: xx-small;
+    position: absolute;
+    bottom: 10px;
+    left: calc(50% - 5px);
+    transform: translate(-50%, -50%);
+}
+
+.inspector .emote-section .field {
+    margin-top: 7px;
+}

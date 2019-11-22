@@ -72,7 +72,7 @@ class EmoteSection extends Component {
         const allEmotesDisabled = [...Array(12).keys()]
             .map(emoteSlotDisabled).every(b => b)
 
-        return <div className="action">
+        return <div className="action emote-section">
             <Foldable title="Emote"
                 classNames={{
                     warning: nestedEmoteWarning != null ||
@@ -100,7 +100,8 @@ class EmoteSection extends Component {
                         layer.emote == null ? inherit.emote : layer.emote}
                     onChange={bundleEmotesInfo != null ? this.selectEmote :
                         this.changeEmote}
-                    disabled={emoteSlotDisabled} />
+                    disabled={emoteSlotDisabled}
+                    help="Marks this layer as one of the emotes in the emote controller, making it only appear when that emote slot is active. When babbling the eyes layer will be locked to that emotes' eyes, unless its the default emote slot" />
             </Foldable>
         </div>
     }
