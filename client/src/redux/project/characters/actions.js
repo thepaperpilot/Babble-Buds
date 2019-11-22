@@ -125,7 +125,7 @@ export function changeCharacter(id, character) {
         dispatch({ type: EDIT, id, character })
 
         character = util.updateObject(project.characters[id], character)
-        const thumbnail = project.characterThumbnails[id].slice(7)
+        const thumbnail = project.characterThumbnails[id].slice(8)
         const folder = thumbnail.split('/').slice(0, -1).join('/')
         ipcRenderer.send('background', 'generate thumbnails',
             `${folder}/new-${id}`, character, 'puppet', id)

@@ -300,7 +300,7 @@ describe('redux/project/characters/actions', function () {
         ]})
         expect(backgroundMessage).to.eql([
             "generate thumbnails",
-            '/fake/path/new-1',
+            'fake/path/new-1',
             { name: 'updated', foo: 'bar' },
             'puppet',
             1

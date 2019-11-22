@@ -101,14 +101,13 @@ ipcRenderer.on('generate thumbnails', async (e, thumbnailsPath, character, type,
     const data = stage.renderer.view.toDataURL() === empty.toDataURL() ? null : stage.getThumbnail()
 
     // Write thumbnail to files
-    if (data)
+    fs.ensureDirSync(thumbnailsPath)
+    if (data) {
         fs.writeFileSync(`${thumbnailsPath}.png`, Buffer.from(data, 'base64'))
-    else fs.removeSync(`${thumbnailsPath}.png`)
+    } else fs.removeSync(`${thumbnailsPath}.png`)
 
+    // Generate emote screenshots
     if (type !== 'asset') {
-        // Generate emote screenshots
-        fs.ensureDirSync(thumbnailsPath)
-
         // Make only the heads visible
         // (yeah, I realize I don't really have a good way of doing that)
         handleLayer(false)(puppet.container)
