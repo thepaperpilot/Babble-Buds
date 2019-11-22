@@ -72,6 +72,7 @@ function createWindow() {
     // Setup passthroughs between the foreground and background windows
     ipcMain.on('background', (e, ...event) => backgroundWindow.webContents.send(...event))
     ipcMain.on('foreground', (e, ...event) => mainWindow.webContents.send(...event))
+    // TODO if you hide the background window, it will ignore ipc messages :(
     ipcMain.on('change background visibility', (e, visible) => backgroundWindow[visible ? 'show' : 'hide']())
     ipcMain.on('toggle background visibility', () => backgroundWindow[backgroundWindow.isVisible() ? 'hide' : 'show']())
 
