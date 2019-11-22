@@ -7,11 +7,14 @@ import mock from 'mock-require'
 import fakeReducer from '../../util/fakeReducer'
 import fakeActions from '../../util/fakeActions'
 import path from 'path'
+import fs from 'fs-extra'
 
 chai.use(chaiRedux)
 
 let project, close, load, setNumCharacters
 let reducer
+
+let dialog
 
 const middleware = thunk
 
@@ -19,7 +22,7 @@ const projectPath = path.join(__dirname, '..', '..', 'test-data', 'project')
 
 const defaults = {
     settings: {
-        'clientVersion': '1.0.0',
+        'clientVersion': process.env.npm_package_version,
         'alwaysOnTop': false,
         'networking': {
             'ip': 'babblebuds.xyz',
@@ -27,7 +30,7 @@ const defaults = {
             'roomName': 'lobby',
             'roomPassword': '',
         },
-        'nickname': 'nickname',
+        'nickname': 'testnick',
         'charactersPath': '../characters',
         'assetsPath': '../assets',
         'characters': [],
@@ -77,6 +80,7 @@ const defaults = {
 describe('redux/project/project', function () {
     before(() => {
         mock.reRequire('../../util/mock-electron')
+        dialog = mock.reRequire('electron').remote.dialog
         mock('../../../src/redux/project/folders', fakeActions('load'))
         mock('../../../src/redux/project/settings/settings', fakeActions('setSettings'))
         mock('../../../src/redux/project/characters/reducers', fakeActions('setCharacters'))
@@ -101,6 +105,8 @@ describe('redux/project/project', function () {
             defaults: fakeReducer
         })
     })
+
+    beforeEach(() => dialog.reset())
 
     after(mock.stopAll)
 
@@ -136,7 +142,11 @@ describe('redux/project/project', function () {
         const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(load(path.join(projectPath, 'empty.babble')))
-        expect(store).to.have.dispatched({ f: 'setSettings', args: [defaults.settings] })
+        expect(store).to.have.dispatched({
+            f: 'setSettings',
+            args: [Object.assign({}, defaults.settings, fs.readJsonSync(path.join(projectPath, 'empty.babble')))]
+        })
+        expect(dialog.hasBeenCalled).to.be.false
     })
 
     it('should warn if loading non-exist file', () => {
@@ -172,7 +182,11 @@ describe('redux/project/project', function () {
                 ...store.getState().project,
                 project: filepath
             }
-        }).and.dispatched({ f: 'setSettings', args: [defaults.settings] })
+        }).and.dispatched({
+            f: 'setSettings',
+            args: [Object.assign({}, defaults.settings, fs.readJsonSync(filepath))]
+        })
+        expect(dialog.hasBeenCalled).to.be.true
     })
 
     it('should warn if loadCharacters returned errors', () => {

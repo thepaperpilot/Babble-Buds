@@ -111,7 +111,7 @@ export function load(filepath) {
         const settings = util.updateObject(state.defaults.settings, loadedSettings)
 
         // Confirm loading project if mismatched versions
-        if (!confirmOpen())
+        if (!confirmOpen(settings.clientVersion))
             return
 
         // Mark this filepath as the currently open project

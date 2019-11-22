@@ -27,7 +27,14 @@ function setup(settingsPath) {
                 getVersion: () => process.env.npm_package_version
             },
             dialog: {
-                showMessageBox: () => 1
+                response: 1,
+                hasBeenCalled: false,
+                showMessageBox() {
+                    this.hasBeenCalled = true
+                    return this.response
+                },
+                setResponse(response) { this.response = response },
+                reset() { this.hasBeenCalled = false }
             }
         },
         ipcRenderer: {
