@@ -1,0 +1,9 @@
+.puppet-selector .drag-preview {
+    height: 200px !important;
+    flex-direction: column-reverse;
+}
+
+.puppet-selector .drag-preview .inner-line-item {
+    margin: -2px;
+    margin-bottom: 2px;
+}

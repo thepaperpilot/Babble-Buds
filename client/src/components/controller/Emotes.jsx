@@ -45,7 +45,7 @@ const Hotkey = ({index, i, emotes, actor, characterThumbnail, changeEmote}) => {
         onClick={changeEmote(index)}>
         <div className="hotkey">{i}</div>
         <div className="desc">{emoteName}</div>
-        {emote && <img alt={emoteName} src={thumbnail}/>}
+        {emote && <img alt={emoteName} src={thumbnail} draggable={false} />}
     </div>
 }
 

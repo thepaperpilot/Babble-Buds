@@ -48,7 +48,7 @@ class Character extends Component {
                 onClick={this.changePuppet}>
                 <div className="hotkey">{index + 1}</div>
                 <div className="desc">{character.name}</div>
-                <img alt={character.name} src={thumbnail}/>
+                <img alt={character.name} src={thumbnail} draggable={false} />
             </div>)}
         </ContextMenuTrigger>
     }
