@@ -2,7 +2,7 @@
 //  with circular dependencies when creating the reducers
 
 import util from '../../util.js'
-import { warn } from '../../status'
+import { warn, info } from '../../status'
 import { close } from '../../editor/editor'
 import { changeCharacter } from '../characters/actions'
 import { addFolder, removeFolder } from '../folders'
@@ -14,11 +14,17 @@ const path = require('path')
 const {ipcRenderer} = window.require('electron')
 
 // Action Creators
-export function addAssets(assets) {
+export function addAssets(assets, updateBackground = true) {
     return (dispatch, getState) => {
+        const state = getState()
         dispatch({ type: ADD, assets })
 
-        let folders = getState().project.folders
+        if (updateBackground) {
+            dispatch(info('Updating assets in background process...'))
+            ipcRenderer.send('background', 'update assets', util.updateObject(state.project.assets, assets), state.project.settings.assetsPath)
+        }
+
+        let folders = state.project.folders
         Object.values(assets).forEach(asset => {
             if (!folders.includes(asset.tab)) {
                 dispatch(addFolder(asset.tab))
@@ -46,12 +52,9 @@ export function duplicateAsset(asset) {
             name: `${assets[asset].name} (copy)`
         })
         
-        dispatch({
-            type: ADD,
-            assets: {
-                [`${state.self}:${id}`]: newAsset
-            }
-        })
+        dispatch(addAssets({
+            [`${state.self}:${id}`]: newAsset
+        }))
 
         const assetsPath = path.join(project, settings.assetsPath)
         fs.copySync(path.join(assetsPath, assets[asset].location),
@@ -138,11 +141,18 @@ export function setLayers(asset, layers) {
             return
         }
 
-        dispatch({ type: EDIT, id: asset, asset: {
+        const newAsset = {
             layers,
             conflicts: getConflicts(assets, layers),
             version: assets[asset].version + 1
-        }})
+        }
+        dispatch({ type: EDIT, id: asset, asset: newAsset})
+
+        dispatch(info('Updating assets in background process...'))
+        const newAssets = util.updateObject(assets, {
+            [asset]: util.updateObject(assets[asset], newAsset)
+        })
+        ipcRenderer.send('background', 'update assets', newAssets, settings.assetsPath)
 
         const thumbnailPath = path.join(project, settings.assetsPath,
             state.self, `${asset.split(':')[1]}`)

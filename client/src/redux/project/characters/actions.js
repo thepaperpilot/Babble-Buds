@@ -45,7 +45,7 @@ export function addCharacter(id, character) {
         dispatch({ type: ADD, id, character })
         const thumbnail =
             path.join(project.charactersPath, '..', 'thumbnails', `new-${id}`)
-        dispatch(updateThumbnail(id, 'puppet', thumbnail))
+        dispatch(updateThumbnail(id, 'puppet', thumbnail, false))
         dispatch(addCharacterSettings(id))
     }
 }

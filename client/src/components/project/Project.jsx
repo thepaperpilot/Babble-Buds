@@ -108,7 +108,7 @@ class Project extends Component {
     }
 
     importAssets(e, assets, statusId) {
-        this.props.dispatch(addAssets(assets))
+        this.props.dispatch(addAssets(assets, false))
         this.props.dispatch(inProgressIncrement(statusId, Object.keys(assets).length))
     }
 

@@ -53,16 +53,7 @@ async function waitUntilAssetsLoaded() {
     }
 }
 
-ipcRenderer.on('update assets', async (e, assets, assetsPath) => {
-    stage.assets = assets
-    stage.assetsPath = assetsPath
-    isLoadingAssets = true
-    await new Promise(resolve => stage.reloadAssets(resolve))
-    isLoadingAssets = false
-})
-
-ipcRenderer.on('generate thumbnails', async (e, thumbnailsPath, character, type, id) => {
-    await waitUntilAssetsLoaded()
+async function generateThumbnails(thumbnailsPath, character, type, id) {
     // Put puppet on the stage
     stage.clearPuppets()
     character.position = 1
@@ -76,29 +67,25 @@ ipcRenderer.on('generate thumbnails', async (e, thumbnailsPath, character, type,
     }
 
     // Take puppet screenshot
-    let empty = document.createElement('canvas')
-    const {width, height} = stage.stage
+    const {width, height} = puppet.container
+    let w, h
     
     //ipcRenderer.send('change background visibility', true)
 
     if (type === 'environment') {
-        const w = Math.ceil(character.width)
-        const h = Math.ceil(character.height)
+        w = Math.ceil(character.width)
+        h = Math.ceil(character.height)
         stage.resize(null, w, h)
-        empty.width = w
-        empty.height = h
         remote.getCurrentWindow().setContentSize(w, h)
     } else {
-        const w = Math.ceil(width)
-        const h = Math.ceil(height)
+        w = Math.ceil(width)
+        h = Math.ceil(height)
         stage.resize(null, w, h)
-        empty.width = w
-        empty.height = h
         remote.getCurrentWindow().setContentSize(w, h)
     }
 
     stage.renderer.render(stage.stage)
-    const data = stage.renderer.view.toDataURL() === empty.toDataURL() ? null : stage.getThumbnail()
+    const data = w == 0 && h == 0 ? null : stage.getThumbnail()
 
     // Write thumbnail to files
     fs.ensureDirSync(thumbnailsPath)
@@ -118,7 +105,8 @@ ipcRenderer.on('generate thumbnails', async (e, thumbnailsPath, character, type,
         Object.keys(puppet.emotes).forEach(emote => {
             puppet.changeEmote(emote)
             stage.renderer.render(stage.stage)
-            const data = stage.renderer.view.toDataURL() === empty.toDataURL() ? null : stage.getThumbnail()
+            const {width, height} = puppet.container
+            const data = w == 0 && h == 0 ? null : stage.getThumbnail()
             const emotePath = path.join(thumbnailsPath, `${emote}.png`)
             if (data)
                 fs.writeFileSync(emotePath, Buffer.from(data, 'base64'))
@@ -130,6 +118,20 @@ ipcRenderer.on('generate thumbnails', async (e, thumbnailsPath, character, type,
     ipcRenderer.send('foreground', 'update thumbnails', type, id, thumbnailsPath)
 
     //ipcRenderer.send('change background visibility', false)
+}
+
+ipcRenderer.on('update assets', async (e, assets, assetsPath) => {
+    await waitUntilAssetsLoaded()
+    isLoadingAssets = true
+    stage.assets = assets
+    stage.assetsPath = assetsPath
+    await new Promise(resolve => stage.reloadAssets(resolve))
+    isLoadingAssets = false
+})
+
+ipcRenderer.on('generate thumbnails', async (e, thumbnailsPath, character, type, id) => {
+    await waitUntilAssetsLoaded()
+    await generateThumbnails(thumbnailsPath, character, type, id)
 })
 
 ipcRenderer.on('import', async (e, duplicate, selected, oldAssetsPath, newAssetsPath, statusId) => {
@@ -151,6 +153,7 @@ ipcRenderer.on('import', async (e, duplicate, selected, oldAssetsPath, newAssets
 
 ipcRenderer.on('add assets', async (e, assets, assetsPath, statusId) => {
     await fs.ensureDir(assetsPath)
+
     await addAssets(assets, statusId, async asset => {
         let file = await fs.readFile(asset.filepath)
 
@@ -208,6 +211,13 @@ ipcRenderer.on('add assets', async (e, assets, assetsPath, statusId) => {
         await fs.writeFile(path.join(assetsPath, asset.location), file)
         delete asset.filepath
     })
+
+    await waitUntilAssetsLoaded()
+    isLoadingAssets = true
+    Object.assign(stage.assets, assets)
+    stage.assetsPath = newAssetsPath
+    await new Promise(resolve => stage.reloadAssets(resolve))
+    isLoadingAssets = false
 })
 
 ipcRenderer.on('add puppets', async (e, characters, assets, oldAssetsPath, newAssetsPath, thumbnailsPath, puppetsStatusId, assetsStatusId) => {
@@ -225,6 +235,17 @@ ipcRenderer.on('add puppets', async (e, characters, assets, oldAssetsPath, newAs
                 `${path.join(thumbnailsPath, `new-${id}`)}`)
     }))
 
+    const unfinishedCharacters = Object.assign({}, characters)
+    Object.keys(unfinishedCharacters).forEach(id => {
+        const character = unfinishedCharacters[id]
+        if (character.assets.length === 0) {
+            delete character.thumbnail
+            delete character.thumbFolder
+            delete character.assets
+            ipcRenderer.send('foreground', 'import puppet', id, character, puppetsStatusId)
+            delete unfinishedCharacters[id]
+        }
+    })
     await addAssets(assets, assetsStatusId, async (asset, assetId) => {
         // Copy the files over
         const newLocation = `${assetId.replace(':', '/')}.${asset.location.slice(-3)}`
@@ -240,8 +261,8 @@ ipcRenderer.on('add puppets', async (e, characters, assets, oldAssetsPath, newAs
         }
 
         // Check for completed puppets
-        Object.keys(characters).map(id => {
-            const character = characters[id]
+        Object.keys(unfinishedCharacters).map(id => {
+            const character = unfinishedCharacters[id]
             const assets = character.assets
             const index = assets.indexOf(assetId)
 
@@ -255,9 +276,22 @@ ipcRenderer.on('add puppets', async (e, characters, assets, oldAssetsPath, newAs
                     delete character.thumbFolder
                     delete character.assets
                     ipcRenderer.send('foreground', 'import puppet', id, character, puppetsStatusId)
-                    delete characters[id]
+                    delete unfinishedCharacters[id]
                 }
             }
         })
     })
+
+    await waitUntilAssetsLoaded()
+
+    isLoadingAssets = true
+    Object.assign(stage.assets, assets)
+    stage.assetsPath = newAssetsPath
+    await new Promise(resolve => stage.reloadAssets(resolve))
+
+    await Promise.all(Object.keys(characters).map(async id => {
+        const character = characters[id]
+        generateThumbnails(path.join(thumbnailsPath, `new-${id}`), character, 'puppet', id)
+    }))
+    isLoadingAssets = false
 })

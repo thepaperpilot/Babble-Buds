@@ -44,7 +44,6 @@ class BackgroundInterface extends Component {
         // to the empty array, causing another render we don't need. 
         const dirtyCharacters = this.hasUpdated ? [] : newProps.dirtyCharacters
 
-        let updated = assetsPath !== this.props.assetsPath
         let updatedAssets = []
 
         const assetKeys = [
@@ -55,20 +54,12 @@ class BackgroundInterface extends Component {
             // asset doesn't exist in new assets list (it got deleted)
             !(id in assets) ||
             // asset was changed
-                assets[id] !== this.props.assets[id]).forEach(id => {
-            updated = true
+                assets[id] !== this.props.assets[id]).filter(id =>
             // If the asset was a bundle
-            if (id in this.props.assets && this.props.assets[id].type === 'bundle' &&
-                // and was either deleted or has incremented the version field
-                (!(id in assets) || assets[id].version !== this.props.assets[id].version)) {
-                updatedAssets.push(id)
-            }
-        })
-
-        if (updated && Object.keys(assets).length > 0) {
-            this.props.dispatch(info('Updating assets in background process...'))
-            ipcRenderer.send('background', 'update assets', assets, assetsPath)
-        }
+            id in this.props.assets && this.props.assets[id].type === 'bundle' &&
+            // and was either deleted or has incremented the version field
+                (!(id in assets) || assets[id].version !== this.props.assets[id].version)
+            ).forEach(id => updatedAssets.push(id))
 
         updatedAssets.forEach(id => {
             const asset = assets[id] || this.props.assets[id]

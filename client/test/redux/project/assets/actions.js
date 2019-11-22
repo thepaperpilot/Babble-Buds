@@ -39,7 +39,7 @@ describe('redux/project/assets/actions', function () {
         mockElectron(settingsFolder)
         ipcRenderer = require('electron').ipcRenderer
         settingsManager = mock.reRequire('../../../../src/main-process/settings')
-        mock('../../../../src/redux/status', fakeActions('warn'))
+        mock('../../../../src/redux/status', fakeActions('warn', 'info'))
         mock('../../../../src/redux/editor/editor', fakeActions('close'))
         mock('../../../../src/redux/project/characters/actions', fakeActions('changeCharacter'))
         mock('../../../../src/redux/project/folders', fakeActions('addFolder', 'removeFolder'))
@@ -93,22 +93,33 @@ describe('redux/project/assets/actions', function () {
         const initialState = {
             project: {
                 assets: {},
-                folders: []
+                folders: [],
+                settings: {
+                    assetsPath
+                }
             }
         }
         const store = chai.createReduxStore({ reducer, middleware, initialState })
+        let backgroundMessage
+        ipcRenderer.on('background', (e, ...data) => {
+            backgroundMessage = data
+        })
 
-        store.dispatch(addAssets({ test: { tab: 'test' }, test2: {} }))
+        const assets = { test: { tab: 'test' }, test2: {} }
+        store.dispatch(addAssets(assets))
         expect(store).to.have.state.like({
             project: {
                 ...store.getState().project,
-                assets: {
-                    test: { tab: 'test' },
-                    test2: {}
-                }
+                assets
             }
         })
         .then.dispatched({ f: 'addFolder' })
+        expect(backgroundMessage).to.eql([
+            "update assets",
+            assets,
+            assetsPath
+        ])
+        ipcRenderer.removeAllListeners('background')
     })
 
     it('should duplicate asset', () => {
@@ -118,14 +129,20 @@ describe('redux/project/assets/actions', function () {
                 project,
                 settings: {
                     assetsPath
-                }
+                },
+                folders: [ 'test' ]
             },
             self: 'test-uuid'
         }
         const store = chai.createReduxStore({ reducer, middleware, initialState })
+        let backgroundMessage
+        ipcRenderer.on('background', (e, ...data) => {
+            backgroundMessage = data
+        })
 
         store.dispatch(duplicateAsset('test'))
         expect(store.getState().project.assets[`${defaultSettings.uuid}:1`].tab).to.eql('test')
+        ipcRenderer.removeAllListeners('background')
     })
 
     it('should delete assets', () => {
@@ -379,9 +396,9 @@ describe('redux/project/assets/actions', function () {
             self: 'testid'
         }
         const store = chai.createReduxStore({ reducer, middleware, initialState })
-        let backgroundMessage
+        let backgroundMessages = []
         ipcRenderer.on('background', (e, ...data) => {
-            backgroundMessage = data
+            backgroundMessages.push(data)
         })
 
         store.dispatch(createAssetBundle([0], "test", "testtab"))
@@ -412,7 +429,7 @@ describe('redux/project/assets/actions', function () {
                 { children: [ { id: 'testid:1' } ] }
             ]
         })
-        expect(backgroundMessage).to.eql([
+        expect(backgroundMessages[0]).to.eql([
             "generate thumbnails",
             path.join(project, assetsPath, 'testid', '1'),
             { layers },

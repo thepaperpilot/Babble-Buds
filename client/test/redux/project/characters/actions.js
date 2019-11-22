@@ -85,7 +85,7 @@ describe('redux/project/characters/actions', function () {
             }
         })
         .and.dispatched({ f: 'setNumCharacters', args: [1] })
-        .and.dispatched({ f: 'updateThumbnail', args: [1, 'puppet', thumbnail] })
+        .and.dispatched({ f: 'updateThumbnail', args: [1, 'puppet', thumbnail, false] })
         .and.dispatched({ f: 'addCharacter', args: [1] })
     })
 

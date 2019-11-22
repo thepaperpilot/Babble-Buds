@@ -15,7 +15,7 @@ export function removeThumbnail(id) {
     return { type: REMOVE, id }
 }
 
-export function updateThumbnail(id, type, thumbnailsPath) {
+export function updateThumbnail(id, type, thumbnailsPath, logStatus = true) {
     return (dispatch, getState) => {
         const { assets, characters, environments } = getState().project
         
@@ -38,7 +38,8 @@ export function updateThumbnail(id, type, thumbnailsPath) {
         const path =
             `file:///${thumbnailsPath}.png?random=${new Date().getTime()}`.replace(/\\/g, '/')
         dispatch({ type: EDIT, id, thumbnailsPath: path })
-        dispatch(log(`Update thumbnail for "${name}" ${type}.`))
+        if (logStatus)
+            dispatch(log(`Update thumbnail for "${name}" ${type}.`))
     }
 }
 
