@@ -38,14 +38,6 @@
     width: 0;
 }
 
-.selector.canDrop.isOver {
-    background-color: rgba(0, 255, 0, .2);
-}
-
-.selector.canDrop {
-    background-color: rgba(0, 255, 0, .05);
-}
-
 .char, .emote, .babble {
     background-color: var(--background);
     color: var(--foreground);
@@ -66,7 +58,7 @@
 }
 
 .char.canDrop img {
-    background: transparent;
+    background: inherit;
 }
 
 .emote img {

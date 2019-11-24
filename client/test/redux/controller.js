@@ -9,7 +9,7 @@ import fakeActions from '../util/fakeActions'
 chai.use(chaiRedux)
 
 let controller
-let setActors, setEmote, moveLeft, moveRight, jiggle, changePuppet, setBabbling
+let setActors, setEmote, moveLeft, moveRight, jiggle, changePuppet, changeEnvironment, setBabbling
 let reducer
 
 const middleware = thunk
@@ -19,6 +19,7 @@ describe('redux/controller', () => {
         mock('../../src/redux/actors',
             fakeActions('setEmote', 'moveLeft', 'moveRight', 'jiggle',
                 'changePuppet', 'setBabbling'))
+        mock('../../src/redux/environment', fakeActions('setEnvironment', 'setDefaultEnvironment'))
 
         const c = mock.reRequire('../../src/redux/controller')
         controller = c.default
@@ -28,11 +29,13 @@ describe('redux/controller', () => {
         moveRight = c.moveRight
         jiggle = c.jiggle
         changePuppet = c.changePuppet
+        changeEnvironment = c.changeEnvironment
         setBabbling = c.setBabbling
 
         reducer = combineReducers({
             controller,
-            project: fakeReducer
+            project: fakeReducer,
+            self: fakeReducer
         })
     })
 
@@ -157,6 +160,46 @@ describe('redux/controller', () => {
         expect(store).to.have
             .dispatched({ f: 'changePuppet', args: [1, 'test', 'test character'] })
             .dispatched({ f: 'changePuppet', args: [2, 'test', 'test character'] })
+    })
+
+    it('should set environment from hotbar', () => {
+        const initialState = {
+            project: {
+                settings: {
+                    environmentHotbar: [
+                        'test'
+                    ]
+                },
+                environments: {
+                    test: 'test environment'
+                }
+            },
+            self: 'testid'
+        }
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
+
+        store.dispatch(changeEnvironment(0))
+        expect(store).to.have
+            .dispatched({ f: 'setEnvironment', args: ['testid', 'test', 'test environment'] })
+    })
+
+    it('should set environment to default from hotbar', () => {
+        const initialState = {
+            project: {
+                settings: {
+                    environmentHotbar: [
+                        -1
+                    ]
+                },
+                environments: {}
+            },
+            self: 'testid'
+        }
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
+
+        store.dispatch(changeEnvironment(0))
+        expect(store).to.have
+            .dispatched({ f: 'setDefaultEnvironment' })
     })
 
     it('should set babbling', () => {

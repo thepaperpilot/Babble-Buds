@@ -3,6 +3,7 @@ import util from '../../util.js'
 import characters, { setCharacters } from './characters'
 import environments, { setEnvironments } from './environments'
 import hotbar, { setHotbar } from './hotbar'
+import environmentHotbar, { setHotbar as setEnvironmentsHotbar } from './environmentHotbar'
 import networking, { setNetworking } from './networking'
 import nickname, { setNickname } from './nickname'
 import shortcuts, { setShortcuts } from './shortcuts'
@@ -24,17 +25,19 @@ export function setSettings(settings) {
             characters,
             environments,
             hotbar,
+            environmentHotbar,
             networking,
             nickname,
             shortcuts
         } = settings
 
-        dispatch({ type: SET_ALWAYS_ON_TOP, alwaysOnTop })
-        dispatch({ type: SET_CHARACTERS_PATH, charactersPath })
-        dispatch({ type: SET_ASSETS_PATH, assetsPath })
+        dispatch({ type: SET_ALWAYS_ON_TOP, alwaysOnTop: alwaysOnTop || false })
+        dispatch({ type: SET_CHARACTERS_PATH, charactersPath: charactersPath || '../characters' })
+        dispatch({ type: SET_ASSETS_PATH, assetsPath: assetsPath || '../assets' })
         dispatch(setCharacters(characters))
         dispatch(setEnvironments(environments))
         dispatch(setHotbar(hotbar))
+        dispatch(setEnvironmentsHotbar(environmentHotbar))
         dispatch(setNetworking(networking))
         dispatch(setNickname(nickname))
         dispatch(setShortcuts(shortcuts))
@@ -68,6 +71,7 @@ export default combineReducers({
     characters,
     environments,
     hotbar,
+    environmentHotbar,
     networking,
     nickname,
     shortcuts

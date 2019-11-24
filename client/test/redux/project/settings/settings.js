@@ -25,6 +25,8 @@ describe('redux/project/settings/settings', function () {
             fakeActions('setEnvironments'))
         mock('../../../../src/redux/project/settings/hotbar',
             fakeActions('setHotbar'))
+        mock('../../../../src/redux/project/settings/environmentHotbar',
+            fakeActions('setHotbar'))
         mock('../../../../src/redux/project/settings/networking',
             fakeActions('setNetworking'))
         mock('../../../../src/redux/project/settings/nickname',
@@ -62,6 +64,7 @@ describe('redux/project/settings/settings', function () {
             characters: [ 'testCharacter' ],
             environments: [ 'testEnvironment' ],
             hotbar: [0,1,2,3,4,5,6,7,8,9],
+            environmentHotbar: [9,8,7,6,5,4,3,2,1],
             networking: { ip: 'ip', port: 'port', roomName: 'roomName', roomPassword: 'roomPassword' },
             nickname: 'testnick',
             shortcuts: { test: null }
@@ -82,9 +85,32 @@ describe('redux/project/settings/settings', function () {
         .then.dispatched({ f: 'setCharacters', args: [ settings.characters ] })
         .then.dispatched({ f: 'setEnvironments', args: [ settings.environments ] })
         .then.dispatched({ f: 'setHotbar', args: [ settings.hotbar ] })
+        .then.dispatched({ f: 'setHotbar', args: [ settings.environmentHotbar ] })
         .then.dispatched({ f: 'setNetworking', args: [ settings.networking ] })
         .then.dispatched({ f: 'setNickname', args: [ settings.nickname ] })
         .then.dispatched({ f: 'setShortcuts', args: [ settings.shortcuts ] })
+    })
+
+    it('should set settings to empty', () => {
+        const initialState = {
+            project: {
+                settings: {}
+            }
+        }
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
+
+        store.dispatch(setSettings({}))
+        expect(store).to.have.state.like({
+            project: {
+                ...store.getState().project,
+                settings: {
+                    clientVersion: process.env.npm_package_version,
+                    alwaysOnTop: false,
+                    charactersPath: '../characters',
+                    assetsPath: '../assets'
+                }
+            }
+        })
     })
 
     it('should set always on top', () => {

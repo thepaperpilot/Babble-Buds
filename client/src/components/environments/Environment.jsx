@@ -1,9 +1,11 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { ContextMenuTrigger } from 'react-contextmenu'
+import { DragSource, DragPreviewImage } from 'react-dnd'
 import InlineEdit from '../ui/InlineEdit'
-import { open } from '../../redux/editor/editor'
+import EnvironmentDragPreview from './EnvironmentDragPreview'
+import { ContextMenuTrigger } from 'react-contextmenu'
 import { changeEnvironment } from '../../redux/project/environments/actions'
+import { open } from '../../redux/editor/editor'
 
 class Environment extends Component {
     constructor(props) {
@@ -46,55 +48,64 @@ class Environment extends Component {
             style.margin = `0 ${50 * remainingWidth / (this.props.width - 4)}%`
         }
 
-        return <div>
-            <ContextMenuTrigger
-                id={`contextmenu-environment-${this.props.contextmenu}`}
-                holdToDisplay={-1}
-                collect={() => ({
-                    environment: this.props.id,
-                    inlineEdit: this.inlineEdit,
-                    disabled: this.props.id === -1
-                })}>
-                {this.props.small ?
-                    <div>
-                        <InlineEdit
-                            ref={this.inlineEdit}
-                            disabled={true}
-                            target={this.props.id}
-                            targetType="environment"
-                            label={name}
-                            className="line-item smallThumbnail-wrapper"
-                            onChange={this.renameEnvironment}
-                            onDoubleClick={this.editEnvironment}>
-                            <div className="smallThumbnail-img" style={{width: '20px', height: '20px'}}>
-                                <img
-                                    style={style}
-                                    alt={name}
-                                    src={this.props.thumbnail}/>
-                            </div>
-                        </InlineEdit>
-                    </div> :
-                    <div>
-                        <InlineEdit
-                            ref={this.inlineEdit}
-                            disabled={true}
-                            target={this.props.id}
-                            targetType="environment"
-                            label={name}
-                            className="char"
-                            width={this.props.width}
-                            height={this.props.height}
-                            onChange={this.renameEnvironment}
-                            onDoubleClick={this.editEnvironment}>
+        // Create drag preview image with an empty image,
+        // so we can make our own dragpreview we have more control over
+        const img = new Image()
+        this.props.connectDragPreview(img)
+
+        return <ContextMenuTrigger
+            id={`contextmenu-environment-${this.props.contextmenu}`}
+            holdToDisplay={-1}
+            collect={() => ({
+                environment: this.props.id,
+                inlineEdit: this.inlineEdit,
+                disabled: this.props.id === -1
+            })}>
+            {this.props.isDragging && <EnvironmentDragPreview
+                thumbnail={this.props.thumbnail}
+                name={name}
+                monitor={this.props.monitor} />}
+            {this.props.connectDragSource(this.props.small ?
+                <div>
+                    <InlineEdit
+                        ref={this.inlineEdit}
+                        disabled={true}
+                        target={this.props.id}
+                        targetType="environment"
+                        label={name}
+                        className="line-item smallThumbnail-wrapper"
+                        onChange={this.renameEnvironment}
+                        onDoubleClick={this.editEnvironment}>
+                        <div className="smallThumbnail-img" style={{width: '20px', height: '20px'}}>
                             <img
                                 style={style}
                                 alt={name}
-                                src={this.props.thumbnail} />
-                        </InlineEdit>
-                    </div>
-                }
-            </ContextMenuTrigger>
-        </div>
+                                src={this.props.thumbnail}
+                                draggable={false} />
+                        </div>
+                    </InlineEdit>
+                </div> :
+                <div>
+                    <InlineEdit
+                        ref={this.inlineEdit}
+                        disabled={true}
+                        target={this.props.id}
+                        targetType="environment"
+                        label={name}
+                        className="char"
+                        width={this.props.width}
+                        height={this.props.height}
+                        onChange={this.renameEnvironment}
+                        onDoubleClick={this.editEnvironment}>
+                        <img
+                            style={style}
+                            alt={name}
+                            src={this.props.thumbnail}
+                            draggable={false} />
+                    </InlineEdit>
+                </div>
+            )}
+        </ContextMenuTrigger>
     }
 }
 
@@ -104,4 +115,19 @@ function mapStateToProps(state, props) {
     }
 }
 
-export default connect(mapStateToProps)(Environment)
+const environmentSource = {
+    beginDrag(props) {
+        return { environment: props.id }
+    }
+}
+
+function collect(connect, monitor) {
+    return {
+        connectDragSource: connect.dragSource(),
+        connectDragPreview: connect.dragPreview(),
+        isDragging: monitor.isDragging(),
+        monitor
+    }
+}
+
+export default connect(mapStateToProps)(DragSource('environment', environmentSource, collect)(Environment))

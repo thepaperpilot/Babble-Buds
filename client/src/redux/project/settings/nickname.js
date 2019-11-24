@@ -17,7 +17,7 @@ export function randomizeNickname() {
 }
 
 export function setNickname(nickname) {
-    return { type: SET, nickname }
+    return { type: SET, nickname: nickname || getRandomName() }
 }
 
 // Reducers

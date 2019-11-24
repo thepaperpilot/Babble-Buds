@@ -27,6 +27,8 @@ ipcMain.on('global', (e, toRemove, toRegister) => {
                     data = words[2]- 1
                     if (words[1] && words[1] === 'puppet') {
                         action = 'changePuppet'
+                    } else if (words[1] && words[1] === 'environment') {
+                        action = 'changeEnvironment'
                     } else if (words[1] && words[1] === 'emote') {
                         action = 'setEmote'
                     }

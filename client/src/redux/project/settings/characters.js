@@ -7,7 +7,7 @@ const REMOVE = 'project/settings/characters/REMOVE'
 
 // Action Creators
 export function setCharacters(characters) {
-    return { type: SET, characters }
+    return { type: SET, characters: characters || [] }
 }
 
 export function addCharacter(id) {

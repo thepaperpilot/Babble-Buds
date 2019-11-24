@@ -158,16 +158,15 @@ export function load(filepath) {
                     `${path.join(filepath, settings.charactersPath, '..',
                         'thumbnails', `${numCharacters + 1}`)}`.replace(/\\/g, '/'),
                     environment, 'environment', numCharacters + 1)
-                dispatch(setEnvironment(settingsManager.settings.uuid,
-                    numCharacters + 1, environment))
                 numCharacters++
-            } else dispatch(setDefaultEnvironment())
+                settings.environmentHotbar = [numCharacters,0,0,0,0,0,0,0,0]
+            }
 
             // Delete old values we don't need anymore
             delete settings.greenScreen
             delete settings.numCharacters
             delete settings.puppetScale
-        } else dispatch(setDefaultEnvironment())
+        }
 
         // Remove any character layers for assets that don't exist in this project
         let dirtyCharacters = filterCharacters(dispatch, assets, characters)
@@ -197,7 +196,7 @@ export function load(filepath) {
         dispatch(addCharacters(dirtyCharacters))
         dispatch(setAssets(assets))
         dispatch(loadProject(settings, characters, environments, assets))
-        dispatch(setSinglePlayer())
+        dispatch(setSinglePlayer(true))
         dispatch({ type: SET_PROJECT, project: filepath })
     }
 }

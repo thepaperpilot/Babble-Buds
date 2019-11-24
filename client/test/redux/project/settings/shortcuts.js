@@ -17,6 +17,43 @@ const reducer = combineReducers({
     })
 })
 
+const defaultShortcuts = {
+    'Select puppet 1': null,
+    'Select puppet 2': null,
+    'Select puppet 3': null,
+    'Select puppet 4': null,
+    'Select puppet 5': null,
+    'Select puppet 6': null,
+    'Select puppet 7': null,
+    'Select puppet 8': null,
+    'Select puppet 9': null,
+    'Select environment 1': null,
+    'Select environment 2': null,
+    'Select environment 3': null,
+    'Select environment 4': null,
+    'Select environment 5': null,
+    'Select environment 6': null,
+    'Select environment 7': null,
+    'Select environment 8': null,
+    'Select environment 9': null,
+    'Select emote 1': null,
+    'Select emote 2': null,
+    'Select emote 3': null,
+    'Select emote 4': null,
+    'Select emote 5': null,
+    'Select emote 6': null,
+    'Select emote 7': null,
+    'Select emote 8': null,
+    'Select emote 9': null,
+    'Select emote 10': null,
+    'Select emote 11': null,
+    'Select emote 12': null,
+    'Toggle babbling': null,
+    'Move left': null,
+    'Move right': null,
+    'Jiggle': null
+}
+
 const middleware = thunk
 
 describe('redux/project/settings/shortcuts', function () {
@@ -24,7 +61,7 @@ describe('redux/project/settings/shortcuts', function () {
         const initialState = {
             project: {
                 settings: {
-                    shortcuts: {}   
+                    shortcuts: defaultShortcuts
                 }
             }
         }
@@ -50,17 +87,15 @@ describe('redux/project/settings/shortcuts', function () {
             }
         })
         expect(backgroundMessage).to.have.lengthOf(2)
-        expect(backgroundMessage[1]).to.eql([
-            { accel: null, shortcut: 'test' },
-            { accel: 'ctrl+x', shortcut: 'test2' }
-        ])
+        expect(backgroundMessage[1].find(s => s.shortcut === 'test')).to.exist
+        expect(backgroundMessage[1].find(s => s.shortcut === 'test2' && s.accel === 'ctrl+x')).to.exist
     })
 
     it('should set shortcut', () => {
         const initialState = {
             project: {
                 settings: {
-                    shortcuts: {}   
+                    shortcuts: defaultShortcuts
                 }
             }
         }

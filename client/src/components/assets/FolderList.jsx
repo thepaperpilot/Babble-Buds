@@ -1,5 +1,6 @@
 import React, {PureComponent} from 'react'
 import { connect } from 'react-redux'
+import classNames from 'classnames'
 import { DropTarget, DragSource } from 'react-dnd'
 import Scrollbar from 'react-custom-scroll'
 import Folder from './Folder'
@@ -83,14 +84,13 @@ export class FolderTarget extends PureComponent {
 
     render() {
         const { connectDragSource, connectDropTarget, isOver, canDrop, tab } = this.props
-        return connectDragSource(connectDropTarget(<div className="folder-list-item"
+        return connectDragSource(connectDropTarget(<div className={classNames({
+                'folder-list-item': true,
+                isOver,
+                canDrop
+            })}
             onClick={this.jumpToFolder}
-            ref={this.ref}
-            style={{
-                // Set background color based on the current drop status
-                backgroundColor: isOver && canDrop ? 'rgba(0, 255, 0, .2)' :
-                    canDrop ? 'rgba(0, 255, 0, .05)' : ''
-            }}>
+            ref={this.ref}>
             {/* For the actual object to render,
                 we'll just copy our Folder component from the asset list */}
             <Folder contextmenu={this.props.contextmenu} tab={tab} />

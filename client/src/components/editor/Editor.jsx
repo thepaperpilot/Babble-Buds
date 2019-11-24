@@ -2,6 +2,7 @@ import React, {Component} from 'react'
 import { connect } from 'react-redux'
 import { Stage } from 'react-pixi-fiber'
 import { DropTarget } from 'react-dnd'
+import classNames from 'classnames'
 import Viewport from './Viewport'
 import Layer from './Layer'
 import Cross from './Cross'
@@ -177,11 +178,12 @@ class Editor extends Component {
         }
 
         return this.props.connectDropTarget(
-            <div className={`panel editor${changed ? ' changed' : ''}`}
-                style={{
-                    // Set background color based on the current drop status
-                    backgroundColor: !isOver && canDrop ? 'rgba(0, 255, 0, .05)' : ''
-                }}>
+            <div className={classNames({
+                panel: true,
+                editor: true,
+                changed,
+                canDrop: canDrop && !isOver
+            })}>
                 <div className="bar flex-row">
                     <button onClick={this.savePuppet}>Apply</button>
                     <div className="toggle" style={{ backgroundColor: this.state.highlight ? 'var(--highlight)' : 'var(--background)'}} onClick={this.toggleHighlight}>

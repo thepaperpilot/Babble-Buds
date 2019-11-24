@@ -316,3 +316,11 @@ img:after {
     width: 100%;
     height: 100%;
 }
+
+.canDrop {
+    background-color: #264026; /* hsl(120, 25%, 20%) */
+}
+
+.canDrop.isOver {
+    background-color: #215421; /* hsl(120, 44%, 23%) */
+}

@@ -59,9 +59,9 @@ class Layer extends Component {
         // center of where all its children are, and offset each child the opposite
         // direction to compensate.
         // Thus making scaling and rotating work in a more straightforward way
-        const className = ['layer']
+        const className = { layer: true, canDrop, isOver }
         if (comparePaths(selected.layer, path))
-            className.push('selected')
+            className.selected = true
 
         // Check for errors
         // We have an emote but a parent already has one
@@ -78,7 +78,7 @@ class Layer extends Component {
                 (asset.conflicts.emoteLayer && ('emoteLayer' in inherit || emoteLayer)) ||
                 (asset.conflicts.emote && ('emote' in inherit || nodeEmote)) ||
                 asset.conflicts.emotes.some(e => e in emotes && !comparePaths(emotes[e], path)))))
-            className.push('warning')
+            className.warning = true
 
         const isBundle = asset && asset.type === 'bundle'
 
@@ -103,12 +103,7 @@ class Layer extends Component {
             collect={() => ({ path, name, tabs, assetId: id, asset })}>
             {this.props.connectDropTarget(<div className={classNames(className)}
                 onClick={this.onNodeClick}
-                onDoubleClick={this.editBundle}
-                style={{
-                    // Set background color based on the current drop status
-                    backgroundColor: isOver && canDrop ? 'rgba(0, 255, 0, .2)' :
-                        canDrop ? 'rgba(0, 255, 0, .05)' : ''
-                }}>
+                onDoubleClick={this.editBundle}>
                 {children == null ?
                     asset ?
                         <div>

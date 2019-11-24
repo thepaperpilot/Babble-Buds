@@ -10,7 +10,8 @@ chai.use(chaiRedux)
 let store
 const reducer = combineReducers({
     environment,
-    defaults: fakeReducer
+    defaults: fakeReducer,
+    self: fakeReducer
 })
 const initialState = {
     environment: null,
@@ -19,7 +20,8 @@ const initialState = {
             name: 'fake default environment',
             foo: 'bar'
         }
-    }
+    },
+    self: 'fake setter'
 }
 const middleware = thunk
 
@@ -48,7 +50,9 @@ describe('redux/environment', function () {
         expect(store).to.have.state.like({
             environment: {
                 name: 'fake default environment',
-                foo: 'bar'
+                foo: 'bar',
+                setter: 'fake setter',
+                environmentId: -1
             }
         })
     })

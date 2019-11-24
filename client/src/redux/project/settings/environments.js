@@ -7,7 +7,7 @@ const REMOVE = 'project/settings/environments/REMOVE'
 
 // Action Creators
 export function setEnvironments(environments) {
-    return { type: SET, environments }
+    return { type: SET, environments: environments || [] }
 }
 
 export function addEnvironment(id) {

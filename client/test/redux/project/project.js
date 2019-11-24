@@ -13,6 +13,7 @@ chai.use(chaiRedux)
 
 let project, close, load, setNumCharacters
 let reducer
+let ipcRenderer
 
 let dialog
 
@@ -35,17 +36,8 @@ const defaults = {
         'assetsPath': '../assets',
         'characters': [],
         'environments': [],
-        'hotbar': [
-            1,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0
-        ],
+        'hotbar': [0,0,0,0,0,0,0,0,0],
+        'environmentHotbar': [0,0,0,0,0,0,0,0,0],
         'shortcuts': {
             'Select puppet 1': null,
             'Select puppet 2': null,
@@ -80,6 +72,7 @@ const defaults = {
 describe('redux/project/project', function () {
     before(() => {
         mock.reRequire('../../util/mock-electron')
+        ipcRenderer = mock.reRequire('electron').ipcRenderer
         dialog = mock.reRequire('electron').remote.dialog
         mock('../../../src/redux/project/folders', fakeActions('load'))
         mock('../../../src/redux/project/settings/settings', fakeActions('setSettings'))
@@ -187,6 +180,40 @@ describe('redux/project/project', function () {
             args: [Object.assign({}, defaults.settings, fs.readJsonSync(filepath))]
         })
         expect(dialog.hasBeenCalled).to.be.true
+    })
+
+    it('should set legacy environment when loading', () => {
+        const initialState = {
+            defaults
+        }
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
+        let backgroundMessage
+        ipcRenderer.on('background', (e, ...data) => {
+            backgroundMessage = data
+        })
+
+        const filepath = path.join(projectPath, 'legacy.babble')
+        store.dispatch(load(filepath))
+        expect(store).to.have.state.like({
+            project: {
+                ...store.getState().project,
+                project: filepath
+            }
+        })
+        expect(store.__history.find(h => h.action.f === 'setSettings').action.args[0].environments)
+            .to.have.lengthOf(1)
+        expect(backgroundMessage).to.eql([
+            'generate thumbnails',
+            path.join(filepath, '..', 'thumbnails', '1'),
+            {
+                name: 'Legacy',
+                color: '#000000',
+                numCharacters: 3,
+                puppetScale: 1.2
+            },
+            'environment',
+            1
+        ])
     })
 
     it('should warn if loadCharacters returned errors', () => {

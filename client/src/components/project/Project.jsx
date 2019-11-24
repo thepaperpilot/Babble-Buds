@@ -8,12 +8,12 @@ import BackgroundInterface from './BackgroundInterface'
 import Themer from './Themer'
 import Panels from '../panels/Panels'
 import { log, inProgressIncrement } from '../../redux/status'
-import { setEmote, moveLeft, moveRight, jiggle, changePuppet, setBabbling } from '../../redux/controller'
+import { setEmote, moveLeft, moveRight, jiggle, changePuppet, changeEnvironment, setBabbling } from '../../redux/controller'
 import { addAssets } from '../../redux/project/assets/actions'
 import { addCharacter } from '../../redux/project/characters/actions'
 
 const electron = window.require('electron')
-const actions = { moveLeft, moveRight, jiggle, changePuppet, setEmote }
+const actions = { moveLeft, moveRight, jiggle, changePuppet, changeEnvironment, setEmote }
 
 class Project extends Component {
     constructor(props) {
@@ -61,21 +61,17 @@ class Project extends Component {
 
         if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA'))
             return
-
-        if (e.keyCode == 32) {
-            this.props.dispatch(setBabbling(true))
-            if (e.preventDefault) e.preventDefault()
-        }
-    }
-
-    keyUp(e) {
-        if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA'))
-            return
         
         if (e.keyCode > 48 && e.keyCode < 58) {
-            this.props.dispatch(changePuppet(e.keyCode - 49))
+            if (e.shiftKey)
+                this.props.dispatch(changeEnvironment(e.keyCode - 49))
+            else
+                this.props.dispatch(changePuppet(e.keyCode - 49))
         } else switch(e.keyCode) {
-        case 32: this.props.dispatch(setBabbling(false)); break
+        case 32:
+            this.props.dispatch(setBabbling(true));
+            if (e.preventDefault) e.preventDefault();
+            break
         case 85: this.props.dispatch(setEmote(0)); break
         case 73: this.props.dispatch(setEmote(1)); break
         case 79: this.props.dispatch(setEmote(2)); break
@@ -92,6 +88,15 @@ class Project extends Component {
         case 39: this.props.dispatch(moveRight()); break
         case 38:case 66: this.props.dispatch(jiggle()); break
         default: break
+        }
+    }
+
+    keyUp(e) {
+        if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA'))
+            return
+
+        if (e.keyCode == 32) {
+            this.props.dispatch(setBabbling(false))
         }
     }
 

@@ -28,6 +28,7 @@ const SET = 'project/settings/hotbars/SET'
 // Action Creators
 export function setHotbar(hotbar) {
     return (dispatch, getState) => {
+        hotbar = hotbar || [1,0,0,0,0,0,0,0,0]
         const state = getState()
         const controller = state.controller
         

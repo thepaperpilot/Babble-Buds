@@ -1,11 +1,12 @@
 import util from './util.js'
 import { setActors } from './controller'
+import { setEnvironment, setDefaultEnvironment } from './environment'
 import { addActor, removeActor, moveRight } from './actors'
 
 // Action Types
 
 // Action Creators
-export function setSinglePlayer() {
+export function setSinglePlayer(openingProject = false) {
     return (dispatch, getState) => {
         const state = getState()
 
@@ -34,6 +35,19 @@ export function setSinglePlayer() {
                 dispatch(addActor(0, puppetId, state.project.characters[puppetId]))
                 dispatch(setActors([0]))
                 setTimeout(() => dispatch(moveRight(0)), 1000)
+            }
+        }
+
+        // First see if we're already using one of our environments
+        if (state.environment.setter !== state.self || openingProject) {
+            // Then see if we have an environment on our hotbar
+            const hotbar = state.project.settings.environmentHotbar
+            let envId = hotbar.find(i => i in state.project.environments)
+
+            if (envId == null) {
+                dispatch(setDefaultEnvironment())
+            } else {
+                dispatch(setEnvironment(state.self, envId, state.project.environments[envId]))
             }
         }
     }

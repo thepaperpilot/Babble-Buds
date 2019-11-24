@@ -2,6 +2,43 @@ import util from '../../util.js'
 
 const ipcRenderer = window.require('electron').ipcRenderer
 
+const defaults = {
+    'Select puppet 1': null,
+    'Select puppet 2': null,
+    'Select puppet 3': null,
+    'Select puppet 4': null,
+    'Select puppet 5': null,
+    'Select puppet 6': null,
+    'Select puppet 7': null,
+    'Select puppet 8': null,
+    'Select puppet 9': null,
+    'Select environment 1': null,
+    'Select environment 2': null,
+    'Select environment 3': null,
+    'Select environment 4': null,
+    'Select environment 5': null,
+    'Select environment 6': null,
+    'Select environment 7': null,
+    'Select environment 8': null,
+    'Select environment 9': null,
+    'Select emote 1': null,
+    'Select emote 2': null,
+    'Select emote 3': null,
+    'Select emote 4': null,
+    'Select emote 5': null,
+    'Select emote 6': null,
+    'Select emote 7': null,
+    'Select emote 8': null,
+    'Select emote 9': null,
+    'Select emote 10': null,
+    'Select emote 11': null,
+    'Select emote 12': null,
+    'Toggle babbling': null,
+    'Move left': null,
+    'Move right': null,
+    'Jiggle': null
+}
+
 // Action Types
 const SET_ALL = 'project/settings/shortcuts/SET_ALL'
 const SET = 'project/settings/shortcuts/SET'
@@ -10,6 +47,7 @@ const SET = 'project/settings/shortcuts/SET'
 export function setShortcuts(shortcuts) {
     return (dispatch, getState) => {
         const settings = getState().project.settings
+        shortcuts = Object.assign({}, defaults, shortcuts)
         
         ipcRenderer.send('global',
             Object.keys(settings.shortcuts).map(k => ({
@@ -46,33 +84,7 @@ export function setShortcut(shortcut, accelerator) {
 }
 
 // Reducers
-export default util.createReducer({
-    'Select puppet 1': null,
-    'Select puppet 2': null,
-    'Select puppet 3': null,
-    'Select puppet 4': null,
-    'Select puppet 5': null,
-    'Select puppet 6': null,
-    'Select puppet 7': null,
-    'Select puppet 8': null,
-    'Select puppet 9': null,
-    'Select emote 1': null,
-    'Select emote 2': null,
-    'Select emote 3': null,
-    'Select emote 4': null,
-    'Select emote 5': null,
-    'Select emote 6': null,
-    'Select emote 7': null,
-    'Select emote 8': null,
-    'Select emote 9': null,
-    'Select emote 10': null,
-    'Select emote 11': null,
-    'Select emote 12': null,
-    'Toggle babbling': null,
-    'Move left': null,
-    'Move right': null,
-    'Jiggle': null
-}, {
+export default util.createReducer(defaults, {
     [SET_ALL]: (state, action) => action.shortcuts,
     [SET]: (state, action) => ({...state, [action.shortcut]: action.accelerator })
 })

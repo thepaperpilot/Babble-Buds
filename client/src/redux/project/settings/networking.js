@@ -10,11 +10,11 @@ const SET_PASSWORD = 'project/settings/networking/SET_PASSWORD'
 // Action Creators
 export function setNetworking(networking) {
     return dispatch => {
-        const { ip, port, roomName: name, roomPassword: password } = networking
-        dispatch({ type: SET_IP, ip })
-        dispatch({ type: SET_PORT, port })
-        dispatch({ type: SET_ROOM, name })
-        dispatch({ type: SET_PASSWORD, password })
+        const { ip, port, roomName: name, roomPassword: password } = (networking || {})
+        dispatch({ type: SET_IP, ip: ip || 'babblebuds.xyz' })
+        dispatch({ type: SET_PORT, port: port || 8080 })
+        dispatch({ type: SET_ROOM, name: name || 'lobby' })
+        dispatch({ type: SET_PASSWORD, password: password || '' })
     }
 }
 

@@ -17,11 +17,19 @@ export function setEnvironment(setter, environmentId, environment) {
 
 export function setDefaultEnvironment() {
     return (dispatch, getState) => {
-        dispatch({ type: SET, environment: getState().defaults.environment })
+        const state = getState()
+        dispatch({
+            type: SET,
+            environment: {
+                ...state.defaults.environment,
+                setter: state.self,
+                environmentId: -1
+            }
+        })
     }
 }
 
 // Reducers
-export default util.createReducer(null, {
+export default util.createReducer({}, {
     [SET]: (state, action) => action.environment
 })

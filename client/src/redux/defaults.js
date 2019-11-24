@@ -63,6 +63,17 @@ export default util.createReducer({
             0,
             0
         ],
+        'environmentHotbar': [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        ],
         'shortcuts': {
             'Select puppet 1': null,
             'Select puppet 2': null,
@@ -73,6 +84,15 @@ export default util.createReducer({
             'Select puppet 7': null,
             'Select puppet 8': null,
             'Select puppet 9': null,
+            'Select environment 1': null,
+            'Select environment 2': null,
+            'Select environment 3': null,
+            'Select environment 4': null,
+            'Select environment 5': null,
+            'Select environment 6': null,
+            'Select environment 7': null,
+            'Select environment 8': null,
+            'Select environment 9': null,
             'Select emote 1': null,
             'Select emote 2': null,
             'Select emote 3': null,

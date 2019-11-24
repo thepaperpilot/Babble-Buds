@@ -8,6 +8,7 @@ import {
     changePuppet as changeActorPuppet,
     setBabbling as setActorBabbling
 } from './actors'
+import { setEnvironment, setDefaultEnvironment } from './environment'
 
 // Action Types
 const SET_ACTORS = 'controller/SET_ACTORS'
@@ -49,6 +50,20 @@ export function changePuppet(index, skipHotbar = false) {
         const character = state.project.characters[puppetId]
         if (character)
             state.controller.actors.forEach(id => dispatch(changeActorPuppet(id, puppetId, character)))
+    }
+}
+
+export function changeEnvironment(index, skipHotbar = false) {
+    return (dispatch, getState) => {
+        const state = getState()
+        const env = skipHotbar ? index : state.project.settings.environmentHotbar[index]
+        if (env === -1) {
+            dispatch(setDefaultEnvironment())
+            return
+        }
+        const environment = state.project.environments[env]
+        if (environment)
+            dispatch(setEnvironment(state.self, env, environment))
     }
 }
 

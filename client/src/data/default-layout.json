@@ -71,6 +71,11 @@
                     "type": "tab",
                     "name": "Puppet Controller",
                     "component": "puppet-controller"
+                  },
+                  {
+                    "type": "tab",
+                    "name": "Environment Controller",
+                    "component": "environment-controller"
                   }
                 ]
               },

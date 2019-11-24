@@ -135,9 +135,21 @@ const template = [
                 }
             },
             {
-                label: 'Control Panel',
+                label: 'Puppet Controller',
                 click (item, focusedWindow) {
-                    focusedWindow.webContents.send('toggle panel', 'controller')
+                    focusedWindow.webContents.send('toggle panel', 'puppet-controller')
+                }
+            },
+            {
+                label: 'Emote Controller',
+                click (item, focusedWindow) {
+                    focusedWindow.webContents.send('toggle panel', 'emote-controller')
+                }
+            },
+            {
+                label: 'Environment Controller',
+                click (item, focusedWindow) {
+                    focusedWindow.webContents.send('toggle panel', 'environment-controller')
                 }
             },
             {

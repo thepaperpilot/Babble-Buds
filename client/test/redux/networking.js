@@ -19,6 +19,8 @@ describe('redux/networking', function () {
         mock('../../src/redux/actors',
             fakeActions('addActor', 'removeActor', 'moveRight'))
         mock('../../src/redux/controller', fakeActions('setActors'))
+        mock('../../src/redux/environment',
+            fakeActions('setEnvironment', 'setDefaultEnvironment'))
         disableTimeouts()
 
         const n = mock.reRequire('../../src/redux/networking')
@@ -28,8 +30,10 @@ describe('redux/networking', function () {
         reducer = combineReducers({
             networking,
             controller: fakeReducer,
+            environment: fakeReducer,
             actors: fakeReducer,
-            project: fakeReducer
+            project: fakeReducer,
+            self: fakeReducer
         })
     })
 
@@ -51,9 +55,11 @@ describe('redux/networking', function () {
                 settings: {
                     hotbar: [
                         'test'
-                    ]
+                    ],
+                    environmentHotbar: []
                 }
-            }
+            },
+            environment: {}
         }
         const store = chai.createReduxStore({ reducer, middleware, initialState })
 
@@ -78,9 +84,11 @@ describe('redux/networking', function () {
                 settings: {
                     hotbar: [
                         'test'
-                    ]
+                    ],
+                    environmentHotbar: []
                 }
-            }
+            },
+            environment: {}
         }
         const store = chai.createReduxStore({ reducer, middleware, initialState })
 
@@ -106,14 +114,18 @@ describe('redux/networking', function () {
                 settings: {
                     hotbar: [
                         'test'
-                    ]
+                    ],
+                    environmentHotbar: []
                 }
-            }
+            },
+            environment: {}
         }
         const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(setSinglePlayer())
-        expect(store.__history.filter(h => h.action.type !== '@@INIT')).to.be.empty
+        expect(store).not.have.dispatched({ f: 'removeActor' })
+            .and.dispatched({ f: 'addActor' })
+            .and.dispatched({ f: 'setActors' })
     })
 
     it("should set single player with both controlled and non-controlled actors", () => {
@@ -129,14 +141,98 @@ describe('redux/networking', function () {
                 settings: {
                     hotbar: [
                         'test'
-                    ]
+                    ],
+                    environmentHotbar: []
                 }
-            }
+            },
+            environment: {}
         }
         const store = chai.createReduxStore({ reducer, middleware, initialState })
 
         store.dispatch(setSinglePlayer())
         expect(store).to.have
             .dispatched({ f: 'removeActor', args: ['other fake id'] })
+    })
+
+    it("should set single player with the active environment", () => {
+        const initialState = {
+            controller: {
+                actors: []
+            },
+            actors: [],
+            project: {
+                characters: {},
+                environments: {
+                    2: 'test environment'
+                },
+                settings: {
+                    hotbar: [
+                        'test'
+                    ],
+                    environmentHotbar: []
+                }
+            },
+            environment: {
+                setter: 'testid',
+                environmentId: 2
+            },
+            self: 'testid'
+        }
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
+
+        store.dispatch(setSinglePlayer())
+        expect(store).to.not.have.dispatched({ f: 'setDefaultEnvironment' })
+            .and.dispatched({ f: 'setEnvironment' })
+    })
+
+    it("should set single player with no environments", () => {
+        const initialState = {
+            controller: {
+                actors: []
+            },
+            actors: [],
+            project: {
+                characters: {},
+                settings: {
+                    hotbar: [
+                        'test'
+                    ],
+                    environmentHotbar: []
+                }
+            },
+            environment: {},
+            self: 'testid'
+        }
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
+
+        store.dispatch(setSinglePlayer())
+        expect(store).to.have.dispatched({ f: 'setDefaultEnvironment' })
+    })
+
+    it("should set single player with an environment", () => {
+        const initialState = {
+            controller: {
+                actors: []
+            },
+            actors: [],
+            project: {
+                characters: {},
+                environments: {
+                    1: 'test environment'
+                },
+                settings: {
+                    hotbar: [
+                        'test'
+                    ],
+                    environmentHotbar: [1]
+                }
+            },
+            environment: {},
+            self: 'testid'
+        }
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
+
+        store.dispatch(setSinglePlayer())
+        expect(store).to.have.dispatched({ f: 'setEnvironment', args: ['testid', 1, 'test environment'] })
     })
 })
