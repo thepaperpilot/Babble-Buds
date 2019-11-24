@@ -204,7 +204,7 @@ describe('redux/project/project', function () {
             .to.have.lengthOf(1)
         expect(backgroundMessage).to.eql([
             'generate thumbnails',
-            path.join(filepath, '..', 'thumbnails', '1'),
+            path.join(filepath, '..', 'thumbnails', '1').replace(/\\/g, '/'),
             {
                 name: 'Legacy',
                 color: '#000000',
