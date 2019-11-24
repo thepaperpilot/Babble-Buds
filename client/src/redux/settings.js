@@ -14,8 +14,8 @@ export function saveLayout(layout) {
 
 export function loadLayout(layout) {
     return (dispatch, getState) => {
-        dispatch({ type: LOAD_LAYOUT })
         dispatch({ type: SAVE_LAYOUT, layout })
+        dispatch({ type: LOAD_LAYOUT })
     }
 }
 
