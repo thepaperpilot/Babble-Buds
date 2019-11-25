@@ -116,9 +116,9 @@ class Layer extends Component {
                             asset={asset}
                             emoteLayer={emoteLayer}
                             target={this.props.target} />}
-                        <AnimationSection 
+                        {isSpecial ? null : <AnimationSection 
                             layer={layer}
-                            target={this.props.target} />
+                            target={this.props.target} />}
                     </Scrollbar>
                 </div>
             </div>
