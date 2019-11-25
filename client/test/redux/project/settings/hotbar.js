@@ -67,7 +67,7 @@ describe('redux/project/settings/hotbar', function () {
                 }
             }
         })
-        .and.dispatched({ f: 'changePuppet', args: [
+        .and.then.dispatched({ f: 'changePuppet', args: [
             0,
             2,
             "test puppet"
@@ -102,7 +102,7 @@ describe('redux/project/settings/hotbar', function () {
                 }
             }
         })
-        .and.dispatched({ f: 'changePuppet', args: [
+        .and.then.dispatched({ f: 'changePuppet', args: [
             0,
             2,
             "test puppet"

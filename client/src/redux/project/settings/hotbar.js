@@ -1,6 +1,6 @@
 import util from '../../util.js'
 import { getActor } from '../../actors'
-import { changePuppet } from '../../controller'
+import { changePuppet } from '../../actors'
 
 // Utility Functions
 function updateActors(dispatch, state, actor, slotIndex, newValue) {
@@ -31,6 +31,8 @@ export function setHotbar(hotbar) {
         hotbar = hotbar || [1,0,0,0,0,0,0,0,0]
         const state = getState()
         const controller = state.controller
+
+        dispatch({ type: SET_ALL, hotbar })
         
         // Change any actors we're controlling that'd be affected
         controller.actors.forEach(id => {
@@ -38,8 +40,6 @@ export function setHotbar(hotbar) {
             hotbar.forEach((newValue, index) =>
                 updateActors(dispatch, state, actor, index, newValue))
         })
-
-        dispatch({ type: SET_ALL, hotbar })
     }
 }
 
@@ -48,14 +48,14 @@ export function setSlot(slot, puppet) {
         const state = getState()
         const controller = state.controller
 
+        dispatch({ type: SET, index: slot, id: puppet })
+
         // If we're not clearing the slot, we may want to change our puppet
         if (puppet !== 0)
             controller.actors.forEach(id => {
                 const actor = getActor(state, id)
                 updateActors(dispatch, state, actor, slot, puppet)
             })
-
-        dispatch({ type: SET, index: slot, id: puppet })
     }
 }
 

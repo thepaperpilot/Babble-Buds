@@ -48,6 +48,7 @@ export function changePuppet(index, skipHotbar = false) {
         const state = getState()
         const puppetId = skipHotbar ? index : state.project.settings.hotbar[index]
         const character = state.project.characters[puppetId]
+        console.log(puppetId, character)
         if (character)
             state.controller.actors.forEach(id => dispatch(changeActorPuppet(id, puppetId, character)))
     }
