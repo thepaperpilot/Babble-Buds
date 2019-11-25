@@ -81,11 +81,13 @@ describe('redux/project/project', function () {
         mock('../../../src/redux/project/assets/reducers', fakeActions('setAssets'))
         mock('../../../src/redux/project/characterThumbnails', fakeActions('setThumbnails'))
         mock('../../../src/redux/project/dirtyCharacters', fakeActions('addCharacters', 'clearCharacters'))
+        mock('../../../src/redux/editor/editor', fakeActions('close'))
         mock('../../../src/redux/environment', fakeActions('setEnvironment', 'setDefaultEnvironment'))
         mock('../../../src/redux/networking', fakeActions('setSinglePlayer'))
         mock('../../../src/redux/actors', fakeActions('clearActors'))
         mock('../../../src/redux/controller', fakeActions('setActors'))
         mock('../../../src/redux/status', fakeActions('warn'))
+        mock('../../../src/redux/inspector', fakeActions('close'))
 
         const p = mock.reRequire('../../../src/redux/project/project')
         project = p.default
@@ -126,6 +128,8 @@ describe('redux/project/project', function () {
         .then.dispatched({ f: 'setAssets', args: [] })
         .then.dispatched({ f: 'clearActors', args: [] })
         .then.dispatched({ f: 'setActors', args: [] })
+        .then.dispatched({ f: 'close', args: [] })
+        .then.dispatched({ f: 'close', args: [] })
     })
 
     it('should load empty project', () => {

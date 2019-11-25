@@ -1,6 +1,8 @@
 import { combineReducers } from 'redux'
 import util from '../util.js'
 import folders from './folders'
+import { close as closeEditor } from '../editor/editor'
+import { close as closeInspector } from '../inspector'
 import saver, { load as loadProject } from './saver'
 import settings, { setSettings } from './settings/settings'
 import characters, { setCharacters } from './characters/reducers'
@@ -90,6 +92,8 @@ export function close() {
         dispatch(setAssets())
         dispatch(clearActors())
         dispatch(setActors())
+        dispatch(closeEditor())
+        dispatch(closeInspector())
     }
 }
 
