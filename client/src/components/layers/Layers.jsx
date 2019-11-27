@@ -28,6 +28,16 @@ export function calculateEmotes(assets, layers) {
     return emotes
 }
 
+function reverseTree(tree) {
+    function handleLayer(layer) {
+        layer = Object.assign({}, layer)
+        if (layer.children)
+            layer.children = layer.children.map(handleLayer).reverse()
+        return layer
+    }
+    return handleLayer(tree)
+}
+
 class Layers extends Component {
     constructor(props) {
         super(props)
@@ -49,7 +59,7 @@ class Layers extends Component {
     }
 
     handleChange(tree) {
-        this.props.dispatch(setLayers(tree))
+        this.props.dispatch(setLayers(reverseTree(tree)))
     }
 
     addLayer() {
@@ -75,7 +85,7 @@ class Layers extends Component {
             return false
         if (inh.emoteLayer != null && emoteLayer != null)
             return false
-        if (id === 'CHARACTER_PLACEHOLDER' && parent.path.length)
+        if (id === 'CHARACTER_PLACEHOLDER' && parent.path && parent.path.length)
             return false
 
         return true
@@ -103,7 +113,7 @@ class Layers extends Component {
                 {this.props.tree.children ?
                     <Scrollbar allowOuterScroll={true} heightRelativeToParent="100%">
                         <Tree
-                            tree={JSON.parse(JSON.stringify(this.props.tree))}
+                            tree={reverseTree(this.props.tree)}
                             onChange={this.handleChange}
                             renderNode={this.renderNode}
                             autoscroll={50}

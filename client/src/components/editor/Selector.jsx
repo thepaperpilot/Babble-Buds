@@ -95,6 +95,7 @@ function endScaleDrag(instance, dispatch) {
 
 function endMoveDrag(instance, dispatch, e) {
     const {startPosition, dx, dy} = e.currentTarget
+    if (instance.props.disabled) return
 
     if (startPosition && (dx || dy)) {
         dispatch(changeLayer(instance.props.layer.path, {
@@ -116,6 +117,7 @@ function onMove(instance) {
         const target = e.currentTarget
         if (!target) return
         if (!e.data.buttons) return
+        if (instance.props.disabled) return
 
         const {x, y} = e.data.global
         let dx = x - target.startMouse.x
@@ -267,12 +269,13 @@ function flipVert(instance, dispatch) {
     }
 }
 
-function drawGraphics(instance, props) {
-    const {scale, layer} = props
-    instance.props = props
+function drawGraphics(instance) {
+    const {scale, layer, disabled, selectorColor, app} = instance.props
 
     if (instance.selector) {
         instance.selector.clear()
+        
+        instance.selector.alpha = disabled ? .5 : 1
 
         if (instance.layer) {
             let {x, y, rotation} = layer
@@ -287,7 +290,7 @@ function drawGraphics(instance, props) {
             height = 2 * Math.max(Math.abs(bounds.top), Math.abs(bounds.bottom))
             instance.selector.normalSize = {x: width, y: height}
 
-            instance.selector.lineStyle(scale * 4, props.selectorColor)
+            instance.selector.lineStyle(scale * 4, selectorColor)
                 .moveTo(-width / 2 - scale, -height / 2 - scale)
                 .lineTo(-width / 2 - scale, height / 2 + scale)
                 .lineTo(width / 2 + scale, height / 2 + scale)
@@ -298,32 +301,48 @@ function drawGraphics(instance, props) {
             instance.selector.rotation = rotation
 
             instance.scalers.forEach((scaler, i) => {
-                const x = (i % 2 === 0 ? 1 : -1) * (width / 2 + scale)
-                const y = (Math.floor(i / 2) === 0 ? 1 : -1) * (height / 2 + scale)
-                scaler.clear()
-                scaler.hitArea = new Circle(x, y, scale * 8)
-                scaler.lineStyle(scale * 2, props.selectorColor)
-                scaler.beginFill(props.selectorColor)
-                    .drawCircle(x, y, 6 * scale)
+                if (disabled) {
+                    instance.selector.removeChild(scaler)
+                } else {
+                    instance.selector.addChild(scaler)
+
+                    const x = (i % 2 === 0 ? 1 : -1) * (width / 2 + scale)
+                    const y = (Math.floor(i / 2) === 0 ? 1 : -1) * (height / 2 + scale)
+                    scaler.clear()
+                    scaler.hitArea = new Circle(x, y, scale * 8)
+                    scaler.lineStyle(scale * 2, selectorColor)
+                    scaler.beginFill(selectorColor)
+                        .drawCircle(x, y, 6 * scale)
+                }
             })
 
-            instance.rotate.position.set(width / 2 + 22 * scale,
-                -height / 2 + 17 * scale)
-            instance.rotate.scale.set(scale / 10)
-            instance.flipHoriz.position.set(width / 2 + 22 * scale,
-                -height / 2 + 52 * scale)
-            instance.flipHoriz.scale.set(scale / 2)
-            instance.flipVert.position.set(width / 2 + 22 * scale,
-                -height / 2 + 87 * scale)
-            instance.flipVert.scale.set(scale / 2)
+            if (disabled) {
+                instance.selector.removeChild(instance.rotate)
+                instance.selector.removeChild(instance.flipHoriz)
+                instance.selector.removeChild(instance.flipVert)
+            } else {
+                instance.selector.addChild(instance.rotate)
+                instance.selector.addChild(instance.flipHoriz)
+                instance.selector.addChild(instance.flipVert)
+                instance.rotate.position.set(width / 2 + 22 * scale,
+                    -height / 2 + 17 * scale)
+                instance.rotate.scale.set(scale / 10)
+                instance.flipHoriz.position.set(width / 2 + 22 * scale,
+                    -height / 2 + 52 * scale)
+                instance.flipHoriz.scale.set(scale / 2)
+                instance.flipVert.position.set(width / 2 + 22 * scale,
+                    -height / 2 + 87 * scale)
+                instance.flipVert.scale.set(scale / 2)
+            }
         }
     }
-    props.app.renderer.render(props.app.stage)
+    app.renderer.render(app.stage)
 }
 
 export const behavior = {
     customDisplayObject: () => new Container(),
     customApplyProps: (instance, oldProps, newProps) => {
+        instance.props = newProps
         drawGraphics(instance, newProps)
     },
     customDidAttach: instance => {
@@ -346,7 +365,7 @@ export const behavior = {
         root.off('mousedown', instance.mousedown)
     },
     setupSelector: instance => {
-        if (instance.parent.parent) {
+        if (instance.parent && instance.parent.parent) {
             let root = instance
             while (root.parent && root.parent.parent)
                 root = root.parent
@@ -393,7 +412,7 @@ export const behavior = {
                 return g
             })
 
-            drawGraphics(instance, instance.props, instance.props)
+            drawGraphics(instance, instance.props)
 
             // Setup input listeners for panning
             instance.selector.mousemove = onMove(instance)
@@ -401,6 +420,7 @@ export const behavior = {
                 const {x, y} = e.data.global
                 const layer = instance.layer
                 const target = e.currentTarget
+                if (instance.props.disabled) return
                 target.startMouse = {x, y}
                 target.startPosition = {x: layer.layer.x || 0, y: layer.layer.y || 0}
                 root.on('mousemove', instance.selector.mousemove)

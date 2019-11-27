@@ -4,9 +4,12 @@ import { Sprite, Container, withApp } from 'react-pixi-fiber'
 import Selector, { behavior } from './Selector'
 import { comparePaths } from '../layers/Layer'
 import babble from 'babble.js'
+import silhoutte from './icons/person.png'
 
 const path = require('path')
 const TextureCache = window.PIXI.utils.TextureCache
+const Texture = window.PIXI.Texture
+Texture.from(silhoutte)
 
 class RawLayer extends Component {
     constructor(props) {
@@ -50,6 +53,7 @@ class RawLayer extends Component {
             highlight,
             play,
             selectorColor,
+            environment,
             ...props
         } = this.props
 
@@ -88,6 +92,24 @@ class RawLayer extends Component {
                 scale={[layer.scaleX || 1, layer.scaleY || 1]}
                 texture={TextureCache[path.join(assetsPath, assets[layer.id].location)]} />
             }
+        } else if (layer.id === 'CHARACTER_PLACEHOLDER') {
+            const numCharacters = Math.max(1, environment.numCharacters)
+            const size = Math.min(environment.width / numCharacters, environment.height)
+            return <Container ref={this.container} x={0} y={-environment.height / 2}>
+                <Container x={0} y={0}>
+                    {new Array(numCharacters).fill(0).map((e, i) =>
+                        <Sprite key={i}
+                            alpha={.5}
+                            texture={Texture.from(silhoutte)}
+                            width={size}
+                            height={size}
+                            x={-environment.width / 2 + (i + .5) * environment.width / numCharacters - size / 2}
+                            y={environment.height / 2 - size} />)}
+                    <Sprite width={environment.width / 2} height={environment.height} y={-environment.height / 2} />
+                </Container>
+                <Selector scale={scale} layer={{ x: 0, y: -environment.height / 2, rotation: 0 }}
+                    dispatch={this.props.dispatch} disabled={true} selectorColor={selectorColor} />
+            </Container>
         } else
             element = <Container scale={[layer.scaleX || 1, layer.scaleY || 1]}>
                 {(layer.children || []).map((l, i) =>
@@ -117,7 +139,8 @@ function mapStateToProps(state) {
     return {
         selected: state.editor.present.selected,
         assets: state.project.assets,
-        assetsPath: state.project.assetsPath
+        assetsPath: state.project.assetsPath,
+        environment: state.project.environments[state.editor.present.id]
     }
 }
 
