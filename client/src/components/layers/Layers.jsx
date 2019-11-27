@@ -117,7 +117,8 @@ class Layers extends Component {
                             onChange={this.handleChange}
                             renderNode={this.renderNode}
                             autoscroll={50}
-                            canBecomeParent={this.canBecomeParent} />
+                            canBecomeParent={this.canBecomeParent}
+                            storeCollapsedInState={true} />
                     </Scrollbar> :
                     <div className="default">Open puppet to edit layers</div>}
                 <LinkedLayerContextMenu />
