@@ -14,7 +14,7 @@ import './editor.css'
 
 const DISTANCE = 10000
 const TYPE_MAP = {
-    environment: p => p.settings.environments,
+    environment: p => p.environments,
     puppet: p => p.characters,
     asset: p => p.assets
 }
