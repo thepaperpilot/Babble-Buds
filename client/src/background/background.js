@@ -215,7 +215,7 @@ ipcRenderer.on('add assets', async (e, assets, assetsPath, statusId) => {
     await waitUntilAssetsLoaded()
     isLoadingAssets = true
     Object.assign(stage.assets, assets)
-    stage.assetsPath = newAssetsPath
+    stage.assetsPath = assetsPath
     await new Promise(resolve => stage.reloadAssets(resolve))
     isLoadingAssets = false
 })

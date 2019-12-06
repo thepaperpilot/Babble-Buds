@@ -34,10 +34,11 @@ export function close() {
 
 export function save() {
     return (dispatch, getState) => {
-        const editor = getState().editor.present        
+        const editor = getState().editor.present
         switch (editor.type) {
         case 'environment': {
             dispatch(changeEnvironment(editor.id, { layers: editor.layers }))
+            break
         }
         case 'puppet': {
             dispatch(changeCharacter(editor.id, { layers: editor.layers }))
