@@ -23,7 +23,7 @@ class Stage extends Component {
     }
 
     componentDidMount() {
-        this.stage = new babble.Stage(`screen${this.props.id}`, this.props.settings, this.props.assets, this.props.assetsPath, null, Object.assign({}, console, {
+        this.stage = new babble.Stage(`screen${this.props.id}`, this.props.environment, this.props.assets, this.props.assetsPath, null, Object.assign({}, console, {
             info: this.info,
             warn: this.warn,
             log: this.log,
@@ -39,9 +39,10 @@ class Stage extends Component {
 
     componentWillReceiveProps(newProps) {
         // Update environment
-        if (this.props.settings !== newProps.settings) {
-            this.stage.project = newProps.settings
+        if (this.props.environment !== newProps.environment) {
+            this.stage.environment = newProps.environment
             this.stage.resize()
+            this.stage.updateEnvironment()
         }
         // Update assets
         if (this.props.assets !== newProps.assets ||
@@ -81,7 +82,7 @@ class Stage extends Component {
                 puppet.facingLeft = newActor.facingLeft
                 if (puppet.movingAnim === 0)
                     puppet.container.scale.x = (newActor.facingLeft ? -1 : 1) *
-                        (newProps.settings.puppetScale || 1)
+                        (newProps.environment.puppetScale || 1)
             }
             if (old.babbling !== newActor.babbling)
                 puppet.setBabbling(newActor.babbling)
@@ -145,9 +146,7 @@ class Stage extends Component {
         return (
             <div id={`screen${this.props.id}`} style={{
                 width: '100%',
-                height: '100%',
-                backgroundColor: this.props.settings.color}
-            }>
+                height: '100%'}}>
                 <ReactResizeDetector handleWidth handleHeight onResize={this.onResize} />
             </div>
         )
@@ -157,7 +156,7 @@ class Stage extends Component {
 function mapStateToProps(state) {
     return {
         controlled: state.controller.actors,
-        settings: state.environment,
+        environment: state.environment,
         assets: state.project.assets,
         assetsPath: state.project.assetsPath,
         actors: state.actors
