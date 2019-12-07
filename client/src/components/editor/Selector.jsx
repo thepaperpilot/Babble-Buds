@@ -210,12 +210,9 @@ function onScale(instance, corner) {
         instance.layer.position.x = target.posX
         instance.layer.position.y = target.posY
 
-        drawGraphics(instance, Object.assign({}, instance.props, {
-            layer: Object.assign({}, instance.props.layer, {
-                x: target.posX,
-                y: target.posY
-            })
-        }))
+        drawGraphics(instance)
+        instance.selector.position.set(target.posX, target.posY)
+        instance.props.app.renderer.render(instance.props.app.stage)
     }
 }
 
@@ -343,7 +340,7 @@ export const behavior = {
     customDisplayObject: () => new Container(),
     customApplyProps: (instance, oldProps, newProps) => {
         instance.props = newProps
-        drawGraphics(instance, newProps)
+        drawGraphics(instance)
     },
     customDidAttach: instance => {
         instance.props.selector.current = instance
@@ -412,7 +409,7 @@ export const behavior = {
                 return g
             })
 
-            drawGraphics(instance, instance.props)
+            drawGraphics(instance)
 
             // Setup input listeners for panning
             instance.selector.mousemove = onMove(instance)
