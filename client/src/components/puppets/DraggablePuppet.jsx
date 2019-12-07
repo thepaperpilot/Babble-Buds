@@ -43,7 +43,6 @@ class DraggablePuppet extends Component {
                 <div>
                     <InlineEdit
                         ref={this.inlineEdit}
-                        disabled={true}
                         target={this.props.puppet}
                         targetType="puppet"
                         label={this.props.name}
@@ -61,7 +60,6 @@ class DraggablePuppet extends Component {
                 <div>
                     <InlineEdit
                         ref={this.inlineEdit}
-                        disabled={true}
                         target={this.props.puppet}
                         targetType="puppet"
                         label={this.props.name}

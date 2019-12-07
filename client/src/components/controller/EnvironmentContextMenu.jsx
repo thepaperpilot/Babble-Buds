@@ -23,7 +23,7 @@ class EnvironmentContextMenu extends Component {
     render() {
         return <ContextMenu id={this.props.id}>
             <MenuItem onClick={this.clear}>Clear Slot</MenuItem>
-            <MenuItem onClick={this.edit}>Edit Character</MenuItem>
+            <MenuItem onClick={this.edit}>Edit Environment</MenuItem>
         </ContextMenu>
     }
 }

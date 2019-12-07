@@ -69,7 +69,7 @@ class Environment extends Component {
                 <div>
                     <InlineEdit
                         ref={this.inlineEdit}
-                        disabled={true}
+                        disabled={this.props.id === -1}
                         target={this.props.id}
                         targetType="environment"
                         label={name}
@@ -88,7 +88,7 @@ class Environment extends Component {
                 <div>
                     <InlineEdit
                         ref={this.inlineEdit}
-                        disabled={true}
+                        disabled={this.props.id === -1}
                         target={this.props.id}
                         targetType="environment"
                         label={name}
