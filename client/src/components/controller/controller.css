@@ -55,6 +55,7 @@
     width: calc(100% - 4px);
     box-sizing: border-box;
     margin: auto 2px;
+    display: inline-block;
 }
 
 .char.canDrop img {

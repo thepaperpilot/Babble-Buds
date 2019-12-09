@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import * as JsSearch from 'js-search'
 import { FixedSizeList as List, areEqual } from 'react-window'
 import Environment from './Environment'
-//import EnvironmentImporter from './EnvironmentImporter'
+import EnvironmentImporter from './EnvironmentImporter'
 import EnvironmentContextMenu from './EnvironmentContextMenu'
 import CustomScrollbarsVirtualList from '../ui/CustomScrollbarsVirtualList'
 import { newEnvironment } from '../../redux/project/environments/actions'
@@ -82,7 +82,7 @@ class Environments extends Component {
             <div className="panel puppet-selector environment-selector">
                 <div className="bar flex-row">
                     <button onClick={this.newEnvironment}>New Environment</button>
-                    {/*<EnvironmentImporter />*/}
+                    <EnvironmentImporter />
                     <input
                         type="range"
                         min="60"

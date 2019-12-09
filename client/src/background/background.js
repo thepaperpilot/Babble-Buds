@@ -220,7 +220,7 @@ ipcRenderer.on('add assets', async (e, assets, assetsPath, statusId) => {
     isLoadingAssets = false
 })
 
-ipcRenderer.on('add puppets', async (e, characters, assets, oldAssetsPath, newAssetsPath, thumbnailsPath, puppetsStatusId, assetsStatusId) => {
+ipcRenderer.on('add characters', async (e, characters, assets, oldAssetsPath, newAssetsPath, thumbnailsPath, puppetsStatusId, assetsStatusId, type = 'puppet') => {
     await fs.ensureDir(newAssetsPath)
     await Promise.all(Object.keys(characters).map(async id => {
         const character = characters[id]
@@ -242,7 +242,7 @@ ipcRenderer.on('add puppets', async (e, characters, assets, oldAssetsPath, newAs
             delete character.thumbnail
             delete character.thumbFolder
             delete character.assets
-            ipcRenderer.send('foreground', 'import puppet', id, character, puppetsStatusId)
+            ipcRenderer.send('foreground', `import ${type}`, id, character, puppetsStatusId)
             delete unfinishedCharacters[id]
         }
     })
@@ -275,7 +275,7 @@ ipcRenderer.on('add puppets', async (e, characters, assets, oldAssetsPath, newAs
                     delete character.thumbnail
                     delete character.thumbFolder
                     delete character.assets
-                    ipcRenderer.send('foreground', 'import puppet', id, character, puppetsStatusId)
+                    ipcRenderer.send('foreground', `import ${type}`, id, character, puppetsStatusId)
                     delete unfinishedCharacters[id]
                 }
             }
@@ -291,7 +291,7 @@ ipcRenderer.on('add puppets', async (e, characters, assets, oldAssetsPath, newAs
 
     await Promise.all(Object.keys(characters).map(async id => {
         const character = characters[id]
-        generateThumbnails(path.join(thumbnailsPath, `new-${id}`), character, 'puppet', id)
+        generateThumbnails(path.join(thumbnailsPath, `new-${id}`), character, type, id)
     }))
     isLoadingAssets = false
 })

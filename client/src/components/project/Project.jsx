@@ -11,6 +11,7 @@ import { log, inProgressIncrement } from '../../redux/status'
 import { setEmote, moveLeft, moveRight, jiggle, changePuppet, changeEnvironment, setBabbling } from '../../redux/controller'
 import { addAssets } from '../../redux/project/assets/actions'
 import { addCharacter } from '../../redux/project/characters/actions'
+import { addEnvironment } from '../../redux/project/environments/actions'
 
 const electron = window.require('electron')
 const actions = { moveLeft, moveRight, jiggle, changePuppet, changeEnvironment, setEmote }
@@ -28,6 +29,7 @@ class Project extends Component {
         this.redo = this.redo.bind(this)
         this.importAssets = this.importAssets.bind(this)
         this.importPuppet = this.importPuppet.bind(this)
+        this.importEnvironment = this.importEnvironment.bind(this)
     }
 
     componentDidMount() {
@@ -40,6 +42,7 @@ class Project extends Component {
         electron.ipcRenderer.on('redo', this.redo)
         electron.ipcRenderer.on('import assets', this.importAssets)
         electron.ipcRenderer.on('import puppet', this.importPuppet)
+        electron.ipcRenderer.on('import environment', this.importEnvironment)
 
         // rerender now that our AssetUpdater prop will be working
         this.setState({})
@@ -53,6 +56,7 @@ class Project extends Component {
         electron.ipcRenderer.off('dispatch', this.redo)
         electron.ipcRenderer.off('import assets', this.importAssets)
         electron.ipcRenderer.off('import puppet', this.importPuppet)
+        electron.ipcRenderer.off('import environment', this.importEnvironment)
     }
 
     keyDown(e) {
@@ -119,6 +123,11 @@ class Project extends Component {
 
     importPuppet(e, id, puppet, statusId) {
         this.props.dispatch(addCharacter(id, puppet))
+        this.props.dispatch(inProgressIncrement(statusId))
+    }
+
+    importEnvironment(e, id, environment, statusId) {
+        this.props.dispatch(addEnvironment(id, environment))
         this.props.dispatch(inProgressIncrement(statusId))
     }
 

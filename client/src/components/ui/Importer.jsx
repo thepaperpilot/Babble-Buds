@@ -109,10 +109,10 @@ class Importer extends Component {
                 filepath = filepath.replace(/\\/g, '/')
 
                 const newItems = this.props.readFile(filepath)
-                itemsByFile[filepath] = Object.keys(newItems)
-
-                if (newItems != null)
+                if (newItems != null) {
+                    itemsByFile[filepath] = Object.keys(newItems)
                     items = {...items, ...newItems}
+                }
             })
 
             const numItems = Object.keys(items).length

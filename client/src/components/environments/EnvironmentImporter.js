@@ -8,13 +8,13 @@ import { loadCharacters, loadAssets } from '../../redux/project/loader'
 import { warn, inProgress } from '../../redux/status'
 import Importer from '../ui/Importer'
 
-import './importer.css'
+import './../puppets/importer.css'
 
 const fs = window.require('fs-extra')
 const path = require('path')
 const ipcRenderer = window.require('electron').ipcRenderer
 
-class PuppetImporter extends Component {
+class EnvironmentImporter extends Component {
     static id = 0
 
     constructor(props) {
@@ -33,59 +33,23 @@ class PuppetImporter extends Component {
     }
 
     createElement({ id, item, selected, toggleItem, singleItem }) {
-        const thumbnails = this.state.characterThumbnails[id].split('.').slice(0, -1).join('.')
-        const emotes = getEmotes(this.state.assets, item.layers)
-
-        return <Foldable
-            key={id}
-            defaultFolded={!singleItem}
-            title={<div className="puppet-importer-title">
-                <div className="puppet-importer-img char">
-                    <img
-                        alt={item.name}
-                        src={this.state.characterThumbnails[id]}
-                        style={{width: '60px', height: '60px'}} />
-                </div>
-                <div className="puppet-importer-label">
-                    <p>{item.name}</p>
-                    <p>Creator: {item.creator === this.props.self ? this.props.nick : item.creator}</p>
-                    <p>OC: {item.oc === this.props.self ? this.props.nick : item.oc}</p>
-                </div>
-                {singleItem ? null : <Checkbox
-                    inline={true}
-                    value={selected}
-                    onChange={toggleItem(id)}/>}
-            </div>}>
-            <div className="action">
-                <Checkbox
-                    title="Bobble head while talking"
-                    value={item.deadbonesStyle}
-                    disabled={true} />
-                <Number
-                    title="Eyes Duration (while babbling)"
-                    value={item.eyeBabbleDuration || 2000}
-                    disabled={true} />
-                <Number
-                    title="Mouth Duration (while babbling)"
-                    value={item.mouthBabbleDuration || 270}
-                    disabled={true} />
+        return <div key={id} className="puppet-importer-title">
+            <div className="puppet-importer-img char">
+                <img
+                    alt={item.name}
+                    src={this.state.characterThumbnails[id]}
+                    style={{width: '120px', height: '120px', border: '1px solid'}} />
             </div>
-            <div className="list">
-                {emotes.map(emote => {
-                    return (
-                        <div
-                            className="list-item"
-                            style={{height: '120px', width: '120px'}}
-                            key={emote.name} >
-                            <div className="char" key={emote.name}>
-                                <img alt={emote.name} src={`${thumbnails}/${emote.emote}.png`}/>
-                                <div className="desc">{emote.name}</div>
-                            </div>
-                        </div>
-                    )
-                })}
+            <div className="puppet-importer-label">
+                <p>{item.name}</p>
+                <p>Number of Slots: {item.numCharacters}</p>
+                <p>Puppet Scale: {item.puppetScale}</p>
             </div>
-        </Foldable>
+            {singleItem ? null : <Checkbox
+                inline={true}
+                value={selected}
+                onChange={toggleItem(id)}/>}
+        </div>
     }
 
     resetImporter() {
@@ -100,26 +64,26 @@ class PuppetImporter extends Component {
         const project = fs.readJsonSync(filepath)
         const puppetsPath = path.join(filepath, project.charactersPath || '../characters')
         const {
-            characters: rawCharacters,
+            environments: rawEnvironments,
             characterThumbnails: rawThumbnails
         } = loadCharacters(project, puppetsPath, this.props.defaults)
 
-        if (Object.values(rawCharacters).length === 0) {
-            this.props.dispatch(warn(`No puppets found in ${path.basename(filepath)} to import`))
+        if (Object.values(rawEnvironments).length === 0) {
+            this.props.dispatch(warn(`No environments found in ${path.basename(filepath)} to import`))
             return null
         }
 
-        const characters = {}
+        const environments = {}
         const characterThumbnails = {}
-        Object.values(rawCharacters).forEach((character, i) => {
+        Object.values(rawEnvironments).forEach((environment, i) => {
             const id = this.props.numCharacters + i + 1
-            characterThumbnails[id] = rawThumbnails[character.id]
-            character.id = id
-            characters[id] = character
+            characterThumbnails[id] = rawThumbnails[environment.id] || ''
+            environment.id = id
+            environments[id] = environment
         })
 
         const assetsPath = path.join(filepath, project.assetsPath || '../assets')
-        const { assets, error, errors } = loadAssets(project, assetsPath, characters)
+        const { assets, error, errors } = loadAssets(project, assetsPath, environments)
         if (error)
             this.props.dispatch(warn(error))
         if (errors)
@@ -131,39 +95,40 @@ class PuppetImporter extends Component {
             assetsPaths: {...this.state.assetsPaths, [filepath]: assetsPath}
         })
 
-        return characters
+        return environments
     }
 
     import(filepath, items) {
         const assets = {}
-        const puppetsStatusId = `import-puppet-${PuppetImporter.id++}`
+        const puppetsStatusId = `import-environment-${EnvironmentImporter.id++}`
         const assetsStatusId = `${puppetsStatusId}-assets`
 
-        const checkLayer = (puppet, layer) => {
+        const checkLayer = (environment, layer) => {
             if (layer == null || !Array.isArray(layer.children)) return
             layer.children.forEach(layer => {
                 // Continue searching through the layers
-                checkLayer(puppet, layer)
+                checkLayer(environment, layer)
 
                 // Ensure this is a new asset
                 if (!('id' in layer)) return
                 if (layer.id in this.props.assets) return
                 if (layer.id in assets) return
+                if (layer.id === 'CHARACTER_PLACEHOLDER') return
 
                 // Add asset to the appropriate lists
                 assets[layer.id] = this.state.assets[layer.id]
-                puppet.assets.push(layer.id)
+                environment.assets.push(layer.id)
             })
         }
 
-        const puppets = Object.keys(items).reduce((acc, curr) => {
+        const environments = Object.keys(items).reduce((acc, curr) => {
             const thumbnail = this.state.characterThumbnails[curr].slice(8)
             const thumbFolder = thumbnail.split('.').slice(0, -1).join('.')
 
             acc[curr] = items[curr]
             // These are temporary variables for use in the background
             // process that will be removed before adding them to the
-            // puppet list
+            // environment list
             acc[curr].thumbnail = thumbnail
             acc[curr].thumbFolder = thumbFolder
             acc[curr].assets = []
@@ -175,14 +140,14 @@ class PuppetImporter extends Component {
         }, {})
 
         // Create status messages for showing progress on importing puppets
-        this.props.dispatch(inProgress(puppetsStatusId, Object.keys(puppets).length, 'Importing puppets...'))
+        this.props.dispatch(inProgress(puppetsStatusId, Object.keys(environments).length, 'Importing environments...'))
         if (Object.keys(assets).length > 0)
             this.props.dispatch(inProgress(assetsStatusId, Object.keys(assets).length, 'Importing assets...'))
 
         // Make the background window copy all the necessary files over
         ipcRenderer.send('background', 'add characters',
             // Puppets to add
-            puppets,
+            environments,
             // Assets to add
             assets,
             // Assets path to copy assets from
@@ -194,7 +159,9 @@ class PuppetImporter extends Component {
             // ID for sending status updates as new puppets get added
             puppetsStatusId,
             // ID for sending status updates as new assets get added
-            assetsStatusId
+            assetsStatusId,
+            // Specify that these are environments we're adding
+            'environment'
         )
     }
 
@@ -206,7 +173,7 @@ class PuppetImporter extends Component {
 
     render() {
         return <Importer
-            title="Import Puppets"
+            title="Import Environments"
             importClassName="puppet-importer"
             createElement={this.createElement}
             readFile={this.readFile}
@@ -228,4 +195,4 @@ function mapStateToProps(state) {
     }
 }
 
-export default connect(mapStateToProps)(PuppetImporter)
+export default connect(mapStateToProps)(EnvironmentImporter)
