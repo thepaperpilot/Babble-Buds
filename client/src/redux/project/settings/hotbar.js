@@ -13,7 +13,7 @@ function updateActors(dispatch, state, actor, slotIndex, newValue) {
 
     const matches = prevHotbar.filter(puppet => puppet == actor.puppetId)
     // If its a non-one amount, we don't need to change the actor
-    if (matches.length !== 1)
+    if (matches.length !== 1 || prevHotbar.indexOf(matches[0]) !== slotIndex)
         return
 
     // If we changed the one hotbar slot this actor matches,

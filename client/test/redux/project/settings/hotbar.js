@@ -5,6 +5,7 @@ import { combineReducers } from 'redux'
 import mock from 'mock-require'
 import fakeReducer from '../../../util/fakeReducer'
 import fakeActions from '../../../util/fakeActions'
+import { getActor } from '../../../../src/redux/actors'
 
 chai.use(chaiRedux)
 
@@ -18,7 +19,10 @@ const middleware = thunk
 
 describe('redux/project/settings/hotbar', function () {
     before(() => {
-        mock('../../../../src/redux/controller', fakeActions('changePuppet'))
+        mock('../../../../src/redux/actors', {
+            ...fakeActions('changePuppet'),
+            getActor
+        })
 
         const h = mock.reRequire('../../../../src/redux/project/settings/hotbar')
         hotbar = h.default
@@ -107,5 +111,36 @@ describe('redux/project/settings/hotbar', function () {
             2,
             "test puppet"
         ]})
+    })
+
+    it('should set inactive slot', () => {
+        const initialState = {
+            project: {
+                settings: {
+                    hotbar: defaultHotbar
+                },
+                characters: {
+                    2: "test puppet"
+                }
+            },
+            controller: {
+                actors: [0]
+            },
+            actors: [
+                { id: 0, puppetId: 1 }
+            ]
+        }
+        const store = chai.createReduxStore({ reducer, middleware, initialState })
+
+        store.dispatch(setSlot(1, 2))
+        expect(store).to.have.state.like({
+            project: {
+                ...store.getState().project,
+                settings: {
+                    hotbar: [1, 2, 0, 0, 0, 0, 0, 0, 0]
+                }
+            }
+        })
+        .and.then.not.dispatched({ f: 'changePuppet' })
     })
 })
