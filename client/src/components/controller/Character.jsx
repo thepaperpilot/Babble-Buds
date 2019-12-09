@@ -60,7 +60,7 @@ function mapStateToProps(state, props) {
         puppet,
         character: state.project.characters[puppet],
         thumbnail: state.project.characterThumbnails[puppet],
-        selected: state.controller.actors.some(id => state.actors.find(actor => actor.id === id).puppetId === puppet)
+        selected: state.controller.actors.some(id => state.actors.find(actor => actor.id === id).puppetId == puppet)
     }
 }
 
