@@ -1,37 +1,14 @@
-.importer .foldable:before {
-    top: 9px;
-    left: 12px;
-}
-
-.importer .flex-row {
-    line-height: 32px;
-}
-
-.importer .checkbox-label {
-    margin: 0;
-}
-
-.importer .flex-row > .flex-grow {
-    border: none;
-}
-
-.importer .foldable h4 {
-    padding: 4px 24px;
-    padding-left: 36px;
-    border-top: 1px solid var(--foreground);
-    border-bottom: 1px solid var(--inactive);
-    margin-top: -1px;
-}
-
 .asset-importer {
     display: flex;
     flex-direction: column;
+    height: 100%;
 }
 
 .asset-importer .small.list .list-item .char .inner-line-item {
     margin: 0;
     background-color: unset;
     line-height: 20px;
+    margin-left: 4px;
 }
 
 .asset-importer .list-item .char .desc {
@@ -43,15 +20,8 @@
 }
 
 .asset-importer .folder-list-item {
-    border-style: solid;
-}
-
-.asset-importer .folder-list-item .header-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: stretch;
-    text-align: center;
-    height: 100%;
+    margin: 4px;
+    margin-right: 15px;
 }
 
 .asset-importer .header-wrapper .inner-line-item {
@@ -62,8 +32,12 @@
 .asset-importer .toggle-button {
     padding: 0 3px;
     padding-top: 3px;
-    margin-top: -4px;
+    margin: 2px;
+    margin-top: -2px;
+    margin-left: auto;
     border: solid var(--highlight) 3px;
     display: flex;
     align-items: center;
+    width: 12px;
+    height: 12px;
 }

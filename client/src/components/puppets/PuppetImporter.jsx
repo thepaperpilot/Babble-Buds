@@ -1,19 +1,18 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import Scrollbar from 'react-custom-scroll'
 import Checkbox from '../inspector/fields/Checkbox'
 import Number from '../inspector/fields/Number'
-import Modal from '../ui/Modal'
 import Foldable from '../ui/Foldable'
 import { getEmotes } from '../controller/Emotes'
 import { loadCharacters, loadAssets } from '../../redux/project/loader'
 import { warn, inProgress } from '../../redux/status'
+import Importer from '../ui/Importer'
 
 import './importer.css'
 
 const fs = window.require('fs-extra')
 const path = require('path')
-const {remote, ipcRenderer} = window.require('electron')
+const ipcRenderer = window.require('electron').ipcRenderer
 
 class PuppetImporter extends Component {
     static id = 0
@@ -22,32 +21,129 @@ class PuppetImporter extends Component {
         super(props)
 
         this.state = {
-            open: false,
-            characters: [],
             assets: {},
-            selected: []
+            characterThumbnails: {},
+            assetsPaths: {}
         }
 
+        this.createElement = this.createElement.bind(this)
+        this.resetImporter = this.resetImporter.bind(this)
+        this.readFile = this.readFile.bind(this)
         this.import = this.import.bind(this)
-        this.cancel = this.cancel.bind(this)
-        this.toggleAll = this.toggleAll.bind(this)
-        this.togglePuppet = this.togglePuppet.bind(this)
-        this.importPuppets = this.importPuppets.bind(this)
     }
 
-    import() {
+    createElement({ id, item, selected, toggleItem, singleItem }) {
+        const thumbnails = this.state.characterThumbnails[id].split('.').slice(0, -1).join('.')
+        const emotes = getEmotes(this.state.assets, item.layers)
+
+        return <Foldable
+            key={id}
+            defaultFolded={!singleItem}
+            title={<div className="puppet-importer-title">
+                <div className="puppet-importer-img char">
+                    <img
+                        alt={item.name}
+                        src={this.state.characterThumbnails[id]}
+                        style={{width: '60px', height: '60px'}} />
+                </div>
+                <div className="puppet-importer-label">
+                    <p>{item.name}</p>
+                    <p>Creator: {item.creator === this.props.self ? this.props.nick : item.creator}</p>
+                    <p>OC: {item.oc === this.props.self ? this.props.nick : item.oc}</p>
+                </div>
+                {singleItem ? null : <Checkbox
+                    inline={true}
+                    value={selected}
+                    onChange={toggleItem(id)}/>}
+            </div>}>
+            <div className="action">
+                <Checkbox
+                    title="Bobble head while talking"
+                    value={item.deadbonesStyle}
+                    disabled={true} />
+                <Number
+                    title="Eyes Duration (while babbling)"
+                    value={item.eyeBabbleDuration || 2000}
+                    disabled={true} />
+                <Number
+                    title="Mouth Duration (while babbling)"
+                    value={item.mouthBabbleDuration || 270}
+                    disabled={true} />
+            </div>
+            <div className="list">
+                {emotes.map(emote => {
+                    return (
+                        <div
+                            className="list-item"
+                            style={{height: '120px', width: '120px'}}
+                            key={emote.name} >
+                            <div className="char" key={emote.name}>
+                                <img alt={emote.name} src={`${thumbnails}/${emote.emote}.png`}/>
+                                <div className="desc">{emote.name}</div>
+                            </div>
+                        </div>
+                    )
+                })}
+            </div>
+        </Foldable>
+    }
+
+    resetImporter() {
+        this.setState({
+            assets: {},
+            characterThumbnails: {},
+            assetsPath: {}
+        })
+    }
+
+    readFile(filepath) {
+        const project = fs.readJsonSync(filepath)
+        const puppetsPath = path.join(filepath, project.charactersPath || '../characters')
+        const {
+            characters: rawCharacters,
+            characterThumbnails: rawThumbnails
+        } = loadCharacters(project, puppetsPath, this.props.defaults)
+
+        if (Object.values(rawCharacters).length === 0) {
+            
+            return null
+        }
+
+        const characters = {}
+        const characterThumbnails = {}
+        Object.values(rawCharacters).forEach((character, i) => {
+            const id = this.props.numCharacters + i + 1
+            characterThumbnails[id] = rawThumbnails[character.id]
+            character.id = id
+            characters[id] = character
+        })
+
+        const assetsPath = path.join(filepath, project.assetsPath || '../assets')
+        const { assets, error, errors } = loadAssets(project, assetsPath, characters)
+        if (error)
+            this.props.dispatch(warn(error))
+        if (errors)
+            errors.forEach(e => this.props.dispatch(warn(e)))
+
+        this.setState({
+            assets: {...this.state.assets, ...assets},
+            characterThumbnails: {...this.state.characterThumbnails, ...characterThumbnails},
+            assetsPaths: {...this.state.assetsPaths, [filepath]: assetsPath}
+        })
+
+        return characters
+    }
+
+    import(filepath, items) {
         const assets = {}
-        const assetsPath = path.join(this.props.project, this.props.assetsPath)
-        const thumbnailsPath = path.join(this.props.project, 
-            this.props.charactersPath, '..', 'thumbnails')
         const puppetsStatusId = `import-puppet-${PuppetImporter.id++}`
         const assetsStatusId = `${puppetsStatusId}-assets`
 
         const checkLayer = (puppet, layer) => {
+            if (layer == null || !Array.isArray(layer.children)) return
             layer.children.forEach(layer => {
                 // Continue searching through the layers
-                if (layer.children)
-                    checkLayer(puppet, layer)
+                checkLayer(puppet, layer)
 
                 // Ensure this is a new asset
                 if (!('id' in layer)) return
@@ -60,11 +156,11 @@ class PuppetImporter extends Component {
             })
         }
 
-        const puppets = this.state.selected.reduce((acc, curr) => {
+        const puppets = Object.keys(items).reduce((acc, curr) => {
             const thumbnail = this.state.characterThumbnails[curr].slice(8)
             const thumbFolder = thumbnail.split('.').slice(0, -1).join('.')
 
-            acc[curr] = this.state.characters[curr]
+            acc[curr] = items[curr]
             // These are temporary variables for use in the background
             // process that will be removed before adding them to the
             // puppet list
@@ -73,191 +169,48 @@ class PuppetImporter extends Component {
             acc[curr].assets = []
 
             // Import any assets this character has that we don't have
-            checkLayer(acc[curr], this.state.characters[curr].layers)
+            checkLayer(acc[curr], items[curr].layers)
 
             return acc
         }, {})
 
-        this.setState({
-            open: false
-        })
-
+        // Create status messages for showing progress on importing puppets
         this.props.dispatch(inProgress(puppetsStatusId, Object.keys(puppets).length, 'Importing puppets...'))
-
         this.props.dispatch(inProgress(assetsStatusId, Object.keys(assets).length, 'Importing assets...'))
 
+        // Make the background window copy all the necessary files over
         ipcRenderer.send('background', 'add puppets',
+            // Puppets to add
             puppets,
+            // Assets to add
             assets,
-            this.state.assetsPath,
-            assetsPath,
-            thumbnailsPath,
+            // Assets path to copy assets from
+            this.state.assetsPaths[filepath],
+            // Assets path to move assets to
+            path.join(this.props.project, this.props.assetsPath),
+            // Thumbnails path to save thumbnails to
+            path.join(this.props.project, this.props.charactersPath, '..', 'thumbnails'),
+            // ID for sending status updates as new puppets get added
             puppetsStatusId,
+            // ID for sending status updates as new assets get added
             assetsStatusId
         )
     }
 
-    cancel() {
-        this.setState({
-            open: false
-        })
-    }
-
-    toggleAll(allSelected) {
-        return () => {
-            this.setState({
-                selected: allSelected ? [] : Object.keys(this.state.characters)
-            })
-        }
-    }
-
-    togglePuppet(id) {
-        return () => {
-            const selected = this.state.selected.slice()
-            if (this.state.selected.includes(id)) {
-                selected.splice(selected.indexOf(id), 1)
-            } else {
-                selected.push(id)
-            }
-            this.setState({ selected })
-        }
-    }
-
-    importPuppets() {
-        remote.dialog.showOpenDialog(remote.BrowserWindow.getFocusedWindow(), {
-            title: 'Select Project',
-            defaultPath: path.join(remote.app.getPath('home'), 'projects'),
-            filters: [
-                {name: 'Babble Buds Project File', extensions: ['babble']},
-                {name: 'All Files', extensions: ['*']}
-            ],
-            properties: [
-                'openFile'
-            ] 
-        }, filepaths => {
-            if (!filepaths) return
-            const project = fs.readJsonSync(filepaths[0])
-            filepaths[0] = filepaths[0].replace(/\\/g, '/')
-            
-            const puppetsPath = path.join(filepaths[0],
-                project.charactersPath || '../characters')
-            const { characters: rawCharacters,
-                characterThumbnails: rawThumbnails } =
-                loadCharacters(project, puppetsPath, this.props.defaults)
-            const characters = {}
-            const characterThumbnails = {}
-            Object.values(rawCharacters).forEach((character, i) => {
-                const id = this.props.numCharacters + i + 1
-                characterThumbnails[id] = rawThumbnails[character.id]
-                character.id = id
-                characters[id] = character
-            })
-
-            const assetsPath = path.join(filepaths[0],
-                project.assetsPath || '../assets')
-            const {assets, error, errors} = loadAssets(project, assetsPath, characters)
-            if (error)
-                this.props.dispatch(warn(error))
-            if (errors)
-                errors.forEach(e => this.props.dispatch(warn(e)))
-
-            this.setState({
-                project: filepaths[0],
-                open: true,
-                selected: [],
-                characters,
-                characterThumbnails,
-                puppetsPath,
-                assets,
-                assetsPath
-            })
-        })
+    shouldComponentUpdate() {
+        // We only need the state and props for the functions we have
+        // We'll never to re-render, because we always render the same thing
+        return false
     }
 
     render() {
-        let allSelected = Object.keys(this.state.characters).sort().join(',') ===
-            this.state.selected.sort().join(',')
-
-        const puppets = Object.keys(this.state.characters).map(id => {
-            const puppet = this.state.characters[id]
-            const selected = this.state.selected.includes(id)
-            const thumbnails = this.state.characterThumbnails[id].split('.').slice(0, -1).join('.')
-            const emotes = getEmotes(this.state.assets, puppet.layers)
-            return <Foldable
-                key={id}
-                defaultFolded={true}
-                title={<div className="puppet-importer-title">
-                    <div className="puppet-importer-img char">
-                        <img
-                            alt={puppet.name}
-                            src={this.state.characterThumbnails[id]}
-                            style={{width: '60px', height: '60px'}} />
-                    </div>
-                    <div className="puppet-importer-label">
-                        <p>{puppet.name}</p>
-                        <p>Creator: {puppet.creator === this.props.self ? this.props.nick : puppet.creator}</p>
-                        <p>OC: {puppet.oc === this.props.self ? this.props.nick : puppet.oc}</p>
-                    </div>
-                    <Checkbox
-                        inline={true}
-                        value={selected}
-                        onChange={this.togglePuppet(id)}/>
-                </div>}>
-                <div className="action">
-                    <Checkbox
-                        title="Bobble head while talking"
-                        value={puppet.deadbonesStyle}
-                        disabled={true} />
-                    <Number
-                        title="Eyes Duration (while babbling)"
-                        value={puppet.eyeBabbleDuration || 2000}
-                        disabled={true} />
-                    <Number
-                        title="Mouth Duration (while babbling)"
-                        value={puppet.mouthBabbleDuration || 270}
-                        disabled={true} />
-                </div>
-                <div className="list">
-                    {emotes.map(emote => {
-                        return (
-                            <div
-                                className="list-item"
-                                style={{height: '120px', width: '120px'}}
-                                key={emote.name} >
-                                <div className="char" key={emote.name}>
-                                    <img alt={emote.name} src={`${thumbnails}/${emote.emote}.png`}/>
-                                    <div className="desc">{emote.name}</div>
-                                </div>
-                            </div>
-                        )
-                    })}
-                </div>
-            </Foldable>
-        })
-
-        return <div>
-            <button onClick={this.importPuppets}>Import</button>
-            <Modal
-                title={`Import Puppets - ${path.basename(this.state.project)}`}
-                open={this.state.open}
-                onClose={this.cancel}
-                style={{ height: '80%' }}
-                footer={[
-                    <Checkbox
-                        inline={true}
-                        title="Toggle All"
-                        key="1"
-                        value={allSelected}
-                        onChange={this.toggleAll(allSelected)}/>,
-                    <div className="flex-grow" key="2"/>,
-                    <button onClick={this.import} key="3">Import</button>]}>
-                <Scrollbar allowOuterScroll={true} heightRelativeToParent="calc(100% - 48px)">
-                    <div className="puppet-importer">
-                        {puppets}
-                    </div>
-                </Scrollbar>
-            </Modal>
-        </div>
+        return <Importer
+            title="Import Puppets"
+            importClassName="puppet-importer"
+            createElement={this.createElement}
+            readFile={this.readFile}
+            import={this.import}
+            onOpen={this.resetImporter} />
     }
 }
 
