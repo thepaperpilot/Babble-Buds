@@ -8,6 +8,7 @@ import { changeCharacter } from '../characters/actions'
 import { addFolder, removeFolder } from '../folders'
 import { changeLayer, setLayers as setEditorLayers } from '../../editor/layers'
 import { SET, ADD, REMOVE, EDIT, getNewAssetID, getConflicts } from './reducers'
+import { emit } from '../../networking'
 
 const fs = window.require('fs-extra')
 const path = require('path')
@@ -30,6 +31,10 @@ export function addAssets(assets, updateBackground = true) {
                 dispatch(addFolder(asset.tab))
                 folders = [...folders, asset.tab]
             }
+        })
+
+        Object.keys(assets).forEach(id => {
+            dispatch(emit('add asset', id, assets[id]))
         })
     }
 }
@@ -119,6 +124,10 @@ export function deleteAssets(ids) {
         if (editor.present.type === 'asset' &&
             ids.includes(editor.present.id))
             dispatch(close())
+
+        ids.forEach(id => {
+            dispatch(emit('delete asset', id))
+        })
     }
 }
 
@@ -158,6 +167,8 @@ export function setLayers(asset, layers) {
             state.self, `${asset.split(':')[1]}`)
         ipcRenderer.send('background', 'generate thumbnails', thumbnailPath,
             { layers }, 'asset', asset)
+
+        dispatch(emit('add asset', asset, util.updateObject(assets[asset], newAsset)))
     }
 }
 
@@ -177,6 +188,11 @@ export function renameAsset(id, name) {
                 version: assets[id].version + 1
             }
         })
+
+        dispatch(emit('add asset', id, util.updateObject(assets[id], {
+            name,
+            version: assets[id].version + 1
+        })))
     }
 }
 
@@ -197,6 +213,11 @@ export function moveAsset(id, tab) {
                 version: assets[id].version + 1
             }
         })
+
+        dispatch(emit('add asset', id, util.updateObject(assets[id], {
+            tab,
+            version: assets[id].version + 1
+        })))
 
         if (!folders.includes(tab))
             dispatch(addFolder(tab))

@@ -278,9 +278,9 @@ const assetTarget = {
         const {x, y} = component.state.dragPos
         const {id, asset} = monitor.getItem()
 
-        let l = item.selected || []
+        let l = item.selected.layer || []
         let curr = item.layers;
-        (l || []).forEach((index, i) => {
+        l.forEach((index, i) => {
             if (curr.children[index] != null)
                 curr = curr.children[index]
             else l = l.slice(0, i)

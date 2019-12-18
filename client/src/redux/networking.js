@@ -296,6 +296,20 @@ export function connectToRoom() {
                 stream.pipe(fs.createWriteStream(path.join(project.assetsPath, id.split(':')[0], `${id.split(':')[1]}.png`)))
             })
         })
+        socket.on('add asset', (id, asset) => {
+            const project = getState().project
+            const statusId = `downloading-${downloadingAssetsStatusId++}`
+            if (id in project.assets && asset.version <= project.assets[id].version) return
+            dispatch(inProgress(statusId, 1, 'Retrieving Asset from Server'))
+            let stream = ss.createStream()
+            fs.ensureDirSync(path.join(project.assetsPath, id.split(':')[0]))
+            ss(socket).emit('request asset', stream, id)
+            stream.on('end', () => {
+                dispatch(addAssets({ [id]: asset }))
+                dispatch(inProgressIncrement(statusId))
+            })
+            stream.pipe(fs.createWriteStream(path.join(project.assetsPath, id.split(':')[0], `${id.split(':')[1]}.png`)))
+        })
         ss(socket).on('request asset', (stream, id) => {
             const project = getState().project
             fs.createReadStream(path.join(project.project, project.settings.assetsPath, project.assets[id].location)).pipe(stream)

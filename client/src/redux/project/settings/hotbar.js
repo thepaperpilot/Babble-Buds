@@ -1,6 +1,7 @@
 import util from '../../util.js'
 import { getActor } from '../../actors'
 import { changePuppet } from '../../actors'
+import { emit } from '../../networking'
 
 // Utility Functions
 function updateActors(dispatch, state, actor, slotIndex, newValue) {
@@ -19,6 +20,7 @@ function updateActors(dispatch, state, actor, slotIndex, newValue) {
     // If we changed the one hotbar slot this actor matches,
     // change the actor to the new puppet
     dispatch(changePuppet(actor.id, newValue, characters[newValue]))
+    dispatch(emit('set puppet', actor.id, characters[newValue]))
 }
 
 // Action Types
