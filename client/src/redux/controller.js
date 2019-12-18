@@ -8,7 +8,10 @@ import {
     changePuppet as changeActorPuppet,
     setBabbling as setActorBabbling
 } from './actors'
+import { emit } from './networking'
 import { setEnvironment, setDefaultEnvironment } from './environment'
+
+const ipcRenderer = window.require('electron').ipcRenderer
 
 // Action Types
 const SET_ACTORS = 'controller/SET_ACTORS'
@@ -21,25 +24,37 @@ export function setActors(actors = []) {
 
 export function setEmote(emote) {
     return (dispatch, getState) => {
-        getState().controller.actors.forEach(id => dispatch(setActorEmote(id, emote)))
+        getState().controller.actors.forEach(id => {
+            dispatch(setActorEmote(id, emote))
+            dispatch(emit('set emote', id, emote))
+        })
     }
 }
 
 export function moveLeft() {
     return (dispatch, getState) => {
-        getState().controller.actors.forEach(id => dispatch(moveActorLeft(id)))
+        getState().controller.actors.forEach(id => {
+            dispatch(moveActorLeft(id))
+            dispatch(emit('move left', id))
+        })
     }
 }
 
 export function moveRight() {
     return (dispatch, getState) => {
-        getState().controller.actors.forEach(id => dispatch(moveActorRight(id)))
+        getState().controller.actors.forEach(id => {
+            dispatch(moveActorRight(id))
+            dispatch(emit('move right', id))
+        })
     }
 }
 
 export function jiggle() {
     return (dispatch, getState) => {
-        getState().controller.actors.forEach(id => dispatch(jiggleActor(id)))
+        getState().controller.actors.forEach(id => {
+            dispatch(jiggleActor(id))
+            dispatch(emit('jiggle', id))
+        })
     }
 }
 
@@ -49,7 +64,12 @@ export function changePuppet(index, skipHotbar = false) {
         const puppetId = skipHotbar ? index : state.project.settings.hotbar[index]
         const character = state.project.characters[puppetId]
         if (character)
-            state.controller.actors.forEach(id => dispatch(changeActorPuppet(id, puppetId, character)))
+            state.controller.actors.forEach(id => {
+                dispatch(changeActorPuppet(id, puppetId, character))
+                dispatch(emit('set puppet', id, character))
+                if (state.networking.connectedRoom)
+                    ipcRenderer.send('background', 'get thumbnail URI', id, character)
+            })
     }
 }
 
@@ -69,7 +89,10 @@ export function changeEnvironment(index, skipHotbar = false) {
 
 export function setBabbling(babbling = false) {
     return (dispatch, getState) => {
-        getState().controller.actors.forEach(id => dispatch(setActorBabbling(id, babbling)))
+        getState().controller.actors.forEach(id => {
+            dispatch(setActorBabbling(id, babbling))
+            dispatch(emit(`${babbling ? 'start' : 'stop'} babbling`, id))
+        })
         dispatch({ type: SET_BABBLING, babbling })
     }
 }

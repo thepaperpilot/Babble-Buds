@@ -1,4 +1,5 @@
 import util from '../../util.js'
+import { emit } from '../../networking'
 
 // taken from https://wiki.urealms.com/wiki/List_of_Minor_Characters - Updated 2018-01-08
 import names from '../../../data/names.json'
@@ -13,11 +14,19 @@ function getRandomName() {
 
 // Action Creators
 export function randomizeNickname() {
-    return { type: SET, nickname: getRandomName() }
+    return (dispatch, getState) => {
+        const nickname = getRandomName()
+        dispatch({ type: SET, nickname })
+        dispatch(emit('change nickname', nickname))
+    }
 }
 
 export function setNickname(nickname) {
-    return { type: SET, nickname: nickname || getRandomName() }
+    return (dispatch, getState) => {
+        nickname = nickname || getRandomName()
+        dispatch({ type: SET, nickname })
+        dispatch(emit('change nickname', nickname))
+    }
 }
 
 // Reducers

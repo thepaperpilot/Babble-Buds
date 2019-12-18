@@ -113,5 +113,5 @@ function mapStateToProps(state, props) {
 }
 
 export default connect(mapStateToProps, null, null, {
-    withRef: true
+    forwardRef: true
 })(InlineEdit)

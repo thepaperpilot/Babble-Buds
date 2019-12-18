@@ -207,6 +207,12 @@ const template = [
                 }
             },
             {
+                label: 'Multiplayer',
+                click (item, focusedWindow) {
+                    focusedWindow.webContents.send('toggle panel', 'multiplayer')
+                }
+            },
+            {
                 type: 'separator'
             },
             {

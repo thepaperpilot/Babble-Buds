@@ -121,6 +121,11 @@
                     "grid": 2,
                     "highlight": false
                 }
+              },
+              {
+                "type": "tab",
+                "name": "Multiplayer",
+                "component": "multiplayer"
               }
             ]
           },

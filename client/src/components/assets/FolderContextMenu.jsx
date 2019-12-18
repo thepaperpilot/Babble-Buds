@@ -123,4 +123,4 @@ function mapStateToProps(state) {
     }
 }
 
-export default id => connect(mapStateToProps, null, null, { withRef: true })(connectMenu(`contextmenu-tab-${id}`)(FolderContextMenu))
+export default id => connect(mapStateToProps, null, null, { forwardRef: true })(connectMenu(`contextmenu-tab-${id}`)(FolderContextMenu))

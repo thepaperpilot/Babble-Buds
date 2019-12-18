@@ -375,6 +375,7 @@ export const behavior = {
             instance.selector = new Graphics()
             instance.selector.setParent(instance.parent.parent)
 
+            console.log(instance.props)
             const endRot = endRotateDrag(instance, instance.props.dispatch)
             instance.rotate = getIcon(instance, 'rotate.png')
                 .on('mousemove', onRotate(instance))

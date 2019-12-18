@@ -99,7 +99,7 @@ export class FolderTarget extends PureComponent {
 }
 
 // Use some HOCs to give us our dispatch and other props
-const ConnectedFolderTarget = connect(null, null, null, { withRef: true })(DragSource('folder', folderSource, collectSource)(DropTarget(['asset', 'folder'], assetTarget, collect)(FolderTarget)))
+const ConnectedFolderTarget = DragSource('folder', folderSource, collectSource)(DropTarget(['asset', 'folder'], assetTarget, collect)(FolderTarget))
 
 class NewFolderButton extends PureComponent {
     constructor(props) {

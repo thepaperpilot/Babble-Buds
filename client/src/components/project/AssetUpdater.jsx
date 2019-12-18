@@ -49,4 +49,4 @@ function mapStateToProps(state) {
     }
 }
 
-export default connect(mapStateToProps, null, null, { withRef: true })(AssetUpdater)
+export default connect(mapStateToProps, null, null, { forwardRef: true })(AssetUpdater)

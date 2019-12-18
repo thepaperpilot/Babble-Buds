@@ -1,5 +1,4 @@
 import React, {Component} from 'react'
-import { connect } from 'react-redux'
 import { Sprite, Container, withApp } from 'react-pixi-fiber'
 import Selector, { behavior } from './Selector'
 import { comparePaths } from '../layers/Layer'
@@ -54,12 +53,24 @@ class RawLayer extends Component {
             play,
             selectorColor,
             environment,
+            dispatch,
             ...props
         } = this.props
 
         const isHighlighted = highlight == null || comparePaths(highlight, layer.path)
         const isSelected = selected.layer && bundles.length == 0 &&
             comparePaths(selected.layer, layer.path)
+
+        const layerProps = {
+            play,
+            scale,
+            selected,
+            selectorColor,
+            assets,
+            assetsPath,
+            environment,
+            dispatch
+        }
 
         let element
         if (layer.id && layer.id in assets) {
@@ -78,13 +89,13 @@ class RawLayer extends Component {
                     {...props} >
                     <Container scale={[layer.scaleX || 1, layer.scaleY || 1]}>
                         {assets[layer.id].layers.children.map((l, i) =>
-                            <Layer play={play} bundles={[...bundles, layer.id]}
-                                key={i} layer={l} scale={scale} selectorColor={selectorColor}
+                            <Layer bundles={[...bundles, layer.id]}
+                                key={i} layer={l} {...layerProps}
                                 highlight={isHighlighted ? l.path : highlight} />)}
                     </Container>
                     {isSelected && bundles.length === 0 && 
                         <Selector ref={this.selector} scale={scale} layer={layer}
-                            dispatch={this.props.dispatch} selectorColor={selectorColor} />}
+                            dispatch={dispatch} selectorColor={selectorColor} />}
                 </Container>
             default: element = <Sprite
                 anchor={[.5,.5]}
@@ -108,13 +119,12 @@ class RawLayer extends Component {
                     <Sprite width={environment.width / 2} height={environment.height} y={-environment.height / 2} />
                 </Container>
                 <Selector scale={scale} layer={{ x: 0, y: -environment.height / 2, rotation: 0 }}
-                    dispatch={this.props.dispatch} disabled={true} selectorColor={selectorColor} />
+                    dispatch={dispatch} disabled={true} selectorColor={selectorColor} />
             </Container>
         } else
             element = <Container scale={[layer.scaleX || 1, layer.scaleY || 1]}>
                 {(layer.children || []).map((l, i) =>
-                    <Layer play={play} key={i} layer={l} bundles={bundles}
-                        selectorColor={selectorColor} scale={scale}
+                    <Layer key={i} layer={l} bundles={bundles} {...layerProps}
                         highlight={isHighlighted ? l.path : highlight} />)}
             </Container>
 
@@ -130,19 +140,10 @@ class RawLayer extends Component {
             {element}
             {isSelected &&
                 <Selector ref={this.selector} scale={scale} layer={layer}
-                    dispatch={this.props.dispatch} selectorColor={selectorColor}/>}
+                    dispatch={dispatch} selectorColor={selectorColor}/>}
         </Container>
     }
 }
 
-function mapStateToProps(state) {
-    return {
-        selected: state.editor.present.selected,
-        assets: state.project.assets,
-        assetsPath: state.project.assetsPath,
-        environment: state.project.environments[state.editor.present.id]
-    }
-}
-
-const Layer = withApp(connect(mapStateToProps)(RawLayer))
+const Layer = withApp(RawLayer)
 export default Layer

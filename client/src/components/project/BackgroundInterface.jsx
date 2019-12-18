@@ -4,6 +4,7 @@ import { Puppet } from 'babble.js'
 import { info } from '../../redux/status'
 import { updateThumbnail } from '../../redux/project/characterThumbnails'
 import { updateThumbnail as updateAssetThumbnail} from '../../redux/project/assets/actions'
+import { setThumbnailURI } from '../../redux/actors'
 
 const { ipcRenderer } = window.require('electron')
 const path = window.require('path')
@@ -16,6 +17,7 @@ class BackgroundInterface extends Component {
 
         this.updateThumbnails = this.updateThumbnails.bind(this)
         this.checkDirtyCharacters = this.checkDirtyCharacters.bind(this)
+        this.setThumbnailURI = this.setThumbnailURI.bind(this)
     }
 
     componentDidMount() {
@@ -23,12 +25,14 @@ class BackgroundInterface extends Component {
         ipcRenderer.send('background', 'update assets', this.props.assets, this.props.assetsPath)
 
         ipcRenderer.on('update thumbnails', this.updateThumbnails)
+        ipcRenderer.on('set thumbnail URI', this.setThumbnailURI)
         this.checkDirtyCharacters(this.props, this.props.dirtyCharacters)
     }
 
     componentWillUnmount() {
         this.hasUpdated = false
         ipcRenderer.off('update thumbnails', this.updateThumbnails)
+        ipcRenderer.off('set thumbnail URI', this.setThumbnailURI)
     }
 
     componentWillReceiveProps(newProps) {
@@ -132,6 +136,10 @@ class BackgroundInterface extends Component {
             this.props.dispatch(updateAssetThumbnail(id, thumbnailsPath))
         else
             this.props.dispatch(updateThumbnail(id, type, thumbnailsPath))
+    }
+
+    setThumbnailURI(e, id, thumbnail) {
+        this.props.dispatch(setThumbnailURI(id, thumbnail))
     }
 
     render() {

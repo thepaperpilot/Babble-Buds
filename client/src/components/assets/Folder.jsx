@@ -38,4 +38,4 @@ class Folder extends Component {
     }
 }
 
-export default connect(null, null, null, { withRef: true })(Folder)
+export default connect(null, null, null, { forwardRef: true })(Folder)

@@ -10,6 +10,7 @@ import CharactersController from '../controller/Characters'
 import EnvironmentsController from '../controller/Environments'
 import EmotesController from '../controller/Emotes'
 import ProjectSettings from '../settings/ProjectSettings'
+import Multiplayer from '../multiplayer/Multiplayer'
 import Inspector from '../inspector/Inspector'
 import Editor from '../editor/Editor'
 import Layers from '../layers/Layers'
@@ -103,6 +104,9 @@ class Panels extends Component {
             child = <Environments rect={node._rect} size={node.getConfig().size}
                 onZoomChange={this.updateConfig(node, 'size')}
                 id={node.getId()} />
+            break
+        case 'multiplayer':
+            child = <Multiplayer/>
             break
         }
 

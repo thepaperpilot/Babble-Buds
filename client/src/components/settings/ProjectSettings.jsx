@@ -65,7 +65,6 @@ class ProjectSettings extends Component {
                                 <Foldable title="Networking Settings">
                                     <Text title="Server IP" value={this.props.ip} onChange={this.setIP} />
                                     <Number title="Server Port" value={this.props.port} onChange={this.setPort} />
-                                    <button onClick={this.connect}>Connect</button>
                                 </Foldable>
                             </div>
                             <div className="action">

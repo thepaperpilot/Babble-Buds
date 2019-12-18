@@ -66,13 +66,14 @@ class Stage extends Component {
             this.puppets[actor.id] = this.stage.addPuppet(character, actor.id)
         })
         // Remove actors
-        Object.keys(this.puppets).filter(id => !newProps.actors.some(a => a.id === id)).forEach(actor => {
-            this.stage.removePuppet(actor.id)
-            delete this.puppets[actor.id]
+        Object.keys(this.puppets).filter(id => !newProps.actors.some(a => a.id == id)).forEach(id => {
+            this.stage.removePuppet(id)
+            delete this.puppets[id]
         })
         // Update actors
         newProps.actors.filter(actor => actor.id in this.puppets).forEach(newActor => {
-            const old = this.props.actors.find(actor => actor.id === newActor.id)
+            const old = this.props.actors.find(actor => actor.id == newActor.id)
+            if (old == null) return
             const puppet = this.puppets[newActor.id]
             if (old.emote !== newActor.emote)
                 puppet.changeEmote(newActor.emote)
@@ -93,7 +94,10 @@ class Stage extends Component {
                 this.puppets[newActor.id] =
                     this.stage.setPuppet(newActor.id, tempPuppet)
             }
+            this.stage.dirty = true
         })
+        if (this.props.banish !== newProps.banish)
+            this.stage.banishPuppets()
     }
 
     info(content) {
@@ -114,7 +118,7 @@ class Stage extends Component {
 
     registerPuppetLoader() {
         if (this.props.assetUpdater) {
-            this.props.assetUpdater.getWrappedInstance().addPuppetLoader(this.loadPuppets)
+            this.props.assetUpdater.addPuppetLoader(this.loadPuppets)
             this.regPuppetLoader = null
         } else
             this.regPuppetLoader = requestAnimationFrame(this.registerPuppetLoader)
@@ -159,7 +163,8 @@ function mapStateToProps(state) {
         environment: state.environment,
         assets: state.project.assets,
         assetsPath: state.project.assetsPath,
-        actors: state.actors
+        actors: state.actors,
+        banish: state.networking.banish
     }
 }
 

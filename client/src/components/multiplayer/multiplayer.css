@@ -1,0 +1,70 @@
+.panel-footer {
+    text-align: right;
+}
+
+.panel-footer p,
+.panel-footer button {
+    margin: 0;
+}
+
+.panel-footer button {
+    color: orange;
+}
+
+.multiplayer-actors {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.multiplayer-actors .char {
+    height: 200px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    flex: 1 1 100px;
+}
+
+.uri-thumbnail {
+    width: 100%;
+    height: 100%;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.host .field-title::before {
+    content: "♔";
+    margin-right: 5px;
+    background-color: var(--highlight);
+    padding: 4px;
+}
+
+.admin:not(.host) .field-title::before {
+    content: "♗";
+    margin-right: 5px;
+    background-color: var(--highlight);
+    padding: 4px;
+}
+
+.self::after {
+    content: "YOU";
+    color: yellow;
+    margin-left: 4px;
+    font-size: small;
+    font-weight: bold;
+}
+
+.multiplayer-users .field:not(:last-child) {
+    border-bottom: solid 1px var(--highlight);
+}
+
+.user-actions {
+    flex-basis: 100%;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.user-actions button {
+    flex: 33%;
+    margin: 4px;
+    margin-bottom: 8px;
+}

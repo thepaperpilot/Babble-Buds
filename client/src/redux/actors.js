@@ -4,6 +4,7 @@ import { warn } from './status'
 
 // Action Types
 const CLEAR = 'actors/CLEAR'
+const SET = 'actors/SET'
 const ADD = 'actors/ADD'
 const REMOVE = 'actors/REMOVE'
 const CHANGE = 'actors/CHANGE'
@@ -18,7 +19,11 @@ export function clearActors() {
     return { type: CLEAR }
 }
 
-export function addActor(id, puppetId, character) {
+export function setActors(actors) {
+    return { type: SET, actors }
+}
+
+export function newActor(id, puppetId, character) {
     return (dispatch, getState) => {
         const assets = getState().project.assets
         
@@ -45,6 +50,18 @@ export function addActor(id, puppetId, character) {
         
         dispatch({ type: ADD, actor })
     }
+}
+
+export function addActor(a) {
+    const actor = util.updateObject({
+        emote: 0,
+        babbling: false,
+        jiggle: 0,
+        position: 0,
+        facingLeft: false
+    }, a)
+    
+    return { type: ADD, actor }
 }
 
 export function removeActor(id) {
@@ -143,9 +160,34 @@ export function setBabbling(id, babbling = false) {
     }
 }
 
+export function banishActor(id) {
+    return (dispatch, getState) => {
+        let position
+        let facingLeft
+
+        const actor = getActor(getState(), id)
+        const numCharacters = getState().environment.numCharacters
+
+        if (actor.position > numCharacters / 2) {
+            position = numCharacters + 1
+            facingLeft = false
+        } else {
+            position = 0
+            facingLeft = true
+        }
+        
+        dispatch({ type: CHANGE, id, actor: { position, facingLeft } })
+    }
+}
+
+export function setThumbnailURI(id, thumbnail) {
+    return { type: CHANGE, id, actor: { thumbnail } }
+}
+
 // Reducers
 export default util.createReducer([], {
     [CLEAR]: () => [],
+    [SET]: (state, action) => action.actors,
     [ADD]: (state, action) => [...state, action.actor],
     [REMOVE]: (state, action) => {
         const index = state.findIndex(({id}) => id === action.id)

@@ -35,6 +35,7 @@ function createWindow() {
             nodeIntegration: true
         }
     })
+    mainWindow.openDevTools()
 
     mainWindowState.manage(mainWindow)
 

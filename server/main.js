@@ -36,146 +36,137 @@ server.sockets.on('connection', function(socket) {
 	socket.emit('serverVersion', clientVersion)
 
 	// Add Application Listeners
-	socket.on('join room', (name, password) => {
-		if (socket.room) {
-			socket.emit('info', 'Already in a room')
-			return
-		}
+    socket.on('connect to room', (name, password, nickname, environment) => {
+        if (socket.room) {
+            socket.emit('info', 'Already in a room')
+            return
+        }
 
-		if (!rooms[name] || rooms[name].password !== password) {
-			socket.emit('info', 'Wrong password or room does not exist.')
-			return
-		}
+        let isHost
 
-		socket.join(name)
-		socket.room = name
-		socket.emit('joined room', name)
-		if (logLevel >= 1) console.log(socket.id + " joined room:", name)
+        if (rooms[name]) {
+            isHost = false
+            // Joining Room
+            if (rooms[name].password !== password) {
+                socket.emit('info', 'Couldn\'t join room: Wrong password!.')
+                return
+            }
 
-		// Send room settings
-		let room = rooms[name]
-		socket.emit('set scale', room.puppetScale)
-		socket.emit('set slots', room.numCharacters)
+            // Send room settings
+            let room = rooms[name]
+            socket.emit('set environment', room.envSetter, room.environment.id, room.environment)
+            socket.emit('add assets', room.assets)
+            Object.keys(room.users).forEach(id => {
+                const user = room.users[id]
+                const actors = user.actors.reduce((acc, curr) => {
+                    acc[curr] = room.puppets[curr]
+                    return acc
+                }, {})
+                socket.emit('add user', id, actors, user.nickname, room.admins.includes(id), room.host === id)
+            })
 
-		// Send list of assets
-		let keys = Object.keys(room.assets)
-		for (let i = 0; i < keys.length; i++) {
-			let asset = JSON.parse(JSON.stringify((room.assets[keys[i]])))
-			socket.emit('add asset', keys[i], asset)
-		}
-	})
-	socket.on('create room', (name, password, puppetScale, numCharacters) => {
-		if (socket.room) {
-			socket.emit('info', 'Already in a room')
-			return
-		}
+            // Add user to room
+            socket.join(name)
+            socket.room = name
+            room.users[socket.id] = {
+                nickname,
+                actors: []
+            }
+            socket.broadcast.to(socket.room).emit('add user', socket.id, [], nickname, false, false)
 
-		if (rooms[name]) {
-			socket.emit('info', 'Room already exists')
-			return
-		}
-
-		socket.join(name)
-		socket.room = name
-		rooms[name] = {
-			host: socket.id,
-			admins: [socket.id],
-			password: password,
-			puppetScale: puppetScale,
-			numCharacters: numCharacters,
-			puppets: [],
-			names: [],
-			assets: {},
-			numPuppets: 0
-		}
-		socket.emit('created room', name)
-		if (logLevel >= 1) console.log(socket.id + " created room:", name)
-	})
+            if (logLevel >= 1) console.log(socket.id + " joined room:", name)
+        } else {
+            isHost = true
+            // Creating Room
+            socket.join(name)
+            socket.room = name
+            rooms[name] = {
+                host: socket.id,
+                admins: [socket.id],
+                password: password,
+                envSetter: socket.id,
+                environment,
+                puppets: {},
+                users: {
+                    [socket.id]: {
+                        nickname,
+                        actors: []
+                    }
+                },
+                assets: {},
+                numPuppets: 0
+            }
+            if (logLevel >= 1) console.log(socket.id + " created room:", name)
+        }
+        socket.emit('joined room', name, socket.id, isHost)
+    })
 	socket.on('leave room', () => {
 		leaveRoom(socket)
 	})
-	socket.on('change nickname', (id, name) => {
+    socket.on('change host', (id) => {
+        let room = rooms[socket.room]
+        if (!socket.room || !room) return
+        if (!(id in room.users)) return
+        if (logLevel >= 1) console.log(socket.room + " is now owned by " + id)
+        room.host = id
+        if (!room.admins.includes(id))
+            room.admins.push(id)
+        server.sockets.in(socket.room).emit('set host', id)
+    })
+	socket.on('change nickname', (nickname) => {
 		let room = rooms[socket.room]
 		if (!socket.room || !room) return
-		if (logLevel >= 2) console.log(socket.id + "changed their nickname to " + name)
-		for (let i = 0; i < room.puppets.length; i++) {
-			if (room.puppets[i].charId == id) {
-				room.names[i] = name
-				break
-			}
-		}
-		socket.broadcast.to(socket.room).emit('change nickname', id, name)
+		if (logLevel >= 2) console.log(socket.id + " changed their nickname to " + nickname)
+        room.users[socket.id].nickname = nickname
+		socket.broadcast.to(socket.room).emit('change nickname', socket.id, nickname)
 	})
-	socket.on('add puppet', (puppet, name) => {
+	socket.on('add actor', (actor) => {
 		let room = rooms[socket.room]
 		if (!socket.room || !room) return
-		if (logLevel >= 1) console.log("Received puppet from " + socket.id + " with nickname " + name)
-		for (let i = 0; i < room.puppets.length; i++) {
-			socket.emit('add puppet', room.puppets[i], room.names[i], room.admins.includes(room.puppets[i].socket), room.host === room.puppets[i].socket)
-		}
-		room.numPuppets++
-		puppet.socket = socket.id
-		puppet.charId = room.numPuppets
-		room.puppets.push(puppet)
-		room.names.push(name)
-		socket.emit('assign puppet', room.numPuppets, room.host === socket.id)
-		socket.broadcast.to(socket.room).emit('add puppet', puppet, name, room.admins.includes(socket.id), room.host === socket.id)
+		if (logLevel >= 1) console.log("Received actor from " + socket.id)
+		actor.socket = socket.id
+        const newId = `server-${room.numPuppets++}`
+		socket.emit('assign actor', actor.id, newId)
+		actor.id = newId
+		room.puppets[actor.id] = actor
+        room.users[socket.id].actors.push(actor.id)
+		socket.broadcast.to(socket.room).emit('add actor', socket.id, actor.id, actor)
 	})
 	socket.on('set puppet', (id, puppet) => {
 		let room = rooms[socket.room]
 		if (!socket.room || !room) return
 		if (logLevel >= 2) console.log(socket.id + " changed puppets")
 		socket.broadcast.to(socket.room).emit('set puppet', id, puppet)
-		for (let i = 0; i < room.puppets.length; i++) {
-			if (room.puppets[i].charId == id) {
-				puppet.socket = room.puppets[i].socket
-				puppet.charId = room.puppets[i].charId
-				room.puppets[i] = puppet
-				break
-			}
-		}
+        puppet.socket = socket.id
+        puppet.puppetId = id
+        room.puppets[id] = puppet
 	})
 	socket.on('set emote', (id, emote) => {
 		let room = rooms[socket.room]
 		if (!socket.room || !room) return
 		if (logLevel >= 3) console.log(socket.id + " changed to emote " + emote)
 		socket.broadcast.to(socket.room).emit('set emote', id, emote)
-		for (let i = 0; i < room.puppets.length; i++) {
-			if (room.puppets[i].charId == id) {
-				room.puppets[i].emote = emote
-				break
-			}
-		}
+        room.puppets[id].emote = emote
 	})
 	socket.on('move left', (id) => {
 		let room = rooms[socket.room]
 		if (!socket.room || !room) return
 		if (logLevel >= 3) console.log(socket.id + " moved left")
 		socket.broadcast.to(socket.room).emit('move left', id)
-		for (let i = 0; i < room.puppets.length; i++) {
-			if (room.puppets[i].charId == id) {
-				if (room.puppets[i].facingLeft)
-					room.puppets[i].target = --room.puppets[i].position
-				else
-					room.puppets[i].facingLeft = true
-				break
-			}
-		}
+		if (room.puppets[id].facingLeft)
+			room.puppets[id].position--
+		else
+			room.puppets[id].facingLeft = true
 	})
 	socket.on('move right', (id) => {
 		let room = rooms[socket.room]
 		if (!socket.room || !room) return
 		if (logLevel >= 3) console.log(socket.id + " moved right")
 		socket.broadcast.to(socket.room).emit('move right', id)
-		for (let i = 0; i < room.puppets.length; i++) {
-			if (room.puppets[i].charId == id) {
-				if (room.puppets[i].facingLeft)
-					room.puppets[i].facingLeft = true
-				else
-					room.puppets[i].target = ++room.puppets[i].position
-				break
-			}
-		}
+		if (room.puppets[id].facingLeft)
+			room.puppets[id].facingLeft = true
+		else
+			room.puppets[id].position++
 	})
 	socket.on('start babbling', (id) => {
 		let room = rooms[socket.room]
@@ -200,16 +191,15 @@ server.sockets.on('connection', function(socket) {
 		if (!socket.room || !room || !room.admins.includes(socket.id)) return
 		if (logLevel >= 3) console.log(socket.id + " sent all puppets off the stage")
 		socket.broadcast.to(socket.room).emit('banish')
-        for (let i = 0; i < room.puppets.length; i++) {
-            let puppet = room.puppets[i]
-            if (puppet.target > room.numCharacters / 2) {
-                puppet.position = puppet.target = room.numCharacters + 1
+        Object.values(room.puppets).forEach(puppet => {
+            if (puppet.position > room.numCharacters / 2) {
+                puppet.position = room.numCharacters + 1
                 puppet.facingLeft = false
             } else {
-                puppet.position = puppet.target = 0
+                puppet.position = 0
                 puppet.facingLeft = true
             }
-        }
+        })
 	})
 	socket.on('kick user', (id) => {
 		let room = rooms[socket.room]
@@ -219,25 +209,14 @@ server.sockets.on('connection', function(socket) {
 		if (room.host === id) return
 		// Can't kick an admin if we aren't the host
 		if (room.admins.includes(id) && room.host !== socket.id) return
-		for (let i = 0; i < room.puppets.length; i++) {
-			if (room.puppets[i].charId == id) {
-				leaveRoom(server.sockets.sockets[room.puppets[i].socket])
-				break
-			}
-		}
+        leaveRoom(server.sockets.sockets[id])
 	})
 	socket.on('promote user', (id) => {
 		let room = rooms[socket.room]
 		if (!socket.room || !room || room.host !== socket.id) return
 		// Can't demote the host
 		if (room.host === id) return
-		let index
-		for (let i = 0; i < room.puppets.length; i++)
-			if (room.puppets[i].charId == id) {
-				index = i
-				break
-			}
-		if (room.admins.includes(room.puppets[index].socket)) {
+		if (room.admins.includes(id)) {
 			// Demote
 			if (logLevel >= 2) console.log(socket.id + " demoted " + id)
 			room.admins.splice(room.admins.indexOf(id), 1)
@@ -245,7 +224,7 @@ server.sockets.on('connection', function(socket) {
 		} else {
 			// Promote
 			if (logLevel >= 2) console.log(socket.id + " promoted " + id)
-			room.admins.push(room.puppets[index].socket)
+			room.admins.push(id)
 			server.sockets.in(socket.room).emit('promote', id)
 		}
 	})
@@ -256,19 +235,13 @@ server.sockets.on('connection', function(socket) {
 		room.password = password
 		socket.broadcast.to(socket.room).emit('change password', password)
 	})
-	socket.on('set scale', (scale) => {
+	socket.on('set environment', (environment) => {
 		let room = rooms[socket.room]
 		if (!socket.room || !room || !room.admins.includes(socket.id)) return
 		if (logLevel >= 3) console.log(socket.id + " changed the puppetScale to " + scale)
-		room.puppetScale = scale
-		socket.broadcast.to(socket.room).emit('set scale', scale)
-	})
-	socket.on('set slots', (slots) => {
-		let room = rooms[socket.room]
-		if (!socket.room || !room || !room.admins.includes(socket.id)) return
-		if (logLevel >= 3) console.log(socket.id + " changed the number of puppet slots to " + slots)
-		room.numCharacters = slots
-		socket.broadcast.to(socket.room).emit('set slots', slots)
+        room.envSetter = socket.id
+		room.environment = environment
+		socket.broadcast.to(socket.room).emit('set environment', socket.id, environment.id, environment)
 	})
 	socket.on('delete asset', (id) => {
 		let room = rooms[socket.room]
@@ -318,22 +291,18 @@ function leaveRoom(socket) {
 		if (logLevel >= 1) console.log("Closing room:", socket.room)
 		server.sockets.in(socket.room).emit('leave room')
 		delete rooms[socket.room]
-		let sockets = server.sockets.in(socket.room).sockets
-		let keys = Object.keys(sockets)
-		for (let i = 0; i < keys.length; i++) {
-			sockets[keys[i]].leave(socket.room)
-			sockets[keys[i]].room = null
-		}
+		Object.values(server.sockets.in(socket.room).sockets).forEach(s => {
+            s.leave(socket.room)
+            s.room = null
+        })
 		fs.remove(path.join(assetsPath, room.host))
 	} else {
 		socket.emit('leave room')
-		for (let i = 0; i < room.puppets.length; i++) {
-			if (room.puppets[i].socket === socket.id) {
-				socket.broadcast.to(socket.room).emit('remove puppet', room.puppets[i].charId)
-				room.puppets.splice(i, 1)
-				break
-			}
-		}
-		socket.room = null
+        socket.broadcast.to(socket.room).emit('remove user', socket.id)
+        room.users[socket.id].actors.forEach(actor => {
+            delete room.puppets[actor]
+        })
+        delete room.users[socket.id]
+        socket.room = null
 	}
 }

@@ -1,6 +1,6 @@
 import React, {Component} from 'react'
 import { connect } from 'react-redux'
-import { Stage } from 'react-pixi-fiber'
+import { createStageClass } from 'react-pixi-fiber'
 import { DropTarget } from 'react-dnd'
 import classNames from 'classnames'
 import Viewport from './Viewport'
@@ -18,6 +18,8 @@ const TYPE_MAP = {
     puppet: p => p.characters,
     asset: p => p.assets
 }
+
+const Stage = createStageClass()
 
 class Editor extends Component {
     constructor(props) {
@@ -53,9 +55,11 @@ class Editor extends Component {
     }
 
     componentDidMount() {
-        const v = this.viewport.current.getViewport()
-        v.on('moved', this.updateViewportBounds)
-        v.on('zoomed', this.updateViewportBounds)
+        if (this.viewport.current) {
+            const v = this.viewport.current.getViewport()
+            v.on('moved', this.updateViewportBounds)
+            v.on('zoomed', this.updateViewportBounds)
+        }
     }
 
     componentDidUpdate(prevProps) {
@@ -116,33 +120,40 @@ class Editor extends Component {
     }
 
     resetPos() {
-        const {rect, changed} = this.props
-        this.viewport.current.getViewport().moveCenter(0, -(rect.height - 21 - (changed ? 6 : 0)) / 2)
-        this.updateViewportBounds()
+        if (this.viewport.current) {
+            const {rect, changed} = this.props
+            this.viewport.current.getViewport().moveCenter(0, -(rect.height - 21 - (changed ? 6 : 0)) / 2)
+            this.updateViewportBounds()
+        }
     }
 
     hover(dragPos) {
-        const v = this.viewport.current.getViewport()
-        const { top, left, transform} = v
-        const rect = this.stage.current._canvas.getBoundingClientRect()
-        const scale = transform.scale.x
-        
-        this.setState({
-            dragPos: {
-                x: left + (dragPos.x - rect.x) / scale,
-                y: top + (dragPos.y - rect.y) / scale
-            }
-        })
+        if (this.viewport.current) {
+            const v = this.viewport.current.getViewport()
+            const { top, left, transform} = v
+            const rect = this.stage.current._canvas.getBoundingClientRect()
+            const scale = transform.scale.x
+            
+            this.setState({
+                dragPos: {
+                    x: left + (dragPos.x - rect.x) / scale,
+                    y: top + (dragPos.y - rect.y) / scale
+                }
+            })
+        }
     }
 
     renderViewport() {
-        const v = this.viewport.current.getViewport()
-        v.app.renderer.render(v.app.stage)
+        if (this.viewport.current) {
+            const v = this.viewport.current.getViewport()
+            v.app.renderer.render(v.app.stage)
+        }
     }
 
     render() {
         // TODO (re-)load assets since babble.js isn't here to do it for us
         const {rect, layers, selected, changed, isOver, canDrop, item, color} = this.props
+        const {assets, assetsPath, environment, dispatch} = this.props
         const {scale, grid, bounds, dragPos} = this.state
 
         let {highlight, 'far-background': background, raised} = getTheme(color)
@@ -177,6 +188,15 @@ class Editor extends Component {
                 }
         }
 
+        const layerProps = {
+            scale,
+            selected,
+            assets,
+            assetsPath,
+            environment,
+            dispatch
+        }
+
         return this.props.connectDropTarget(
             <div className={classNames({
                 panel: true,
@@ -202,7 +222,9 @@ class Editor extends Component {
                     <div className="flex-grow"></div>
                 </div>
                 <div className="changed-warning" style={{ height: rect.height - 25 }}></div>
-                <Stage width={rect.width} height={rect.height - 21} options={{
+                <Stage options={{
+                    width: rect.width,
+                    height: rect.height,
                     transparent: true,
                     antialias: true,
                     autoStart: false
@@ -212,8 +234,8 @@ class Editor extends Component {
                         {gridLines}
                         <Cross x={0} y={0} scale={scale * 2} color={highlight} distance={DISTANCE * scale} />
                         {!!layers && <Layer play={this.state.play} layer={layers} bundles={[]}
-                            x={0} y={0} selectorColor={background} selectedRef={this.selectedRef} scale={scale}
-                            highlight={this.state.highlight ? selected : null} />}
+                            x={0} y={0} selectorColor={background} selectedRef={this.selectedRef} {...layerProps}
+                            highlight={this.state.highlight ? selected.layer : null} />}
                         {isOver && dragPos &&
                             <Layer layer={{
                                 id: item.id,
@@ -224,7 +246,7 @@ class Editor extends Component {
                                 y: 0,
                                 path: []
                             }} bundles={[]} x={dragPos.x} y={dragPos.y}
-                            scale={scale} highlight={[]} />}
+                            {...layerProps} highlight={[]} />}
                     </Viewport>
                 </Stage>
             </div>
@@ -240,8 +262,11 @@ function mapStateToProps(state) {
         changed: id && type && (TYPE_MAP[type](state.project)[id] == null ||
             JSON.stringify(layers) !==
             JSON.stringify(TYPE_MAP[type](state.project)[id].layers)),
-        selected: selected.layer,
+        selected,
         layers,
+        assets: state.project.assets,
+        assetsPath: state.project.assetsPath,
+        environment: state.project.environments[id],
         type,
         id,
         color: state.environment.color

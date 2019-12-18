@@ -134,6 +134,28 @@ ipcRenderer.on('generate thumbnails', async (e, thumbnailsPath, character, type,
     await generateThumbnails(thumbnailsPath, character, type, id)
 })
 
+ipcRenderer.on('get thumbnail URI', async (e, id, character) => {
+    await waitUntilAssetsLoaded()
+    // Put puppet on the stage
+    stage.clearPuppets()
+    character.position = 1
+    character.facingLeft = false
+    character.emote = 0
+    const puppet = stage.addPuppet(character)
+
+    const {width, height} = puppet.container
+    const w = Math.ceil(width)
+    const h = Math.ceil(height)
+    if (w == 0 || h == 0)
+        return null
+
+    stage.resize(null, w, h)
+    remote.getCurrentWindow().setContentSize(w, h)
+    stage.renderer.render(stage.stage)
+
+    ipcRenderer.send('foreground', 'set thumbnail URI', id, `url('data:image/png;base64, ${stage.getThumbnail()}')`)
+})
+
 ipcRenderer.on('import', async (e, duplicate, selected, oldAssetsPath, newAssetsPath, statusId) => {
     await addAssets(selected, statusId, async (asset, id) => {
         // Copy the files over
