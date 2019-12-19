@@ -107,6 +107,7 @@ server.sockets.on('connection', function(socket) {
         let room = rooms[socket.room]
         if (!socket.room || !room) return
         if (!(id in room.users)) return
+        if (room.host !== socket.id) return
         if (logLevel >= 1) console.log(socket.room + " is now owned by " + id)
         room.host = id
         if (!room.admins.includes(id))
