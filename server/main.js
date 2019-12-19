@@ -287,7 +287,7 @@ if (logLevel >= 1) console.log("Started Server!")
 function leaveRoom(socket) {
 	let room = rooms[socket.room]
 	if (!socket.room || !room) return
-	if (logLevel >= 1) console.log(`${room.users[socket.id].nickname} (${socket.id}) left room: ${name}`)
+	if (logLevel >= 1) console.log(`${room.users[socket.id].nickname} (${socket.id}) left room: ${socket.room}`)
 	if (room.host === socket.id) {
 		if (logLevel >= 1) console.log("Closing room:", socket.room)
 		server.sockets.in(socket.room).emit('leave room')
