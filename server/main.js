@@ -74,7 +74,7 @@ server.sockets.on('connection', function(socket) {
             }
             socket.broadcast.to(socket.room).emit('add user', socket.id, [], nickname, false, false)
 
-            if (logLevel >= 1) console.log(socket.id + " joined room:", name)
+            if (logLevel >= 1) console.log(`${nickname} (${socket.id}) joined room: ${name}`)
         } else {
             isHost = true
             // Creating Room
@@ -96,7 +96,7 @@ server.sockets.on('connection', function(socket) {
                 assets: {},
                 numPuppets: 0
             }
-            if (logLevel >= 1) console.log(socket.id + " created room:", name)
+            if (logLevel >= 1) console.log(`${nickname} (${socket.id}) created room: ${name}`)
         }
         socket.emit('joined room', name, socket.id, isHost)
     })
@@ -108,7 +108,7 @@ server.sockets.on('connection', function(socket) {
         if (!socket.room || !room) return
         if (!(id in room.users)) return
         if (room.host !== socket.id) return
-        if (logLevel >= 1) console.log(socket.room + " is now owned by " + id)
+        if (logLevel >= 1) console.log(`${room.users[socket.id].nickname} (${socket.id}) transferred ownership of ${socket.room} to ${room.users[id].nickname} (${id})`)
         room.host = id
         if (!room.admins.includes(id))
             room.admins.push(id)
@@ -117,14 +117,14 @@ server.sockets.on('connection', function(socket) {
 	socket.on('change nickname', (nickname) => {
 		let room = rooms[socket.room]
 		if (!socket.room || !room) return
-		if (logLevel >= 2) console.log(socket.id + " changed their nickname to " + nickname)
+		if (logLevel >= 2) console.log(`${room.users[id].nickname} (${socket.id}) changed their nickname to ${nickname}`)
         room.users[socket.id].nickname = nickname
 		socket.broadcast.to(socket.room).emit('change nickname', socket.id, nickname)
 	})
 	socket.on('add actor', (actor) => {
 		let room = rooms[socket.room]
 		if (!socket.room || !room) return
-		if (logLevel >= 1) console.log("Received actor from " + socket.id)
+		if (logLevel >= 1) console.log(`Received actor from ${room.users[socket.id].nickname} (${socket.id})`)
 		actor.socket = socket.id
         const newId = `server-${room.numPuppets++}`
 		socket.emit('assign actor', actor.id, newId)
@@ -136,7 +136,7 @@ server.sockets.on('connection', function(socket) {
 	socket.on('set puppet', (id, puppet) => {
 		let room = rooms[socket.room]
 		if (!socket.room || !room) return
-		if (logLevel >= 2) console.log(socket.id + " changed puppets")
+		if (logLevel >= 2) console.log(`${room.users[socket.id].nickname} (${socket.id}) changed puppets`)
 		socket.broadcast.to(socket.room).emit('set puppet', id, puppet)
         puppet.socket = socket.id
         puppet.puppetId = id
@@ -145,14 +145,14 @@ server.sockets.on('connection', function(socket) {
 	socket.on('set emote', (id, emote) => {
 		let room = rooms[socket.room]
 		if (!socket.room || !room) return
-		if (logLevel >= 3) console.log(socket.id + " changed to emote " + emote)
+		if (logLevel >= 3) console.log(`${room.users[socket.id].nickname} (${socket.id}) changed to emote ${emote}`)
 		socket.broadcast.to(socket.room).emit('set emote', id, emote)
         room.puppets[id].emote = emote
 	})
 	socket.on('move left', (id) => {
 		let room = rooms[socket.room]
 		if (!socket.room || !room) return
-		if (logLevel >= 3) console.log(socket.id + " moved left")
+		if (logLevel >= 3) console.log(`${room.users[socket.id].nickname} (${socket.id}) moved left`)
 		socket.broadcast.to(socket.room).emit('move left', id)
 		if (room.puppets[id].facingLeft)
 			room.puppets[id].position--
@@ -162,7 +162,7 @@ server.sockets.on('connection', function(socket) {
 	socket.on('move right', (id) => {
 		let room = rooms[socket.room]
 		if (!socket.room || !room) return
-		if (logLevel >= 3) console.log(socket.id + " moved right")
+		if (logLevel >= 3) console.log(`${room.users[socket.id].nickname} (${socket.id}) moved right`)
 		socket.broadcast.to(socket.room).emit('move right', id)
 		if (room.puppets[id].facingLeft)
 			room.puppets[id].facingLeft = true
@@ -172,25 +172,25 @@ server.sockets.on('connection', function(socket) {
 	socket.on('start babbling', (id) => {
 		let room = rooms[socket.room]
 		if (!socket.room || !room) return
-		if (logLevel >= 3) console.log(socket.id + " started babbling")
+		if (logLevel >= 3) console.log(`${room.users[socket.id].nickname} (${socket.id}) started babbling`)
 		socket.broadcast.to(socket.room).emit('start babbling', id)
 	})
 	socket.on('stop babbling', (id) => {
 		let room = rooms[socket.room]
 		if (!socket.room || !room) return
-		if (logLevel >= 3) console.log(socket.id + " stopped babbling")
+		if (logLevel >= 3) console.log(`${room.users[socket.id].nickname} (${socket.id}) stopped babbling`)
 		socket.broadcast.to(socket.room).emit('stop babbling', id)
 	})
 	socket.on('jiggle', (id) => {
 		let room = rooms[socket.room]
 		if (!socket.room || !room) return
-		if (logLevel >= 3) console.log(socket.id + " jiggled")
+		if (logLevel >= 3) console.log(`${room.users[socket.id].nickname} (${socket.id}) jiggled`)
 		socket.broadcast.to(socket.room).emit('jiggle', id)
 	})
 	socket.on('banish', () => {
 		let room = rooms[socket.room]
 		if (!socket.room || !room || !room.admins.includes(socket.id)) return
-		if (logLevel >= 3) console.log(socket.id + " sent all puppets off the stage")
+		if (logLevel >= 3) console.log(`${room.users[socket.id].nickname} (${socket.id}) sent all puppets off the stage`)
 		socket.broadcast.to(socket.room).emit('banish')
         Object.values(room.puppets).forEach(puppet => {
             if (puppet.position > room.numCharacters / 2) {
@@ -205,7 +205,7 @@ server.sockets.on('connection', function(socket) {
 	socket.on('kick user', (id) => {
 		let room = rooms[socket.room]
 		if (!socket.room || !room || !room.admins.includes(socket.id)) return
-		if (logLevel >= 1) console.log(socket.id + " kicked " + id)
+		if (logLevel >= 1) console.log(`${room.users[socket.id].nickname} (${socket.id}) kicked ${room.users[id].nickname} (${id})`)
 		// Can't kick the host
 		if (room.host === id) return
 		// Can't kick an admin if we aren't the host
@@ -219,12 +219,12 @@ server.sockets.on('connection', function(socket) {
 		if (room.host === id) return
 		if (room.admins.includes(id)) {
 			// Demote
-			if (logLevel >= 2) console.log(socket.id + " demoted " + id)
+			if (logLevel >= 2) console.log(`${room.users[socket.id].nickname} (${socket.id}) demoted ${room.users[id].nickname} (${id})`)
 			room.admins.splice(room.admins.indexOf(id), 1)
 			server.sockets.in(socket.room).emit('demote', id)
 		} else {
 			// Promote
-			if (logLevel >= 2) console.log(socket.id + " promoted " + id)
+			if (logLevel >= 2) console.log(`${room.users[socket.id].nickname} (${socket.id}) promoted ${room.users[id].nickname} (${id})`)
 			room.admins.push(id)
 			server.sockets.in(socket.room).emit('promote', id)
 		}
@@ -232,14 +232,14 @@ server.sockets.on('connection', function(socket) {
 	socket.on('change password', (password) => {
 		let room = rooms[socket.room]
 		if (!socket.room || !room || room.host !== socket.id) return
-		if (logLevel >= 2) console.log(socket.id + " changed the room's password to " + password)
+		if (logLevel >= 2) console.log(`${room.users[socket.id].nickname} (${socket.id}) changed the room's password to ${password}`)
 		room.password = password
 		socket.broadcast.to(socket.room).emit('change password', password)
 	})
 	socket.on('set environment', (environment) => {
 		let room = rooms[socket.room]
 		if (!socket.room || !room || !room.admins.includes(socket.id)) return
-		if (logLevel >= 3) console.log(socket.id + " changed the puppetScale to " + scale)
+		if (logLevel >= 3) console.log(`${room.users[socket.id].nickname} (${socket.id}) changed the room's environment`)
         room.envSetter = socket.id
 		room.environment = environment
 		socket.broadcast.to(socket.room).emit('set environment', socket.id, environment.id, environment)
@@ -247,7 +247,7 @@ server.sockets.on('connection', function(socket) {
 	socket.on('delete asset', (id) => {
 		let room = rooms[socket.room]
 		if (!socket.room || !room) return
-		if (logLevel >= 3) console.log(socket.id + " deleted asset " + id)
+		if (logLevel >= 3) console.log(`${room.users[socket.id].nickname} (${socket.id}) deleted asset ${id}`)
 		delete room.assets[id]
 		socket.broadcast.to(socket.room).emit('delete asset', id)
 	})
@@ -262,9 +262,9 @@ server.sockets.on('connection', function(socket) {
 	socket.on('add asset', (id, asset) => {
 		let room = rooms[socket.room]
 		if (!socket.room || !room) return
-		if (logLevel >= 3) console.log("Received new asset " + JSON.stringify(asset) + " from " + socket.id)
+		if (logLevel >= 3) console.log(`${room.users[socket.id].nickname} (${socket.id}) added asset ${id}`)
 		if (!room.assets[id] || asset.version > room.assets[id].version) {
-			if (logLevel >= 3) console.log("Downloading new asset from " + socket.id)
+			if (logLevel >= 3) console.log(`Downloading new asset from ${room.users[socket.id].nickname} (${socket.id})`)
 			var stream = ss.createStream()
 			fs.ensureDirSync(path.join(assetsPath, room.host, id.split(':')[0]))
 			ss(socket).emit('request asset', stream, id)
@@ -287,7 +287,7 @@ if (logLevel >= 1) console.log("Started Server!")
 function leaveRoom(socket) {
 	let room = rooms[socket.room]
 	if (!socket.room || !room) return
-	if (logLevel >= 1) console.log(socket.id + " left room:", socket.room)
+	if (logLevel >= 1) console.log(`${room.users[socket.id].nickname} (${socket.id}) left room: ${name}`)
 	if (room.host === socket.id) {
 		if (logLevel >= 1) console.log("Closing room:", socket.room)
 		server.sockets.in(socket.room).emit('leave room')
