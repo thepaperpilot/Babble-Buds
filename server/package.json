@@ -4,7 +4,8 @@
   "description": "An open source version of puppet pals",
   "main": "main.js",
   "scripts": {
-    "start": "node main.js"
+    "start": "node main.js",
+    "forever": "while :; do npm start; rm -r assets/; done"
   },
   "repository": "https://github.com/thepaperpilot/babble-buds",
   "keywords": [
