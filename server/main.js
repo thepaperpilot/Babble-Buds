@@ -119,7 +119,7 @@ server.sockets.on('connection', function(socket) {
 		if (!socket.room || !room) return
 		if (logLevel >= 2) console.log(`${room.users[socket.id].nickname} (${socket.id}) changed their nickname to ${nickname}`)
         room.users[socket.id].nickname = nickname
-		socket.broadcast.to(socket.room).emit('change nickname', socket.id, nickname)
+		server.sockets.in(socket.room).emit('change nickname', socket.id, nickname)
 	})
 	socket.on('add actor', (actor) => {
 		let room = rooms[socket.room]
