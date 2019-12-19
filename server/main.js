@@ -10,8 +10,8 @@ const ss = require('socket.io-stream')
 // Settings
 var port = process.env.babblePort || 8080 // Will read port from environment variable "babblePort" or default to 8080
 var assetsPath = path.join(__dirname, 'assets')
-var logLevel = 3 // 0 = No messages, 1 = Connect/Disconnect messages, 2 = Also include puppet changes, 3 = All known commands
-var clientVersion = "~0.8.0"	// Clients will need to match this version/range
+var logLevel = 2 // 0 = No messages, 1 = Connect/Disconnect messages, 2 = Also include puppet changes, 3 = All known commands
+var clientVersion = "~0.9.99"	// Clients will need to match this version/range
 
 // Variables
 var server
