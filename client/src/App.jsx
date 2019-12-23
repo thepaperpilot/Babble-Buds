@@ -7,6 +7,7 @@ import Project from './components/project/Project'
 import { info } from './redux/status'
 import { close, load } from './redux/project/project'
 import { save } from './redux/project/saver'
+import { setAddress } from './redux/settings'
 
 const electron = window.require('electron')
 const dialog = electron.remote.dialog
@@ -21,6 +22,9 @@ class App extends Component {
         this.setProject = this.setProject.bind(this)
         this.closeProject = this.closeProject.bind(this)
         this.save = this.save.bind(this)
+
+        if (settingsManager.settings.address)
+            props.dispatch(setAddress(settingsManager.settings.address))
 
         if (settingsManager.settings.openProject)
             props.dispatch(load(settingsManager.settings.openProject))

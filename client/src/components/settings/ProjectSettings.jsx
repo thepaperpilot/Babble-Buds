@@ -5,12 +5,10 @@ import Shortcuts from './Shortcuts'
 import Header from '../inspector/Header'
 import Foldable from '../ui/Foldable'
 import Checkbox from '../inspector/fields/Checkbox'
-import Number from '../inspector/fields/Number'
 import Text from '../inspector/fields/Text'
 import { setAlwaysOnTop } from '../../redux/project/settings/settings'
 import { setNickname, randomizeNickname } from
     '../../redux/project/settings/nickname'
-import { setIP, setPort } from '../../redux/project/settings/networking'
 
 class ProjectSettings extends Component {
     constructor(props) {
@@ -19,8 +17,6 @@ class ProjectSettings extends Component {
         this.changeAlwaysOnTop = this.changeAlwaysOnTop.bind(this)
         this.changeNickname = this.changeNickname.bind(this)
         this.randomizeNickname = this.randomizeNickname.bind(this)
-        this.setIP = this.setIP.bind(this)
-        this.setPort = this.setPort.bind(this)
     }
 
     changeAlwaysOnTop(alwaysOnTop) {
@@ -33,14 +29,6 @@ class ProjectSettings extends Component {
 
     randomizeNickname() {
         this.props.dispatch(randomizeNickname())
-    }
-
-    setIP(ip) {
-        this.props.dispatch(setIP(ip))
-    }
-
-    setPort(port) {
-        this.props.dispatch(setPort(port))
     }
 
     render() {
@@ -62,12 +50,6 @@ class ProjectSettings extends Component {
                                 </Foldable>
                             </div>
                             <div className="action">
-                                <Foldable title="Networking Settings">
-                                    <Text title="Server IP" value={this.props.ip} onChange={this.setIP} />
-                                    <Number title="Server Port" value={this.props.port} onChange={this.setPort} />
-                                </Foldable>
-                            </div>
-                            <div className="action">
                                 <Foldable title="Global Shortcuts">
                                     <div className="info">
                                         These are shortcuts that will activate even when the window is not in focus, and override any function they already had (except for OS level shortcuts). For that reason, its recommended to use either macro keys or use 1+ modifier keys (ctrl, alt, etc.)
@@ -86,9 +68,7 @@ class ProjectSettings extends Component {
 function mapStateToProps(state) {
     return {
         alwaysOnTop: state.project.settings.alwaysOnTop,
-        nickname: state.project.settings.nickname,
-        ip: state.project.settings.networking.ip,
-        port: state.project.settings.networking.port
+        nickname: state.project.settings.nickname
     }
 }
 

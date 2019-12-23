@@ -14,7 +14,8 @@ module.exports = exports = {
         recentProjects: [],
         layout: defaultLayout,
         uuid: uuid.v4(),
-        numAssets: 0
+        numAssets: 0,
+        address: 'babblebuds.xyz'
     },
     save: function() {
         fs.ensureDirSync(app.getPath('userData'))
@@ -50,5 +51,8 @@ module.exports = exports = {
     },
     setNumAssets: function(numAssets) {
         this.settings.numAssets = numAssets
+    },
+    setAddress: function(address) {
+        this.settings.address = address
     }
 }

@@ -27,8 +27,7 @@ let socket = null
 let downloadingAssetsStatusId = 0
 
 // Action Types
-const CONNECT = 'networking/CONNECT'
-const DISCONNECT = 'networking/DISCONNECT'
+const CHANGE_CONNECTION_STATUS = 'networking/CHANGE_CONNECTION_STATUS'
 const CLEAR_ROOM = 'networking/CLEAR_ROOM'
 const JOIN_ROOM = 'networking/JOIN_ROOM'
 const CLEAR_USERS = 'networking/CLEAR_USERS'
@@ -37,12 +36,17 @@ const UPDATE_USER = 'networking/UPDATE_USER'
 const REMOVE_USER = 'networking/REMOVE_USER'
 const SET_SELF = 'networking/SET_SELF'
 
+// Connection Statuses
+export const DISCONNECTED = 0
+export const CONNECTING = 1
+export const CONNECTED = 2
+
 // Action Creators
 function onDisconnect(dispatch) {
     socket.close()
     socket = null
     dispatch(info('Disconnected from server'))
-    dispatch({ type: DISCONNECT })
+    dispatch({ type: CHANGE_CONNECTION_STATUS, status: DISCONNECTED })
     dispatch({ type: CLEAR_ROOM })
     dispatch(setSinglePlayer())
 }
@@ -50,6 +54,7 @@ function onDisconnect(dispatch) {
 function onJoinRoom(dispatch, getState, room, self, isHost) {
     dispatch({ type: SET_SELF, self })
     dispatch({ type: JOIN_ROOM, room })
+    dispatch({ type: CHANGE_CONNECTION_STATUS, status: CONNECTED })
 
     const state = getState()
     const assets = state.project.assets
@@ -141,6 +146,7 @@ export function connectToRoom() {
             return
         }
         dispatch(info('Connecting to server...'))
+        dispatch({ type: CHANGE_CONNECTION_STATUS, status: CONNECTING })
 
         const {ip, port} = getState().project.settings.networking
         
@@ -150,7 +156,6 @@ export function connectToRoom() {
         socket.on('connect', () => {
             if (socket == null) return
             dispatch(info('Connected to server!'))
-            dispatch({ type: CONNECT })
             // Join room
             const state = getState()
             const {roomName, roomPassword} = state.project.settings.networking
@@ -332,9 +337,8 @@ export function emit(...message) {
 }
 
 // Reducers
-const isConnectedReducer = util.createReducer(false, {
-    [CONNECT]: () => true,
-    [DISCONNECT]: () => false
+const connectionStatusReducer = util.createReducer(DISCONNECTED, {
+    [CHANGE_CONNECTION_STATUS]: (state, action) => action.status
 })
 
 const connectedRoomReducer = util.createReducer(null, {
@@ -362,7 +366,7 @@ const selfReducer = util.createReducer(null, {
 })
 
 export default combineReducers({
-    isConnected: isConnectedReducer,
+    connectionStatus: connectionStatusReducer,
     connectedRoom: connectedRoomReducer,
     connectedUsers: connectedUsersReducer,
     self: selfReducer

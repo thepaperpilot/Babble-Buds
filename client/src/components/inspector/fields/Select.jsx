@@ -15,8 +15,8 @@ class Select extends Component {
 
     componentWillReceiveProps(props) {        
         const options = (props.options || []).map(option => ({
-            label: option,
-            value: option
+            label: option.label == null ? option : option.label,
+            value: option.value == null ? option : option.value
         }))
 
         const state = {
@@ -54,7 +54,7 @@ class Select extends Component {
 
     render() {
         const inputProps = {
-            value: `${this.props.value || ''}`,
+            value: `${this.props.value == null ? '' : this.props.value}`,
             onChange: (e, { newValue }) => this.props.onChange(newValue),
             disabled: this.props.disabled
         }
