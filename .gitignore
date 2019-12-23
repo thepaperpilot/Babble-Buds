@@ -1,5 +1,6 @@
 client/node_modules
 client/build
 server/node_modules
-server/assets
+server/build/bundle.js
+server/build/temp-assets
 out

@@ -6,7 +6,7 @@ import { setActors as setControllerActors } from './controller'
 import { setEnvironment, setDefaultEnvironment } from './environment'
 import {
     addActor, newActor, removeActor,
-    moveLeft, moveRight,
+    moveRight, movePuppet,
     changePuppet, setEmote,
     setBabbling, jiggle,
     banishActor, setActors
@@ -262,8 +262,7 @@ export function connectToRoom() {
             ipcRenderer.send('background', 'get thumbnail URI', id, puppet)
         })
         socket.on('set emote', (id, emote) => dispatch(setEmote(id, emote)))
-        socket.on('move left', (id) => dispatch(moveLeft(id)))
-        socket.on('move right', (id) => dispatch(moveRight(id)))
+        socket.on('move puppet', (id, position, facingLeft) => dispatch(movePuppet(id, position, facingLeft)))
         socket.on('start babbling', (id) => dispatch(setBabbling(id, true)))
         socket.on('stop babbling', (id) => dispatch(setBabbling(id, false)))
         socket.on('jiggle', (id) => dispatch(jiggle(id)))

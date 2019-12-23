@@ -4,8 +4,17 @@
   "description": "An open source version of puppet pals",
   "main": "main.js",
   "scripts": {
-    "start": "node main.js",
-    "forever": "while :; do npm start; rm -r assets/; done"
+    "start": "node server.js",
+    "build": "cross-env NODE_ENV=production webpack",
+    "start:dev": "cross-env NODE_ENV=development webpack",
+    "run:dev": "cross-env NODE_ENV=development nodemon server.js"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "src/*",
+      "node_modules/*"
+    ],
+    "delay": "0"
   },
   "repository": "https://github.com/thepaperpilot/babble-buds",
   "keywords": [
@@ -15,8 +24,30 @@
   "author": "thepaperpilot",
   "license": "CC0-1.0",
   "dependencies": {
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
     "fs-extra": "~3.0.1",
-    "socket.io": "~1.7.3",
+    "socket.io": "~2.2.0",
+    "socket.io-client": "^2.3.0",
     "socket.io-stream": "~0.9.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.7.7",
+    "@babel/preset-env": "^7.7.7",
+    "@babel/preset-react": "^7.7.4",
+    "babble.js": "^2.0.1",
+    "babel-loader": "^8.0.6",
+    "classnames": "^2.2.6",
+    "cross-env": "^6.0.3",
+    "js-search": "^1.4.3",
+    "react": "^16.12.0",
+    "react-custom-scroll": "^4.1.5",
+    "react-dom": "^16.12.0",
+    "react-resize-observer": "^1.1.1",
+    "react-router": "^5.1.2",
+    "react-router-dom": "^5.1.2",
+    "webpack": "^4.41.4",
+    "webpack-cli": "^3.3.10",
+    "webpack-shell-plugin": "^0.5.0"
   }
 }

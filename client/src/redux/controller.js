@@ -34,8 +34,7 @@ export function setEmote(emote) {
 export function moveLeft() {
     return (dispatch, getState) => {
         getState().controller.actors.forEach(id => {
-            dispatch(moveActorLeft(id))
-            dispatch(emit('move left', id))
+            dispatch(moveActorLeft(id, true))
         })
     }
 }
@@ -43,8 +42,7 @@ export function moveLeft() {
 export function moveRight() {
     return (dispatch, getState) => {
         getState().controller.actors.forEach(id => {
-            dispatch(moveActorRight(id))
-            dispatch(emit('move right', id))
+            dispatch(moveActorRight(id, true))
         })
     }
 }

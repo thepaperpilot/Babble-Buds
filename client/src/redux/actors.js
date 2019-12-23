@@ -1,6 +1,7 @@
 import util from './util.js'
 import { Puppet } from 'babble.js'
 import { warn } from './status'
+import { emit } from './networking'
 
 // Action Types
 const CLEAR = 'actors/CLEAR'
@@ -102,7 +103,7 @@ export function setEmote(id, emote) {
     }
 }
 
-export function moveLeft(id) {
+export function moveLeft(id, emitToServer = false) {
     return (dispatch, getState) => {
         const state = getState()
         const act = getActor(state, id)
@@ -115,10 +116,12 @@ export function moveLeft(id) {
         if (act.facingLeft || act.position == state.environment.numCharacters + 1)
             actor.position = act.position - 1
         dispatch({ type: CHANGE, id, actor })
+        if (emitToServer)
+            dispatch(emit('move puppet', id, actor.position == null ? act.position : actor.position, true))
     }
 }
 
-export function moveRight(id) {
+export function moveRight(id, emitToServer = false) {
     return (dispatch, getState) => {
         const state = getState()
         const act = getActor(state, id)
@@ -131,7 +134,13 @@ export function moveRight(id) {
         if (!act.facingLeft || act.position === 0)
             actor.position = act.position + 1
         dispatch({ type: CHANGE, id, actor })
+        if (emitToServer)
+            dispatch(emit('move puppet', id, actor.position == null ? act.position : actor.position, false))
     }
+}
+
+export function movePuppet(id, position, facingLeft) {
+    return { type: CHANGE, id, actor: { position, facingLeft } }
 }
 
 export function jiggle(id) {

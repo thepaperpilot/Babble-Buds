@@ -1,0 +1,633 @@
+{
+    "deadbonesStyle": false,
+    "name": "Gravy",
+    "layers": {
+        "children": [
+            {
+                "name": "body",
+                "children": [
+                    {
+                        "x": 1.5,
+                        "y": -54,
+                        "rotation": 0,
+                        "scaleX": 1,
+                        "scaleY": 1,
+                        "id": "165e1af4-93ac-4566-a5eb-bddb4fbcd16c:11",
+                        "leaf": "true",
+                        "inherit": {},
+                        "path": [
+                            0,
+                            0
+                        ],
+                        "name": "body"
+                    }
+                ],
+                "inherit": {},
+                "path": [
+                    0
+                ]
+            },
+            {
+                "name": "head",
+                "children": [
+                    {
+                        "x": 1,
+                        "y": -210.5,
+                        "rotation": 0,
+                        "scaleX": 1,
+                        "scaleY": 1,
+                        "id": "165e1af4-93ac-4566-a5eb-bddb4fbcd16c:12",
+                        "leaf": "true",
+                        "inherit": {
+                            "head": true
+                        },
+                        "path": [
+                            1,
+                            0
+                        ],
+                        "name": "head"
+                    }
+                ],
+                "head": true,
+                "inherit": {},
+                "path": [
+                    1
+                ]
+            },
+            {
+                "name": "emotes",
+                "head": true,
+                "children": [
+                    {
+                        "name": "default",
+                        "emote": 0,
+                        "children": [
+                            {
+                                "x": -15.5,
+                                "y": -125,
+                                "rotation": 0,
+                                "scaleX": 1,
+                                "scaleY": 1,
+                                "id": "165e1af4-93ac-4566-a5eb-bddb4fbcd16c:8",
+                                "emoteLayer": "mouth",
+                                "leaf": "true",
+                                "inherit": {
+                                    "head": true,
+                                    "emote": 0
+                                },
+                                "path": [
+                                    2,
+                                    0,
+                                    0
+                                ],
+                                "name": "mouth_normal"
+                            },
+                            {
+                                "x": -7,
+                                "y": -187.5,
+                                "rotation": 0,
+                                "scaleX": 1,
+                                "scaleY": 1,
+                                "id": "165e1af4-93ac-4566-a5eb-bddb4fbcd16c:5",
+                                "emoteLayer": "eyes",
+                                "babble": true,
+                                "leaf": "true",
+                                "inherit": {
+                                    "head": true,
+                                    "emote": 0
+                                },
+                                "path": [
+                                    2,
+                                    0,
+                                    1
+                                ],
+                                "name": "eyes_normal"
+                            },
+                            {
+                                "x": -6.5,
+                                "y": -210,
+                                "rotation": 0,
+                                "scaleX": 1,
+                                "scaleY": 1,
+                                "id": "165e1af4-93ac-4566-a5eb-bddb4fbcd16c:1",
+                                "emoteLayer": "eyes",
+                                "babble": true,
+                                "leaf": "true",
+                                "inherit": {
+                                    "head": true,
+                                    "emote": 0
+                                },
+                                "path": [
+                                    2,
+                                    0,
+                                    2
+                                ],
+                                "name": "brow_normal"
+                            }
+                        ],
+                        "inherit": {
+                            "head": true
+                        },
+                        "path": [
+                            2,
+                            0
+                        ]
+                    },
+                    {
+                        "name": "happy",
+                        "emote": 1,
+                        "children": [
+                            {
+                                "x": -16,
+                                "y": -125.5,
+                                "rotation": 0,
+                                "scaleX": 1,
+                                "scaleY": 1,
+                                "id": "165e1af4-93ac-4566-a5eb-bddb4fbcd16c:8",
+                                "emoteLayer": "mouth",
+                                "leaf": "true",
+                                "inherit": {
+                                    "head": true,
+                                    "emote": 1
+                                },
+                                "path": [
+                                    2,
+                                    1,
+                                    0
+                                ],
+                                "name": "mouth_normal"
+                            },
+                            {
+                                "x": -7,
+                                "y": -187.5,
+                                "rotation": 0,
+                                "scaleX": 1,
+                                "scaleY": 1,
+                                "id": "165e1af4-93ac-4566-a5eb-bddb4fbcd16c:5",
+                                "emoteLayer": "eyes",
+                                "babble": true,
+                                "leaf": "true",
+                                "inherit": {
+                                    "head": true,
+                                    "emote": 1
+                                },
+                                "path": [
+                                    2,
+                                    1,
+                                    1
+                                ],
+                                "name": "eyes_normal"
+                            },
+                            {
+                                "x": -10.5,
+                                "y": -225,
+                                "rotation": 0,
+                                "scaleX": 1,
+                                "scaleY": 1,
+                                "id": "165e1af4-93ac-4566-a5eb-bddb4fbcd16c:0",
+                                "emoteLayer": "eyes",
+                                "babble": true,
+                                "leaf": "true",
+                                "inherit": {
+                                    "head": true,
+                                    "emote": 1
+                                },
+                                "path": [
+                                    2,
+                                    1,
+                                    2
+                                ],
+                                "name": "brow_excited"
+                            }
+                        ],
+                        "inherit": {
+                            "head": true
+                        },
+                        "path": [
+                            2,
+                            1
+                        ]
+                    },
+                    {
+                        "name": "angry",
+                        "emote": 4,
+                        "children": [
+                            {
+                                "x": -12,
+                                "y": -128.5,
+                                "rotation": 0,
+                                "scaleX": 1,
+                                "scaleY": 1,
+                                "id": "165e1af4-93ac-4566-a5eb-bddb4fbcd16c:6",
+                                "emoteLayer": "mouth",
+                                "leaf": "true",
+                                "inherit": {
+                                    "head": true,
+                                    "emote": 4
+                                },
+                                "path": [
+                                    2,
+                                    2,
+                                    0
+                                ],
+                                "name": "mouth_teeth"
+                            },
+                            {
+                                "x": -7,
+                                "y": -187.5,
+                                "rotation": 0,
+                                "scaleX": 1,
+                                "scaleY": 1,
+                                "id": "165e1af4-93ac-4566-a5eb-bddb4fbcd16c:5",
+                                "emoteLayer": "eyes",
+                                "babble": true,
+                                "leaf": "true",
+                                "inherit": {
+                                    "head": true,
+                                    "emote": 4
+                                },
+                                "path": [
+                                    2,
+                                    2,
+                                    1
+                                ],
+                                "name": "eyes_normal"
+                            },
+                            {
+                                "x": -7,
+                                "y": -207,
+                                "rotation": 0,
+                                "scaleX": 1,
+                                "scaleY": 1,
+                                "id": "165e1af4-93ac-4566-a5eb-bddb4fbcd16c:4",
+                                "emoteLayer": "eyes",
+                                "babble": true,
+                                "leaf": "true",
+                                "inherit": {
+                                    "head": true,
+                                    "emote": 4
+                                },
+                                "path": [
+                                    2,
+                                    2,
+                                    2
+                                ],
+                                "name": "brow_angry"
+                            }
+                        ],
+                        "inherit": {
+                            "head": true
+                        },
+                        "path": [
+                            2,
+                            2
+                        ]
+                    },
+                    {
+                        "name": "sad",
+                        "emote": 5,
+                        "children": [
+                            {
+                                "x": -14.5,
+                                "y": -125.5,
+                                "rotation": 0,
+                                "scaleX": 1,
+                                "scaleY": 1,
+                                "id": "165e1af4-93ac-4566-a5eb-bddb4fbcd16c:10",
+                                "emoteLayer": "mouth",
+                                "babble": true,
+                                "leaf": "true",
+                                "inherit": {
+                                    "head": true,
+                                    "emote": 5
+                                },
+                                "path": [
+                                    2,
+                                    3,
+                                    0
+                                ],
+                                "name": "mouth_sad"
+                            },
+                            {
+                                "x": -7,
+                                "y": -187.75,
+                                "rotation": 0,
+                                "scaleX": 1,
+                                "scaleY": 1,
+                                "id": "165e1af4-93ac-4566-a5eb-bddb4fbcd16c:5",
+                                "emoteLayer": "eyes",
+                                "babble": true,
+                                "leaf": "true",
+                                "inherit": {
+                                    "head": true,
+                                    "emote": 5
+                                },
+                                "path": [
+                                    2,
+                                    3,
+                                    1
+                                ],
+                                "name": "eyes_normal"
+                            },
+                            {
+                                "x": -7.5,
+                                "y": -211.5,
+                                "rotation": 0,
+                                "scaleX": 1,
+                                "scaleY": 1,
+                                "id": "165e1af4-93ac-4566-a5eb-bddb4fbcd16c:3",
+                                "emoteLayer": "eyes",
+                                "babble": true,
+                                "leaf": "true",
+                                "inherit": {
+                                    "head": true,
+                                    "emote": 5
+                                },
+                                "path": [
+                                    2,
+                                    3,
+                                    2
+                                ],
+                                "name": "brow_sad"
+                            }
+                        ],
+                        "inherit": {
+                            "head": true
+                        },
+                        "path": [
+                            2,
+                            3
+                        ]
+                    },
+                    {
+                        "name": "gasp",
+                        "emote": 7,
+                        "children": [
+                            {
+                                "x": -5.5,
+                                "y": -123.5,
+                                "rotation": 0,
+                                "scaleX": 1,
+                                "scaleY": 1,
+                                "id": "165e1af4-93ac-4566-a5eb-bddb4fbcd16c:9",
+                                "emoteLayer": "mouth",
+                                "babble": true,
+                                "leaf": "true",
+                                "inherit": {
+                                    "head": true,
+                                    "emote": 7
+                                },
+                                "path": [
+                                    2,
+                                    4,
+                                    0
+                                ],
+                                "name": "mouth_open"
+                            },
+                            {
+                                "x": -10.5,
+                                "y": -225,
+                                "rotation": 0,
+                                "scaleX": 1,
+                                "scaleY": 1,
+                                "id": "165e1af4-93ac-4566-a5eb-bddb4fbcd16c:0",
+                                "emoteLayer": "eyes",
+                                "leaf": "true",
+                                "inherit": {
+                                    "head": true,
+                                    "emote": 7
+                                },
+                                "path": [
+                                    2,
+                                    4,
+                                    1
+                                ],
+                                "name": "brow_excited"
+                            },
+                            {
+                                "x": -7,
+                                "y": -187.5,
+                                "rotation": 0,
+                                "scaleX": 1,
+                                "scaleY": 1,
+                                "id": "165e1af4-93ac-4566-a5eb-bddb4fbcd16c:5",
+                                "emoteLayer": "eyes",
+                                "leaf": "true",
+                                "inherit": {
+                                    "head": true,
+                                    "emote": 7
+                                },
+                                "path": [
+                                    2,
+                                    4,
+                                    2
+                                ],
+                                "name": "eyes_normal"
+                            }
+                        ],
+                        "inherit": {
+                            "head": true
+                        },
+                        "path": [
+                            2,
+                            4
+                        ]
+                    },
+                    {
+                        "name": "confused",
+                        "emote": 10,
+                        "children": [
+                            {
+                                "x": -6,
+                                "y": -126.5,
+                                "rotation": 0,
+                                "scaleX": 1,
+                                "scaleY": 1,
+                                "id": "165e1af4-93ac-4566-a5eb-bddb4fbcd16c:6",
+                                "emoteLayer": "mouth",
+                                "babble": true,
+                                "leaf": "true",
+                                "inherit": {
+                                    "head": true,
+                                    "emote": 10
+                                },
+                                "path": [
+                                    2,
+                                    5,
+                                    0
+                                ],
+                                "name": "mouth_teeth"
+                            },
+                            {
+                                "x": -7,
+                                "y": -187.5,
+                                "rotation": 0,
+                                "scaleX": 1,
+                                "scaleY": 1,
+                                "id": "165e1af4-93ac-4566-a5eb-bddb4fbcd16c:5",
+                                "emoteLayer": "eyes",
+                                "leaf": "true",
+                                "inherit": {
+                                    "head": true,
+                                    "emote": 10
+                                },
+                                "path": [
+                                    2,
+                                    5,
+                                    1
+                                ],
+                                "name": "eyes_normal"
+                            },
+                            {
+                                "x": -9,
+                                "y": -212.5,
+                                "rotation": 0,
+                                "scaleX": 1,
+                                "scaleY": 1,
+                                "id": "165e1af4-93ac-4566-a5eb-bddb4fbcd16c:2",
+                                "emoteLayer": "eyes",
+                                "leaf": "true",
+                                "inherit": {
+                                    "head": true,
+                                    "emote": 10
+                                },
+                                "path": [
+                                    2,
+                                    5,
+                                    2
+                                ],
+                                "name": "brow_confused"
+                            }
+                        ],
+                        "inherit": {
+                            "head": true
+                        },
+                        "path": [
+                            2,
+                            5
+                        ]
+                    },
+                    {
+                        "name": "ooo",
+                        "emote": 11,
+                        "children": [
+                            {
+                                "x": -2,
+                                "y": -122.5,
+                                "rotation": 0,
+                                "scaleX": 1,
+                                "scaleY": 1,
+                                "id": "165e1af4-93ac-4566-a5eb-bddb4fbcd16c:7",
+                                "emoteLayer": "mouth",
+                                "babble": true,
+                                "leaf": "true",
+                                "inherit": {
+                                    "head": true,
+                                    "emote": 11
+                                },
+                                "path": [
+                                    2,
+                                    6,
+                                    0
+                                ],
+                                "name": "mouth_ooo"
+                            },
+                            {
+                                "x": -9.5,
+                                "y": -220,
+                                "rotation": 0,
+                                "scaleX": 1,
+                                "scaleY": 1,
+                                "id": "165e1af4-93ac-4566-a5eb-bddb4fbcd16c:0",
+                                "emoteLayer": "eyes",
+                                "leaf": "true",
+                                "inherit": {
+                                    "head": true,
+                                    "emote": 11
+                                },
+                                "path": [
+                                    2,
+                                    6,
+                                    1
+                                ],
+                                "name": "brow_excited"
+                            },
+                            {
+                                "x": -7,
+                                "y": -187.5,
+                                "rotation": 0,
+                                "scaleX": 1,
+                                "scaleY": 1,
+                                "id": "165e1af4-93ac-4566-a5eb-bddb4fbcd16c:5",
+                                "emoteLayer": "eyes",
+                                "leaf": "true",
+                                "inherit": {
+                                    "head": true,
+                                    "emote": 11
+                                },
+                                "path": [
+                                    2,
+                                    6,
+                                    2
+                                ],
+                                "name": "eyes_normal"
+                            }
+                        ],
+                        "inherit": {
+                            "head": true
+                        },
+                        "path": [
+                            2,
+                            6
+                        ]
+                    }
+                ],
+                "inherit": {},
+                "path": [
+                    2
+                ]
+            },
+            {
+                "name": "hat",
+                "children": [],
+                "head": true,
+                "inherit": {},
+                "path": [
+                    3
+                ]
+            },
+            {
+                "name": "props",
+                "children": [
+                    {
+                        "x": -3,
+                        "y": -158,
+                        "rotation": 0,
+                        "scaleX": 1,
+                        "scaleY": 1,
+                        "id": "165e1af4-93ac-4566-a5eb-bddb4fbcd16c:13",
+                        "leaf": "true",
+                        "inherit": {},
+                        "path": [
+                            4,
+                            0
+                        ],
+                        "name": "glasses_normal"
+                    }
+                ],
+                "inherit": {},
+                "path": [
+                    4
+                ]
+            }
+        ]
+    },
+    "id": 1,
+    "position": 1,
+    "facingLeft": false,
+    "emote": 0,
+    "creator": "cbedd8ff-e303-4516-b82a-c8645d7bbd86",
+    "creatorNick": "Alfie",
+    "oc": "cbedd8ff-e303-4516-b82a-c8645d7bbd86",
+    "ocNick": "Alfie"
+}

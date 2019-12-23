@@ -1,0 +1,6 @@
+[
+    { "command": "delay", "delay": 500, "wait": true },
+    { "command": "add", "id": 1, "name": "gravy", "position": 0 },
+    { "command": "move", "target": 1, "position": 2, "wait": true },
+    { "command": "chat", "target": 1 }
+]
