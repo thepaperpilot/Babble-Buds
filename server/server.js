@@ -302,6 +302,7 @@ io.on('connection', function(socket) {
     })
     socket.on('disconnect', () => {
         log(socket.id + " disconnected.")
+        delete connections[socket.id]
         emitAdmin('remove connection', socket.id)
     })
 
@@ -358,6 +359,7 @@ function leaveRoom(socket) {
         emitAdmin('update room', socket.room, { puppets: room.puppets, users: room.users })
         socket.room = null
     }
+    connections[socket.id] = ''
     emitAdmin('update connection', socket.id, '')
 }
 
