@@ -39,6 +39,7 @@ const SET_SELF = 'networking/SET_SELF'
 
 // Action Creators
 function onDisconnect(dispatch) {
+    socket.close()
     socket = null
     dispatch(info('Disconnected from server'))
     dispatch({ type: DISCONNECT })
@@ -136,7 +137,7 @@ export function connectToRoom() {
         //  then we're currently still trying to connect
         // So we'll assume that means the user actually wants to stop trying to connect
         if (socket != null) {
-            socket.disconnect()
+            onDisconnect(dispatch)
             return
         }
         dispatch(info('Connecting to server...'))
