@@ -5,6 +5,7 @@
   "main": "main.js",
   "scripts": {
     "start": "node server.js",
+    "cert": "openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ./certs/server.key -out certs/server.crt",
     "build": "cross-env NODE_ENV=production webpack",
     "start:dev": "cross-env NODE_ENV=development webpack",
     "run:dev": "cross-env NODE_ENV=development nodemon server.js"

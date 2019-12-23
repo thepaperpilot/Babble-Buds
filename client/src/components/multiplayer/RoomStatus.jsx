@@ -19,6 +19,7 @@ class RoomStatus extends Component {
     constructor(props) {
         super(props)
 
+        this.setAddress = this.setAddress.bind(this)
         this.changeRoomName = this.changeRoomName.bind(this)
         this.changeRoomPassword = this.changeRoomPassword.bind(this)
         this.changeAddAssetPermission = this.changeAddAssetPermission.bind(this)

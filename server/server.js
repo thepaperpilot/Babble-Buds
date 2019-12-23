@@ -1,4 +1,5 @@
 // Load requirements
+const https = require('https')
 const http = require('http')
 const path = require('path')
 
@@ -10,14 +11,19 @@ const express = require('express')
 require('dotenv').config()
 
 // Settings
-const port = process.env.PORT || 8080
+const port = process.env.NODE_ENV === 'production' ?
+    process.env.SECURE_PORT || 8443 :
+    process.env.PORT || 8080
 const assetsPath = path.join(__dirname, 'build', 'temp-assets')
 const clientVersion = "~0.9.99"
 const logLevels = ['log', 'warn', 'error'] // Possible values: 'info', 'log', 'warn', 'error'
 
 // Set up server
 const app = express()
-const server = http.createServer(app)
+const credentials = {
+    key: fs.readFileSync('certs/server.key'),
+    cert: fs.readFileSync('certs/server.crt')
+}
 
 app.use(express.static('build'))
 
@@ -25,7 +31,19 @@ app.get('*', function(req, res) {
     res.sendFile(path.join(__dirname, './src/index.html'))
 })
 
+// Set up http server redirecting to the https one
+if (process.env.NODE_ENV === 'production') {
+    http.createServer(function (req, res) {
+        if (req.headers.host.startsWith('localhost:') || req.headers.host.startsWith('127.0.0.1:'))
+            res.writeHead(301, { Location: `https://localhost:${process.env.SECURE_PORT || 8443}${req.url}` })
+        else
+            res.writeHead(301, { Location: `https://${req.headers['host']}${req.url}` })
+        res.end()
+    }).listen(process.env.PORT || 8080);
+}
+
 // Set up socket io
+const server = (process.env.NODE_ENV === 'production' ? https : http).createServer(credentials, app)
 const io = require('socket.io')(server)
 
 const rooms = {}
