@@ -68,3 +68,7 @@
     margin: 4px;
     margin-bottom: 8px;
 }
+
+.multiplayer button + button {
+    margin-top: 0;
+}

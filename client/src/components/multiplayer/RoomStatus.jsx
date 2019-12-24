@@ -71,28 +71,33 @@ class RoomStatus extends Component {
         const isAdmin = connectedRoom && selfActor && selfActor.isAdmin
         const isHost = connectedRoom && selfActor && selfActor.isHost
 
+        const permissionOptions = [
+            { label: 'Anyone', value: ANYONE },
+            { label: 'Admins Only', value: ADMINS_ONLY },
+            { label: 'Host Only', value: HOST_ONLY }
+        ]
+
         if (connectionStatus === CONNECTED) {
-            return <div className="action">
+            return <div className="action multiplayer">
                 <Foldable title="Room status">
                     <Text title="Room Name" value={roomName} disabled={true} />
-                    {isHost ? <Text title="Room Password" value={roomPassword} onChange={this.changeRoomPassword} /> : null}
+                    {isHost ? <React.Fragment>
+                        <Text title="Room Password" value={roomPassword} onChange={this.changeRoomPassword} />
+                        <Select title="Who can add assets" value={addAssetPermission} onChange={this.changeAddAssetPermission} options={permissionOptions} disabled={connectionStatus === CONNECTING} />
+                        <Puppet title="Default puppet" value={defaultPuppet} onChange={this.changeDefaultPuppet} disabled={connectionStatus === CONNECTING} />
+                    </React.Fragment> : null}
                     <button onClick={this.setSinglePlayer}>{isHost ? 'Close' : 'Leave'} Room</button>
                     {isAdmin ? <button onClick={this.banish}>Move all puppets off the stage</button> : null}
                 </Foldable>
             </div>
         } else {
-            const permissionOptions = [
-                { label: 'Anyone', value: ANYONE },
-                { label: 'Admins Only', value: ADMINS_ONLY },
-                { label: 'Host Only', value: HOST_ONLY }
-            ]
-            return <div className="action">
+            return <div className="action multiplayer">
                 <Foldable title="Host Room">
-                    <Text title="Server Address" value={address} onChange={this.setAddress} />
+                    <Text title="Server Address" value={address} onChange={this.setAddress} disabled={connectionStatus !== DISCONNECTED} />
                     <Text title="Name" value={roomName} onChange={this.changeRoomName} disabled={connectionStatus !== DISCONNECTED} />
                     <Text title="Password" value={roomPassword} onChange={this.changeRoomPassword} disabled={connectionStatus !== DISCONNECTED} />
-                    <Select title="Who can add assets" value={addAssetPermission} onChange={this.changeAddAssetPermission} options={permissionOptions} />
-                    <Puppet title="Default puppet" value={defaultPuppet} onChange={this.changeDefaultPuppet} />
+                    <Select title="Who can add assets" value={addAssetPermission} onChange={this.changeAddAssetPermission} options={permissionOptions} disabled={connectionStatus === CONNECTING} />
+                    <Puppet title="Default puppet" value={defaultPuppet} onChange={this.changeDefaultPuppet} disabled={connectionStatus === CONNECTING} />
                     <button onClick={this.connectToRoom}>{connectionStatus === CONNECTING ? 'Cancel' : 'Create Room'}</button>
                 </Foldable>
             </div>

@@ -149,7 +149,8 @@ export function connectToRoom() {
         dispatch({ type: CHANGE_CONNECTION_STATUS, status: CONNECTING })
 
         const address = getState().settings.address
-        socket = io.connect(`https://${address}`, {reconnect: true, transports: ['websocket', 'xhr-polling']})
+        socket = io.connect(`${address.startsWith('http://') ? '' : 'https://'}${address}`,
+            {reconnect: true, transports: ['websocket', 'xhr-polling']})
 
         // Connection Listeners
         socket.on('connect', () => {

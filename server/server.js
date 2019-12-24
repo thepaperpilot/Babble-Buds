@@ -20,10 +20,6 @@ const logLevels = ['log', 'warn', 'error'] // Possible values: 'info', 'log', 'w
 
 // Set up server
 const app = express()
-const credentials = {
-    key: fs.readFileSync(process.env.KEY_PATH || 'certs/server.key'),
-    cert: fs.readFileSync(process.env.CERT_PATH || 'certs/server.crt')
-}
 
 app.use(express.static('build'))
 
@@ -43,7 +39,12 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // Set up socket io
-const server = (process.env.NODE_ENV === 'production' ? https : http).createServer(credentials, app)
+const server = process.env.NODE_ENV === 'production' ?
+    https.createServer({
+        key: fs.readFileSync(process.env.KEY_PATH || 'certs/server.key'),
+        cert: fs.readFileSync(process.env.CERT_PATH || 'certs/server.crt')
+    }, app) :
+    http.createServer(app)
 const io = require('socket.io')(server)
 
 const rooms = {}
