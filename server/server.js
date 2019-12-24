@@ -21,8 +21,8 @@ const logLevels = ['log', 'warn', 'error'] // Possible values: 'info', 'log', 'w
 // Set up server
 const app = express()
 const credentials = {
-    key: fs.readFileSync('certs/server.key'),
-    cert: fs.readFileSync('certs/server.crt')
+    key: fs.readFileSync(process.env.KEY_PATH || 'certs/server.key'),
+    cert: fs.readFileSync(process.env.CERT_PATH || 'certs/server.crt')
 }
 
 app.use(express.static('build'))
