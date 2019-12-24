@@ -53,8 +53,16 @@
     font-weight: bold;
 }
 
-.multiplayer-users .field:not(:last-child) {
-    border-bottom: solid 1px var(--highlight);
+.multiplayer-users {
+    display: flex;
+    flex-flow: wrap;
+    justify-content: center;
+}
+
+.multiplayer-users .char {
+    flex-basis: 50px;
+    margin: 8px;
+    height: 120px;
 }
 
 .user-actions {

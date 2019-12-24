@@ -4,6 +4,7 @@ import Scrollbar from 'react-custom-scroll'
 import Header from '../inspector/Header'
 import RoomStatus from './RoomStatus'
 import UsersList from './UsersList'
+import SharedPuppets from './SharedPuppets'
 import { DISCONNECTED, CONNECTED } from '../../redux/networking'
 
 import './multiplayer.css'
@@ -30,6 +31,7 @@ class Multiplayer extends Component {
                         <Scrollbar allowOuterScroll={true} heightRelativeToParent="100%">
                             <RoomStatus />
                             {connectionStatus === CONNECTED ? <UsersList /> : null}
+                            <SharedPuppets />
                         </Scrollbar>
                     </div>
                     {connectionStatus === DISCONNECTED ? <div className="panel-footer">
