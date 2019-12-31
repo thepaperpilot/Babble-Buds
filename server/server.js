@@ -30,7 +30,7 @@ app.get('*', function(req, res) {
 // Set up http server redirecting to the https one
 if (process.env.NODE_ENV === 'production') {
     http.createServer(function (req, res) {
-        if (req.headers.host.startsWith('localhost:') || req.headers.host.startsWith('127.0.0.1:'))
+        if (req.headers.host && (req.headers.host.startsWith('localhost:') || req.headers.host.startsWith('127.0.0.1:')))
             res.writeHead(301, { Location: `https://localhost:${process.env.SECURE_PORT || 8443}${req.url}` })
         else
             res.writeHead(301, { Location: `https://${req.headers['host']}${req.url}` })
