@@ -158,6 +158,11 @@ ipcRenderer.on('get thumbnail URI', async (e, id, character) => {
 
 ipcRenderer.on('import', async (e, duplicate, selected, oldAssetsPath, newAssetsPath, statusId) => {
     await addAssets(selected, statusId, async (asset, id) => {
+        if (asset.type === 'particles') {
+            asset.emitter = fs.readJsonSync(asset.location)
+            return
+        }
+
         // Copy the files over
         const newLocation = `${id.replace(':', '/')}.${asset.location.slice(-3)}`
         const newThumbnailLocation = `${id.replace(':', '/')}.thumb.${asset.location.slice(-3)}`
@@ -230,7 +235,9 @@ ipcRenderer.on('add assets', async (e, assets, assetsPath, statusId) => {
             Object.assign(asset, { rows, cols, numFrames, delay })
         }
         
-        await fs.writeFile(path.join(assetsPath, asset.location), file)
+        if (asset.type === 'particles')
+            asset.emitter = JSON.parse(file)
+        else await fs.writeFile(path.join(assetsPath, asset.location), file)
         delete asset.filepath
     })
 

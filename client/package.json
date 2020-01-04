@@ -76,6 +76,7 @@
   "dependencies": {
     "electron": "^5.0.1",
     "fs-extra": "~8.0.1",
+    "pixi-particles": "^4.2.0",
     "pixi-tween": "^0.2.0",
     "redux-logger": "^3.0.6",
     "semver": "^6.0.0",

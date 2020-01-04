@@ -14,6 +14,12 @@ const fs = window.require('fs-extra')
 const path = require('path')
 const ipcRenderer = window.require('electron').ipcRenderer
 
+export const TYPE_MAP = {
+    json: 'particles',
+    gif: 'animated',
+    png: 'sprite'
+}
+
 class AssetImporter extends Component {
     static id = 0
 
@@ -141,15 +147,16 @@ class AssetImporter extends Component {
         return assets
     }
 
-    readImage(filepath) {
+    readImage(filepath, fileType) {
         const assetId = getNewAssetID()
         const id = `${this.props.self}:${assetId}`
         const assetsPath = ''
         const asset = {
-            name: path.basename(filepath, path.extname(filepath)),
-            type: 'sprite',
+            name: path.basename(filepath, fileType),
+            type: TYPE_MAP[fileType],
             tab: 'unsorted',
-            location: filepath,
+            location: fileType === 'json' ? null : filepath,
+            thumbnail: fileType === 'json' ? 'temp' : null,
             version: 0,
             panning: []
         }
@@ -174,7 +181,9 @@ class AssetImporter extends Component {
     readFile(filepath) {
         switch (path.extname(filepath)) {
             case '.png':
-                return this.readImage(filepath)
+            case '.gif':
+            case '.json':
+                return this.readImage(filepath, path.extname(filepath).slice(1))
             default: case '.babble':
                 return this.readProject(filepath)
         }
@@ -218,7 +227,10 @@ class AssetImporter extends Component {
             readFile={this.readFile}
             import={this.import}
             onOpen={this.resetImporter}
-            filters={[{name: 'Image', extensions: ['png']}]}
+            filters={[
+                {name: 'Image', extensions: ['png']},
+                {name: 'Animated Image', extensions: ['gif']},
+                {name: 'Particle Effect', extensions: ['json']}]}
             footers={[<Checkbox
                 inline={true}
                 title="Duplicate Assets"

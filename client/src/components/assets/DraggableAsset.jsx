@@ -32,7 +32,7 @@ class DraggableAsset extends Component {
 
     render() {
         const disabled = this.props.id.split(':')[0] !== this.props.self
-        const thumbnail = `${path.join(this.props.assetsPath, this.props.asset.type === 'animated' ?
+        const thumbnail = `${path.join(this.props.assetsPath, this.props.asset.thumbnail ?
             this.props.asset.thumbnail :
             this.props.asset.location)}?version=${this.props.asset.version}`
         const className = cx({

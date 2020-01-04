@@ -97,6 +97,9 @@ class RawLayer extends Component {
                         <Selector ref={this.selector} scale={scale} layer={layer}
                             dispatch={dispatch} selectorColor={selectorColor} />}
                 </Container>
+            case 'particles':                
+                element = null
+                break
             default: element = <Sprite
                 anchor={[.5,.5]}
                 alpha={isHighlighted ? 1 : .5}
