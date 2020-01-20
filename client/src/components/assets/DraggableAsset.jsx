@@ -27,6 +27,8 @@ class DraggableAsset extends Component {
     editAsset() {
         if (this.props.asset.type === 'bundle') {
             this.props.dispatch(open(this.props.id, this.props.asset.layers, 'asset'))
+        } else if (this.props.asset.type === 'particles') {
+            this.props.dispatch(open(this.props.id, this.props.asset.emitters, 'particles'))
         }
     }
 

@@ -14,9 +14,10 @@ import './editor.css'
 
 const DISTANCE = 10000
 const TYPE_MAP = {
-    environment: p => p.environments,
-    puppet: p => p.characters,
-    asset: p => p.assets
+    environment: (p, id) => p.environments[id] && p.environments[id].layers,
+    puppet: (p, id) => p.characters[id] && p.characters[id].layers,
+    asset: (p, id) => p.assets[id] && p.assets[id].layers,
+    particles: (p, id) => p.assets[id] && p.assets[id].emitters
 }
 
 const Stage = createStageClass()
@@ -28,6 +29,7 @@ class Editor extends Component {
         this.stage = React.createRef()
         this.viewport = React.createRef()
         this.selectedRef = React.createRef()
+        this.intervalId = null
 
         this.state = {
             scale: 1,
@@ -65,7 +67,7 @@ class Editor extends Component {
     componentDidUpdate(prevProps) {
         if (this.props.bounds !== prevProps.bounds || this.props.rect !== prevProps.rect)
             this.updateViewportBounds()
-        else
+        else if (!this.intervalId)
             this.renderViewport()
     }
 
@@ -73,7 +75,7 @@ class Editor extends Component {
         const {top, right, bottom, left} = this.viewport.current.getViewport()
         this.setState({
             bounds: {top, right, bottom, left}
-        }, this.renderViewport)
+        })
     }
 
     onScroll(e) {
@@ -152,7 +154,8 @@ class Editor extends Component {
 
     render() {
         // TODO (re-)load assets since babble.js isn't here to do it for us
-        const {rect, layers, selected, changed, isOver, canDrop, item, color} = this.props
+        let layers = this.props.layers
+        const {rect, selected, changed, isOver, canDrop, item, color} = this.props
         const {assets, assetsPath, environment, dispatch} = this.props
         const {scale, grid, bounds, dragPos} = this.state
 
@@ -195,6 +198,34 @@ class Editor extends Component {
             assetsPath,
             environment,
             dispatch
+        }
+
+        // Find the currently selected layer so that if its a particle effect we can render every frame
+        if (selected.layer) {
+            // Handle it being a particle effect asset separately
+            if (Array.isArray(layers)) {
+                if (!this.intervalId)
+                    this.intervalId = setInterval(this.renderViewport, 50)
+            } else {
+                let currentLayer = layers
+                for (let i = 0; i < selected.layer.length; i++)
+                    currentLayer = layers.children[selected.layer[i]]
+                if (currentLayer && currentLayer.id && currentLayer.id in assets && assets[currentLayer.id].type === 'particles') {
+                    if (!this.intervalId) {
+                        this.intervalId = setInterval(this.renderViewport, 50)
+                    }
+                } else if (this.intervalId) {
+                    clearInterval(this.intervalId)
+                    this.intervalId = null
+                }
+            }            
+        } else if (this.intervalId) {
+            clearInterval(this.intervalId)
+            this.intervalId = null
+        }
+
+        if (Array.isArray(layers)) {
+            layers = { children: layers.map((l, i) => ({...l, path: [i] }))}
         }
 
         return this.props.connectDropTarget(
@@ -258,10 +289,10 @@ function mapStateToProps(state) {
     const {layers, type, id, selected} = state.editor.present
 
     return {
-        canDrop: !!layers,
-        changed: id && type && (TYPE_MAP[type](state.project)[id] == null ||
+        canDrop: !!layers && type !== 'particles',
+        changed: id && type && (TYPE_MAP[type](state.project, id) == null ||
             JSON.stringify(layers) !==
-            JSON.stringify(TYPE_MAP[type](state.project)[id].layers)),
+            JSON.stringify(TYPE_MAP[type](state.project, id))),
         selected,
         layers,
         assets: state.project.assets,

@@ -98,10 +98,11 @@ function endMoveDrag(instance, dispatch, e) {
     if (instance.props.disabled) return
 
     if (startPosition && (dx || dy)) {
-        dispatch(changeLayer(instance.props.layer.path, {
+        const pos = {
             x: startPosition.x + (dx || 0),
             y: startPosition.y + (dy || 0)
-        }))
+        }
+        dispatch(changeLayer(instance.props.layer.path, instance.props.isEmitter ? { pos } : pos))
         e.currentTarget.dx = 0
         e.currentTarget.dy = 0
 
@@ -267,7 +268,7 @@ function flipVert(instance, dispatch) {
 }
 
 function drawGraphics(instance) {
-    const {scale, layer, disabled, selectorColor, app} = instance.props
+    const {scale, layer, disabled, isEmitter, selectorColor, app, emitters} = instance.props
 
     if (instance.selector) {
         instance.selector.clear()
@@ -278,13 +279,38 @@ function drawGraphics(instance) {
             let {x, y, rotation} = layer
             let width, height
 
+            if (isEmitter) {
+                x = layer.emitter.pos.x
+                y = layer.emitter.pos.y
+            }
+
             x = x || 0
             y = y || 0
             rotation = rotation || 0
 
-            const bounds = instance.layer.getLocalBounds()
-            width = 2 * Math.max(Math.abs(bounds.left), Math.abs(bounds.right))
-            height = 2 * Math.max(Math.abs(bounds.top), Math.abs(bounds.bottom))
+            if (isEmitter) {
+                const {lifetime, speed, maxSpeed, acceleration} = layer.emitter
+                const isAccelerating = acceleration.x || acceleration.y
+                width = height = 2 * lifetime.max * (isAccelerating ? maxSpeed : (speed.start + speed.end) / 2)
+            } else if (emitters) {
+                let minX, minY, maxX, maxY
+                emitters.forEach(({ emitter }) => {
+                    console.log(emitter)
+                    const {lifetime, speed, maxSpeed, acceleration, pos} = emitter
+                    const isAccelerating = acceleration.x || acceleration.y
+                    const size = lifetime.max * (isAccelerating ? maxSpeed : (speed.start + speed.end) / 2)
+                    minX = Math.min(minX || 0, pos.x - size)
+                    maxX = Math.max(maxX || 0, pos.x + size)
+                    minY = Math.min(minY || 0, pos.y - size)
+                    maxY = Math.max(maxY || 0, pos.y + size)
+                })
+                width = maxX - minX
+                height = maxY - minY
+            } else {
+                const bounds = instance.layer.getLocalBounds()
+                width = 2 * Math.max(Math.abs(bounds.left), Math.abs(bounds.right))
+                height = 2 * Math.max(Math.abs(bounds.top), Math.abs(bounds.bottom))
+            }
             instance.selector.normalSize = {x: width, y: height}
 
             instance.selector.lineStyle(scale * 4, selectorColor)
@@ -298,7 +324,7 @@ function drawGraphics(instance) {
             instance.selector.rotation = rotation
 
             instance.scalers.forEach((scaler, i) => {
-                if (disabled) {
+                if (disabled || isEmitter) {
                     instance.selector.removeChild(scaler)
                 } else {
                     instance.selector.addChild(scaler)
@@ -313,7 +339,7 @@ function drawGraphics(instance) {
                 }
             })
 
-            if (disabled) {
+            if (disabled || isEmitter) {
                 instance.selector.removeChild(instance.rotate)
                 instance.selector.removeChild(instance.flipHoriz)
                 instance.selector.removeChild(instance.flipVert)
@@ -375,7 +401,6 @@ export const behavior = {
             instance.selector = new Graphics()
             instance.selector.setParent(instance.parent.parent)
 
-            console.log(instance.props)
             const endRot = endRotateDrag(instance, instance.props.dispatch)
             instance.rotate = getIcon(instance, 'rotate.png')
                 .on('mousemove', onRotate(instance))
@@ -420,7 +445,9 @@ export const behavior = {
                 const target = e.currentTarget
                 if (instance.props.disabled) return
                 target.startMouse = {x, y}
-                target.startPosition = {x: layer.layer.x || 0, y: layer.layer.y || 0}
+                console.log(layer)
+                target.startPosition = instance.props.isEmitter ?
+                    layer.layer.emitter.pos : {x: layer.layer.x || 0, y: layer.layer.y || 0}
                 root.on('mousemove', instance.selector.mousemove)
             })
             root.on('mouseup', instance.mouseup = e => {

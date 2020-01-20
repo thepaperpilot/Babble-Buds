@@ -172,6 +172,38 @@ export function setLayers(asset, layers) {
     }
 }
 
+export function setParticles(asset, emitters) {
+    return (dispatch, getState) => {
+        const state = getState()
+        const {project, assets, settings} = state.project
+
+        if (!(asset in assets)) {
+            dispatch(warn("Cannot modify asset because asset does not exist."))
+            return
+        }
+
+        const newAsset = {
+            emitters,
+            version: assets[asset].version + 1
+        }
+        dispatch({ type: EDIT, id: asset, asset: newAsset})
+
+        dispatch(info('Updating assets in background process...'))
+        const newAssets = util.updateObject(assets, {
+            [asset]: util.updateObject(assets[asset], newAsset)
+        })
+        ipcRenderer.send('background', 'update assets', newAssets, settings.assetsPath)
+
+        const thumbnailPath = path.join(project, settings.assetsPath,
+            state.self, `${asset.split(':')[1]}`)
+        // TODO implement generating thumbnails for particle effect assets
+        ipcRenderer.send('background', 'generate particle thumbnails', thumbnailPath,
+            emitters, 'asset', asset)
+
+        dispatch(emit('add asset', asset, util.updateObject(assets[asset], newAsset)))
+    }
+}
+
 export function renameAsset(id, name) {
     return (dispatch, getState) => {
         const assets = getState().project.assets
@@ -290,5 +322,20 @@ export function updateThumbnail(id, thumbnailsPath) {
             location: `${path.relative(path.join(project, settings.assetsPath), thumbnailsPath)}.png`,
             version: asset.version + 1
         }})
+    }
+}
+
+export function newParticleEffect(tab) {
+    return (dispatch, getState) => {
+        dispatch(addAssets({
+            [`${getState().self}:${getNewAssetID()}`]: {
+                name: 'New Particle Effect',
+                tab,
+                location: null,
+                thumbnail: 'temp',
+                type: 'particles',
+                emitters: []
+            }
+        }))
     }
 }

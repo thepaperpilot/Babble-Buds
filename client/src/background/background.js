@@ -158,8 +158,8 @@ ipcRenderer.on('get thumbnail URI', async (e, id, character) => {
 
 ipcRenderer.on('import', async (e, duplicate, selected, oldAssetsPath, newAssetsPath, statusId) => {
     await addAssets(selected, statusId, async (asset, id) => {
-        if (asset.type === 'particles') {
-            asset.emitter = fs.readJsonSync(asset.location)
+        if (asset.type === 'particles' && asset.emitters == null) {
+            asset.emitters = [{ image: null, emitter: fs.readJsonSync(asset.location), name: 'Emitter' }]
             return
         }
 
@@ -236,7 +236,7 @@ ipcRenderer.on('add assets', async (e, assets, assetsPath, statusId) => {
         }
         
         if (asset.type === 'particles')
-            asset.emitter = JSON.parse(file)
+            asset.emitters = [{ image: null, emitter: JSON.parse(file), name: 'Emitter' }]
         else await fs.writeFile(path.join(assetsPath, asset.location), file)
         delete asset.filepath
     })

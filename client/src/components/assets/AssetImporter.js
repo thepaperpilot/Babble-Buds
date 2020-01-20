@@ -60,7 +60,7 @@ class AssetImporter extends Component {
                         <img
                             alt={asset.name}
                             src={`file:///${path.join(assetsPath,
-                                asset.type === 'animated' ?
+                                asset.thumbnail ?
                                     asset.thumbnail :
                                     asset.location)}`}
                             style={{width: '20px', height: '20px'}} />
@@ -70,7 +70,7 @@ class AssetImporter extends Component {
                 {small || <img
                     alt={asset.name}
                     src={`file:///${path.join(assetsPath,
-                        asset.type === 'animated' ?
+                        asset.thumbnail ?
                             asset.thumbnail :
                             asset.location)}`} />}
                 {small || <div className="desc">{asset.name}</div>}
@@ -152,10 +152,10 @@ class AssetImporter extends Component {
         const id = `${this.props.self}:${assetId}`
         const assetsPath = ''
         const asset = {
-            name: path.basename(filepath, fileType),
+            name: path.basename(filepath, `.${fileType}`),
             type: TYPE_MAP[fileType],
             tab: 'unsorted',
-            location: fileType === 'json' ? null : filepath,
+            location: filepath,
             thumbnail: fileType === 'json' ? 'temp' : null,
             version: 0,
             panning: []

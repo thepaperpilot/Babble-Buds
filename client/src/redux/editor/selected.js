@@ -15,16 +15,18 @@ export function setEmote(emote = 0) {
 
 export function selectLayer(path = [], shouldInspect = true) {
     return (dispatch, getState) => {
-        if (comparePaths(path, []) || path == null) {
-            dispatch({ type: SELECT_LAYER, path })
-            return
-        }
-
         const state = getState()
         const editor = state.editor.present
         const assets = state.project.assets
 
+        if (comparePaths(path, []) || path == null || editor.type === 'particles' && path.length === 1) {
+            dispatch({ type: SELECT_LAYER, path })
+            return
+        }
+
         let curr = editor.layers
+        if (Array.isArray(curr))
+            dispatch({ type: SELECT_LAYER, path })
         let emote = null
         for (let i = 0; i < path.length; i++) {
             if (curr.children == null || curr.children.length <= path[i]) {

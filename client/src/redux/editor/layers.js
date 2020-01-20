@@ -3,6 +3,7 @@ import util from '../util.js'
 import { warn } from '../status'
 import { close } from '../inspector'
 import { setEmote, selectLayer } from './selected'
+import defaultEmitter from '../../data/emitter.json'
 
 // Action Types
 const CHANGE_LAYERS = 'editor/layers/CHANGE_LAYERS'
@@ -72,7 +73,15 @@ export function changeLayer(path, layer = {}) {
         const state = getState()
         if (!checkEditor(dispatch, state)) return
 
+        if (getState().editor.present.type === 'particles') {
+            let layers = state.editor.present.layers.slice()
+            layers[path[0]] = util.updateObject(layers[path[0]], { emitter: util.updateObject(layers[path[0]].emitter, layer) })
+            dispatch({ type: CHANGE_LAYERS, layers })
+            return
+        }
+
         let layers = util.updateObject(state.editor.present.layers || {})
+        if (Array.isArray(state.editor.present.layers)) layers = {}
         let curr = getLayerAtPath(layers, path.slice(0, -1), true)
         
         if (curr == null) {
@@ -116,6 +125,8 @@ export function changeLayer(path, layer = {}) {
 
 // Use this as a shorthand for changing the editor's root layer
 export function setLayers(layers) {
+    if (Array.isArray(layers))
+        return { type: CHANGE_LAYERS, layers }
     return changeLayer([], layers)
 }
 
@@ -192,6 +203,14 @@ export function addLayer(path, layer = {}) {
         if (!checkEditor(dispatch, state)) return
 
         const layers = state.editor.present.layers
+
+        if (Array.isArray(layers)) {
+            const emitter = Object.keys(layer).length === 0 ?
+                { name: 'New Emitter', emitter: defaultEmitter } : layer
+            dispatch({ type: CHANGE_LAYERS, layers: [...layers, emitter] })
+
+            return
+        }
 
         const curr = getLayerAtPath(layers, path)
         if (curr == null) {

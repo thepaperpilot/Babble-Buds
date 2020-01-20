@@ -4,6 +4,7 @@ import { ContextMenu, MenuItem, connectMenu } from 'react-contextmenu'
 import { getNewAssetID } from '../../redux/project/assets/reducers'
 import { removeFolder } from '../../redux/project/folders'
 import { inProgress } from '../../redux/status'
+import { newParticleEffect } from '../../redux/project/assets/actions'
 import { TYPE_MAP } from './AssetImporter'
 
 const path = require('path')
@@ -19,6 +20,7 @@ class FolderContextMenu extends Component {
         this.focus = this.focus.bind(this)
         this.loadAssets = this.loadAssets.bind(this)
         this.addAsset = this.addAsset.bind(this)
+        this.newParticleEffect = this.newParticleEffect.bind(this)
         this.deleteFolder = this.deleteFolder.bind(this)
     }
 
@@ -86,6 +88,10 @@ class FolderContextMenu extends Component {
         })
     }
 
+    newParticleEffect() {
+        this.props.dispatch(newParticleEffect(this.props.trigger.tab))
+    }
+
     deleteFolder() {
         this.props.dispatch(removeFolder(this.props.trigger.tab, true))
     }
@@ -95,6 +101,7 @@ class FolderContextMenu extends Component {
             <MenuItem onClick={this.focus}>Rename</MenuItem>
             <MenuItem onClick={this.deleteFolder}>Delete</MenuItem>
             <MenuItem onClick={this.addAsset}>Add Asset</MenuItem>
+            <MenuItem onClick={this.newParticleEffect}>New Particle Effect Asset</MenuItem>
         </ContextMenu>
     }
 }

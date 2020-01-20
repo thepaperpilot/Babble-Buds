@@ -51,7 +51,7 @@ class Layer extends Component {
 
     render() {
         const {selected, asset, assetsPath, isOver, canDrop} = this.props
-        const {path, id, name, children, nodeEmote, emotes, head, emoteLayer, inherit, tabs}
+        const {path, id, name, children, nodeEmote, emotes, head, emoteLayer, inherit, tabs, emitter}
             = this.props
         
         // TODO context menu item to "recenter layer", which will only work on a layer
@@ -97,6 +97,23 @@ class Layer extends Component {
                 {name}
             </div>
 
+        let element = null
+        if (children == null) {
+            if (asset) {
+                element = <div>
+                    <img src={join(assetsPath, `${asset.location}?version=${asset.version}`)}
+                        alt={asset.name} />
+                    {name}
+                </div>
+            } else if (emitter) {
+                element = <div>{name}</div>
+            }
+        } else if (name) {
+            element = <div>{name}</div>
+        } else {
+            element = <div>root</div>
+        }
+
         return <ContextMenuTrigger
             id={`contextmenu-layer-${this.props.contextmenu}`}
             holdToDisplay={-1}
@@ -104,14 +121,7 @@ class Layer extends Component {
             {this.props.connectDropTarget(<div className={classNames(className)}
                 onClick={this.onNodeClick}
                 onDoubleClick={this.editBundle}>
-                {children == null ?
-                    asset ?
-                        <div>
-                            <img src={join(assetsPath, `${asset.location}?version=${asset.version}`)}
-                                alt={asset.name} />
-                            {name}
-                        </div> : null :
-                    name ? <div>{name}</div> : <div>root</div>}
+                {element}
                 {emote}
                 {bundle}
             </div>)}
@@ -134,6 +144,9 @@ const assetTarget = {
             ...path,
             item.id ? item.path.slice(-1)[0] : item.children.length
         ]))
+    },
+    canDrop: (item, monitor) => {
+        return item.emitter == null
     }
 }
 

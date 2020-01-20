@@ -5,7 +5,7 @@ import layers, { setLayers, clear } from './layers'
 import selected, { selectLayer, setEmote } from './selected'
 import { changeEnvironment } from '../project/environments/actions'
 import { changeCharacter } from '../project/characters/actions'
-import { setLayers as setAssetLayers } from '../project/assets/actions'
+import { setLayers as setAssetLayers, setParticles } from '../project/assets/actions'
 import { warn } from '../status'
 
 const path = window.require('path')
@@ -46,6 +46,10 @@ export function save() {
         }
         case 'asset': {
             dispatch(setAssetLayers(editor.id, editor.layers))
+            break
+        }
+        case 'particles': {
+            dispatch(setParticles(editor.id, editor.layers))
             break
         }
         default:

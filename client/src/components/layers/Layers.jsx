@@ -38,6 +38,14 @@ function reverseTree(tree) {
     return handleLayer(tree)
 }
 
+function reverseEmitterTree(emitters) {
+    return { children: emitters.map((emitter, i) => ({ name: emitter.name, emitter, leaf: "true", path: [i] })) }
+}
+
+function getEmitters(tree) {
+    return tree.children.map(node => node.emitter)
+}
+
 class Layers extends Component {
     constructor(props) {
         super(props)
@@ -47,9 +55,11 @@ class Layers extends Component {
         }
 
         this.handleChange = this.handleChange.bind(this)
+        this.handleEmitterChange = this.handleEmitterChange.bind(this)
         this.addLayer = this.addLayer.bind(this)
         this.canBecomeParent = this.canBecomeParent.bind(this)
         this.renderNode = this.renderNode.bind(this)
+        this.renderEmitterNode = this.renderEmitterNode.bind(this)
         this.calculateEmotes = this.calculateEmotes.bind(this)
     }
 
@@ -62,6 +72,10 @@ class Layers extends Component {
         this.props.dispatch(setLayers(reverseTree(tree)))
     }
 
+    handleEmitterChange(tree) {
+        this.props.dispatch(setLayers(getEmitters(tree)))
+    }
+
     addLayer() {
         this.props.dispatch(addLayer([]))
     }
@@ -69,6 +83,10 @@ class Layers extends Component {
     renderNode(node) {
         return <Layer {...node} contextmenu={this.props.id}
             nodeEmote={node.emote} tabs={this.props.folders} emotes={this.state.emotes} />
+    }
+
+    renderEmitterNode(node) {
+        return <Layer {...node} contextmenu={this.props.id} />
     }
 
     canBecomeParent(parent, child) {
@@ -104,26 +122,42 @@ class Layers extends Component {
         // We don't want the ui tree modifying the tree object stored in redux because then it won't re-render everything properly
         // So we have to clone it using JSON parse and stringify
         const LinkedLayerContextMenu = LayerContextMenu(this.props.id)
-        return (
-            <div className="panel console">
-                <div className="bar flex-row">
-                    <button onClick={this.addLayer} disabled={!this.props.tree.children}>New Layer</button>
-                    <div className="flex-grow" />
-                </div>
-                {this.props.tree.children ?
-                    <Scrollbar allowOuterScroll={true} heightRelativeToParent="100%">
-                        <Tree
-                            tree={reverseTree(this.props.tree)}
-                            onChange={this.handleChange}
-                            renderNode={this.renderNode}
-                            autoscroll={50}
-                            canBecomeParent={this.canBecomeParent}
-                            storeCollapsedInState={true} />
-                    </Scrollbar> :
-                    <div className="default">Open puppet to edit layers</div>}
-                <LinkedLayerContextMenu />
+
+        let element, disabled
+        if (Array.isArray(this.props.tree)) {
+            disabled = false
+            element = <Scrollbar allowOuterScroll={true} heightRelativeToParent="100%">
+                <Tree
+                    tree={reverseEmitterTree(this.props.tree)}
+                    onChange={this.handleEmitterChange}
+                    renderNode={this.renderEmitterNode}
+                    autoscroll={50}
+                    canBecomeParent={() => false} />
+            </Scrollbar>
+        } else if (this.props.tree.children) {
+            disabled = false
+            element = <Scrollbar allowOuterScroll={true} heightRelativeToParent="100%">
+                <Tree
+                    tree={reverseTree(this.props.tree)}
+                    onChange={this.handleChange}
+                    renderNode={this.renderNode}
+                    autoscroll={50}
+                    canBecomeParent={this.canBecomeParent}
+                    storeCollapsedInState={true} />
+            </Scrollbar>
+        } else {
+            disabled = true
+            element = <div className="default">Open puppet to edit layers</div>
+        }
+
+        return <div className="panel console">
+            <div className="bar flex-row">
+                <button onClick={this.addLayer} disabled={disabled}>New Layer</button>
+                <div className="flex-grow" />
             </div>
-        )
+            {element}
+            <LinkedLayerContextMenu />
+        </div>
     }
 }
 

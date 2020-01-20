@@ -1,6 +1,7 @@
 import React, {Component} from 'react'
 import { Sprite, Container, withApp } from 'react-pixi-fiber'
 import Selector, { behavior } from './Selector'
+import Particles from './Particles'
 import { comparePaths } from '../layers/Layer'
 import babble from 'babble.js'
 import silhoutte from './icons/person.png'
@@ -97,8 +98,17 @@ class RawLayer extends Component {
                         <Selector ref={this.selector} scale={scale} layer={layer}
                             dispatch={dispatch} selectorColor={selectorColor} />}
                 </Container>
-            case 'particles':                
-                element = null
+            case 'particles':
+                element = <React.Fragment>
+                    {assets[layer.id].emitters.map((emitter, i) => <Particles
+                        key={i}
+                        isActive={true}
+                        alpha={isHighlighted ? 1 : .5}
+                        scale={[layer.scaleX || 1, layer.scaleY || 1]}
+                        assetsPath={assetsPath}
+                        location={emitter.location}
+                        emitter={emitter.emitter} />)}
+                </React.Fragment>
                 break
             default: element = <Sprite
                 anchor={[.5,.5]}
@@ -124,6 +134,14 @@ class RawLayer extends Component {
                 <Selector scale={scale} layer={{ x: 0, y: -environment.height / 2, rotation: 0 }}
                     dispatch={dispatch} disabled={true} selectorColor={selectorColor} />
             </Container>
+        } else if (layer.emitter) {
+            element = <Particles
+                isActive={isSelected}
+                alpha={isHighlighted ? 1 : .5}
+                scale={[layer.scaleX || 1, layer.scaleY || 1]}
+                assetsPath={assetsPath}
+                location={layer.location}
+                emitter={layer.emitter} />
         } else
             element = <Container scale={[layer.scaleX || 1, layer.scaleY || 1]}>
                 {(layer.children || []).map((l, i) =>
@@ -142,8 +160,9 @@ class RawLayer extends Component {
             {...props} >
             {element}
             {isSelected &&
-                <Selector ref={this.selector} scale={scale} layer={layer}
-                    dispatch={dispatch} selectorColor={selectorColor}/>}
+                <Selector ref={this.selector} scale={scale} layer={layer} isEmitter={!!layer.emitter}
+                    dispatch={dispatch} selectorColor={selectorColor}
+                    emitters={layer.id in assets ? assets[layer.id].emitters : null}/>}
         </Container>
     }
 }
