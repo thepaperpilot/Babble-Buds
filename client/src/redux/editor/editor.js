@@ -2,7 +2,7 @@ import { combineReducers } from 'redux'
 import undoable, { ActionCreators } from 'redux-undo'
 import util from '../util.js'
 import layers, { setLayers, clear } from './layers'
-import selected, { selectLayer, setEmote } from './selected'
+import selected, { selectLayer, setEmote, clearSelected } from './selected'
 import { changeEnvironment } from '../project/environments/actions'
 import { changeCharacter } from '../project/characters/actions'
 import { setLayers as setAssetLayers, setParticles } from '../project/assets/actions'
@@ -29,6 +29,7 @@ export function close() {
     return dispatch => {
         dispatch({ type: OPEN, id: null, objectType: null })
         dispatch(clear())
+        dispatch(clearSelected())
     }
 }
 

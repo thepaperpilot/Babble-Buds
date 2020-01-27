@@ -57,6 +57,13 @@ export function selectLayer(path = [], shouldInspect = true) {
     }
 }
 
+export function clearSelected() {
+    return dispatch => {
+        dispatch({ type: SELECT_LAYER, path: null })
+        dispatch({ type: SET_EMOTE, emote: 0 })
+    }
+}
+
 // Reducers
 const layerReducer = util.createReducer(null, {
     [SELECT_LAYER]: (state, action) => action.path

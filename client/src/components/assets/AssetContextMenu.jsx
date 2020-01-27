@@ -35,7 +35,7 @@ class AssetContextMenu extends Component {
 
     edit() {
         if (this.props.trigger.inlineEdit.current)
-            this.props.trigger.inlineEdit.current.getWrappedInstance().edit()
+            this.props.trigger.inlineEdit.current.edit()
     }
 
     deleteAsset() {
