@@ -9,10 +9,19 @@ import AssetContextMenu from './AssetContextMenu'
 import FolderContextMenu from './FolderContextMenu'
 import FolderList from './FolderList'
 import CustomScrollbarsVirtualList from '../ui/CustomScrollbarsVirtualList'
+import { getNewAssetID } from '../../redux/project/assets/reducers'
+import { TYPE_MAP } from './AssetImporter'
+import { inProgress } from '../../redux/status'
 import './assets.css'
 import '../ui/list.css'
 
+const path = require('path')
+const {remote, ipcRenderer} = window.require('electron')
+const settingsManager = remote.require('./main-process/settings')
+
 class Assets extends Component {
+    static id = 0
+
     constructor(props) {
         super(props)
 
@@ -26,6 +35,7 @@ class Assets extends Component {
         this.scrollbar = React.createRef()
         this.list = React.createRef()
 
+        this.loadAssets = this.loadAssets.bind(this)
         this.onChange = this.onChange.bind(this)
         this.changeZoom = this.changeZoom.bind(this)
         this.jumpToFolder = this.jumpToFolder.bind(this)
@@ -43,6 +53,44 @@ class Assets extends Component {
             id: asset,
             name: props.assets[asset].name 
         })))
+    }
+
+    loadAssets(assets, tab) {
+        const statusId = `asset-${Assets.id++}`
+        this.props.dispatch(inProgress(statusId, assets.length, 'Adding new assets...'))
+
+        assets = assets.reduce((acc, curr) => {
+            const fileType = path.extname(curr).slice(1)
+            const name = path.basename(curr.replace(/^.*[\\/]/, ''), `.${fileType}`)
+            const id = getNewAssetID()
+
+            const asset = {
+                type: TYPE_MAP[fileType],
+                tab,
+                name,
+                version: 0,
+                panning: [],
+                location: fileType === 'json' ? null : path.join(settingsManager.settings.uuid, `${id}.png`),
+                thumbnail: fileType === 'json' ? 'temp' : null,
+                // The following is temporary for use by the background process
+                // and will be deleted before being added to the assets lists
+                filepath: curr
+            }
+
+            if (fileType === 'animated')
+                asset.thumbnail = path.join(settingsManager.settings.uuid,
+                    `${id}.thumb.png`)
+
+            acc[`${settingsManager.settings.uuid}:${id}`] = asset
+            return acc
+        }, {})
+        const assetsPath = path.join(this.props.project, this.props.assetsPath)
+
+        ipcRenderer.send('background', 'add assets',
+            assets,
+            assetsPath,
+            statusId
+        )
     }
 
     onChange(e) {
@@ -141,7 +189,8 @@ class Assets extends Component {
             <div className="full-panel" >
                 <FolderList contextmenu={this.props.id}
                     CustomFolder={CustomFolder} tabs={tabs} tabToRow={tabToRow}
-                    jumpToFolder={this.jumpToFolder} />
+                    jumpToFolder={this.jumpToFolder}
+                    loadAssets={this.loadAssets} />
                 <List
                     height={Math.max(this.props.rect.height, 0)}
                     width="75%"
@@ -158,7 +207,7 @@ class Assets extends Component {
                                 'fontSize': size === 20 ? 15 : size / 3}}>
                                 {CustomTitle ?
                                     <CustomTitle contextmenu={this.props.id} tab={tab} /> :
-                                    <Folder contextmenu={this.props.id} tab={tab} />}
+                                    <Folder contextmenu={this.props.id} tab={tab} loadAssets={this.loadAssets} />}
                             </div>
                         } else {
                             const nextTabIndex = tabs.findIndex(tab =>
@@ -202,7 +251,7 @@ class Assets extends Component {
                 </List>
             </div>
             {this.props.isAssetImporter || <LinkedAssetContextMenu tabs={tabs} />}
-            {this.props.isAssetImporter || <LinkedFolderContextMenu />}
+            {this.props.isAssetImporter || <LinkedFolderContextMenu loadAssets={this.loadAssets} />}
         </div>
     }
 }
@@ -210,7 +259,9 @@ class Assets extends Component {
 function mapStateToProps(state, props) {
     return {
         assets: props.assets || state.project.assets,
-        folders: props.folders || state.project.folders
+        folders: props.folders || state.project.folders,
+        project: state.project.project,
+        assetsPath: state.project.settings.assetsPath
     }
 }
 

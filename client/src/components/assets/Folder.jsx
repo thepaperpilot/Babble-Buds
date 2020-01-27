@@ -1,4 +1,5 @@
 import React, {Component} from 'react'
+import Dropzone from 'react-dropzone'
 import { connect } from 'react-redux'
 import InlineEdit from './../ui/InlineEdit'
 import { ContextMenuTrigger } from 'react-contextmenu'
@@ -12,6 +13,7 @@ class Folder extends Component {
 
         this.focus = this.focus.bind(this)
         this.renameFolder = this.renameFolder.bind(this)
+        this.onDrop = this.onDrop.bind(this)
     }
 
     focus() {
@@ -21,20 +23,29 @@ class Folder extends Component {
 
     renameFolder(name) {
         this.props.dispatch(renameFolder(this.props.tab, name))
-    } 
+    }
+
+    onDrop(acceptedFiles) {
+        console.log(this.props)
+        this.props.loadAssets(acceptedFiles.map(f => f.path), this.props.tab)
+    }
 
     render() {
-        return <ContextMenuTrigger
-            attributes={{className: 'header-wrapper'}}
-            collect={() => ({ tab: this.props.tab, inlineEdit: this.inlineEdit })}
-            id={`contextmenu-tab-${this.props.contextmenu}`}
-            holdToDisplay={-1}>
-            <InlineEdit
-                ref={this.inlineEdit}
-                target={this.props.tab}
-                selectable={false}
-                onChange={this.renameFolder} />
-        </ContextMenuTrigger>
+        return <Dropzone onDrop={this.onDrop}>
+            {({ getRootProps, isDragAccept }) => <ContextMenuTrigger
+                attributes={{className: 'header-wrapper'}}
+                collect={() => ({ tab: this.props.tab, inlineEdit: this.inlineEdit })}
+                id={`contextmenu-tab-${this.props.contextmenu}`}
+                holdToDisplay={-1}>
+                <div {...getRootProps()} className={isDragAccept ? 'canDrop' : ''}>
+                    <InlineEdit
+                        ref={this.inlineEdit}
+                        target={this.props.tab}
+                        selectable={false}
+                        onChange={this.renameFolder} />
+                </div>
+            </ContextMenuTrigger>}
+        </Dropzone>
     }
 }
 

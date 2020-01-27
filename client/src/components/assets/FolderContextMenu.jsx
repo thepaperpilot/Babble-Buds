@@ -3,22 +3,15 @@ import { connect } from 'react-redux'
 import { ContextMenu, MenuItem, connectMenu } from 'react-contextmenu'
 import { getNewAssetID } from '../../redux/project/assets/reducers'
 import { removeFolder } from '../../redux/project/folders'
-import { inProgress } from '../../redux/status'
 import { newParticleEffect } from '../../redux/project/assets/actions'
-import { TYPE_MAP } from './AssetImporter'
 
-const path = require('path')
-const {remote, ipcRenderer} = window.require('electron')
-const settingsManager = remote.require('./main-process/settings')
+const remote = window.require('electron').remote
 
 class FolderContextMenu extends Component {
-    static id = 0
-
     constructor(props) {
         super(props)
 
         this.focus = this.focus.bind(this)
-        this.loadAssets = this.loadAssets.bind(this)
         this.addAsset = this.addAsset.bind(this)
         this.newParticleEffect = this.newParticleEffect.bind(this)
         this.deleteFolder = this.deleteFolder.bind(this)
@@ -26,45 +19,7 @@ class FolderContextMenu extends Component {
 
     focus() {
         if (this.props.trigger.inlineEdit.current)
-            this.props.trigger.inlineEdit.current.getWrappedInstance().edit()
-    }
-
-    loadAssets(assets, tab) {
-        const statusId = `asset-${FolderContextMenu.id++}`
-        this.props.dispatch(inProgress(statusId, assets.length, 'Adding new assets...'))
-
-        assets = assets.reduce((acc, curr) => {
-            const fileType = path.extname(curr).slice(1)
-            const name = path.basename(curr.replace(/^.*[\\/]/, ''), `.${fileType}`)
-            const id = getNewAssetID()
-
-            const asset = {
-                type: TYPE_MAP[fileType],
-                tab,
-                name,
-                version: 0,
-                panning: [],
-                location: fileType === 'json' ? null : path.join(settingsManager.settings.uuid, `${id}.png`),
-                thumbnail: fileType === 'json' ? 'temp' : null,
-                // The following is temporary for use by the background process
-                // and will be deleted before being added to the assets lists
-                filepath: curr
-            }
-
-            if (fileType === 'animated')
-                asset.thumbnail = path.join(settingsManager.settings.uuid,
-                    `${id}.thumb.png`)
-
-            acc[`${settingsManager.settings.uuid}:${id}`] = asset
-            return acc
-        }, {})
-        const assetsPath = path.join(this.props.project, this.props.assetsPath)
-
-        ipcRenderer.send('background', 'add assets',
-            assets,
-            assetsPath,
-            statusId
-        )
+            this.props.trigger.inlineEdit.current.edit()
     }
 
     addAsset() {
@@ -84,7 +39,7 @@ class FolderContextMenu extends Component {
             ]
         }, (filepaths) => {
             if (!filepaths) return
-            this.loadAssets(filepaths, tab)
+            this.props.loadAssets(filepaths, tab)
         })
     }
 
@@ -106,11 +61,4 @@ class FolderContextMenu extends Component {
     }
 }
 
-function mapStateToProps(state) {
-    return {
-        project: state.project.project,
-        assetsPath: state.project.settings.assetsPath
-    }
-}
-
-export default id => connect(mapStateToProps, null, null, { forwardRef: true })(connectMenu(`contextmenu-tab-${id}`)(FolderContextMenu))
+export default id => connect(null, null, null, { forwardRef: true })(connectMenu(`contextmenu-tab-${id}`)(FolderContextMenu))
