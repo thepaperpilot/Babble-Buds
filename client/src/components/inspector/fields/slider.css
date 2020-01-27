@@ -1,0 +1,18 @@
+.slider .field-flex {
+    position: relative;
+}
+
+.slider-value {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -75%);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 2s ease;
+}
+
+.slider input:hover ~ .slider-value {
+    opacity: 1;
+    transition: opacity .25s ease;
+}

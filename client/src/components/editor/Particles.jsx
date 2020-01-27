@@ -12,7 +12,6 @@ export const behavior = {
     customDisplayObject: () => new Container(),
     customApplyProps: (instance, oldProps, newProps) => {
         if (oldProps.emitter !== newProps.emitter || oldProps.location !== newProps.location) {
-            console.log(instance.emitter)
             if (instance.emitter)
                 instance.emitter.destroy()
             const image = newProps.location ? TextureCache[path.join(newProps.assetsPath, newProps.location)] : defaultParticle

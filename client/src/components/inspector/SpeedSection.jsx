@@ -40,7 +40,7 @@ class SpeedSection extends Component {
         return <div className="action">
             <Foldable title="Speed">
                 <Number
-                    title="Start"
+                    title="Start Speed"
                     value={start}
                     onChange={this.changeSpeed('start')}
                     float={true}
@@ -50,27 +50,24 @@ class SpeedSection extends Component {
                     value={[ acceleration.x, -acceleration.y]}
                     onChange={this.changeAcceleration}
                     help="Acceleration of particles. Prevents using end speed. Without a rotation speed defined, particles will rotate to match movement direction."
-                    float={true}
-                    step={.1} />
+                    float={true} />
                 {isAccelerating ? 
                     <Number
                         title="Max Speed"
                         value={maxSpeed}
                         onChange={this.changeEmitter('maxSpeed')}
                         help="The maximum speed allowed on accelerating particles. If particles are not using Acceleration, use Start Speed and End Speed instead."
-                        float={true}
-                        step={.1} /> :
+                        float={true} /> :
                     <Number
-                        title="End"
+                        title="End Speed"
                         value={end}
                         onChange={this.changeSpeed('end')}
-                        float={true}
-                        step={.1} />}
+                        float={true} />}
                 <Number
                     title="Minimum Speed Multiplier"
                     value={minimumSpeedMultiplier}
                     onChange={this.changeSpeed('minimumSpeedMultiplier')}
-                    help="A value between minimum speed multipler and 1 is randomly generated and multiplied with start speed and end speed to provide the actual start speed and end speed for each particle."
+                    help="A value between minimum speed multiplier and 1 is randomly generated and multiplied with start speed and end speed to provide the actual start speed and end speed for each particle."
                     float={true}
                     step={.1} />
             </Foldable>

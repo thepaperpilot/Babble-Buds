@@ -3,7 +3,9 @@ import { connect } from 'react-redux'
 import Scrollbar from 'react-custom-scroll'
 import {Puppet} from 'babble.js'
 import Header from './Header'
+import ColorSection from './ColorSection'
 import SpeedSection from './SpeedSection'
+import SizeSection from './SizeSection'
 import Text from './fields/Text'
 import Vector2 from './fields/Vector2'
 import Dropdown from '../ui/InspectorDropdown'
@@ -69,7 +71,9 @@ class Emitter extends Component {
                                 onChange={this.changePosition} />
                         </Foldable>
                     </div>
+                    <ColorSection target={this.props.target} alpha={alpha} color={color} />
                     <SpeedSection target={this.props.target} speed={speed} maxSpeed={maxSpeed} acceleration={acceleration} />
+                    <SizeSection target={this.props.target} scale={scale} />
                 </Scrollbar>
             </div>
         </div>
