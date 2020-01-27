@@ -79,7 +79,7 @@ class DraggablePuppet extends Component {
 }
 
 function mapStateToProps(state, props) {
-    const character = state.project.characters[props.puppet]
+    const character = state.project.characters[props.puppet] || {}
     return {
         name: character.name,
         layers: character.layers,
