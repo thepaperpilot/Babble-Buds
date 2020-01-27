@@ -183,6 +183,8 @@ ipcRenderer.on('add assets', async (e, assets, assetsPath, statusId) => {
 
     await addAssets(assets, statusId, async asset => {
         let file = await fs.readFile(asset.filepath)
+        if (asset.location)
+            await fs.ensureDir(path.join(assetsPath, asset.location.substr(0, asset.location.indexOf(path.sep))))
 
         if (asset.type === 'animated') {
             // Default values (overriden if importing a gif)
