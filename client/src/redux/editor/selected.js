@@ -21,6 +21,8 @@ export function selectLayer(path = [], shouldInspect = true) {
 
         if (comparePaths(path, []) || path == null || editor.type === 'particles' && path.length === 1) {
             dispatch({ type: SELECT_LAYER, path })
+            if (editor.type === 'particles' && !comparePaths(path, []) && path != null)
+                dispatch(inspect(path, 'emitter'))
             return
         }
 

@@ -100,14 +100,17 @@ class RawLayer extends Component {
                 </Container>
             case 'particles':
                 element = <React.Fragment>
-                    {assets[layer.id].emitters.map((emitter, i) => <Particles
-                        key={i}
-                        isActive={true}
-                        alpha={isHighlighted ? 1 : .5}
-                        scale={[layer.scaleX || 1, layer.scaleY || 1]}
-                        assetsPath={assetsPath}
-                        location={emitter.location}
-                        emitter={emitter.emitter} />)}
+                    {assets[layer.id].emitters.map(({emitter, location}, i) =>
+                        <Container key={i}
+                            x={emitter.pos.x * (layer.scaleX || 1)} y={emitter.pos.y * (layer.scaleY || 1)}
+                            scale={[layer.scaleX || 1, layer.scaleY || 1]}>
+                            <Particles
+                                isActive={true}
+                                alpha={isHighlighted ? 1 : .5}
+                                assetsPath={assetsPath}
+                                location={location}
+                                emitter={emitter} />
+                        </Container>)}
                 </React.Fragment>
                 break
             default: element = <Sprite
@@ -135,13 +138,14 @@ class RawLayer extends Component {
                     dispatch={dispatch} disabled={true} selectorColor={selectorColor} />
             </Container>
         } else if (layer.emitter) {
-            element = <Particles
-                isActive={isSelected}
-                alpha={isHighlighted ? 1 : .5}
-                scale={[layer.scaleX || 1, layer.scaleY || 1]}
-                assetsPath={assetsPath}
-                location={layer.location}
-                emitter={layer.emitter} />
+            element = <Container x={layer.emitter.pos.x} y={layer.emitter.pos.y}>
+                    <Particles
+                        isActive={isSelected}
+                        alpha={isHighlighted ? 1 : .5}
+                        assetsPath={assetsPath}
+                        location={layer.location}
+                        emitter={layer.emitter} />
+                </Container>
         } else
             element = <Container scale={[layer.scaleX || 1, layer.scaleY || 1]}>
                 {(layer.children || []).map((l, i) =>

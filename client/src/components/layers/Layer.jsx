@@ -117,7 +117,7 @@ class Layer extends Component {
         return <ContextMenuTrigger
             id={`contextmenu-layer-${this.props.contextmenu}`}
             holdToDisplay={-1}
-            collect={() => ({ path, name, tabs, assetId: id, asset })}>
+            collect={() => ({ path, name, emitter, tabs, assetId: id, asset })}>
             {this.props.connectDropTarget(<div className={classNames(className)}
                 onClick={this.onNodeClick}
                 onDoubleClick={this.editBundle}>

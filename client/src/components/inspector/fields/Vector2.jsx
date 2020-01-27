@@ -1,4 +1,5 @@
 import React, {Component} from 'react'
+import './vector.css'
 
 class Vector2 extends Component {
 
@@ -9,7 +10,7 @@ class Vector2 extends Component {
     render() {
 
         return (
-            <div className="field">
+            <div className="field vector">
                 <p className="field-title">{this.props.title}</p>
                 <div className="field-flex">
                     <div className="field-label">X</div>
@@ -27,6 +28,7 @@ class Vector2 extends Component {
                         step={this.props.step}
                         disabled={this.props.disabled} />
                 </div>
+                {this.props.help && <div className="flex-help" data-tooltip={this.props.help} />}
             </div>
         )
     }

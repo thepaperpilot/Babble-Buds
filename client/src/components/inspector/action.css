@@ -138,20 +138,14 @@
 }
 
 .field textarea, .field input {
-    border-bottom-width: 1px;
     margin-bottom: 0;
 }
 
 .field input[type="number"] {
-    border-bottom-width: 1px;
     padding-top: 4px;
     padding-left: 8px;
     box-sizing: border-box;
     height: 18px;
-}
-
-.field input[type="number"]:focus {
-    border-bottom-width: 1px;
 }
 
 .field input[type="color"] {

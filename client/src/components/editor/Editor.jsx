@@ -13,6 +13,7 @@ import { selectLayer } from '../../redux/editor/selected'
 import './editor.css'
 
 const DISTANCE = 10000
+const PARTICLE_FRAME_DURATION = 25
 const TYPE_MAP = {
     environment: (p, id) => p.environments[id] && p.environments[id].layers,
     puppet: (p, id) => p.characters[id] && p.characters[id].layers,
@@ -205,14 +206,14 @@ class Editor extends Component {
             // Handle it being a particle effect asset separately
             if (Array.isArray(layers)) {
                 if (!this.intervalId)
-                    this.intervalId = setInterval(this.renderViewport, 50)
+                    this.intervalId = setInterval(this.renderViewport, PARTICLE_FRAME_DURATION)
             } else {
                 let currentLayer = layers
                 for (let i = 0; i < selected.layer.length; i++)
                     currentLayer = layers.children[selected.layer[i]]
                 if (currentLayer && currentLayer.id && currentLayer.id in assets && assets[currentLayer.id].type === 'particles') {
                     if (!this.intervalId) {
-                        this.intervalId = setInterval(this.renderViewport, 50)
+                        this.intervalId = setInterval(this.renderViewport, PARTICLE_FRAME_DURATION)
                     }
                 } else if (this.intervalId) {
                     clearInterval(this.intervalId)

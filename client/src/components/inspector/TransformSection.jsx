@@ -15,7 +15,7 @@ class TransformSection extends Component {
     }
 
     changePosition(pos) {
-        this.props.dispatch(changeLayer(this.props.target, { x: pos[0], y: pos[1] }))
+        this.props.dispatch(changeLayer(this.props.target, { x: pos[0], y: -pos[1] }))
     }
 
     changeScale(scale) {

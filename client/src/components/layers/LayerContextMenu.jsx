@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { ContextMenu, MenuItem, SubMenu, connectMenu } from 'react-contextmenu'
-import { deleteLayer, wrapLayer, addLayer } from '../../redux/editor/layers'
+import { deleteLayer, deleteEmitter, wrapLayer, addLayer } from '../../redux/editor/layers'
 import { open } from '../../redux/editor/editor'
 import { createAssetBundle } from '../../redux/project/assets/actions'
 
@@ -38,6 +38,11 @@ class LayerContextMenu extends Component {
             onShow={this.props.onShow} onHide={this.props.onHide}>
             <MenuItem onClick={this.editLayer(deleteLayer)}>Delete Layer</MenuItem>
             <MenuItem onClick={this.editLayer(wrapLayer)}>Wrap Layer</MenuItem>
+        </ContextMenu>
+
+        if (this.props.trigger.emitter) return <ContextMenu id={this.props.id}
+            onShow={this.props.onShow} onHide={this.props.onHide}>
+            <MenuItem onClick={this.editLayer(deleteEmitter)}>Delete Layer</MenuItem>
         </ContextMenu>
 
         const {assetId, tabs, asset} = this.props.trigger

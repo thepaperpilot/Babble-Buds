@@ -123,6 +123,23 @@ export function changeLayer(path, layer = {}) {
     }
 }
 
+export function changeEmitter(path, emitter = {}) {
+    return (dispatch, getState) => {
+        const layers = getState().editor.present.layers.slice()
+        emitter = util.updateObject(layers[path[0]].emitter, emitter)
+        layers[path[0]] = util.updateObject(layers[path[0]], { emitter })
+        dispatch({ type: CHANGE_LAYERS, layers })
+    }
+}
+
+export function changeEmitterName(path, name) {
+    return (dispatch, getState) => {
+        const layers = getState().editor.present.layers.slice()
+        layers[path[0]] = util.updateObject(layers[path[0]], { name })
+        dispatch({ type: CHANGE_LAYERS, layers })
+    }
+}
+
 // Use this as a shorthand for changing the editor's root layer
 export function setLayers(layers) {
     if (Array.isArray(layers))
@@ -194,6 +211,22 @@ export function deleteLayer(path) {
 
         if (state.inspector.targetType === 'layer' && comparePaths(state.inspector.target.slice(0, path.length), path))
             dispatch(close())
+    }
+}
+
+export function deleteEmitter(path) {
+    return (dispatch, getState) => {
+        const state = getState()
+        if (!checkEditor(dispatch, state)) return
+
+        if (path.length === 0) {
+            dispatch(warn("You can't delete the root layer."))
+            return
+        }
+
+        const layers = state.editor.present.layers.slice()
+        layers.splice(path[0], 1)
+        dispatch({ type: CHANGE_LAYERS, layers })
     }
 }
 

@@ -32,6 +32,16 @@ function getIcon (instance, image) {
     return icon
 }
 
+function getEmitterSize({ lifetime, speed, maxSpeed, acceleration, scale }, container) {
+    const isAccelerating = acceleration.x || acceleration.y
+    const avgSpeed = isAccelerating ?
+        maxSpeed || speed.start + Math.sqrt(acceleration.x * acceleration.x + acceleration.y * acceleration.y) / 2 :
+        (speed.start + speed.end) / 2
+    const texture = container.children[0].emitter.particleImages[0]
+    const textureSize = Math.max(scale.start, scale.end) * Math.max(texture.width, texture.height)
+    return 2 * lifetime.max * avgSpeed + textureSize
+}
+
 function startDrag(instance) {
     return e => {
         const target = e.currentTarget
@@ -102,6 +112,10 @@ function endMoveDrag(instance, dispatch, e) {
             x: startPosition.x + (dx || 0),
             y: startPosition.y + (dy || 0)
         }
+        if (instance.props.isEmitter) {
+            instance.layer.position.x = 0
+            instance.layer.position.y = 0
+        }
         dispatch(changeLayer(instance.props.layer.path, instance.props.isEmitter ? { pos } : pos))
         e.currentTarget.dx = 0
         e.currentTarget.dy = 0
@@ -139,8 +153,13 @@ function onMove(instance) {
         target.dy = dy
 
         // Update the layer and selector now
-        instance.layer.position.x = target.startPosition.x + dx
-        instance.layer.position.y = target.startPosition.y + dy
+        if (instance.props.isEmitter) {
+            instance.layer.position.x = dx
+            instance.layer.position.y = dy
+        } else {
+            instance.layer.position.x = target.startPosition.x + dx
+            instance.layer.position.y = target.startPosition.y + dy
+        }
 
         instance.selector.position.x = target.startPosition.x + dx
         instance.selector.position.y = target.startPosition.y + dy
@@ -289,23 +308,19 @@ function drawGraphics(instance) {
             rotation = rotation || 0
 
             if (isEmitter) {
-                const {lifetime, speed, maxSpeed, acceleration} = layer.emitter
-                const isAccelerating = acceleration.x || acceleration.y
-                width = height = 2 * lifetime.max * (isAccelerating ? maxSpeed : (speed.start + speed.end) / 2)
+                width = height = getEmitterSize(layer.emitter, instance.parent.children[0])
             } else if (emitters) {
                 let minX, minY, maxX, maxY
-                emitters.forEach(({ emitter }) => {
-                    console.log(emitter)
-                    const {lifetime, speed, maxSpeed, acceleration, pos} = emitter
-                    const isAccelerating = acceleration.x || acceleration.y
-                    const size = lifetime.max * (isAccelerating ? maxSpeed : (speed.start + speed.end) / 2)
+                emitters.forEach(({ emitter }, i) => {
+                    const pos = emitter.pos
+                    const size = getEmitterSize(emitter, instance.parent.children[i]) / 2
                     minX = Math.min(minX || 0, pos.x - size)
                     maxX = Math.max(maxX || 0, pos.x + size)
-                    minY = Math.min(minY || 0, pos.y - size)
-                    maxY = Math.max(maxY || 0, pos.y + size)
+                    minY = Math.min(minY || 0, -pos.y - size)
+                    maxY = Math.max(maxY || 0, -pos.y + size)
                 })
-                width = maxX - minX
-                height = maxY - minY
+                width = Math.max(maxX, -minX) * 2 * (layer.scaleX || 1)
+                height = Math.max(maxY, -minY) * 2 * (layer.scaleY || 1)
             } else {
                 const bounds = instance.layer.getLocalBounds()
                 width = 2 * Math.max(Math.abs(bounds.left), Math.abs(bounds.right))
@@ -445,7 +460,6 @@ export const behavior = {
                 const target = e.currentTarget
                 if (instance.props.disabled) return
                 target.startMouse = {x, y}
-                console.log(layer)
                 target.startPosition = instance.props.isEmitter ?
                     layer.layer.emitter.pos : {x: layer.layer.x || 0, y: layer.layer.y || 0}
                 root.on('mousemove', instance.selector.mousemove)
