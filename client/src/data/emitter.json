@@ -26,7 +26,6 @@
 		"min": 0,
 		"max": 360
 	},
-	"noRotation": false,
 	"rotationSpeed": {
 		"min": 0,
 		"max": 0

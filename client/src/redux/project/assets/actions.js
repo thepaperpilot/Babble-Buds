@@ -22,7 +22,7 @@ export function addAssets(assets, updateBackground = true) {
 
         if (updateBackground) {
             dispatch(info('Updating assets in background process...'))
-            ipcRenderer.send('background', 'update assets', util.updateObject(state.project.assets, assets), state.project.settings.assetsPath)
+            ipcRenderer.send('background', 'update assets', util.updateObject(state.project.assets, assets), state.project.assetsPath)
         }
 
         let folders = state.project.folders
@@ -143,7 +143,7 @@ export function deleteTab(tab) {
 export function setLayers(asset, layers) {
     return (dispatch, getState) => {
         const state = getState()
-        const {project, assets, settings} = state.project
+        const {project, assets, assetsPath, settings} = state.project
 
         if (!(asset in assets)) {
             dispatch(warn("Cannot modify asset because asset does not exist."))
@@ -161,7 +161,7 @@ export function setLayers(asset, layers) {
         const newAssets = util.updateObject(assets, {
             [asset]: util.updateObject(assets[asset], newAsset)
         })
-        ipcRenderer.send('background', 'update assets', newAssets, settings.assetsPath)
+        ipcRenderer.send('background', 'update assets', newAssets, assetsPath)
 
         const thumbnailPath = path.join(project, settings.assetsPath,
             state.self, `${asset.split(':')[1]}`)
@@ -175,7 +175,7 @@ export function setLayers(asset, layers) {
 export function setParticles(asset, emitters) {
     return (dispatch, getState) => {
         const state = getState()
-        const {project, assets, settings} = state.project
+        const {project, assets, assetsPath, settings} = state.project
 
         if (!(asset in assets)) {
             dispatch(warn("Cannot modify asset because asset does not exist."))
@@ -192,7 +192,7 @@ export function setParticles(asset, emitters) {
         const newAssets = util.updateObject(assets, {
             [asset]: util.updateObject(assets[asset], newAsset)
         })
-        ipcRenderer.send('background', 'update assets', newAssets, settings.assetsPath)
+        ipcRenderer.send('background', 'update assets', newAssets, assetsPath)
 
         const thumbnailPath = path.join(project, settings.assetsPath,
             state.self, `${asset.split(':')[1]}`)
