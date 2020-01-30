@@ -40,7 +40,7 @@ export function loadCharacters(settings, charactersPath, defaults) {
 
         const id = settings.characters[i].id
         const character = characters[id] =
-            Object.assign({}, defaults.character, loadedCharacter)
+            Object.assign({}, defaults.character, loadedCharacter, { id })
         if (character.layers === defaults.character.layers)
             character.layers = { children: [] }
 

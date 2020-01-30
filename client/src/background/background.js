@@ -59,7 +59,6 @@ async function generateThumbnails(thumbnailsPath, character, type, id) {
     character.position = 1
     character.facingLeft = false
     character.emote = 0
-    console.log(character)
     const puppet = stage.addPuppet(character)
 
     // If its an asset bundle, ignore emotes
