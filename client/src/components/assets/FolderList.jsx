@@ -45,7 +45,7 @@ const assetTarget = {
             return
         }
         
-        item.dispatch(moveFolder(dragIndex, hoverIndex))
+        thisItem.props.dispatch(moveFolder(dragIndex, hoverIndex))
 
         monitor.getItem().index = hoverIndex
     }
@@ -99,7 +99,7 @@ export class FolderTarget extends PureComponent {
 }
 
 // Use some HOCs to give us our dispatch and other props
-const ConnectedFolderTarget = DragSource('folder', folderSource, collectSource)(DropTarget(['asset', 'folder'], assetTarget, collect)(FolderTarget))
+const ConnectedFolderTarget = connect()(DragSource('folder', folderSource, collectSource)(DropTarget(['asset', 'folder'], assetTarget, collect)(FolderTarget)))
 
 class NewFolderButton extends PureComponent {
     constructor(props) {
