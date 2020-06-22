@@ -46,6 +46,11 @@ class Environment extends Component {
                     })}/>
                 <div className="inspector-content">
                     <Scrollbar allowOuterScroll={true} heightRelativeToParent="100%">
+                        {disabled ? <div className="action">
+                            <div className="info">
+                                The default environment is used as a fallback and cannot be edited. To change the environment please create a new one or duplicate the default environment.
+                            </div>
+                        </div> : null}
                         <div className="action">
                             <Foldable title="General">
                                 <Text
