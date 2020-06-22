@@ -137,11 +137,11 @@ class Project extends Component {
     constructor(props) {
         super(props)
 
-        this.state = getTheme(props.color)
+        this.state = props.themeApp ? getTheme(props.color) : DEFAULT_THEME
     }
 
     componentWillReceiveProps(newProps) {
-        this.setState(getTheme(newProps.color))
+        this.setState(newProps.themeApp ? getTheme(newProps.color) : DEFAULT_THEME)
     }
 
     render() {
@@ -155,7 +155,8 @@ class Project extends Component {
 
 function mapStateToProps(state) {
     return {
-        color: state.environment.color
+        color: state.environment.color,
+        themeApp: state.environment.themeApp
     }
 }
 

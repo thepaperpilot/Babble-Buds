@@ -2,6 +2,7 @@ import React, {Component} from 'react'
 import { connect } from 'react-redux'
 import Scrollbar from 'react-custom-scroll'
 import Header from './Header'
+import Checkbox from './fields/Checkbox'
 import Number from './fields/Number'
 import Text from './fields/Text'
 import Color from './fields/Color'
@@ -26,7 +27,7 @@ class Environment extends Component {
     render() {
         const {
             name, puppetScale, numCharacters,
-            color, width, height
+            color, themeApp, width, height
         } = this.props.environment
 
         const disabled = this.props.target === -1
@@ -72,6 +73,11 @@ class Environment extends Component {
                                     title="Background Color"
                                     value={color}
                                     onChange={this.changeEnvironment('color')}
+                                    disabled={disabled} />
+                                <Checkbox
+                                    title="Tint Window"
+                                    value={themeApp}
+                                    onChange={this.changeEnvironment('themeApp')}
                                     disabled={disabled} />
                             </Foldable>
                         </div>

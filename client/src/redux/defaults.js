@@ -14,6 +14,7 @@ export default util.createReducer({
     environment: {
         'name': 'Default',
         'color': '#242a33',
+        'themeApp': true,
         'width': 1920,
         'height': 1080,
         'layers': {
