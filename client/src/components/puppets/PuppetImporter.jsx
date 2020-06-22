@@ -145,8 +145,16 @@ class PuppetImporter extends Component {
                 // Continue searching through the layers
                 checkLayer(puppet, layer)
 
-                // Ensure this is a new asset
+                // Check if this is an asset layer
                 if (!('id' in layer)) return
+
+                // When parsing characters, it can't add names to
+                // asset layers that were ported from the old layers system
+                // So check for that and add them here
+                if (!('name' in layer))
+                    layer.name = this.state.assets[layer.id].name
+
+                // Check if this is a new asset
                 if (layer.id in this.props.assets) return
                 if (layer.id in assets) return
 
@@ -188,9 +196,9 @@ class PuppetImporter extends Component {
             // Assets path to copy assets from
             this.state.assetsPaths[filepath],
             // Assets path to move assets to
-            path.join(this.props.project, this.props.assetsPath),
+            path.join(...this.props.project.split('\\'), this.props.assetsPath),
             // Thumbnails path to save thumbnails to
-            path.join(this.props.project, this.props.charactersPath, '..', 'thumbnails'),
+            path.join(...this.props.project.split('\\'), this.props.charactersPath, '..', 'thumbnails'),
             // ID for sending status updates as new puppets get added
             puppetsStatusId,
             // ID for sending status updates as new assets get added
