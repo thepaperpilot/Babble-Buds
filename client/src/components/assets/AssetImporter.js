@@ -210,7 +210,7 @@ class AssetImporter extends Component {
             // Assets path to copy assets from
             this.state.assetsPaths[filepath].assetsPath,
             // Assets path to move assets to
-            path.join(this.props.project, this.props.assetsPath),
+            path.join(...this.props.project.split('\\'), this.props.assetsPath),
             // ID for sending status updates as new assets get added
             statusId
         )
