@@ -14,7 +14,7 @@ import { addCharacter } from '../../redux/project/characters/actions'
 import { addEnvironment } from '../../redux/project/environments/actions'
 
 const electron = window.require('electron')
-const actions = { moveLeft, moveRight, jiggle, changePuppet, changeEnvironment, setEmote }
+const actions = { moveLeft, moveRight, jiggle, changePuppet, changeEnvironment, setEmote, setBabbling }
 
 class Project extends Component {
     constructor(props) {
@@ -25,6 +25,7 @@ class Project extends Component {
         this.keyDown = this.keyDown.bind(this)
         this.keyUp = this.keyUp.bind(this)
         this.dispatchPassthrough = this.dispatchPassthrough.bind(this)
+        this.togglePopout = this.togglePopout.bind(this)
         this.undo = this.undo.bind(this)
         this.redo = this.redo.bind(this)
         this.importAssets = this.importAssets.bind(this)
@@ -38,6 +39,7 @@ class Project extends Component {
         window.addEventListener('keydown', this.keyDown)
         window.addEventListener('keyup', this.keyUp)
         electron.ipcRenderer.on('dispatch', this.dispatchPassthrough)
+        electron.ipcRenderer.on('togglePopout', this.togglePopout)
         electron.ipcRenderer.on('undo', this.undo)
         electron.ipcRenderer.on('redo', this.redo)
         electron.ipcRenderer.on('import assets', this.importAssets)
@@ -52,8 +54,9 @@ class Project extends Component {
         window.removeEventListener('keydown', this.keyDown)
         window.removeEventListener('keyup', this.keyUp)
         electron.ipcRenderer.removeListener('dispatch', this.dispatchPassthrough)
-        electron.ipcRenderer.off('dispatch', this.undo)
-        electron.ipcRenderer.off('dispatch', this.redo)
+        electron.ipcRenderer.off('togglePopout', this.togglePopout)
+        electron.ipcRenderer.off('undo', this.undo)
+        electron.ipcRenderer.off('redo', this.redo)
         electron.ipcRenderer.off('import assets', this.importAssets)
         electron.ipcRenderer.off('import puppet', this.importPuppet)
         electron.ipcRenderer.off('import environment', this.importEnvironment)
@@ -71,7 +74,7 @@ class Project extends Component {
                 this.props.dispatch(changeEnvironment(e.keyCode - 49))
             else
                 this.props.dispatch(changePuppet(e.keyCode - 49))
-        } else switch(e.keyCode) {
+        } else if (!e.shiftKey && !e.ctrlKey) switch(e.keyCode) {
         case 32:
             this.props.dispatch(setBabbling(true));
             if (e.preventDefault) e.preventDefault();
@@ -106,6 +109,10 @@ class Project extends Component {
 
     dispatchPassthrough(e, action, data) {
         this.props.dispatch(actions[action](data))
+    }
+
+    togglePopout() {
+        electron.remote.ipcMain.emit('toggle popout visibility')
     }
 
     undo() {

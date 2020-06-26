@@ -10,8 +10,6 @@ class Stage extends Component {
     constructor(props) {
         super(props)
 
-        this.puppets = null
-
         this.info = this.info.bind(this)
         this.warn = this.warn.bind(this)
         this.log = this.log.bind(this)
@@ -35,17 +33,20 @@ class Stage extends Component {
     componentWillUnmount() {
         if (this.regPuppetLoader)
             clearTimeout(this.regPuppetLoader)
+        this.stage.enabled = false
     }
 
+    // TODO I had to start stringifying things to make the popout not give false === negatives
+    // Find a faster way to handle that
     componentWillReceiveProps(newProps) {
         // Update environment
-        if (this.props.environment !== newProps.environment) {
+        if (JSON.stringify(this.props.environment) !== JSON.stringify(newProps.environment)) {
             this.stage.environment = newProps.environment
             this.stage.resize()
             this.stage.updateEnvironment()
         }
         // Update assets
-        if (this.props.assets !== newProps.assets ||
+        if (JSON.stringify(this.props.assets) !== JSON.stringify(newProps.assets) ||
             this.props.assetsPath !== newProps.assetsPath) {
             this.stage.assets = newProps.assets
             this.stage.assetsPath = newProps.assetsPath
@@ -53,51 +54,50 @@ class Stage extends Component {
         }
 
         // If we haven't loaded our puppets in yet, ignore actor changes
-        if (this.puppets == null)
+        if (!this.stage.puppets.length)
             return
 
         // Add actors
-        newProps.actors.filter(actor => !(actor.id in this.puppets)).forEach(actor => {
+        newProps.actors.filter(actor => !(actor.id in this.stage.puppets)).forEach(actor => {
             const character = Object.assign({}, actor.character, {
                 position: actor.position,
                 emote: actor.emote,
                 facingLeft: actor.facingLeft
             })
-            this.puppets[actor.id] = this.stage.addPuppet(character, actor.id)
+            this.stage.addPuppet(character, actor.id)
         })
         // Remove actors
-        Object.keys(this.puppets).filter(id => !newProps.actors.some(a => a.id == id)).forEach(id => {
+        Object.keys(this.stage.puppets).filter(id => !newProps.actors.some(a => a.id == id)).forEach(id => {
             this.stage.removePuppet(id)
-            delete this.puppets[id]
         })
         // Update actors
-        newProps.actors.filter(actor => actor.id in this.puppets).forEach(newActor => {
+        newProps.actors.filter(actor => actor.id in this.stage.puppets).forEach(newActor => {
             const old = this.props.actors.find(actor => actor.id == newActor.id)
             if (old == null) return
-            const puppet = this.puppets[newActor.id]
+            if (JSON.stringify(old.character) !== JSON.stringify(newActor.character)) {
+                const tempPuppet = this.stage.createPuppet(newActor.character)
+                this.stage.puppets[newActor.id] =
+                    this.stage.setPuppet(newActor.id, tempPuppet)
+            }
             if (old.emote !== newActor.emote)
-                puppet.changeEmote(newActor.emote)
+                this.stage.puppets[newActor.id].changeEmote(newActor.emote)
             if (old.position !== newActor.position)
-                puppet.target = newActor.position
+                this.stage.puppets[newActor.id].target = newActor.position
             if (old.facingLeft !== newActor.facingLeft) {
-                puppet.facingLeft = newActor.facingLeft
-                if (puppet.movingAnim === 0)
-                    puppet.container.scale.x = (newActor.facingLeft ? -1 : 1) *
+                this.stage.puppets[newActor.id].facingLeft = newActor.facingLeft
+                if (this.stage.puppets[newActor.id].movingAnim === 0)
+                    this.stage.puppets[newActor.id].container.scale.x = (newActor.facingLeft ? -1 : 1) *
                         (newProps.environment.puppetScale || 1)
             }
             if (old.babbling !== newActor.babbling)
-                puppet.setBabbling(newActor.babbling)
+                this.stage.puppets[newActor.id].setBabbling(newActor.babbling)
             if (old.jiggle !== newActor.jiggle)
-                puppet.jiggle()
-            if (old.character !== newActor.character) {
-                const tempPuppet = this.stage.createPuppet(newActor.character)
-                this.puppets[newActor.id] =
-                    this.stage.setPuppet(newActor.id, tempPuppet)
-            }
+                this.stage.puppets[newActor.id].jiggle()
             this.stage.dirty = true
         })
         if (this.props.banish !== newProps.banish)
             this.stage.banishPuppets()
+        this.stage.gameLoop()
     }
 
     info(content) {
@@ -133,16 +133,13 @@ class Stage extends Component {
             this.props.dispatch(inspect(e.target.puppet.puppet.id, 'puppet-network'))
         })
 
-        this.puppets = this.props.actors.reduce((acc, curr) => {
+        this.props.actors.forEach(curr => {
             const character = Object.assign({}, curr.character, {
                 position: curr.position,
                 emote: curr.emote,
                 facingLeft: curr.facingLeft
             })
-            return {
-                ...acc,
-                [curr.id]: this.stage.addPuppet(character, curr.id)
-            }
+            this.stage.addPuppet(character, curr.id)
         }, {})
     }
 
@@ -168,4 +165,4 @@ function mapStateToProps(state) {
     }
 }
 
-export default connect(mapStateToProps)(Stage)
+export default connect(mapStateToProps, null, null, { forwardRef: true })(Stage)

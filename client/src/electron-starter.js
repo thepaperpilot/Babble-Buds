@@ -1,4 +1,4 @@
-const {app, BrowserWindow, ipcMain} = require('electron')
+const {protocol, app, BrowserWindow, ipcMain} = require('electron')
 const windowStateKeeper = require('electron-window-state')
 const settings = require('./main-process/settings')
 
@@ -9,15 +9,26 @@ const url = require('url')
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
 let backgroundWindow
+let popoutWindow
 
 function createWindow() {
+    protocol.registerFileProtocol('file', (request, callback) => {
+        const pathname = decodeURI(request.url.replace('file:///', ''));
+        callback(pathname);
+    });
+
     // Load application settings
     settings.load()
 
-    // Load window state
+    // Load window states
     let mainWindowState = windowStateKeeper({
         defaultWidth: 1280,
         defaultHeight: 720
+    })
+    let popoutWindowState = windowStateKeeper({
+        defaultWidth: 1280,
+        defaultHeight: 720,
+        file: "popout-window-state.json"
     })
 
     // Create the browser window.
@@ -35,7 +46,6 @@ function createWindow() {
             nodeIntegration: true
         }
     })
-    mainWindow.openDevTools()
 
     mainWindowState.manage(mainWindow)
 
@@ -54,6 +64,8 @@ function createWindow() {
         mainWindow = null
         backgroundWindow.destroy()
         backgroundWindow = null
+        popoutWindow.destroy()
+        popoutWindow = null
     })
 
     // Create background window
@@ -70,12 +82,42 @@ function createWindow() {
         slashes: true
     }))
 
+    // Create popout window
+    popoutWindow = new BrowserWindow({
+        'x': popoutWindowState.x,
+        'y': popoutWindowState.y,
+        'width': popoutWindowState.width,
+        'height': popoutWindowState.height,
+        show: false,
+        frame: false,
+        backgroundColor: '#242a33',
+        icon: path.join(__dirname, '..', 'public', 'icons', 'icon.ico'),
+        webPreferences: {
+            webSecurity: false,
+            nodeIntegration: true
+        }
+    })
+
+    popoutWindowState.manage(popoutWindow)
+
+    popoutWindow.loadURL(process.env.ELECTRON_POPOUT_START_URL || url.format({
+        pathname: path.join(__dirname, 'popout-index.html'),
+        protocol: 'file:',
+        slashes: true
+    }))
+
+    popoutWindow.on('hide', function () {
+        mainWindow.focus()
+    })
+
     // Setup passthroughs between the foreground and background windows
     ipcMain.on('background', (e, ...event) => backgroundWindow.webContents.send(...event))
     ipcMain.on('foreground', (e, ...event) => mainWindow.webContents.send(...event))
+    ipcMain.on('popout', (e, ...event) => popoutWindow.webContents.send(...event))
     // TODO if you hide the background window, it will ignore ipc messages :(
     ipcMain.on('change background visibility', (e, visible) => backgroundWindow[visible ? 'show' : 'hide']())
     ipcMain.on('toggle background visibility', () => backgroundWindow[backgroundWindow.isVisible() ? 'hide' : 'show']())
+    ipcMain.on('toggle popout visibility', () => popoutWindow[popoutWindow.isVisible() ? 'hide' : 'show']())
 
     // Create the application menu
     require('./main-process/menus/application-menu.js')
@@ -92,6 +134,8 @@ exports.openProject = function() {
 
 // Holy shit this one line of code fixed all my performance issues
 app.disableHardwareAcceleration()
+
+app.commandLine.appendSwitch('disable-features', 'OutOfBlinkCors');
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.

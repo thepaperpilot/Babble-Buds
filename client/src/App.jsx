@@ -13,11 +13,21 @@ const electron = window.require('electron')
 const dialog = electron.remote.dialog
 const settingsManager = electron.remote.require('./main-process/settings')
 
+class PopoutInterface extends Component {
+    componentWillReceiveProps(newProps) {
+        electron.ipcRenderer.send('popout', 'setState', newProps.state)
+    }
+
+    render() {
+        return null
+    }
+}
+
+const ConnectedPopoutInterface = connect(state => ({ state }))(PopoutInterface)
+
 class App extends Component {
     constructor(props) {
         super(props)
-
-        this.stage = React.createRef()
 
         this.setProject = this.setProject.bind(this)
         this.closeProject = this.closeProject.bind(this)
@@ -50,14 +60,15 @@ class App extends Component {
         return this.props.project !== nextProps.project
     }
 
-    setProject(event, project) {
-        if (!this.checkChanges()) return
+    async setProject(event, project) {
+        console.log(project)
+        if (!(await this.checkChanges())) return
 
         this.props.dispatch(load(project))
     }
 
-    closeProject() {
-        if (!this.checkChanges()) return
+    async closeProject() {
+        if (!(await this.checkChanges())) return
 
         settingsManager.closeProject()
         settingsManager.save()
@@ -65,7 +76,7 @@ class App extends Component {
         this.props.dispatch(close())
     }
 
-    checkChanges() {
+    async checkChanges() {
         if (this.props.project === null) return true
             
         const { settings, characters, environments, assets, saver } = this.props
@@ -76,7 +87,7 @@ class App extends Component {
         changes = changes || saver.assets !== JSON.stringify(assets)
 
         if (changes) {
-            let response = dialog.showMessageBox({
+            let response = await dialog.showMessageBox({
                 type: 'question',
                 buttons: ['Don\'t Save', 'Cancel', 'Save'],
                 defaultId: 2,
@@ -112,6 +123,7 @@ class App extends Component {
                         <Project /> :
                         <Welcome />
                 }
+                <ConnectedPopoutInterface />
             </div>
         )
     }

@@ -5,16 +5,34 @@ import {Provider} from 'react-redux'
 import logger from 'redux-logger'
 import thunk from 'redux-thunk'
 import { batchedSubscribe } from 'redux-batched-subscribe'
-import App from './App'
-import reducer from './redux/index'
+import PopoutApp from './Popout-App'
+import MainApp from './App'
+import util from './redux/util.js'
+import rootReducer from './redux/index'
 
 import './index.css'
 
-const enhancer = compose(
-    applyMiddleware(logger, thunk),
-    batchedSubscribe(unstable_batchedUpdates)
-)
-const store = createStore(reducer, enhancer)
+let store
+let App
+if (process.env.REACT_APP_POPOUT === "true") {
+	const reducer = util.createReducer({}, {
+	    SET_STATE: (state, action) => action.state
+	})
+	const enhancer = compose(
+	    applyMiddleware(logger, thunk),
+	    batchedSubscribe(unstable_batchedUpdates)
+	)
+	store = createStore(reducer, enhancer)
+	App = PopoutApp
+} else {
+	const reducer = rootReducer
+	const enhancer = compose(
+	    applyMiddleware(logger, thunk),
+	    batchedSubscribe(unstable_batchedUpdates)
+	)
+	store = createStore(reducer, enhancer)
+	App = MainApp
+}
 
 ReactDOM.render(
     <Provider store={store}>

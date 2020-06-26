@@ -56,11 +56,8 @@ class Panels extends Component {
             child = <div className="panel">{node.getName()}</div>
             break
         case 'stage':
-            child = <Stage
-                ref={this.props.stage}
-                assetUpdater={this.props.assetUpdater}
-                rect={node._rect}
-                id={node.getId()} />
+            child = <Stage id={node.getId()}
+                assetUpdater={this.props.assetUpdater} />
             break
         case 'inspector':
             child = <Inspector id={node.getId()} />

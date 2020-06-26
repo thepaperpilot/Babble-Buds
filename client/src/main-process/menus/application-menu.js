@@ -221,6 +221,12 @@ const template = [
                 click (item, focusedWindow) {
                     focusedWindow.webContents.send('togglePopout')
                 }
+            },
+            {
+                label: 'Toggle Dev Tools',
+                click (item, focusedWindow) {
+                    focusedWindow.toggleDevTools()
+                }
             }
         ]
     },
@@ -309,11 +315,10 @@ exports.updateMenu = function(enabled) {
     for (let i = 2; i <= 3; i++) {
         for (let j = 0; j < menu.items[i].submenu.items.length; j++) {
             menu.items[i].submenu.items[j].enabled = enabled
+            if (i == 2 && j == 16)
+                break
         }
     }
-    // Y u no work?
-    // menu.items[2].enabled = enabled
-    // menu.items[3].enabled = enabled
 }
 
 exports.updateMenu(false)

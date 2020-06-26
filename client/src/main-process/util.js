@@ -19,9 +19,9 @@ exports.selectDirectory = function() {
     })
 }
 
-exports.selectProject = function() {
+exports.selectProject = async function() {
     const browserWindow = BrowserWindow.getFocusedWindow()
-    dialog.showOpenDialog(browserWindow, {
+    const result = await dialog.showOpenDialog(browserWindow, {
         title: 'Open Project',
         defaultPath: path.join(app.getPath('home'), 'projects'),
         filters: [
@@ -31,11 +31,10 @@ exports.selectProject = function() {
         properties: [
             'openFile'
         ] 
-    }, (filepaths) => {
-        if (filepaths) {
-            browserWindow.webContents.send('set project', filepaths[0])
-        }
     })
+    if (result.filePaths.length) {
+        browserWindow.webContents.send('set project', result.filePaths[0])
+    }
 }
 
 exports.newProject = function(title, location, sample) {
