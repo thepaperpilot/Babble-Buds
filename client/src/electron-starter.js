@@ -106,6 +106,11 @@ function createWindow() {
         slashes: true
     }))
 
+    popoutWindow.on('close', function (event) {
+        popoutWindow.hide()
+        event.preventDefault()
+    })
+
     popoutWindow.on('hide', function () {
         mainWindow.focus()
     })

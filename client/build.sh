@@ -1,3 +1,6 @@
+mv popout-build/index.html build/popout-index.html
+cp -r popout-build/static/js build/static/js
+rm -R popout-build
 (cd build; npm install)
 mkdir build/.public
 mv build/* build/.public

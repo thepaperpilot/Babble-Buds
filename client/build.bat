@@ -1,3 +1,6 @@
+move popout-build\index.html build\popout-index.html
+robocopy popout-build\static\js build\static\js
+del /q popout-build
 setlocal
 cd build && call npm install
 endlocal
