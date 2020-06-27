@@ -22,10 +22,10 @@ class FolderContextMenu extends Component {
             this.props.trigger.inlineEdit.current.edit()
     }
 
-    addAsset() {
+    async addAsset() {
         // Store tab now because the trigger will be empty once the dialog is closed
         const tab = this.props.trigger.tab
-        remote.dialog.showOpenDialog(remote.BrowserWindow.getFocusedWindow(), {
+        const result = await remote.dialog.showOpenDialog(remote.BrowserWindow.getFocusedWindow(), {
             title: 'Add Assets',
             filters: [
                 {name: 'All Formats', extensions: ['png', 'gif', 'json']},
@@ -37,10 +37,11 @@ class FolderContextMenu extends Component {
                 'openFile',
                 'multiSelections'
             ]
-        }, (filepaths) => {
-            if (!filepaths) return
-            this.props.loadAssets(filepaths, tab)
         })
+
+        if (result.filePaths.length) {
+            this.props.loadAssets(result.filePaths, tab)
+        }
     }
 
     newParticleEffect() {

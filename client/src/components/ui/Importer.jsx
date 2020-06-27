@@ -77,7 +77,7 @@ class Importer extends Component {
         }
     }
 
-    openFile() {
+    async openFile() {
         const filters = [
             {name: 'Babble Buds Project File', extensions: ['babble']},
             ...(this.props.filters || []),
@@ -89,7 +89,7 @@ class Importer extends Component {
                 extensions: [ 'babble', ...this.props.filters.reduce((acc, curr) => [...acc, ...curr.extensions], []) ]
             })
 
-        remote.dialog.showOpenDialog(remote.BrowserWindow.getFocusedWindow(), {
+        const result = await remote.dialog.showOpenDialog(remote.BrowserWindow.getFocusedWindow(), {
             title: this.props.title,
             defaultPath: path.join(remote.app.getPath('home'), 'projects'),
             filters,
@@ -97,15 +97,15 @@ class Importer extends Component {
                 'openFile',
                 'multiSelections'
             ]
-        }, filepaths => {
-            if (!filepaths) return
+        })
 
+        if (result.filePaths.length) {
             const itemsByFile = {}
 
             if (this.props.onOpen) this.props.onOpen()
 
             let items = {}
-            filepaths.forEach(filepath => {
+            result.filePaths.forEach(filepath => {
                 filepath = filepath.replace(/\\/g, '/')
 
                 const newItems = this.props.readFile(filepath)
@@ -125,7 +125,7 @@ class Importer extends Component {
                     items,
                     itemsByFile
                 })
-        })
+        }
     }
 
     render() {

@@ -13,7 +13,10 @@ let popoutWindow
 
 function createWindow() {
     protocol.registerFileProtocol('file', (request, callback) => {
-        const pathname = decodeURI(request.url.replace('file:///', ''));
+        let pathname = decodeURI(request.url.replace('file:///', ''));
+        if (pathname.indexOf('?') > 0)
+            pathname = pathname.substring(0, pathname.indexOf("?"))
+        console.log(request, callback, pathname)
         callback(pathname);
     });
 
