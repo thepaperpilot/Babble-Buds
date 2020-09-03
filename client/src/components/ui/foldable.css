@@ -1,17 +1,14 @@
-.foldable {
-    position: relative;
-}
-
-.foldable:before {
+.foldable h4:before {
     content: "\25B8";
     position: absolute;
+    left: 0;
     top: -8px;
     display: block;
     transition: transform 300ms;
     font-size: xx-large;
 }
 
-.foldable.open:before {
+.foldable.open h4:before {
     transform: rotateZ(90deg);
 }
 
@@ -26,6 +23,7 @@
     margin-bottom: 0;
     padding-top: 4px;
     padding-bottom: 8px;
+    position: relative;
 }
 
 .subtitle {
