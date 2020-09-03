@@ -3,12 +3,12 @@
 }
 
 .foldable:before {
-    content: "\25B6";
+    content: "\25B8";
     position: absolute;
-    left: 4px;
-    top: 2px;
+    top: -8px;
     display: block;
     transition: transform 300ms;
+    font-size: xx-large;
 }
 
 .foldable.open:before {

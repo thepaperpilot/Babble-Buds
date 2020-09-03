@@ -35,10 +35,16 @@
 
 .caret-right, .caret-down {
     position: relative;
+    content: '\25B8';
+    transition: transform 300ms;
+}
+
+.caret-right:before, .caret-down:before {
+    content: '\25B8';
+    transition: transform 300ms;
 }
 
 .caret-right:before {
-    content: '\25B8';
     position: absolute;
     left: -25px;
     top: -2px;
@@ -48,7 +54,7 @@
 }
 
 .caret-down:before {
-    content: '\25BE';
+    transform: rotateZ(90deg);
     position: absolute;
     left: -25px;
     top: -2px;
