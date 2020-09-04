@@ -12,6 +12,8 @@ class Puppet extends Component {
         // I get the feeling some people won't like that I do this:
         this.state = this.componentWillReceiveProps(props)
 
+        this.inputField = React.createRef()
+
         this.renderSuggestion = this.renderSuggestion.bind(this)
         this.renderInputComponent = this.renderInputComponent.bind(this)
     }
@@ -39,7 +41,7 @@ class Puppet extends Component {
         return state
     }
 
-    renderSuggestion(suggestion) {
+    renderSuggestion(suggestion, data) {
         return <div className="smallThumbnail-wrapper">
             <div className="smallThumbnail-img" style={{width: '20px', height: '20px'}}>
                 <img
@@ -54,7 +56,17 @@ class Puppet extends Component {
     renderInputComponent(props) {
         props.onChange = e => e.preventDefault()
         return (
-            <div className="input-thumbnail">
+            <div className="input-thumbnail" onMouseDown={() => {
+                if (this.inputField.current.state.isFocused)
+                    this.justSelectedSuggestion = true
+            }} onMouseUp={() => {
+                if (this.justSelectedSuggestion) {
+                    this.justSelectedSuggestion = false
+                    setTimeout(() => {
+                        this.inputField.current.input.blur()
+                    })
+                }
+            }}>
                 <div className="input-wrapper">
                     {this.state.selected == null ?
                         <div className="placeholder">Select one...</div> :
@@ -69,7 +81,7 @@ class Puppet extends Component {
                         </div>
                     }
                 </div>
-                <input {...props} />
+                <input ref={this.inputComponent} {...props} />
             </div>
         )
     }
@@ -90,6 +102,7 @@ class Puppet extends Component {
                         this.props.canDrop ? 'rgba(0, 255, 0, .05)' : ''
                 }}>
                     <Autosuggest
+                        ref={this.inputField}
                         focusInputOnSuggestionClick={false}
                         suggestions={this.state.options}
                         renderSuggestion={this.renderSuggestion}
