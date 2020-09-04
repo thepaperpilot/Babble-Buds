@@ -26,7 +26,6 @@ class Folder extends Component {
     }
 
     onDrop(acceptedFiles) {
-        console.log(this.props)
         this.props.loadAssets(acceptedFiles.map(f => f.path), this.props.tab)
     }
 

@@ -121,7 +121,6 @@ async function generateThumbnails(thumbnailsPath, character, type, id) {
 }
 
 ipcRenderer.on('update assets', async (e, assets, assetsPath) => {
-    console.log(assets, assetsPath)
     await waitUntilAssetsLoaded()
     isLoadingAssets = true
     stage.assets = assets

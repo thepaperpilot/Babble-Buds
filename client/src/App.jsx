@@ -61,7 +61,6 @@ class App extends Component {
     }
 
     async setProject(event, project) {
-        console.log(project)
         if (!(await this.checkChanges())) return
 
         this.props.dispatch(load(project))
