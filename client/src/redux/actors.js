@@ -113,7 +113,7 @@ export function moveLeft(id, emitToServer = false) {
         }
 
         let actor = { facingLeft: true }
-        if (act.facingLeft || act.position == state.environment.numCharacters + 1)
+        if (act.facingLeft || act.position == 0 || act.position == state.environment.numCharacters + 1)
             actor.position = act.position - 1
         dispatch({ type: CHANGE, id, actor })
         if (emitToServer)
@@ -131,7 +131,7 @@ export function moveRight(id, emitToServer = false) {
         }
 
         let actor = { facingLeft: false }
-        if (!act.facingLeft || act.position === 0)
+        if (!act.facingLeft || act.position === 0 || act.position == state.environment.numCharacters + 1)
             actor.position = act.position + 1
         dispatch({ type: CHANGE, id, actor })
         if (emitToServer)
