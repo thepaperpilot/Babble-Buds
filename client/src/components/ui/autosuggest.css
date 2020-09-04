@@ -58,3 +58,7 @@
     right: 6px;
     top: 6px;
 }
+
+.autosuggest .react-autosuggest__container .smallThumbnail-img img {
+    background-color: unset;
+}
