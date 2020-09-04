@@ -9,6 +9,8 @@ class Select extends Component {
         // I get the feeling some people won't like that I do this:
         this.state = this.componentWillReceiveProps(props)
 
+        this.inputField = React.createRef()
+
         this.renderSuggestion = this.renderSuggestion.bind(this)
         this.renderInputComponent = this.renderInputComponent.bind(this)
     }
@@ -40,7 +42,17 @@ class Select extends Component {
     renderInputComponent(props) {
         props.onChange = e => e.preventDefault()
         return (
-            <div className="input-thumbnail">
+            <div className="input-thumbnail" onMouseDown={() => {
+                if (this.inputField.current.state.isFocused)
+                    this.justSelectedSuggestion = true
+            }} onMouseUp={() => {
+                if (this.justSelectedSuggestion) {
+                    this.justSelectedSuggestion = false
+                    setTimeout(() => {
+                        this.inputField.current.input.blur()
+                    })
+                }
+            }}>
                 <div className="input-wrapper">
                     {this.state.selected == null ?
                         <div className="placeholder">Select one...</div> :
@@ -63,6 +75,7 @@ class Select extends Component {
             <div className="autosuggest field select-field">
                 <p className="field-title">{this.props.title}</p>
                 <Autosuggest
+                    ref={this.inputField}
                     focusInputOnSuggestionClick={false}
                     suggestions={this.state.options}
                     renderSuggestion={this.renderSuggestion}
