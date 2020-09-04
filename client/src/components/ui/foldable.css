@@ -1,3 +1,7 @@
+.foldable {
+    width: 100%;
+}
+
 .foldable h4:before {
     content: "\25B8";
     position: absolute;
