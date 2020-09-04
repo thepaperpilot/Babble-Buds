@@ -58,7 +58,7 @@ class Stage extends Component {
             return
 
         // Add actors
-        newProps.actors.filter(actor => !(actor.id in this.stage.puppets)).forEach(actor => {
+        newProps.actors.filter(actor => !this.stage.puppets.some(puppet => puppet.id == actor.id)).forEach(actor => {
             const character = Object.assign({}, actor.character, {
                 position: actor.position,
                 emote: actor.emote,
@@ -67,32 +67,32 @@ class Stage extends Component {
             this.stage.addPuppet(character, actor.id)
         })
         // Remove actors
-        Object.keys(this.stage.puppets).filter(id => !newProps.actors.some(a => a.id == id)).forEach(id => {
-            this.stage.removePuppet(id)
+        this.stage.puppets.filter(puppet => !newProps.actors.some(a => a.id == puppet.id)).forEach(puppet => {
+            this.stage.removePuppet(puppet.id)
         })
         // Update actors
-        newProps.actors.filter(actor => actor.id in this.stage.puppets).forEach(newActor => {
+        newProps.actors.filter(actor => this.stage.puppets.some(puppet => puppet.id == actor.id)).forEach(newActor => {
             const old = this.props.actors.find(actor => actor.id == newActor.id)
             if (old == null) return
+            const puppet = this.stage.puppets.find(puppet => puppet.id == newActor.id)
             if (JSON.stringify(old.character) !== JSON.stringify(newActor.character)) {
                 const tempPuppet = this.stage.createPuppet(newActor.character)
-                this.stage.puppets[newActor.id] =
-                    this.stage.setPuppet(newActor.id, tempPuppet)
+                Object.assign(puppet, this.stage.setPuppet(newActor.id, tempPuppet))
             }
             if (old.emote !== newActor.emote)
-                this.stage.puppets[newActor.id].changeEmote(newActor.emote)
+                puppet.changeEmote(newActor.emote)
             if (old.position !== newActor.position)
-                this.stage.puppets[newActor.id].target = newActor.position
+                puppet.target = newActor.position
             if (old.facingLeft !== newActor.facingLeft) {
-                this.stage.puppets[newActor.id].facingLeft = newActor.facingLeft
-                if (this.stage.puppets[newActor.id].movingAnim === 0)
-                    this.stage.puppets[newActor.id].container.scale.x = (newActor.facingLeft ? -1 : 1) *
+                puppet.facingLeft = newActor.facingLeft
+                if (puppet.movingAnim === 0)
+                    puppet.container.scale.x = (newActor.facingLeft ? -1 : 1) *
                         (newProps.environment.puppetScale || 1)
             }
             if (old.babbling !== newActor.babbling)
-                this.stage.puppets[newActor.id].setBabbling(newActor.babbling)
+                puppet.setBabbling(newActor.babbling)
             if (old.jiggle !== newActor.jiggle)
-                this.stage.puppets[newActor.id].jiggle()
+                puppet.jiggle()
             this.stage.dirty = true
         })
         if (this.props.banish !== newProps.banish)
