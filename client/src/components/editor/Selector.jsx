@@ -381,7 +381,10 @@ export const behavior = {
     customDisplayObject: () => new Container(),
     customApplyProps: (instance, oldProps, newProps) => {
         instance.props = newProps
-        drawGraphics(instance)
+        if (instance.selector)
+            instance.selector.alpha = 0
+        // wait a frame before redrawing so the selected layer gets its props applied
+        setTimeout(() => drawGraphics(instance), 1)
     },
     customDidAttach: instance => {
         instance.props.selector.current = instance
