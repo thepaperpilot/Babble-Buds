@@ -137,9 +137,11 @@ function onMove(instance) {
         const {x, y} = e.data.global
         let dx = x - target.startMouse.x
         let dy = y - target.startMouse.y
-        // Adjust for current editor zoom
-        dx *= instance.props.scale
-        dy *= instance.props.scale
+
+        // Transform data based on the container's transform matrix
+        const mat = instance.layer.transform.worldTransform.clone()
+        mat.translate(-mat.tx, -mat.ty)
+        const point = mat.applyInverse({ x: dx, y: dy })
 
         if (e.data.originalEvent.ctrlKey) {
             if (Math.abs(dx) > Math.abs(dy)) {
@@ -149,20 +151,20 @@ function onMove(instance) {
         }
 
         // Store data for setting it on dragEnd
-        target.dx = dx
-        target.dy = dy
+        target.dx = point.x
+        target.dy = point.y
 
         // Update the layer and selector now
         if (instance.props.isEmitter) {
-            instance.layer.position.x = dx
-            instance.layer.position.y = dy
+            instance.layer.position.x = point.x
+            instance.layer.position.y = point.y
         } else {
-            instance.layer.position.x = target.startPosition.x + dx
-            instance.layer.position.y = target.startPosition.y + dy
+            instance.layer.position.x = target.startPosition.x + point.x
+            instance.layer.position.y = target.startPosition.y + point.y
         }
 
-        instance.selector.position.x = target.startPosition.x + dx
-        instance.selector.position.y = target.startPosition.y + dy
+        instance.selector.position.x = target.startPosition.x + dx * instance.props.scale
+        instance.selector.position.y = target.startPosition.y + dy * instance.props.scale
         
         instance.props.app.renderer.render(instance.props.app.stage)
     }
@@ -295,57 +297,91 @@ function drawGraphics(instance) {
         instance.selector.alpha = disabled ? .5 : 1
 
         if (instance.layer) {
-            let {x, y, rotation} = layer
-            let width, height
-
+            // Calculate instance bounds
+            // and use them to get bottom-left and upper-right points in viewport (root) space
+            let p1, p2
             if (isEmitter) {
-                x = layer.emitter.pos.x
-                y = layer.emitter.pos.y
-            }
-
-            x = x || 0
-            y = y || 0
-            rotation = rotation || 0
-
-            if (isEmitter) {
-                width = height = getEmitterSize(layer.emitter, instance.parent.children[0])
+                //bounds = getEmitterBounds(layer.emitter, instance.parent.children[0])
             } else if (emitters) {
                 let minX, minY, maxX, maxY
                 emitters.forEach(({ emitter }, i) => {
                     const pos = emitter.pos
-                    const size = getEmitterSize(emitter, instance.parent.children[i]) / 2
-                    minX = Math.min(minX || 0, pos.x - size)
-                    maxX = Math.max(maxX || 0, pos.x + size)
-                    minY = Math.min(minY || 0, -pos.y - size)
-                    maxY = Math.max(maxY || 0, -pos.y + size)
+                    //const size = getEmitterBounds(emitter, instance.parent.children[i]) / 2
+                    //minX = Math.min(minX || 0, pos.x - size)
+                    //maxX = Math.max(maxX || 0, pos.x + size)
+                    //minY = Math.min(minY || 0, -pos.y - size)
+                    //maxY = Math.max(maxY || 0, -pos.y + size)
                 })
-                width = Math.max(maxX, -minX) * 2 * (layer.scaleX || 1)
-                height = Math.max(maxY, -minY) * 2 * (layer.scaleY || 1)
+                //width = Math.max(maxX, -minX) * 2 * (layer.scaleX || 1)
+                //height = Math.max(maxY, -minY) * 2 * (layer.scaleY || 1)
             } else {
                 const bounds = instance.layer.getLocalBounds()
-                width = 2 * Math.max(Math.abs(bounds.left), Math.abs(bounds.right))
-                height = 2 * Math.max(Math.abs(bounds.top), Math.abs(bounds.bottom))
+                p1 = { x: bounds.left, y: bounds.bottom }
+                p2 = { x: bounds.right, y: bounds.top }
             }
-            instance.selector.normalSize = {x: width, y: height}
 
+            // Calculate root container for comparison with the instance container or its parent
+            let root = instance
+            while (root.parent && root.parent.parent)
+                root = root.parent
+            // If the selector has been removed, selector === root and mess things up
+            if (root === instance)
+                return
+
+            // Transform the two bounding points so they're in the viewport's local space
+            instance.layer.rotation = 0
+            // When parent containers are rotated, the bounding box can appear shorter/taller than it should be
+            // I believe its something to do with scaleX not applying when converting coordinates toGlobal, for some reason
+            // Fortunately the ratio of width to height should stay the same (with scaleX applied),
+            //  so it can be used to figure out the intended height of the box
+            let p1Global = instance.layer.toGlobal(p1)
+            let p2Global = instance.layer.toGlobal(p2)
+            const middleY = (p1Global.y + p2Global.y) / 2
+            const actualRatio = (p2.y - p1.y) / (p2.x - p1.x)
+            const height = (p2Global.x - p1Global.x) * actualRatio / 2
+            p1Global.y = middleY + height
+            p2Global.y = middleY - height
+            p1 = root.toLocal(p1Global)
+            p2 = root.toLocal(p2Global)
+            instance.layer.rotation = instance.props.layer.rotation || 0
+
+            // Store instance bounds for tracking scaling
+            instance.selector.normalSize = { x: p2.x - p1.x, y: p2.y - p1.y }
+
+            // Calculate offset of the selector box
+            const offset = root.toLocal(instance.layer.toGlobal({ x: 0, y: 0 }))
+
+            // Draw selector box
             instance.selector.lineStyle(scale * 4, selectorColor)
-                .moveTo(-width / 2 - scale, -height / 2 - scale)
-                .lineTo(-width / 2 - scale, height / 2 + scale)
-                .lineTo(width / 2 + scale, height / 2 + scale)
-                .lineTo(width / 2 + scale, -height / 2 - scale)
-                .lineTo(-width / 2 - scale, -height / 2 - scale)
+                .moveTo(p1.x - scale - offset.x, p1.y - scale - offset.y)
+                .lineTo(p1.x - scale - offset.x, p2.y + scale - offset.y)
+                .lineTo(p2.x + scale - offset.x, p2.y + scale - offset.y)
+                .lineTo(p2.x + scale - offset.x, p1.y - scale - offset.y)
+                .lineTo(p1.x - scale - offset.x, p1.y - scale - offset.y)
 
-            instance.selector.position.set(x, y)
+            // Draw rotation pivot point
+            instance.selector.drawCircle(0, 0, scale)
+
+            // Calculate selector position and rotation
+            instance.selector.position.set(offset.x, offset.y)
+            let rotation = 0
+            let rotationPointer = instance.layer
+            while (rotationPointer.parent && rotationPointer.parent.parent) {
+                const { a, d } = rotationPointer.transform.worldTransform
+                rotation += rotationPointer.rotation * Math.sign(a) * Math.sign(d)
+                rotationPointer = rotationPointer.parent
+            }
             instance.selector.rotation = rotation
 
+            // Draw "scalers", draggable caps at each of the 4 vertices of the selector box
             instance.scalers.forEach((scaler, i) => {
                 if (disabled || isEmitter) {
                     instance.selector.removeChild(scaler)
                 } else {
                     instance.selector.addChild(scaler)
 
-                    const x = (i % 2 === 0 ? 1 : -1) * (width / 2 + scale)
-                    const y = (Math.floor(i / 2) === 0 ? 1 : -1) * (height / 2 + scale)
+                    const x = (i % 2 === 0 ? p2.x + scale : p1.x - scale) - offset.x
+                    const y = (Math.floor(i / 2) === 0 ? p2.y + scale : p1.y - scale) - offset.y
                     scaler.clear()
                     scaler.hitArea = new Circle(x, y, scale * 8)
                     scaler.lineStyle(scale * 2, selectorColor)
@@ -354,6 +390,7 @@ function drawGraphics(instance) {
                 }
             })
 
+            // Update position and scale of rotate and flipping buttons
             if (disabled || isEmitter) {
                 instance.selector.removeChild(instance.rotate)
                 instance.selector.removeChild(instance.flipHoriz)
@@ -362,14 +399,15 @@ function drawGraphics(instance) {
                 instance.selector.addChild(instance.rotate)
                 instance.selector.addChild(instance.flipHoriz)
                 instance.selector.addChild(instance.flipVert)
-                instance.rotate.position.set(width / 2 + 22 * scale,
-                    -height / 2 + 17 * scale)
+                const flipX = Math.sign((instance.layer.parent.parent.layer && instance.layer.parent.parent.layer.scaleX) || 1) > 0
+                const flipY = Math.sign((instance.layer.parent.parent.layer && instance.layer.parent.parent.layer.scaleY) || 1) > 0
+                const xPos = Math.max(p1.x, p2.x) + 23 * scale - offset.x
+                const yPos = Math.min(p1.y, p2.y) - offset.y
+                instance.rotate.position.set(xPos, yPos + 17 * scale)
                 instance.rotate.scale.set(scale / 10)
-                instance.flipHoriz.position.set(width / 2 + 22 * scale,
-                    -height / 2 + 52 * scale)
+                instance.flipHoriz.position.set(xPos, yPos + 52 * scale)
                 instance.flipHoriz.scale.set(scale / 2)
-                instance.flipVert.position.set(width / 2 + 22 * scale,
-                    -height / 2 + 87 * scale)
+                instance.flipVert.position.set(xPos, yPos + 87 * scale)
                 instance.flipVert.scale.set(scale / 2)
             }
         }
@@ -417,7 +455,7 @@ export const behavior = {
             //instance.setParent(root)
 
             instance.selector = new Graphics()
-            instance.selector.setParent(instance.parent.parent)
+            instance.selector.setParent(root)
 
             const endRot = endRotateDrag(instance, instance.props.dispatch)
             instance.rotate = getIcon(instance, 'rotate.png')
