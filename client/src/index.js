@@ -33,6 +33,7 @@ if (process.env.REACT_APP_POPOUT === "true") {
 	store = createStore(reducer, enhancer)
 	App = MainApp
 }
+window.store = store
 
 ReactDOM.render(
     <Provider store={store}>

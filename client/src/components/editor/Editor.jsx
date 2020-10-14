@@ -5,14 +5,12 @@ import { DropTarget } from 'react-dnd'
 import classNames from 'classnames'
 import Viewport from './Viewport'
 import Layer from './Layer'
-import Cross from './Cross'
-import { getTheme } from '../project/Themer'
+import Grid from './Grid'
 import { save } from '../../redux/editor/editor'
 import { addLayer } from '../../redux/editor/layers'
 import { selectLayer } from '../../redux/editor/selected'
 import './editor.css'
 
-const DISTANCE = 10000
 const PARTICLE_FRAME_DURATION = 25
 const TYPE_MAP = {
     environment: (p, id) => p.environments[id] && p.environments[id].layers,
@@ -31,6 +29,7 @@ class Editor extends Component {
         this.viewport = React.createRef()
         this.selectedRef = React.createRef()
         this.intervalId = null
+        this.onUpdateListeners = []
 
         this.state = {
             scale: 1,
@@ -63,6 +62,7 @@ class Editor extends Component {
             v.on('moved', this.updateViewportBounds)
             v.on('zoomed', this.updateViewportBounds)
         }
+        this.onUpdateListeners.forEach(cb => cb())
     }
 
     componentDidUpdate(prevProps) {
@@ -70,6 +70,7 @@ class Editor extends Component {
             this.updateViewportBounds()
         else if (!this.intervalId)
             this.renderViewport()
+        this.onUpdateListeners.forEach(cb => cb())
     }
 
     updateViewportBounds() {
@@ -157,48 +158,16 @@ class Editor extends Component {
         // TODO (re-)load assets since babble.js isn't here to do it for us
         let layers = this.props.layers
         const {rect, selected, changed, isOver, canDrop, item, color} = this.props
-        const {assets, assetsPath, environment, dispatch} = this.props
+        const {assets, assetsPath, environment} = this.props
         const {scale, grid, bounds, dragPos} = this.state
 
-        let {highlight, 'far-background': background, raised} = getTheme(color)
-        highlight = `0x${highlight.slice(1)}`
-        background = `0x${background.slice(1)}`
-        raised = `0x${raised.slice(1)}`
-
-        const gridLines = []
-        if (grid !== -1) {
-            const gridSize = Math.pow(10, 4 - grid)
-            const startX = Math.ceil(bounds.left / gridSize) * gridSize
-            const startY = Math.ceil(bounds.top / gridSize) * gridSize
-
-            if ((bounds.right - bounds.left) / gridSize <= 100)
-                for (let i = startX; i < bounds.right; i += gridSize) {
-                    gridLines.push(<Cross key={`h${i}`}
-                        x={i}
-                        y={bounds.top}
-                        scale={scale}
-                        color={raised}
-                        distance={bounds.bottom - bounds.top} />)
-                }
-
-            if ((bounds.bottom - bounds.top) / gridSize <= 100)
-                for (let i = startY; i < bounds.bottom; i += gridSize) {
-                    gridLines.push(<Cross key={`v${i}`}
-                        x={bounds.left}
-                        y={i}
-                        scale={scale}
-                        color={raised}
-                        distance={bounds.right - bounds.left} />)
-                }
-        }
-
         const layerProps = {
-            scale,
             selected,
             assets,
             assetsPath,
             environment,
-            dispatch
+            registerOnUpdateListeners: listener => this.onUpdateListeners.push(listener),
+            unregisterOnUpdateListeners: listener => this.onUpdateListeners.splice(this.onUpdateListeners.indexOf(listener), 1)
         }
 
         // Find the currently selected layer so that if its a particle effect we can render every frame
@@ -263,10 +232,9 @@ class Editor extends Component {
                 }} onWheel={this.onScroll} onMouseDown={this.onMouseDown}
                 ref={this.stage} >
                     <Viewport width={rect.width} height={rect.height} ref={this.viewport}>
-                        {gridLines}
-                        <Cross x={0} y={0} scale={scale * 2} color={highlight} distance={DISTANCE * scale} />
+                        <Grid grid={grid} scale={scale} bounds={bounds} color={color} />
                         {!!layers && <Layer play={this.state.play} layer={layers} bundles={[]}
-                            x={0} y={0} selectorColor={background} selectedRef={this.selectedRef} {...layerProps}
+                            x={0} y={0} selectedRef={this.selectedRef} {...layerProps}
                             highlight={this.state.highlight ? selected.layer : null} />}
                         {isOver && dragPos &&
                             <Layer layer={{

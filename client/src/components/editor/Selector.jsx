@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { CustomPIXIComponent, withApp } from 'react-pixi-fiber'
 import { changeLayer } from '../../redux/editor/layers'
+import { getTheme } from '../project/Themer'
 
 import rotateIcon from './icons/rotate.png'
 import flipHorizIcon from './icons/flipHoriz.png'
@@ -64,11 +65,11 @@ function startDrag(instance) {
     }
 }
 
-function endRotateDrag(instance, dispatch) {
+function endRotateDrag(instance) {
     return e => {
         const {angle, dragging, startRotation} = e.currentTarget
         if (dragging) {
-            dispatch(changeLayer(instance.props.layer.path, {
+            window.store.dispatch(changeLayer(instance.props.layer.path, {
                 rotation: (startRotation || 0) + angle
             }))
             e.currentTarget.dragging = false
@@ -82,11 +83,11 @@ function endRotateDrag(instance, dispatch) {
     }
 }
 
-function endScaleDrag(instance, dispatch) {
+function endScaleDrag(instance) {
     return e => {
         const {layer, scaleX, scaleY, posX, posY, dragging} = e.currentTarget
         if (dragging) {
-            dispatch(changeLayer(layer.layer.path, {
+            window.store.dispatch(changeLayer(layer.layer.path, {
                 scaleX,
                 scaleY,
                 x: posX,
@@ -103,7 +104,7 @@ function endScaleDrag(instance, dispatch) {
     }
 }
 
-function endMoveDrag(instance, dispatch, e) {
+function endMoveDrag(instance, e) {
     const {startPosition, dx, dy} = e.currentTarget
     if (instance.props.disabled) return
 
@@ -116,7 +117,7 @@ function endMoveDrag(instance, dispatch, e) {
             instance.layer.position.x = 0
             instance.layer.position.y = 0
         }
-        dispatch(changeLayer(instance.props.layer.path, instance.props.isEmitter ? { pos } : pos))
+        window.store.dispatch(changeLayer(instance.props.layer.path, instance.props.isEmitter ? { pos } : pos))
         e.currentTarget.dx = 0
         e.currentTarget.dy = 0
 
@@ -268,9 +269,9 @@ function onRotate(instance) {
     }
 }
 
-function flipHoriz(instance, dispatch) {
+function flipHoriz(instance) {
     return e => {
-        dispatch(changeLayer(instance.props.layer.path, {
+        window.store.dispatch(changeLayer(instance.props.layer.path, {
             scaleX: -(instance.layer.layer.scaleX || 1),
             scaleY: instance.layer.layer.scaleY || 1
         }))
@@ -278,9 +279,9 @@ function flipHoriz(instance, dispatch) {
     }
 }
 
-function flipVert(instance, dispatch) {
+function flipVert(instance) {
     return e => {
-        dispatch(changeLayer(instance.props.layer.path, {
+        window.store.dispatch(changeLayer(instance.props.layer.path, {
             scaleX: instance.layer.layer.scaleX || 1,
             scaleY: -(instance.layer.layer.scaleY || 1)
         }))
@@ -289,7 +290,8 @@ function flipVert(instance, dispatch) {
 }
 
 function drawGraphics(instance) {
-    const {scale, layer, disabled, isEmitter, selectorColor, app, emitters} = instance.props
+    const {scale, layer, disabled, isEmitter, app, emitters} = instance.props
+    const selectorColor = `0x${getTheme(window.store.getState().environment.color)['far-background']}`
 
     if (instance.selector) {
         instance.selector.clear()
@@ -419,20 +421,24 @@ export const behavior = {
     customDisplayObject: () => new Container(),
     customApplyProps: (instance, oldProps, newProps) => {
         instance.props = newProps
-        if (instance.selector)
-            instance.selector.alpha = 0
         // wait a frame before redrawing so the selected layer gets its props applied
-        setTimeout(() => drawGraphics(instance), 1)
+        //setTimeout(() => drawGraphics(instance), 1)
     },
     customDidAttach: instance => {
+        instance.unsubscribe = window.store.subscribe(() =>
+            behavior.customApplyProps(instance, instance.props, instance.props)
+        )
+        instance.props.registerOnUpdateListeners(instance.onUpdateListener = () => drawGraphics(instance))
         instance.props.selector.current = instance
         behavior.setupSelector(instance)
     },
     customWillDetach: instance => {
         // This function gets called by Layer because for some reason
-        // react-pixi-fiber just... doesn't 
+        // react-pixi-fiber just... doesn't
         if (instance.selector)
             instance.selector.parent.removeChild(instance.selector)
+        instance.unsubscribe()
+        instance.props.unregisterOnUpdateListeners(instance.onUpdateListener)
 
         let root = instance
         while (root.parent && root.parent.parent)
@@ -452,12 +458,11 @@ export const behavior = {
             // root should be the viewport
             // instance.layer will be used for calculating bounds
             instance.layer = instance.parent
-            //instance.setParent(root)
 
             instance.selector = new Graphics()
             instance.selector.setParent(root)
 
-            const endRot = endRotateDrag(instance, instance.props.dispatch)
+            const endRot = endRotateDrag(instance)
             instance.rotate = getIcon(instance, 'rotate.png')
                 .on('mousemove', onRotate(instance))
                 .on('touchmove', onRotate(instance))
@@ -467,17 +472,17 @@ export const behavior = {
                 .on('touchendoutside', endRot)
             instance.selector.addChild(instance.rotate)
             instance.flipHoriz = getIcon(instance, 'flipHoriz.png')
-                .on('click', flipHoriz(instance, instance.props.dispatch))
+                .on('click', flipHoriz(instance))
             instance.selector.addChild(instance.flipHoriz)
             instance.flipVert = getIcon(instance, 'flipVert.png')
-                .on('click', flipVert(instance, instance.props.dispatch))
+                .on('click', flipVert(instance))
             instance.selector.addChild(instance.flipVert)
 
             instance.scalers = new Array(4).fill(0).map((e, i) => {
                 const g = new Graphics()
                 g.interactive = true
                 g.cursor = `${directions[i]}-resize`
-                const endScale = endScaleDrag(instance, instance.props.dispatch)
+                const endScale = endScaleDrag(instance)
                 g.on('mousedown', startDrag(instance))
                     .on('touchstate', startDrag(instance))
                     .on('mouseup', endScale)
@@ -507,7 +512,7 @@ export const behavior = {
             })
             root.on('mouseup', instance.mouseup = e => {
                 root.off('mousemove', instance.selector.mousemove)
-                endMoveDrag(instance, instance.props.dispatch, e)
+                endMoveDrag(instance, e)
             })
             root.on('mouseupoutside', instance.mouseup)
             // The icons need some time to show up for some reason /shrug
