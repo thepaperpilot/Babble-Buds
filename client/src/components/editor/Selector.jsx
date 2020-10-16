@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { CustomPIXIComponent, withApp } from 'react-pixi-fiber'
+import ScaleContext from './ScaleContext'
 import { changeLayer } from '../../redux/editor/layers'
 import { getTheme } from '../project/Themer'
 
@@ -526,6 +527,9 @@ export const behavior = {
 const Selector = withApp(CustomPIXIComponent(behavior, TYPE))
 
 class SelectorWrapper extends Component {
+
+    static contextType = ScaleContext
+
     constructor(props) {
         super(props)
 
@@ -533,7 +537,7 @@ class SelectorWrapper extends Component {
     }
 
     render() {
-        return <Selector {...this.props} selector={this.selector} />
+        return <Selector {...this.props} selector={this.selector} scale={this.context} />
     }
 }
 

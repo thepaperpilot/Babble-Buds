@@ -6,6 +6,7 @@ import classNames from 'classnames'
 import Viewport from './Viewport'
 import Layer from './Layer'
 import Grid from './Grid'
+import ScaleContext from './ScaleContext'
 import { save } from '../../redux/editor/editor'
 import { addLayer } from '../../redux/editor/layers'
 import { selectLayer } from '../../redux/editor/selected'
@@ -231,23 +232,25 @@ class Editor extends Component {
                     autoStart: false
                 }} onWheel={this.onScroll} onMouseDown={this.onMouseDown}
                 ref={this.stage} >
-                    <Viewport width={rect.width} height={rect.height} ref={this.viewport}>
-                        <Grid grid={grid} scale={scale} bounds={bounds} color={color} />
-                        {!!layers && <Layer play={this.state.play} layer={layers} bundles={[]}
-                            x={0} y={0} selectedRef={this.selectedRef} {...layerProps}
-                            highlight={this.state.highlight ? selected.layer : null} />}
-                        {isOver && dragPos &&
-                            <Layer layer={{
-                                id: item.id,
-                                rotation: 0,
-                                scaleX: 1,
-                                scaleY: 1,
-                                x: 0,
-                                y: 0,
-                                path: []
-                            }} bundles={[]} x={dragPos.x} y={dragPos.y}
-                            {...layerProps} highlight={[]} />}
-                    </Viewport>
+                    <ScaleContext.Provider value={scale}>
+                        <Viewport width={rect.width} height={rect.height} ref={this.viewport}>
+                            <Grid grid={grid} scale={scale} bounds={bounds} color={color} />
+                            {!!layers && <Layer play={this.state.play} layer={layers} bundles={[]}
+                                x={0} y={0} selectedRef={this.selectedRef} {...layerProps}
+                                highlight={this.state.highlight ? selected.layer : null} />}
+                            {isOver && dragPos &&
+                                <Layer layer={{
+                                    id: item.id,
+                                    rotation: 0,
+                                    scaleX: 1,
+                                    scaleY: 1,
+                                    x: 0,
+                                    y: 0,
+                                    path: []
+                                }} bundles={[]} x={dragPos.x} y={dragPos.y}
+                                {...layerProps} highlight={[]} />}
+                        </Viewport>
+                    </ScaleContext.Provider>
                 </Stage>
             </div>
         )
