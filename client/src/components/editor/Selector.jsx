@@ -354,12 +354,6 @@ function drawGraphics(instance) {
             // I believe its something to do with scaleX not applying when converting coordinates toGlobal, for some reason
             // Fortunately the ratio of width to height should stay the same (with scaleX applied),
             //  so it can be used to figure out the intended height of the box
-            const cosRotation = Math.cos(rotation)
-            const sinRotation = Math.sin(rotation)
-            p1.x += cosRotation * x + sinRotation * y
-            p1.y += cosRotation * y - sinRotation * x
-            p2.x += cosRotation * x + sinRotation * y
-            p2.y += cosRotation * y - sinRotation * x
             let p1Global = instance.layer.toGlobal(p1)
             let p2Global = instance.layer.toGlobal(p2)
             const middleY = (p1Global.y + p2Global.y) / 2
@@ -370,8 +364,7 @@ function drawGraphics(instance) {
             p1 = root.toLocal(p1Global)
             p2 = root.toLocal(p2Global)
 
-            // Calculate offset of the selector box
-            const offset = root.toLocal(instance.layer.toGlobal({ x: cosRotation * x + sinRotation * y, y: cosRotation * y - sinRotation * x }))
+            const offset = root.toLocal(instance.layer.toGlobal({ x: 0, y: 0 }))
 
             // Put positions and rotations back where they were
             instance.layer.x = x
@@ -382,6 +375,10 @@ function drawGraphics(instance) {
                 rotationPointer.rotation = rotationHistory.shift()
                 rotationPointer = rotationPointer.parent
             }
+
+            // Set selector position and rotation
+            root.toLocal(instance.layer.toGlobal({ x: 0, y: 0 }), null, instance.selector.position)
+            instance.selector.rotation = rotation
 
             // Store instance bounds for tracking scaling
             instance.selector.normalSize = { x: p2.x - p1.x, y: p2.y - p1.y }
@@ -396,10 +393,6 @@ function drawGraphics(instance) {
 
             // Draw rotation pivot point
             instance.selector.drawCircle(0, 0, scale)
-
-            // Set selector position and rotation
-            instance.selector.position.set(offset.x, offset.y)
-            instance.selector.rotation = rotation
 
             // Draw "scalers", draggable caps at each of the 4 vertices of the selector box
             instance.scalers.forEach((scaler, i) => {
