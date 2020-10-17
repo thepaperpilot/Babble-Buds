@@ -299,6 +299,24 @@ function drawGraphics(instance) {
         
         instance.selector.alpha = disabled ? .5 : 1
 
+        // Set rotations of all parents to 0 to calculate bounds correctly
+        let rotation = 0
+        let rotationPointer = instance.layer
+        let rotationHistory = []
+        while (rotationPointer.parent && rotationPointer.parent.parent) {
+            const { a, d } = rotationPointer.transform.worldTransform
+            rotation += rotationPointer.rotation * Math.sign(a) * Math.sign(d)
+            rotationHistory.push(rotationPointer.rotation)
+            rotationPointer.rotation = 0
+            rotationPointer = rotationPointer.parent
+        }
+
+        // Set position to 0 to calculate bounds correctly
+        let x = instance.layer.x
+        let y = instance.layer.y
+        instance.layer.x = 0
+        instance.layer.y = 0
+
         if (instance.layer) {
             // Calculate instance bounds
             // and use them to get bottom-left and upper-right points in viewport (root) space
@@ -332,11 +350,16 @@ function drawGraphics(instance) {
                 return
 
             // Transform the two bounding points so they're in the viewport's local space
-            instance.layer.rotation = 0
             // When parent containers are rotated, the bounding box can appear shorter/taller than it should be
             // I believe its something to do with scaleX not applying when converting coordinates toGlobal, for some reason
             // Fortunately the ratio of width to height should stay the same (with scaleX applied),
             //  so it can be used to figure out the intended height of the box
+            const cosRotation = Math.cos(rotation)
+            const sinRotation = Math.sin(rotation)
+            p1.x += cosRotation * x + sinRotation * y
+            p1.y += cosRotation * y - sinRotation * x
+            p2.x += cosRotation * x + sinRotation * y
+            p2.y += cosRotation * y - sinRotation * x
             let p1Global = instance.layer.toGlobal(p1)
             let p2Global = instance.layer.toGlobal(p2)
             const middleY = (p1Global.y + p2Global.y) / 2
@@ -346,13 +369,22 @@ function drawGraphics(instance) {
             p2Global.y = middleY - height
             p1 = root.toLocal(p1Global)
             p2 = root.toLocal(p2Global)
-            instance.layer.rotation = instance.props.layer.rotation || 0
+
+            // Calculate offset of the selector box
+            const offset = root.toLocal(instance.layer.toGlobal({ x: cosRotation * x + sinRotation * y, y: cosRotation * y - sinRotation * x }))
+
+            // Put positions and rotations back where they were
+            instance.layer.x = x
+            instance.layer.y = y
+
+            rotationPointer = instance.layer
+            while (rotationPointer.parent && rotationPointer.parent.parent) {
+                rotationPointer.rotation = rotationHistory.shift()
+                rotationPointer = rotationPointer.parent
+            }
 
             // Store instance bounds for tracking scaling
             instance.selector.normalSize = { x: p2.x - p1.x, y: p2.y - p1.y }
-
-            // Calculate offset of the selector box
-            const offset = root.toLocal(instance.layer.toGlobal({ x: 0, y: 0 }))
 
             // Draw selector box
             instance.selector.lineStyle(scale * 4, selectorColor)
@@ -365,15 +397,8 @@ function drawGraphics(instance) {
             // Draw rotation pivot point
             instance.selector.drawCircle(0, 0, scale)
 
-            // Calculate selector position and rotation
+            // Set selector position and rotation
             instance.selector.position.set(offset.x, offset.y)
-            let rotation = 0
-            let rotationPointer = instance.layer
-            while (rotationPointer.parent && rotationPointer.parent.parent) {
-                const { a, d } = rotationPointer.transform.worldTransform
-                rotation += rotationPointer.rotation * Math.sign(a) * Math.sign(d)
-                rotationPointer = rotationPointer.parent
-            }
             instance.selector.rotation = rotation
 
             // Draw "scalers", draggable caps at each of the 4 vertices of the selector box
@@ -402,8 +427,6 @@ function drawGraphics(instance) {
                 instance.selector.addChild(instance.rotate)
                 instance.selector.addChild(instance.flipHoriz)
                 instance.selector.addChild(instance.flipVert)
-                const flipX = Math.sign((instance.layer.parent.parent.layer && instance.layer.parent.parent.layer.scaleX) || 1) > 0
-                const flipY = Math.sign((instance.layer.parent.parent.layer && instance.layer.parent.parent.layer.scaleY) || 1) > 0
                 const xPos = Math.max(p1.x, p2.x) + 23 * scale - offset.x
                 const yPos = Math.min(p1.y, p2.y) - offset.y
                 instance.rotate.position.set(xPos, yPos + 17 * scale)
