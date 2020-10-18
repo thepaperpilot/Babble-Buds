@@ -140,17 +140,26 @@ function onMove(instance) {
         let dx = x - target.startMouse.x
         let dy = y - target.startMouse.y
 
+        if (e.data.originalEvent.ctrlKey) {
+            if (Math.abs(dx) > Math.abs(dy))
+                dy = 0
+            else
+                dx = 0
+        }
+
+        let oldDx = dx
+        let oldDy = dy
+        const { a, d } = instance.layer.transform.worldTransform
+        const rotation = -instance.layer.rotation * Math.sign(a) * Math.sign(d)
+        dx = Math.cos(rotation) * oldDx +
+            Math.sin(rotation) * oldDy
+        dy = Math.cos(rotation) * oldDy -
+            Math.sin(rotation) * oldDx
+
         // Transform data based on the container's transform matrix
         const mat = instance.layer.transform.worldTransform.clone()
         mat.translate(-mat.tx, -mat.ty)
         const point = mat.applyInverse({ x: dx, y: dy })
-
-        if (e.data.originalEvent.ctrlKey) {
-            if (Math.abs(dx) > Math.abs(dy)) {
-                dy = 0
-            } else
-                dx = 0
-        }
 
         // Store data for setting it on dragEnd
         target.dx = point.x
@@ -165,8 +174,11 @@ function onMove(instance) {
             instance.layer.position.y = target.startPosition.y + point.y
         }
 
-        instance.selector.position.x = target.startPosition.x + dx * instance.props.scale
-        instance.selector.position.y = target.startPosition.y + dy * instance.props.scale
+        let root = instance
+        while (root.parent && root.parent.parent)
+            root = root.parent
+
+        root.toLocal(instance.layer.toGlobal({ x: 0, y: 0 }), null, instance.selector.position)
         
         instance.props.app.renderer.render(instance.props.app.stage)
     }
