@@ -2,6 +2,7 @@ import React, {Component} from 'react'
 import Scrollbar from 'react-custom-scroll'
 import { connect } from 'react-redux'
 import * as JsSearch from 'js-search'
+import Search from '../ui/Search'
 import './console.css'
 
 const remote = window.require('electron').remote
@@ -25,10 +26,8 @@ class Console extends Component {
         this.createFilterToggle = this.createFilterToggle.bind(this)
     }
 
-    onChange(e) {
-        this.setState({
-            filter: e.target.value
-        })
+    onChange(filter) {
+        this.setState({ filter })
     }
 
     toggleFilter(filter) {
@@ -89,13 +88,7 @@ class Console extends Component {
                     {this.createFilterToggle('warn')}
                     {this.createFilterToggle('error')}
                     <div className="flex-spacer"></div>
-                    <div className="search">
-                        <input
-                            type="search"
-                            placeholder="All"
-                            value={this.state.filter}
-                            onChange={this.onChange} />
-                    </div>
+                    <Search value={this.state.filter} onChange={this.onChange} />
                     <div className="flex-spacer"></div>
                     <button onClick={this.toggleDevTools}>Toggle Dev Tools</button>
                 </div>
