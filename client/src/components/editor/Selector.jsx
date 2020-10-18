@@ -54,7 +54,7 @@ function startDrag(instance) {
         const {x, y} = e.data.global
         const layer = instance.layer
         target.startMouse = {x, y}
-        target.startRotation = instance.selector.rotation
+        target.startRotation = instance.layer.rotation
         target.startPosition = {x: layer.layer.x || 0, y: layer.layer.y || 0}
         target.startScale = {x: layer.layer.scaleX || 1, y: layer.layer.scaleY || 1}
         target.startSize = instance.selector.normalSize
@@ -251,12 +251,24 @@ function onRotate(instance) {
         const a2 = Math.atan2(target.startMouse.y - ty, target.startMouse.x - tx)
         const a1 = Math.atan2(y - ty, x - tx)
 
-        let angle = a1 - a2 + target.startRotation
+        let angle = a1 - a2
+
+        const { a, d } = instance.layer.transform.worldTransform
+        angle *= Math.sign(a) * Math.sign(d)
+
+        angle += target.startRotation
 
         if (e.data.originalEvent.shiftKey) {
-            angle += instance.selector.rotation
+            let rotOffset = 0
+            let rotationPointer = instance.layer.parent
+            while (rotationPointer.parent && rotationPointer.parent.parent) {
+                const { a, d } = rotationPointer.transform.worldTransform
+                rotOffset += rotationPointer.rotation * Math.sign(a) * Math.sign(d)
+                rotationPointer = rotationPointer.parent
+            }
+            angle -= rotOffset
             angle = Math.round(angle / (Math.PI / 8)) * (Math.PI / 8)
-            angle -= instance.selector.rotation
+            angle += rotOffset
         }
 
         // Store data for setting it on dragEnd
@@ -264,7 +276,14 @@ function onRotate(instance) {
 
         // Update the layer and selector now
         instance.layer.rotation = angle
-        instance.selector.rotation = angle
+        let rotation = 0
+        let rotationPointer = instance.layer
+        while (rotationPointer.parent && rotationPointer.parent.parent) {
+            const { a, d } = rotationPointer.transform.worldTransform
+            rotation += rotationPointer.rotation * Math.sign(a) * Math.sign(d)
+            rotationPointer = rotationPointer.parent
+        }
+        instance.selector.rotation = rotation
 
         instance.props.app.renderer.render(instance.props.app.stage)
     }
