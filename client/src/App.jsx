@@ -12,6 +12,7 @@ import { setAddress } from './redux/settings'
 const electron = window.require('electron')
 const dialog = electron.remote.dialog
 const settingsManager = electron.remote.require('./main-process/settings')
+const path = window.require('path')
 
 class PopoutInterface extends Component {
     componentWillReceiveProps(newProps) {
@@ -115,6 +116,10 @@ class App extends Component {
     }
 
     render() {
+        electron.remote.getCurrentWindow().setTitle(this.props.project ?
+            `[${path.basename(this.props.project)}] - Babble Buds ${electron.remote.app.getVersion()}` :
+            `Babble Buds ${electron.remote.app.getVersion()}`)
+
         return (
             <div className="App">
                 {
