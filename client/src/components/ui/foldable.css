@@ -9,11 +9,12 @@
     top: -8px;
     display: block;
     transition: transform 300ms;
+    transform: rotateZ(90deg);
     font-size: xx-large;
 }
 
 .foldable.open h4:before {
-    transform: rotateZ(90deg);
+    transform: unset;
 }
 
 .foldable h4 {

@@ -9,6 +9,7 @@ import AssetContextMenu from './AssetContextMenu'
 import FolderContextMenu from './FolderContextMenu'
 import FolderList from './FolderList'
 import CustomScrollbarsVirtualList from '../ui/CustomScrollbarsVirtualList'
+import Search from '../ui/Search'
 import { getNewAssetID } from '../../redux/project/assets/reducers'
 import { TYPE_MAP } from './AssetImporter'
 import { inProgress } from '../../redux/status'
@@ -93,10 +94,8 @@ class Assets extends Component {
         )
     }
 
-    onChange(e) {
-        this.setState({
-            filter: e.target.value
-        })
+    onChange(filter) {
+        this.setState({ filter })
     }
 
     changeZoom(e) {
@@ -178,13 +177,7 @@ class Assets extends Component {
                     step="20"
                     onChange={this.changeZoom} />
                 <div className="flex-grow" />
-                <div className="search">
-                    <input
-                        type="search"
-                        placeholder="All"
-                        value={this.state.filter}
-                        onChange={this.onChange} />
-                </div>
+                <Search value={this.state.filter} onChange={this.onChange} />
             </div>
             <div className="full-panel" >
                 <FolderList contextmenu={this.props.id}

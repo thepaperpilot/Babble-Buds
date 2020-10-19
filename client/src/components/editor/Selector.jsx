@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
 import { CustomPIXIComponent, withApp } from 'react-pixi-fiber'
+import ScaleContext from './ScaleContext'
 import { changeLayer } from '../../redux/editor/layers'
+import { getTheme } from '../project/Themer'
 
 import rotateIcon from './icons/rotate.png'
 import flipHorizIcon from './icons/flipHoriz.png'
@@ -52,7 +54,7 @@ function startDrag(instance) {
         const {x, y} = e.data.global
         const layer = instance.layer
         target.startMouse = {x, y}
-        target.startRotation = instance.selector.rotation
+        target.startRotation = instance.layer.rotation
         target.startPosition = {x: layer.layer.x || 0, y: layer.layer.y || 0}
         target.startScale = {x: layer.layer.scaleX || 1, y: layer.layer.scaleY || 1}
         target.startSize = instance.selector.normalSize
@@ -64,11 +66,11 @@ function startDrag(instance) {
     }
 }
 
-function endRotateDrag(instance, dispatch) {
+function endRotateDrag(instance) {
     return e => {
         const {angle, dragging, startRotation} = e.currentTarget
         if (dragging) {
-            dispatch(changeLayer(instance.props.layer.path, {
+            window.store.dispatch(changeLayer(instance.props.layer.path, {
                 rotation: (startRotation || 0) + angle
             }))
             e.currentTarget.dragging = false
@@ -82,11 +84,11 @@ function endRotateDrag(instance, dispatch) {
     }
 }
 
-function endScaleDrag(instance, dispatch) {
+function endScaleDrag(instance) {
     return e => {
         const {layer, scaleX, scaleY, posX, posY, dragging} = e.currentTarget
         if (dragging) {
-            dispatch(changeLayer(layer.layer.path, {
+            window.store.dispatch(changeLayer(layer.layer.path, {
                 scaleX,
                 scaleY,
                 x: posX,
@@ -103,7 +105,7 @@ function endScaleDrag(instance, dispatch) {
     }
 }
 
-function endMoveDrag(instance, dispatch, e) {
+function endMoveDrag(instance, e) {
     const {startPosition, dx, dy} = e.currentTarget
     if (instance.props.disabled) return
 
@@ -116,7 +118,7 @@ function endMoveDrag(instance, dispatch, e) {
             instance.layer.position.x = 0
             instance.layer.position.y = 0
         }
-        dispatch(changeLayer(instance.props.layer.path, instance.props.isEmitter ? { pos } : pos))
+        window.store.dispatch(changeLayer(instance.props.layer.path, instance.props.isEmitter ? { pos } : pos))
         e.currentTarget.dx = 0
         e.currentTarget.dy = 0
 
@@ -137,32 +139,46 @@ function onMove(instance) {
         const {x, y} = e.data.global
         let dx = x - target.startMouse.x
         let dy = y - target.startMouse.y
-        // Adjust for current editor zoom
-        dx *= instance.props.scale
-        dy *= instance.props.scale
 
         if (e.data.originalEvent.ctrlKey) {
-            if (Math.abs(dx) > Math.abs(dy)) {
+            if (Math.abs(dx) > Math.abs(dy))
                 dy = 0
-            } else
+            else
                 dx = 0
         }
 
+        let oldDx = dx
+        let oldDy = dy
+        const { a, d } = instance.layer.transform.worldTransform
+        const rotation = -instance.layer.rotation * Math.sign(a) * Math.sign(d)
+        dx = Math.cos(rotation) * oldDx +
+            Math.sin(rotation) * oldDy
+        dy = Math.cos(rotation) * oldDy -
+            Math.sin(rotation) * oldDx
+
+        // Transform data based on the container's transform matrix
+        const mat = instance.layer.transform.worldTransform.clone()
+        mat.translate(-mat.tx, -mat.ty)
+        const point = mat.applyInverse({ x: dx, y: dy })
+
         // Store data for setting it on dragEnd
-        target.dx = dx
-        target.dy = dy
+        target.dx = point.x
+        target.dy = point.y
 
         // Update the layer and selector now
         if (instance.props.isEmitter) {
-            instance.layer.position.x = dx
-            instance.layer.position.y = dy
+            instance.layer.position.x = point.x
+            instance.layer.position.y = point.y
         } else {
-            instance.layer.position.x = target.startPosition.x + dx
-            instance.layer.position.y = target.startPosition.y + dy
+            instance.layer.position.x = target.startPosition.x + point.x
+            instance.layer.position.y = target.startPosition.y + point.y
         }
 
-        instance.selector.position.x = target.startPosition.x + dx
-        instance.selector.position.y = target.startPosition.y + dy
+        let root = instance
+        while (root.parent && root.parent.parent)
+            root = root.parent
+
+        root.toLocal(instance.layer.toGlobal({ x: 0, y: 0 }), null, instance.selector.position)
         
         instance.props.app.renderer.render(instance.props.app.stage)
     }
@@ -247,12 +263,24 @@ function onRotate(instance) {
         const a2 = Math.atan2(target.startMouse.y - ty, target.startMouse.x - tx)
         const a1 = Math.atan2(y - ty, x - tx)
 
-        let angle = a1 - a2 + target.startRotation
+        let angle = a1 - a2
+
+        const { a, d } = instance.layer.transform.worldTransform
+        angle *= Math.sign(a) * Math.sign(d)
+
+        angle += target.startRotation
 
         if (e.data.originalEvent.shiftKey) {
-            angle += instance.selector.rotation
+            let rotOffset = 0
+            let rotationPointer = instance.layer.parent
+            while (rotationPointer.parent && rotationPointer.parent.parent) {
+                const { a, d } = rotationPointer.transform.worldTransform
+                rotOffset += rotationPointer.rotation * Math.sign(a) * Math.sign(d)
+                rotationPointer = rotationPointer.parent
+            }
+            angle -= rotOffset
             angle = Math.round(angle / (Math.PI / 8)) * (Math.PI / 8)
-            angle -= instance.selector.rotation
+            angle += rotOffset
         }
 
         // Store data for setting it on dragEnd
@@ -260,15 +288,22 @@ function onRotate(instance) {
 
         // Update the layer and selector now
         instance.layer.rotation = angle
-        instance.selector.rotation = angle
+        let rotation = 0
+        let rotationPointer = instance.layer
+        while (rotationPointer.parent && rotationPointer.parent.parent) {
+            const { a, d } = rotationPointer.transform.worldTransform
+            rotation += rotationPointer.rotation * Math.sign(a) * Math.sign(d)
+            rotationPointer = rotationPointer.parent
+        }
+        instance.selector.rotation = rotation
 
         instance.props.app.renderer.render(instance.props.app.stage)
     }
 }
 
-function flipHoriz(instance, dispatch) {
+function flipHoriz(instance) {
     return e => {
-        dispatch(changeLayer(instance.props.layer.path, {
+        window.store.dispatch(changeLayer(instance.props.layer.path, {
             scaleX: -(instance.layer.layer.scaleX || 1),
             scaleY: instance.layer.layer.scaleY || 1
         }))
@@ -276,9 +311,9 @@ function flipHoriz(instance, dispatch) {
     }
 }
 
-function flipVert(instance, dispatch) {
+function flipVert(instance) {
     return e => {
-        dispatch(changeLayer(instance.props.layer.path, {
+        window.store.dispatch(changeLayer(instance.props.layer.path, {
             scaleX: instance.layer.layer.scaleX || 1,
             scaleY: -(instance.layer.layer.scaleY || 1)
         }))
@@ -287,65 +322,118 @@ function flipVert(instance, dispatch) {
 }
 
 function drawGraphics(instance) {
-    const {scale, layer, disabled, isEmitter, selectorColor, app, emitters} = instance.props
+    const {scale, layer, disabled, isEmitter, app, emitters} = instance.props
+    const selectorColor = `0x${getTheme(window.store.getState().environment.color)['far-background']}`
 
     if (instance.selector) {
         instance.selector.clear()
         
         instance.selector.alpha = disabled ? .5 : 1
 
+        // Set rotations of all parents to 0 to calculate bounds correctly
+        let rotation = 0
+        let rotationPointer = instance.layer
+        let rotationHistory = []
+        while (rotationPointer.parent && rotationPointer.parent.parent) {
+            const { a, d } = rotationPointer.transform.worldTransform
+            rotation += rotationPointer.rotation * Math.sign(a) * Math.sign(d)
+            rotationHistory.push(rotationPointer.rotation)
+            rotationPointer.rotation = 0
+            rotationPointer = rotationPointer.parent
+        }
+
+        // Set position to 0 to calculate bounds correctly
+        let x = instance.layer.x
+        let y = instance.layer.y
+        instance.layer.x = 0
+        instance.layer.y = 0
+
         if (instance.layer) {
-            let {x, y, rotation} = layer
-            let width, height
-
+            // Calculate instance bounds
+            // and use them to get bottom-left and upper-right points in viewport (root) space
+            let p1, p2
             if (isEmitter) {
-                x = layer.emitter.pos.x
-                y = layer.emitter.pos.y
-            }
-
-            x = x || 0
-            y = y || 0
-            rotation = rotation || 0
-
-            if (isEmitter) {
-                width = height = getEmitterSize(layer.emitter, instance.parent.children[0])
+                //bounds = getEmitterBounds(layer.emitter, instance.parent.children[0])
             } else if (emitters) {
                 let minX, minY, maxX, maxY
                 emitters.forEach(({ emitter }, i) => {
                     const pos = emitter.pos
-                    const size = getEmitterSize(emitter, instance.parent.children[i]) / 2
-                    minX = Math.min(minX || 0, pos.x - size)
-                    maxX = Math.max(maxX || 0, pos.x + size)
-                    minY = Math.min(minY || 0, -pos.y - size)
-                    maxY = Math.max(maxY || 0, -pos.y + size)
+                    //const size = getEmitterBounds(emitter, instance.parent.children[i]) / 2
+                    //minX = Math.min(minX || 0, pos.x - size)
+                    //maxX = Math.max(maxX || 0, pos.x + size)
+                    //minY = Math.min(minY || 0, -pos.y - size)
+                    //maxY = Math.max(maxY || 0, -pos.y + size)
                 })
-                width = Math.max(maxX, -minX) * 2 * (layer.scaleX || 1)
-                height = Math.max(maxY, -minY) * 2 * (layer.scaleY || 1)
+                //width = Math.max(maxX, -minX) * 2 * (layer.scaleX || 1)
+                //height = Math.max(maxY, -minY) * 2 * (layer.scaleY || 1)
             } else {
                 const bounds = instance.layer.getLocalBounds()
-                width = 2 * Math.max(Math.abs(bounds.left), Math.abs(bounds.right))
-                height = 2 * Math.max(Math.abs(bounds.top), Math.abs(bounds.bottom))
+                p1 = { x: bounds.left, y: bounds.bottom }
+                p2 = { x: bounds.right, y: bounds.top }
             }
-            instance.selector.normalSize = {x: width, y: height}
 
-            instance.selector.lineStyle(scale * 4, selectorColor)
-                .moveTo(-width / 2 - scale, -height / 2 - scale)
-                .lineTo(-width / 2 - scale, height / 2 + scale)
-                .lineTo(width / 2 + scale, height / 2 + scale)
-                .lineTo(width / 2 + scale, -height / 2 - scale)
-                .lineTo(-width / 2 - scale, -height / 2 - scale)
+            // Calculate root container for comparison with the instance container or its parent
+            let root = instance
+            while (root.parent && root.parent.parent)
+                root = root.parent
+            // If the selector has been removed, selector === root and mess things up
+            if (root === instance)
+                return
 
-            instance.selector.position.set(x, y)
+            // Transform the two bounding points so they're in the viewport's local space
+            // When parent containers are rotated, the bounding box can appear shorter/taller than it should be
+            // I believe its something to do with scaleX not applying when converting coordinates toGlobal, for some reason
+            // Fortunately the ratio of width to height should stay the same (with scaleX applied),
+            //  so it can be used to figure out the intended height of the box
+            let p1Global = instance.layer.toGlobal(p1)
+            let p2Global = instance.layer.toGlobal(p2)
+            const middleY = (p1Global.y + p2Global.y) / 2
+            const actualRatio = (p2.y - p1.y) / (p2.x - p1.x)
+            const height = (p2Global.x - p1Global.x) * actualRatio / 2
+            p1Global.y = middleY + height
+            p2Global.y = middleY - height
+            p1 = root.toLocal(p1Global)
+            p2 = root.toLocal(p2Global)
+
+            const offset = root.toLocal(instance.layer.toGlobal({ x: 0, y: 0 }))
+
+            // Put positions and rotations back where they were
+            instance.layer.x = x
+            instance.layer.y = y
+
+            rotationPointer = instance.layer
+            while (rotationPointer.parent && rotationPointer.parent.parent) {
+                rotationPointer.rotation = rotationHistory.shift()
+                rotationPointer = rotationPointer.parent
+            }
+
+            // Set selector position and rotation
+            root.toLocal(instance.layer.toGlobal({ x: 0, y: 0 }), null, instance.selector.position)
             instance.selector.rotation = rotation
 
+            // Store instance bounds for tracking scaling
+            instance.selector.normalSize = { x: p2.x - p1.x, y: p2.y - p1.y }
+
+            // Draw selector box
+            instance.selector.lineStyle(scale * 4, selectorColor)
+                .moveTo(p1.x - scale - offset.x, p1.y - scale - offset.y)
+                .lineTo(p1.x - scale - offset.x, p2.y + scale - offset.y)
+                .lineTo(p2.x + scale - offset.x, p2.y + scale - offset.y)
+                .lineTo(p2.x + scale - offset.x, p1.y - scale - offset.y)
+                .lineTo(p1.x - scale - offset.x, p1.y - scale - offset.y)
+
+            // Draw rotation pivot point
+            instance.selector.drawCircle(0, 0, scale)
+
+            // Draw "scalers", draggable caps at each of the 4 vertices of the selector box
             instance.scalers.forEach((scaler, i) => {
                 if (disabled || isEmitter) {
                     instance.selector.removeChild(scaler)
                 } else {
                     instance.selector.addChild(scaler)
 
-                    const x = (i % 2 === 0 ? 1 : -1) * (width / 2 + scale)
-                    const y = (Math.floor(i / 2) === 0 ? 1 : -1) * (height / 2 + scale)
+                    const x = (i % 2 === 0 ? p2.x + scale : p1.x - scale) - offset.x
+                    const y = (Math.floor(i / 2) === 0 ? p2.y + scale : p1.y - scale) - offset.y
                     scaler.clear()
                     scaler.hitArea = new Circle(x, y, scale * 8)
                     scaler.lineStyle(scale * 2, selectorColor)
@@ -354,6 +442,7 @@ function drawGraphics(instance) {
                 }
             })
 
+            // Update position and scale of rotate and flipping buttons
             if (disabled || isEmitter) {
                 instance.selector.removeChild(instance.rotate)
                 instance.selector.removeChild(instance.flipHoriz)
@@ -362,14 +451,13 @@ function drawGraphics(instance) {
                 instance.selector.addChild(instance.rotate)
                 instance.selector.addChild(instance.flipHoriz)
                 instance.selector.addChild(instance.flipVert)
-                instance.rotate.position.set(width / 2 + 22 * scale,
-                    -height / 2 + 17 * scale)
+                const xPos = Math.max(p1.x, p2.x) + 23 * scale - offset.x
+                const yPos = Math.min(p1.y, p2.y) - offset.y
+                instance.rotate.position.set(xPos, yPos + 17 * scale)
                 instance.rotate.scale.set(scale / 10)
-                instance.flipHoriz.position.set(width / 2 + 22 * scale,
-                    -height / 2 + 52 * scale)
+                instance.flipHoriz.position.set(xPos, yPos + 52 * scale)
                 instance.flipHoriz.scale.set(scale / 2)
-                instance.flipVert.position.set(width / 2 + 22 * scale,
-                    -height / 2 + 87 * scale)
+                instance.flipVert.position.set(xPos, yPos + 87 * scale)
                 instance.flipVert.scale.set(scale / 2)
             }
         }
@@ -381,17 +469,24 @@ export const behavior = {
     customDisplayObject: () => new Container(),
     customApplyProps: (instance, oldProps, newProps) => {
         instance.props = newProps
-        drawGraphics(instance)
+        // wait a frame before redrawing so the selected layer gets its props applied
+        //setTimeout(() => drawGraphics(instance), 1)
     },
     customDidAttach: instance => {
+        instance.unsubscribe = window.store.subscribe(() =>
+            behavior.customApplyProps(instance, instance.props, instance.props)
+        )
+        instance.props.registerOnUpdateListeners(instance.onUpdateListener = () => drawGraphics(instance))
         instance.props.selector.current = instance
         behavior.setupSelector(instance)
     },
     customWillDetach: instance => {
         // This function gets called by Layer because for some reason
-        // react-pixi-fiber just... doesn't 
+        // react-pixi-fiber just... doesn't
         if (instance.selector)
             instance.selector.parent.removeChild(instance.selector)
+        instance.unsubscribe()
+        instance.props.unregisterOnUpdateListeners(instance.onUpdateListener)
 
         let root = instance
         while (root.parent && root.parent.parent)
@@ -411,12 +506,11 @@ export const behavior = {
             // root should be the viewport
             // instance.layer will be used for calculating bounds
             instance.layer = instance.parent
-            //instance.setParent(root)
 
             instance.selector = new Graphics()
-            instance.selector.setParent(instance.parent.parent)
+            instance.selector.setParent(root)
 
-            const endRot = endRotateDrag(instance, instance.props.dispatch)
+            const endRot = endRotateDrag(instance)
             instance.rotate = getIcon(instance, 'rotate.png')
                 .on('mousemove', onRotate(instance))
                 .on('touchmove', onRotate(instance))
@@ -426,17 +520,17 @@ export const behavior = {
                 .on('touchendoutside', endRot)
             instance.selector.addChild(instance.rotate)
             instance.flipHoriz = getIcon(instance, 'flipHoriz.png')
-                .on('click', flipHoriz(instance, instance.props.dispatch))
+                .on('click', flipHoriz(instance))
             instance.selector.addChild(instance.flipHoriz)
             instance.flipVert = getIcon(instance, 'flipVert.png')
-                .on('click', flipVert(instance, instance.props.dispatch))
+                .on('click', flipVert(instance))
             instance.selector.addChild(instance.flipVert)
 
             instance.scalers = new Array(4).fill(0).map((e, i) => {
                 const g = new Graphics()
                 g.interactive = true
                 g.cursor = `${directions[i]}-resize`
-                const endScale = endScaleDrag(instance, instance.props.dispatch)
+                const endScale = endScaleDrag(instance)
                 g.on('mousedown', startDrag(instance))
                     .on('touchstate', startDrag(instance))
                     .on('mouseup', endScale)
@@ -466,7 +560,7 @@ export const behavior = {
             })
             root.on('mouseup', instance.mouseup = e => {
                 root.off('mousemove', instance.selector.mousemove)
-                endMoveDrag(instance, instance.props.dispatch, e)
+                endMoveDrag(instance, e)
             })
             root.on('mouseupoutside', instance.mouseup)
             // The icons need some time to show up for some reason /shrug
@@ -480,6 +574,9 @@ export const behavior = {
 const Selector = withApp(CustomPIXIComponent(behavior, TYPE))
 
 class SelectorWrapper extends Component {
+
+    static contextType = ScaleContext
+
     constructor(props) {
         super(props)
 
@@ -487,7 +584,7 @@ class SelectorWrapper extends Component {
     }
 
     render() {
-        return <Selector {...this.props} selector={this.selector} />
+        return <Selector {...this.props} selector={this.selector} scale={this.context} />
     }
 }
 

@@ -6,6 +6,7 @@ import DraggablePuppet from './DraggablePuppet'
 import PuppetImporter from './PuppetImporter'
 import PuppetContextMenu from './PuppetContextMenu'
 import CustomScrollbarsVirtualList from '../ui/CustomScrollbarsVirtualList'
+import Search from '../ui/Search'
 import { newCharacter } from '../../redux/project/characters/actions'
 
 import './puppets.css'
@@ -31,10 +32,8 @@ class Puppets extends Component {
         this.props.dispatch(newCharacter())
     }
 
-    onChange(e) {
-        this.setState({
-            filter: e.target.value
-        })
+    onChange(filter) {
+        this.setState({ filter })
     }
 
     changeZoom(e) {
@@ -95,13 +94,7 @@ class Puppets extends Component {
                         step="20"
                         onChange={this.changeZoom} />
                     <div className="flex-grow" />
-                    <div className="search">
-                        <input
-                            type="search"
-                            placeholder="All"
-                            value={this.state.filter}
-                            onChange={this.onChange} />
-                    </div>
+                    <Search value={this.state.filter} onChange={this.onChange} />
                 </div>
                 <List
                     height={Math.max(this.props.rect.height, 0)}

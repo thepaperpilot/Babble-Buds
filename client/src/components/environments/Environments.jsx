@@ -6,6 +6,7 @@ import Environment from './Environment'
 import EnvironmentImporter from './EnvironmentImporter'
 import EnvironmentContextMenu from './EnvironmentContextMenu'
 import CustomScrollbarsVirtualList from '../ui/CustomScrollbarsVirtualList'
+import Search from '../ui/Search'
 import { newEnvironment } from '../../redux/project/environments/actions'
 
 import './environments.css'
@@ -31,10 +32,8 @@ class Environments extends Component {
         this.props.dispatch(newEnvironment())
     }
 
-    onChange(e) {
-        this.setState({
-            filter: e.target.value
-        })
+    onChange(filter) {
+        this.setState({ filter })
     }
 
     changeZoom(e) {
@@ -91,13 +90,7 @@ class Environments extends Component {
                         step="20"
                         onChange={this.changeZoom} />
                     <div className="flex-grow" />
-                    <div className="search">
-                        <input
-                            type="search"
-                            placeholder="All"
-                            value={this.state.filter}
-                            onChange={this.onChange} />
-                    </div>
+                    <Search value={this.state.filter} onChange={this.onChange} />
                 </div>
                 <List
                     height={Math.max(this.props.rect.height, 0)}

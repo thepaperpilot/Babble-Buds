@@ -2,7 +2,6 @@ import React, {Component} from 'react'
 import { Sprite, Container, withApp } from 'react-pixi-fiber'
 import Selector, { behavior } from './Selector'
 import Particles from './Particles'
-import { comparePaths } from '../layers/Layer'
 import babble from 'babble.js'
 import silhoutte from './icons/person.png'
 
@@ -10,6 +9,20 @@ const path = require('path')
 const TextureCache = window.PIXI.utils.TextureCache
 const Texture = window.PIXI.Texture
 Texture.from(silhoutte)
+
+// Note this function differs from the one in layers/Layer.jsx,
+// because this one returns true if both values are the same non-array values
+export function comparePaths(a, b) {
+    if (!(a instanceof Array && b instanceof Array))
+        return a == b
+    if (a.length !== b.length)
+        return false
+    for (let i = 0; i < a.length; i++)
+        if (a[i] !== b[i]) {
+            return false
+        }
+    return true
+}
 
 class RawLayer extends Component {
     constructor(props) {
@@ -42,6 +55,18 @@ class RawLayer extends Component {
         }
     }
 
+    shouldComponentUpdate(newProps) {
+        return this.props.layer !== newProps.layer ||
+            !comparePaths(this.props.bundles, newProps.bundles) ||
+            this.props.assets !== newProps.assets ||
+            this.props.assetsPath !== newProps.assetsPath ||
+            !comparePaths(this.props.selected.layer, newProps.selected.layer) ||
+            this.props.selected.emote !== newProps.selected.emote ||
+            !comparePaths(this.props.highlight, newProps.highlight) ||
+            this.props.play !== newProps.play ||
+            this.props.environment !== newProps.environment
+    }
+
     render() {
         const {
             layer,
@@ -49,12 +74,11 @@ class RawLayer extends Component {
             assets,
             assetsPath,
             selected,
-            scale,
             highlight,
             play,
-            selectorColor,
             environment,
-            dispatch,
+            registerOnUpdateListeners,
+            unregisterOnUpdateListeners,
             ...props
         } = this.props
 
@@ -64,13 +88,12 @@ class RawLayer extends Component {
 
         const layerProps = {
             play,
-            scale,
             selected,
-            selectorColor,
             assets,
             assetsPath,
             environment,
-            dispatch
+            registerOnUpdateListeners,
+            unregisterOnUpdateListeners
         }
 
         let element
@@ -95,8 +118,8 @@ class RawLayer extends Component {
                                 highlight={isHighlighted ? l.path : highlight} />)}
                     </Container>
                     {isSelected && bundles.length === 0 && 
-                        <Selector ref={this.selector} scale={scale} layer={layer}
-                            dispatch={dispatch} selectorColor={selectorColor} />}
+                        <Selector registerOnUpdateListeners={registerOnUpdateListeners} unregisterOnUpdateListeners={unregisterOnUpdateListeners}
+                            ref={this.selector} layer={layer} />}
                 </Container>
             case 'particles':
                 element = <React.Fragment>
@@ -134,8 +157,8 @@ class RawLayer extends Component {
                             y={environment.height / 2 - size} />)}
                     <Sprite width={environment.width / 2} height={environment.height} y={-environment.height / 2} />
                 </Container>
-                <Selector scale={scale} layer={{ x: 0, y: -environment.height / 2, rotation: 0 }}
-                    dispatch={dispatch} disabled={true} selectorColor={selectorColor} />
+                <Selector registerOnUpdateListeners={registerOnUpdateListeners} unregisterOnUpdateListeners={unregisterOnUpdateListeners}
+                    layer={{ x: 0, y: -environment.height / 2, rotation: 0 }} disabled={true} />
             </Container>
         } else if (layer.emitter) {
             element = <Container x={layer.emitter.pos.x} y={layer.emitter.pos.y}>
@@ -164,9 +187,8 @@ class RawLayer extends Component {
             {...props} >
             {element}
             {isSelected &&
-                <Selector ref={this.selector} scale={scale} layer={layer} isEmitter={!!layer.emitter}
-                    dispatch={dispatch} selectorColor={selectorColor}
-                    emitters={layer.id in assets ? assets[layer.id].emitters : null}/>}
+                <Selector registerOnUpdateListeners={registerOnUpdateListeners} unregisterOnUpdateListeners={unregisterOnUpdateListeners} ref={this.selector}
+                    layer={layer} isEmitter={!!layer.emitter} emitters={layer.id in assets ? assets[layer.id].emitters : null}/>}
         </Container>
     }
 }
