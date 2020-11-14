@@ -30,7 +30,7 @@ class BrokenPanel extends Component {
         if (this.state.hasError) {
             return <div className="default broken">
                 <p>Oh no! This panel crashed :(</p>
-                <button onClick={this.toggleDevTools}>Toggle Dev Tools</button>
+                <button onClick={this.toggleDevTools} style="padding: 4px 8px;">Toggle Dev Tools</button>
             </div>
         }
 
