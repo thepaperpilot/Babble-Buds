@@ -82,7 +82,7 @@
     "pixi-tween": "^0.2.0",
     "redux-logger": "^3.0.6",
     "semver": "^6.0.0",
-    "socket.io": "~2.2.0",
+    "socket.io": "~2.4.0",
     "socket.io-stream": "~0.9.1",
     "uuid": "^3.3.2"
   },
