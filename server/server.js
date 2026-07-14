@@ -15,7 +15,7 @@ const port = process.env.NODE_ENV === 'production' ?
     process.env.SECURE_PORT || 8443 :
     process.env.PORT || 8080
 const assetsPath = path.join(__dirname, 'build', 'temp-assets')
-const clientVersion = "~0.9.99"
+const clientVersion = "~0.9.99-weekly.0"
 const logLevels = ['log', 'warn', 'error'] // Possible values: 'info', 'log', 'warn', 'error'
 
 // Set up server
