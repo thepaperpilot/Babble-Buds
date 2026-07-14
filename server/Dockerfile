@@ -3,7 +3,7 @@ WORKDIR /app
 COPY server/package.json server/package-lock.json ./
 RUN npm ci
 COPY server/ ./
-RUN npm run build
+RUN NODE_OPTIONS=--openssl-legacy-provider npm run build
 
 FROM node:22-alpine
 WORKDIR /app
