@@ -1,0 +1,15 @@
+services:
+  server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    ports:
+      - "${PORT:-8080}:8080"
+    environment:
+      - ADMIN_USERNAME=${ADMIN_USERNAME:-}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-}
+      - NODE_ENV=${NODE_ENV:-development}
+      - PORT=8080
+    tmpfs:
+      - /app/build/temp-assets
+    restart: unless-stopped

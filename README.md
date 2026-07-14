@@ -27,6 +27,9 @@ Users can create puppets with different faces for different emotions, and then u
 - Button to clean up project (remove unused assets, stray files, move any assets into their proper spots, etc.)
 - Sorting assets and characters
 
+## Running Babble Buds Server
+The easiest way is to use the example docker-compose file!
+
 ## How to Contribute
 
 First off, thanks for wanting to help! It means a lot, truly. There are two ways people can contribute to this project:

@@ -20,6 +20,7 @@ const logLevels = ['log', 'warn', 'error'] // Possible values: 'info', 'log', 'w
 
 // Set up server
 const app = express()
+app.set('trust proxy', 1)
 
 app.use(express.static('build'))
 
@@ -72,8 +73,9 @@ io.on('connection', function(socket) {
 
     socket.on('login', (username, password) => {
         if (
-            username === process.env.ADMIN_USERNAME &&
-            password === process.env.ADMIN_PASSWORD
+            (!process.env.ADMIN_USERNAME && !process.env.ADMIN_PASSWORD) ||
+            (username === process.env.ADMIN_USERNAME &&
+            password === process.env.ADMIN_PASSWORD)
         ) {
             socket.emit('loginSuccess', { rooms, statusLog, connections })
             socket.join('admin')
