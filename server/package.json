@@ -34,7 +34,7 @@
     "socket.io-stream": "~0.9.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.7.7",
+    "@babel/core": "^7.29.6",
     "@babel/preset-env": "^7.7.7",
     "@babel/preset-react": "^7.7.4",
     "babble.js": "^2.0.1",
